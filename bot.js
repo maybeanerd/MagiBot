@@ -167,8 +167,8 @@ var checkCommand = function (msg, isMention) {
 }
 
 bot.on("ready", () => {
-    bot.user.setGame("nutze k!help für Hilfe");
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
+    bot.user.setGame("nutze k!help für Hilfe");
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }
