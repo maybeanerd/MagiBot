@@ -46,7 +46,7 @@ commands.help.main = function (bot, msg) {
     for (let command in commands) {
         if (!commands[command].hide) {
             cmds.push({
-                name: bot.PREFIX + command,
+                name: command,
                 value: commands[command].help,
                 inline: true
             });
@@ -55,7 +55,7 @@ commands.help.main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Hier eine Liste der Befehle die du verwenden kannst:",
+        description: "Liste der Befehle die du mit dem Präfix k! verwenden kannst:",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
