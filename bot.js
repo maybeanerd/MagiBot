@@ -7,7 +7,7 @@ var token = require(__dirname + 'token.js');
 var bot = new Discord.Client({ autoReconnect: true });
 
 bot.OWNERID = '185865492576075776';
-bot.PREFIX = 'c';
+bot.PREFIX = 'k';
 bot.TOKEN = token.main();
 
 bot.DETAILED_LOGGING = true;
@@ -145,8 +145,27 @@ var checkCommand = function (msg, isMention) {
         msg.content = msg.content.replace(bot.PREFIX + command + " ", "");
 
     }
-    if (command && commands[command]) {
-        commands[command].main(bot, msg);
+    if (command) {
+        var pre = command.charAt(0);
+        command = command.substr(1, command.length - 1);
+        switch (pre) {
+            case '!':
+                command = 'E' + command;
+                break;
+            case '@':
+                if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
+                    msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
+                    return;
+                } else {
+                    command = 'A' + command;
+                }
+                break;
+            default:
+                return;
+        }
+        if (commands[command]) {
+            commands[command].main(bot, msg);
+        }
     }
 }
 
