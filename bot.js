@@ -2,7 +2,7 @@
 
 var Discord = require("discord.js");
 var fs = require('fs');
-var token = require(__dirname + 'token.js');
+var token = require(__dirname + '\\token.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
@@ -147,30 +147,27 @@ var checkCommand = function (msg, isMention) {
     }
     if (command) {
         var pre = command.charAt(0);
-        command = command.substr(1, command.length - 1);
         switch (pre) {
             case '!':
-                command = 'E' + command;
+                command = command.substr(1, command.length);
                 break;
             case '@':
                 if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
-                } else {
-                    command = 'A' + command;
                 }
                 break;
             default:
                 return;
         }
-        if (commands[command]) {
+        if (command && commands[command]) {
             commands[command].main(bot, msg);
         }
     }
 }
 
 bot.on("ready", () => {
-    bot.user.setGame("denselben Song nochmal");
+    bot.user.setGame("nutze k!help für Hilfe");
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
