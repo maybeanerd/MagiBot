@@ -20,8 +20,6 @@ bot.INFO_COLOR = 0x0000ff;
 
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
-var botChannels = {};
-
 bot.sendNotification = function (info, type, msg) {
     var icolor;
 
@@ -126,26 +124,6 @@ commands.reload.main = function (bot, msg) {
     }
 }
 
-//for changing standard bot channel
-commands.botC = {};
-commands.botC.args = '';
-commands.botC.help = '';
-commands.botC.hide = true;
-commands.botC.main = function (bot, msg) {
-    if (msg.author.id == bot.OWNERID) {
-        try {
-            if (msg.content == "here") {
-                botChannels[msg.guild] = msg.channel;
-            }
-        }
-        catch (err) {
-            msg.channel.sen("Command not found");
-        }
-    } else {
-        bot.sendNotification("Du hast nicht die Berechtigung diesen Befehl zu verwenden.", "error", msg);
-    }
-}
-
 var loadCommands = function () {
     var files = fs.readdirSync(__dirname + '/commands');
     for (let file of files) {
@@ -168,10 +146,6 @@ var checkCommand = function (msg, isMention) {
 
     }
     if (command && commands[command]) {
-        //temporary clunkyness:
-        if (msg.content == "join" && !botChannels[msg.guild] && command == "band") {
-            botChannels[msg.guild] = msg.channel;
-        }
         commands[command].main(bot, msg);
     }
 }
