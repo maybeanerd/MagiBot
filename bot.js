@@ -2,7 +2,8 @@
 
 var Discord = require("discord.js");
 var fs = require('fs');
-var token = require(__dirname + '/token.js'); //use \\token.js as path on Win
+var token = require(__dirname + '\\token.js'); /*use \\ as path on Win and / on Unix*/
+var sounds = require(__dirname + '\\joinSounds.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
@@ -40,7 +41,7 @@ var commands = {}
 commands.help = {};
 commands.help.args = '';
 commands.help.help = "Zeigt dir eine Liste der Befehle";
-commands.help.admin=false;
+commands.help.admin = false;
 commands.help.main = function (bot, msg) {
     var cmds = [];
 
@@ -56,7 +57,7 @@ commands.help.main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Befehle die du mit dem Präfix "+bot.PREFIX+"! verwenden kannst:",
+        description: "Liste der Befehle die du mit dem Präfix " + bot.PREFIX + "! verwenden kannst:",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -70,15 +71,15 @@ commands.help.main = function (bot, msg) {
 commands['@help'] = {};
 commands['@help'].args = '';
 commands['@help'].help = "Zeigt dir eine Liste der Admin Befehle";
-commands['@help'].hide= true;
-commands['@help'].admin=true;
+commands['@help'].hide = true;
+commands['@help'].admin = true;
 commands['@help'].main = function (bot, msg) {
     var cmds = [];
 
     for (let command in commands) {
         if (commands[command].admin) {
             cmds.push({
-                name: command.substr(1,command.length),
+                name: command.substr(1, command.length),
                 value: commands[command].help,
                 inline: true
             });
@@ -87,7 +88,7 @@ commands['@help'].main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Admin Befehle die du mit dem Präfix "+bot.PREFIX+"@ verwenden kannst:",
+        description: "Liste der Admin Befehle die du mit dem Präfix " + bot.PREFIX + "@ verwenden kannst:",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -102,7 +103,7 @@ commands.load = {};
 commands.load.args = '<command>';
 commands.load.help = '';
 commands.load.hide = true;
-commands.load.admin=false;
+commands.load.admin = false;
 commands.load.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -122,7 +123,7 @@ commands.unload = {};
 commands.unload.args = '<command>';
 commands.unload.help = '';
 commands.unload.hide = true;
-commands.unload.admin=false;
+commands.unload.admin = false;
 commands.unload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -142,7 +143,7 @@ commands.reload = {};
 commands.reload.args = '';
 commands.reload.help = '';
 commands.reload.hide = true;
-commands.reload.admin=false;
+commands.reload.admin = false;
 commands.reload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -195,19 +196,19 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-        if(msg.channel.id=='198764451132997632' || pre=='@'){
-            commands[command].main(bot, msg);
-            }else{
-    msg.delete();
-    (msg.reply("Bot Befehle gehören nicht in <#"+msg.channel.id+">, sondern <#198764451132997632>.")).then(mess=>mess.delete(15000));
-    }
+            if (msg.channel.id == '198764451132997632' || pre == '@') {
+                commands[command].main(bot, msg);
+            } else {
+                msg.delete();
+                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern <#198764451132997632>.")).then(mess => mess.delete(15000));
+            }
         }
     }
 }
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setGame("nutze "+bot.PREFIX+"!help für Hilfe");
+    bot.user.setGame("nutze " + bot.PREFIX + "!help für Hilfe");
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }
@@ -229,6 +230,24 @@ bot.on('error', (err) => {
     console.log("————— BIG ERROR —————");
     console.log(err);
     console.log("——— END BIG ERROR ———");
+});
+var vcfree = true;
+bot.on("voiceStateUpdate", (o, n) => {
+    if (vcfree && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+        n.voiceChannel.join().then(connection => {
+            var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+            dispatcher.on("start", () => {
+                vcfree = false;
+            });
+            dispatcher.on("end", () => {
+                if (!vcfree) {
+                    connection.disconnect();
+                    vcfree = true;
+                }
+            });
+
+        });
+    };
 });
 
 bot.on("disconnected", () => {
