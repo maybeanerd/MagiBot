@@ -5,7 +5,8 @@ var sounds = {
     "201768238890221568": "https://www.myinstants.com/media/sounds/ha-gay.mp3", //Kai
     "166649033669083136": "https://www.myinstants.com/media/sounds/falconpunch.swf.mp3", //matti
     "237918762790027264": "https://cdn.discordapp.com/attachments/227833391368634369/385176456524857353/tim_warum_bin_ich_so_autistisch.wav", //stefan
-    "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav" //flavio
+    "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav", //flavio
+    "186052540729655296": "https://cdn.discordapp.com/attachments/186064880556703744/385181918314102794/dadadadadaaaa.wav" //severin
 }
 
 module.exports = {
