@@ -6,9 +6,9 @@ var token = require(__dirname + '/token.js'); //use \\token.js as path on Win
 
 var bot = new Discord.Client({ autoReconnect: true });
 
-bot.OWNERID = '185865492576075776';
-bot.PREFIX = 'k';
-bot.TOKEN = token.main();
+bot.OWNERID = token.owner;
+bot.PREFIX = token.prefix;
+bot.TOKEN = token.tk;
 
 bot.DETAILED_LOGGING = true;
 bot.DELETE_COMMANDS = false;
@@ -56,7 +56,7 @@ commands.help.main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Befehle die du mit dem Präfix k! verwenden kannst:",
+        description: "Liste der Befehle die du mit dem Präfix "+bot.PREFIX+"! verwenden kannst:",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -87,7 +87,7 @@ commands['@help'].main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Admin Befehle die du mit dem Präfix k@ verwenden kannst:",
+        description: "Liste der Admin Befehle die du mit dem Präfix "+bot.PREFIX+"@ verwenden kannst:",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -208,7 +208,7 @@ var checkCommand = function (msg, isMention) {
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setGame("nutze k!help für Hilfe");
+    bot.user.setGame("nutze "+bot.PREFIX+"!help für Hilfe");
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }

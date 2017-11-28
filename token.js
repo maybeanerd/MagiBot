@@ -1,6 +1,5 @@
-
 module.exports = {
-    main: function () {
-        return 'YOUR TOKEN HERE';
-    }
+    tk: 'YOUR BOT TOKEN',
+    owner: 'YOUR OWNER ID',
+    prefix: 'YOUR PREFIX' //has to be single char only, otherwise the assumption is false for a lot of functions
 };
