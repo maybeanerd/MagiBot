@@ -37,6 +37,11 @@ module.exports = {
             value: uptime,
             inline: false
         });
+        info.push({
+            name: "Du willst selbst einen Bot machen? Baue doch auf meinem Code auf!",
+            value: "https://github.com/T0TProduction/MagiBot",
+            inline: false
+        });
 
         //Entwickler Info
         info.push({
