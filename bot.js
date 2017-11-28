@@ -196,7 +196,7 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-        if(msg.channel.id=='198764451132997632'){
+        if(msg.channel.id=='198764451132997632' || pre=='@'){
             commands[command].main(bot, msg);
             }else{
     msg.delete();
