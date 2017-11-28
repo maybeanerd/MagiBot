@@ -11,5 +11,6 @@ module.exports = {
         }
 
     },
-    hide: true
+    admin: true,
+    help:'Fährt den Bot herunter',
 };

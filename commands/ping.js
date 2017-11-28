@@ -8,5 +8,6 @@ module.exports = {
             newMsg.edit("Pong! \nReaktionszeit: `(" + diff + "ms)`\nWebsocket Ping: `(" + bot.ping + "ms)`");
         });
     },
-    help: 'Ping den Bot'
+    help: 'Ping den Bot',
+    admin: false,
 };

@@ -40,11 +40,12 @@ var commands = {}
 commands.help = {};
 commands.help.args = '';
 commands.help.help = "Zeigt dir eine Liste der Befehle";
+commands.help.admin=false;
 commands.help.main = function (bot, msg) {
     var cmds = [];
 
     for (let command in commands) {
-        if (!commands[command].hide) {
+        if (!(commands[command].hide || commands[command].admin)) {
             cmds.push({
                 name: command,
                 value: commands[command].help,
@@ -66,10 +67,42 @@ commands.help.main = function (bot, msg) {
     msg.channel.send('', { embed });
 }
 
+commands['@help'] = {};
+commands['@help'].args = '';
+commands['@help'].help = "Zeigt dir eine Liste der Admin Befehle";
+commands['@help'].hide= true;
+commands['@help'].admin=true;
+commands['@help'].main = function (bot, msg) {
+    var cmds = [];
+
+    for (let command in commands) {
+        if (commands[command].admin) {
+            cmds.push({
+                name: command.substr(1,command.length),
+                value: commands[command].help,
+                inline: true
+            });
+        }
+    }
+
+    let embed = {
+        color: bot.COLOR,
+        description: "Liste der Admin Befehle die du mit dem Präfix k@ verwenden kannst:",
+        fields: cmds,
+        footer: {
+            icon_url: bot.user.avatarURL,
+            text: bot.user.username
+        }
+    }
+
+    msg.channel.send('', { embed });
+}
+
 commands.load = {};
 commands.load.args = '<command>';
 commands.load.help = '';
 commands.load.hide = true;
+commands.load.admin=false;
 commands.load.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -89,6 +122,7 @@ commands.unload = {};
 commands.unload.args = '<command>';
 commands.unload.help = '';
 commands.unload.hide = true;
+commands.unload.admin=false;
 commands.unload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -108,6 +142,7 @@ commands.reload = {};
 commands.reload.args = '';
 commands.reload.help = '';
 commands.reload.hide = true;
+commands.reload.admin=false;
 commands.reload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -161,7 +196,12 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
+        if(msg.channel.id=='198764451132997632'){
             commands[command].main(bot, msg);
+            }else{
+    msg.delete();
+    (msg.reply("Bot Befehle gehören nicht in <#"+msg.channel.id+">, sondern <#198764451132997632>.")).then(mess=>mess.delete(15000));
+    }
         }
     }
 }
