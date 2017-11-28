@@ -2,7 +2,7 @@
 
 var Discord = require("discord.js");
 var fs = require('fs');
-var token = require(__dirname + '\\token.js');
+var token = require(__dirname + '/token.js'); //use \\token.js as path on Win
 
 var bot = new Discord.Client({ autoReconnect: true });
 
