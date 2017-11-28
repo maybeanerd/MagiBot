@@ -5,10 +5,11 @@ module.exports = {
         msg.channel.send("Shutting down...", "success");
         setTimeout(function () {
             process.exit();
+        }, 2000);
         }else{
         msg.channel.send("Nur der Besitzer des Bots, <@"+bot.OWNERID+"> darf mich ausschalten!", "error");
         }
-        }, 2000);
+
     },
     hide: true
 };
