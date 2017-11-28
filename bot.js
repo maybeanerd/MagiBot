@@ -178,7 +178,6 @@ var checkCommand = function (msg, isMention) {
     } else {
         var command = msg.content.split(bot.PREFIX)[1].split(" ")[0];
         msg.content = msg.content.replace(bot.PREFIX + command + " ", "");
-
     }
     if (command) {
         var pre = command.charAt(0);
