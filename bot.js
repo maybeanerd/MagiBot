@@ -232,8 +232,13 @@ bot.on('error', (err) => {
     console.log("——— END BIG ERROR ———");
 });
 var vcfree = true;
+
+function joinableChannel(cid) {
+    return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842"));
+};
+
 bot.on("voiceStateUpdate", (o, n) => {
-    if (vcfree && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    if (vcfree && joinableChannel(n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         n.voiceChannel.join().then(connection => {
             var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
             dispatcher.on("start", () => {
