@@ -38,8 +38,8 @@ module.exports = {
             inline: false
         });
         info.push({
-            name: "Du willst selbst einen Bot machen? Baue doch auf meinem Code auf!",
-            value: "https://github.com/T0TProduction/MagiBot",
+            name: "Roadmap und bekannte Bugs",
+            value: "https://github.com/T0TProduction/MagiBot/projects/1",
             inline: false
         });
 
