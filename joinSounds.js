@@ -8,7 +8,8 @@ var sounds = {
     "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav", //flavio
     "186052540729655296": "https://cdn.discordapp.com/attachments/186064880556703744/385181918314102794/dadadadadaaaa.wav", //severin
     "216979437865009152": "https://cdn.discordapp.com/attachments/229604639069175809/385902962737938432/NiksDa_-_Leb_deinen_Champ_Digimon_LoL_Parodie.mp3", //Hannes
-    "165854980262199297": "https://www.myinstants.com/media/sounds/im-really-feeling-it.mp3" //Tobi
+    "165854980262199297": "https://www.myinstants.com/media/sounds/im-really-feeling-it.mp3", //Tobi
+    "295899170454372352": "https://cdn.discordapp.com/attachments/301696653877051393/386126849023016961/Run_Sound_Effect.mp3" //Lucas Ashura
 }
 
 module.exports = {
