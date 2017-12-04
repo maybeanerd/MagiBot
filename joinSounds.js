@@ -1,5 +1,5 @@
 var sounds = {
-    "185865492576075776": "https://www.myinstants.com/media/sounds/onward.mp3", //ich
+    "185865492576075776": "https://cdn.discordapp.com/attachments/185868764137390080/387360631671488513/onward.mp3", //ich
     "226383324262825985": "https://cdn.discordapp.com/attachments/227833391368634369/386665940181450772/Stalker_-_Bandit.mp3", //tim
     "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/386666373994250241/trumpetmom.mp3", //nico
     "201768238890221568": "https://www.myinstants.com/media/sounds/ha-gay.mp3", //Kai
