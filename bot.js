@@ -19,6 +19,94 @@ bot.SUCCESS_COLOR = 0x00ff00;
 bot.ERROR_COLOR = 0x0000ff;
 bot.INFO_COLOR = 0x0000ff;
 
+//*prototyping area
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/MagiBotDB";
+    //setting up Database
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  console.log("Database created!");
+  db.close();
+});
+
+//Define Methods:
+function getUser(userid){
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  db.collection("users").findOne({_id: userid}, function(err, result) {
+    if (err) throw err;
+    db.close();
+    return result;
+  });
+});
+}
+
+function existsUser(userid){
+if(getUser(userid)){return true;}
+return false;
+}
+
+function addUser(userid){
+if(existsUser(userid)){console.log("This User already exists lol");}
+else{
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var myobj = { _id: userid, salt: 0, warnings: 0, bans: 0, kicks:0, botusage: 0  };
+  db.collection("users").insertOne(myobj, function(err, res) {
+    if (err) throw err;
+    console.log("1 User inserted");
+    db.close();
+  });
+});
+}
+}
+
+function updateUser(userid,update){
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  db.collection("users").updateOne({_id:userid}, update, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+    db.close();
+  });
+});
+}
+
+function saltUp(userid){
+var user=getUser(userid);
+updateUser(userid,{salt: user.salt + 1});
+}
+
+
+    //create Collection
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  //data about users (bans,warnings,etc.)
+  db.createCollection("users", function(err, res) {
+    if (err) throw err;
+    console.log("User Collection created!");
+  });
+  //data about commands (usage count)
+  db.createCollection("commands", function(err, res) {
+    if (err) throw err;
+    console.log("Command Collection created!");
+  });
+  db.createCollection("sounds", function(err, res) {
+    if (err) throw err;
+    console.log("Sound Collection created!");
+  });
+  //Dataset of settings (whitelist channels, etc.)
+  db.createCollection("settings", function(err, res) {
+    if (err) throw err;
+    console.log("Settings Collection created!");
+    db.close();
+  });
+});
+//add TestData
+addUser(OWNERID);
+
+//*/endof prototyping area
+
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
 bot.sendNotification = function (info, type, msg) {
