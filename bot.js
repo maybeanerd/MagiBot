@@ -41,15 +41,20 @@ MongoClient.connect(url, function(err, db) {
 });
 }
 
+function existsUser(userid){
+if(getUser(userid)){return true;}
+return false;
+}
+
 function addUser(userid){
-if(getUser(userid)){console.log("This User already exists lol");}
+if(existsUser(userid)){console.log("This User already exists lol");}
 else{
 MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   var myobj = { _id: userid, salt: 0, warnings: 0, bans: 0, kicks:0, botusage: 0  };
   db.collection("users").insertOne(myobj, function(err, res) {
     if (err) throw err;
-    console.log("1 Testuser inserted");
+    console.log("1 User inserted");
     db.close();
   });
 });
