@@ -28,6 +28,51 @@ MongoClient.connect(url, function(err, db) {
   console.log("Database created!");
   db.close();
 });
+
+//Define Methods:
+function getUser(userid){
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  db.collection("users").findOne({_id: userid}, function(err, result) {
+    if (err) throw err;
+    db.close();
+    return result;
+  });
+});
+}
+
+function addUser(userid){
+if(getUser(userid)){console.log("This User already exists lol");}
+else{
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var myobj = { _id: userid, salt: 0, warnings: 0, bans: 0, kicks:0, botusage: 0  };
+  db.collection("users").insertOne(myobj, function(err, res) {
+    if (err) throw err;
+    console.log("1 Testuser inserted");
+    db.close();
+  });
+});
+}
+}
+
+function updateUser(userid,update){
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  db.collection("users").updateOne({_id:userid}, update, function(err, res) {
+    if (err) throw err;
+    console.log("1 document updated");
+    db.close();
+  });
+});
+}
+
+function saltUp(userid){
+var user=getUser(userid);
+updateUser(userid,{salt: user.salt + 1});
+}
+
+
     //create Collection
 MongoClient.connect(url, function(err, db) {
   if (err) throw err;
@@ -53,15 +98,7 @@ MongoClient.connect(url, function(err, db) {
   });
 });
 //add TestData
-MongoClient.connect(url, function(err, db) {
-  if (err) throw err;
-  var myobj = { ID: OWNERID, Salt: 0, Warnings: 0, Bans: 0, Kicks:0, BotUsage: 0  };
-  db.collection("users").insertOne(myobj, function(err, res) {
-    if (err) throw err;
-    console.log("1 Testuser inserted");
-    db.close();
-  });
-});
+addUser(OWNERID);
 
 //*/endof prototyping area
 
