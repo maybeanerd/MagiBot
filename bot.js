@@ -19,6 +19,52 @@ bot.SUCCESS_COLOR = 0x00ff00;
 bot.ERROR_COLOR = 0x0000ff;
 bot.INFO_COLOR = 0x0000ff;
 
+//*prototyping area
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/MagiBotDB";
+    //setting up Database
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  console.log("Database created!");
+  db.close();
+});
+    //create Collection
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  //data about users (bans,warnings,etc.)
+  db.createCollection("users", function(err, res) {
+    if (err) throw err;
+    console.log("User Collection created!");
+  });
+  //data about commands (usage count)
+  db.createCollection("commands", function(err, res) {
+    if (err) throw err;
+    console.log("Command Collection created!");
+  });
+  db.createCollection("sounds", function(err, res) {
+    if (err) throw err;
+    console.log("Sound Collection created!");
+  });
+  //Dataset of settings (whitelist channels, etc.)
+  db.createCollection("settings", function(err, res) {
+    if (err) throw err;
+    console.log("Settings Collection created!");
+    db.close();
+  });
+});
+//add TestData
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var myobj = { ID: OWNERID, Salt: 0, Warnings: 0, Bans: 0, Kicks:0, BotUsage: 0  };
+  db.collection("users").insertOne(myobj, function(err, res) {
+    if (err) throw err;
+    console.log("1 Testuser inserted");
+    db.close();
+  });
+});
+
+//*/endof prototyping area
+
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
 bot.sendNotification = function (info, type, msg) {
