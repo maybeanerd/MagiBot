@@ -2,8 +2,8 @@
 
 var Discord = require("discord.js");
 var fs = require('fs');
-var token = require(__dirname + '\\token.js'); /*use \\ as path on Win and / on Unix*/
-var sounds = require(__dirname + '\\joinSounds.js');
+var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
+var sounds = require(__dirname + '/joinSounds.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
