@@ -23,87 +23,143 @@ bot.INFO_COLOR = 0x0000ff;
 var MongoClient = require('mongodb').MongoClient;
 
 var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongodb.net:27017,magibot-shard-00-01-1nbod.mongodb.net:27017,magibot-shard-00-02-1nbod.mongodb.net:27017/test?ssl=true&replicaSet=MagiBot-shard-0&authSource=admin";
-MongoClient.connect(url, function (err, db) {
-    // Paste the following examples here
+/*MongoClient.connect(url, function (err, mclient) {
     console.log("Database created!");
-    db.close();
-});
+    mclient.close();
+});*/
 
 //create Collection
-MongoClient.connect(url, function (err, db) {
+MongoClient.connect(url, function (err, mclient) {
     if (err) throw err;
+    var db = mclient.db('MagiBot');
     //data about users (bans,warnings,etc.)
-    db.createCollection("users", function (err, res) {
-        if (err) throw err;
-        console.log("User Collection created!");
-    });
+    if (!db.collection("users")) {
+        db.createCollection("users", function (err, res) {
+            if (err) throw err;
+            console.log("User Collection created!");
+        });
+    }
     //data about commands (usage count)
-    db.createCollection("commands", function (err, res) {
-        if (err) throw err;
-        console.log("Command Collection created!");
-    });
-    db.createCollection("sounds", function (err, res) {
-        if (err) throw err;
-        console.log("Sound Collection created!");
-    });
+    if (!db.collection("commands")) {
+        db.createCollection("commands", function (err, res) {
+            if (err) throw err;
+            console.log("Command Collection created!");
+        });
+    }
+    if (!db.collection("sounds")) {
+        db.createCollection("sounds", function (err, res) {
+            if (err) throw err;
+            console.log("Sound Collection created!");
+        });
+    }
     //Dataset of settings (whitelist channels, etc.)
-    db.createCollection("settings", function (err, res) {
-        if (err) throw err;
-        console.log("Settings Collection created!");
-        db.close();
-    });
+    if (!db.collection("settings")) {
+        db.createCollection("settings", function (err, res) {
+            if (err) throw err;
+            console.log("Settings Collection created!");
+        });
+    }
+    mclient.close();
 });
 
 //Define Methods:
-function getUser(userid) {
-    MongoClient.connect(url, function (err, db) {
+async function getUser(userid) {
+    /*
+    let mclient = await MongoClient.connect(url);
+    try {
+        let collection = mclient.collection('users');
+        let user = collection.findOne({ _id: userid });
+        return user;
+    } finally {
+        mclient.close();
+    }
+    */
+
+    MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
+        var db = mclient.db('MagiBot');
         db.collection("users").findOne({ _id: userid }, function (err, result) {
-            if (err) throw err;
-            db.close();
+            if (err) { throw err; }
+            console.log(result);
+            mclient.close();
             return result;
         });
     });
+
 }
 
-function existsUser(userid) {
-    if (getUser(userid)) { return true; }
-    return false;
+async function existsUser(userid) {
+    let mclient = await MongoClient.connect(url);
+    try {
+        let collection = mclient.collection('users');
+        let userCount = (await collection.find(
+            { _id: userid }).limit(1).count());
+        return userCount > 0;
+    } finally {
+        mclient.close();
+    }
 }
 
-function addUser(userid) {
+async function template(data) {
+    let mclient = await MongoClient.connect(url);
+    try {
+        //do stuff
+
+    } finally {
+        mclient.close();
+    }
+}
+
+async function addUser(userid) {
+    console.log("trying to add an user");
     if (existsUser(userid)) { console.log("This User already exists lol"); }
     else {
-        MongoClient.connect(url, function (err, db) {
+        MongoClient.connect(url, function (err, mclient) {
             if (err) throw err;
+            var db = mclient.db('MagiBot');
             var myobj = { _id: userid, salt: 0, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
             db.collection("users").insertOne(myobj, function (err, res) {
                 if (err) throw err;
                 console.log("1 User inserted");
-                db.close();
+                mclient.close();
             });
         });
     }
 }
 
-function updateUser(userid, update) {
-    MongoClient.connect(url, function (err, db) {
+async function updateUser(userid, update) {
+    MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
+        var db = mclient.db('MagiBot');
         db.collection("users").updateOne({ _id: userid }, update, function (err, res) {
             if (err) throw err;
             console.log("1 document updated");
-            db.close();
+            mclient.close();
         });
     });
 }
 
-function saltUp(userid) {
-    var user = getUser(userid);
-    updateUser(userid, { salt: user.salt + 1 });
+async function saltUp(userid) {
+    let user = await getUser(userid);
+    console.log("current salt:" + parseInt(user.salt));
+    await updateUser(userid, { $set: { salt: (parseInt(user.salt) + 1) } });
+    console.log(getUser(userid));
+}
+
+async function usageUp(userid) {
+    let user = await getUser(userid);
+    await updateUser(userid, { $set: { botusage: (parseInt(user.botusage) + 1) } });
+    console.log(getUser(userid));
+}
+
+async function OwnerStartup() {
+    await addUser(bot.OWNERID);
+    await updateUser(bot.OWNERID, { $set: { salt: 0 } });
+    await saltUp(bot.OWNERID);
 }
 
 //add TestData
-addUser(bot.OWNERID);
+OwnerStartup();
 
 //*/endof prototyping area
 
