@@ -64,17 +64,20 @@ MongoClient.connect(url, function (err, mclient) {
 
 //Define Methods:
 async function getUser(userid) {
-    /*
+
     let mclient = await MongoClient.connect(url);
     try {
-        let collection = mclient.collection('users');
-        let user = collection.findOne({ _id: userid });
-        return user;
+        //do stuff
+        var db = mclient.db('MagiBot');
+        let result = await db.collection("users").findOne({ _id: userid });
+        console.log(result);
+        return result;
+
     } finally {
         mclient.close();
     }
-    */
 
+    /*
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
@@ -85,7 +88,7 @@ async function getUser(userid) {
             return result;
         });
     });
-
+    */
 }
 
 async function existsUser(userid) {
@@ -154,8 +157,7 @@ async function usageUp(userid) {
 
 async function OwnerStartup() {
     await addUser(bot.OWNERID);
-    await updateUser(bot.OWNERID, { $set: { salt: 0 } });
-    await saltUp(bot.OWNERID);
+    updateUser(bot.OWNERID, { $set: { salt: 0 } }).then(saltUp(bot.OWNERID));
 }
 
 //add TestData
