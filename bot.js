@@ -21,12 +21,12 @@ bot.INFO_COLOR = 0x0000ff;
 
 //*prototyping area
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/MagiBotDB";
-    //setting up Database
-MongoClient.connect(url, function(err, db) {
-  if (err) throw err;
-  console.log("Database created!");
-  db.close();
+
+var uri = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongodb.net:27017,magibot-shard-00-01-1nbod.mongodb.net:27017,magibot-shard-00-02-1nbod.mongodb.net:27017/test?ssl=true&replicaSet=MagiBot-shard-0&authSource=admin";
+MongoClient.connect(uri, function (err, db) {
+    // Paste the following examples here
+    console.log("Database created!");
+    db.close();
 });
 
 //Define Methods:
