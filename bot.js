@@ -72,7 +72,6 @@ async function getUser(userid) {
         let result = await db.collection("users").findOne({ _id: userid });
         console.log(result);
         return result;
-
     } finally {
         mclient.close();
     }
@@ -94,7 +93,8 @@ async function getUser(userid) {
 async function existsUser(userid) {
     let mclient = await MongoClient.connect(url);
     try {
-        let collection = mclient.collection('users');
+        let db = mclient.db('MagiBot');
+        let collection = db.collection('users');
         let userCount = (await collection.find(
             { _id: userid }).limit(1).count());
         return userCount > 0;
@@ -146,13 +146,11 @@ async function saltUp(userid) {
     let user = await getUser(userid);
     console.log("current salt:" + parseInt(user.salt));
     await updateUser(userid, { $set: { salt: (parseInt(user.salt) + 1) } });
-    console.log(getUser(userid));
 }
 
 async function usageUp(userid) {
     let user = await getUser(userid);
     await updateUser(userid, { $set: { botusage: (parseInt(user.botusage) + 1) } });
-    console.log(getUser(userid));
 }
 
 async function OwnerStartup() {
@@ -367,6 +365,10 @@ bot.on("message", msg => {
         checkCommand(msg, true);
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
+        //database stuff
+        addUser(msg.author.id);
+        usageUp(msg.author.id);
+        //end database stuff
         checkCommand(msg, false);
         if (bot.DELETE_COMMANDS) msg.delete();
     }
