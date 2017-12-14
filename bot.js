@@ -367,7 +367,6 @@ bot.on("message", msg => {
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
         //database stuff
-        data.addUser(msg.author.id);
         data.usageUp(msg.author.id);
         //end database stuff
         checkCommand(msg, false);

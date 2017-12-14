@@ -46,7 +46,8 @@ async function template(data) {
 
 async function addUser(userid) {
     console.log("trying to add an user");
-    if (existsUser(userid)) { console.log("This User already exists lol"); }
+    if (existsUser(userid)) { console.log("This User already exists lol");
+    return true; }
     else {
         MongoClient.connect(url, function (err, mclient) {
             if (err) throw err;
@@ -56,6 +57,7 @@ async function addUser(userid) {
                 if (err) throw err;
                 console.log("1 User inserted");
                 mclient.close();
+                return true;
             });
         });
     }
@@ -89,10 +91,11 @@ async function OwnerStartup() {
 }
 
 async function checks(userid){
-if (existsUser(userid)){
 //maybe add more checks
+if (addUser(userid)){
 return true;
 }
+//else
 return false;
 }
 
