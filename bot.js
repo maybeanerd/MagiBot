@@ -27,7 +27,7 @@ var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongod
 /*MongoClient.connect(url, function (err, mclient) {
     console.log("Database created!");
     mclient.close();
-});*/
+});
 
 //create Collection
 MongoClient.connect(url, function (err, mclient) {
@@ -77,18 +77,7 @@ async function getUser(userid) {
         mclient.close();
     }
 
-    /*
-    MongoClient.connect(url, function (err, mclient) {
-        if (err) throw err;
-        var db = mclient.db('MagiBot');
-        db.collection("users").findOne({ _id: userid }, function (err, result) {
-            if (err) { throw err; }
-            console.log(result);
-            mclient.close();
-            return result;
-        });
-    });
-    */
+    
 }
 
 async function existsUser(userid) {
@@ -162,7 +151,7 @@ async function OwnerStartup() {
 //add TestData
 OwnerStartup();
 
-*/endof prototyping area
+*///endof prototyping area
 
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
