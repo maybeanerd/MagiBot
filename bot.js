@@ -4,6 +4,7 @@ var Discord = require("discord.js");
 var fs = require('fs');
 var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 var sounds = require(__dirname + '/joinSounds.js');
+var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
@@ -19,14 +20,14 @@ bot.SUCCESS_COLOR = 0x00ff00;
 bot.ERROR_COLOR = 0x0000ff;
 bot.INFO_COLOR = 0x0000ff;
 
-//*prototyping area
+/*prototyping area
 var MongoClient = require('mongodb').MongoClient;
 
 var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongodb.net:27017,magibot-shard-00-01-1nbod.mongodb.net:27017,magibot-shard-00-02-1nbod.mongodb.net:27017/test?ssl=true&replicaSet=MagiBot-shard-0&authSource=admin";
 /*MongoClient.connect(url, function (err, mclient) {
     console.log("Database created!");
     mclient.close();
-});*/
+});
 
 //create Collection
 MongoClient.connect(url, function (err, mclient) {
@@ -76,18 +77,7 @@ async function getUser(userid) {
         mclient.close();
     }
 
-    /*
-    MongoClient.connect(url, function (err, mclient) {
-        if (err) throw err;
-        var db = mclient.db('MagiBot');
-        db.collection("users").findOne({ _id: userid }, function (err, result) {
-            if (err) { throw err; }
-            console.log(result);
-            mclient.close();
-            return result;
-        });
-    });
-    */
+    
 }
 
 async function existsUser(userid) {
@@ -161,7 +151,7 @@ async function OwnerStartup() {
 //add TestData
 OwnerStartup();
 
-//*/endof prototyping area
+*///endof prototyping area
 
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
@@ -366,8 +356,7 @@ bot.on("message", msg => {
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
         //database stuff
-        addUser(msg.author.id);
-        usageUp(msg.author.id);
+        data.usageUp(msg.author.id);
         //end database stuff
         checkCommand(msg, false);
         if (bot.DELETE_COMMANDS) msg.delete();
