@@ -164,17 +164,13 @@ module.exports = {
         console.log("salty bitch");
         if (checks(userid)) {
             let user = await getUser(userid);
-            let result = parseInt(user.salt);
-            console.log(result);
-            return result;
+            return parseInt(user.salt);
         }
     },
     getUsage: async function f(userid) {
         if (checks(userid)) {
             let user = await getUser(userid);
-            let result = parseInt(user.botusage);
-            console.log(result);
-            return result;
+            return parseInt(user.botusage);
         }
     },
     resetSalt: (userid) => {
