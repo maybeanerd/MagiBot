@@ -28,6 +28,7 @@ module.exports = {
         if (command == "help") {
         printHelp(msg,bot);
         }else{
+        if (msg.guild) {
         switch(command){
         case 'info':
         var info = [];
@@ -55,7 +56,10 @@ module.exports = {
         default:
         msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');
         break;
-    }}
+    }}else{
+    msg.reply("Befehle ausser help sind nur auf Servern verfügbar.");
+    }
+    }
     },
     help: 'Salz Befehle. Nutze k!salt help für mehr Information',
     admin: false,
