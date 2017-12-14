@@ -46,8 +46,10 @@ async function template(data) {
 
 async function addUser(userid) {
     console.log("trying to add an user");
-    if (existsUser(userid)) { console.log("This User already exists lol");
-    return true; }
+    if (existsUser(userid)) {
+        console.log("This User already exists lol");
+        return true;
+    }
     else {
         MongoClient.connect(url, function (err, mclient) {
             if (err) throw err;
@@ -90,74 +92,85 @@ async function OwnerStartup() {
     updateUser(bot.OWNERID, { $set: { salt: 0 } }).then(saltUp(bot.OWNERID));
 }
 
-async function checks(userid){
-//maybe add more checks
-if (addUser(userid)){
-return true;
-}
-//else
-return false;
+async function checks(userid) {
+    //maybe add more checks
+    if (addUser(userid)) {
+        return true;
+    }
+    //else
+    return false;
 }
 
 
 module.exports = {
-    startup: ()=>{
-    //create Collection
-MongoClient.connect(url, function (err, mclient) {
-    if (err) throw err;
-    var db = mclient.db('MagiBot');
-    //data about users (bans,warnings,etc.)
-    if (!db.collection("users")) {
-        db.createCollection("users", function (err, res) {
+    startup: () => {
+        //create Collection
+        MongoClient.connect(url, function (err, mclient) {
             if (err) throw err;
-            console.log("User Collection created!");
+            var db = mclient.db('MagiBot');
+            //data about users (bans,warnings,etc.)
+            if (!db.collection("users")) {
+                db.createCollection("users", function (err, res) {
+                    if (err) throw err;
+                    console.log("User Collection created!");
+                });
+            }
+            //data about commands (usage count)
+            if (!db.collection("commands")) {
+                db.createCollection("commands", function (err, res) {
+                    if (err) throw err;
+                    console.log("Command Collection created!");
+                });
+            }
+            if (!db.collection("sounds")) {
+                db.createCollection("sounds", function (err, res) {
+                    if (err) throw err;
+                    console.log("Sound Collection created!");
+                });
+            }
+            //Dataset of settings (whitelist channels, etc.)
+            if (!db.collection("settings")) {
+                db.createCollection("settings", function (err, res) {
+                    if (err) throw err;
+                    console.log("Settings Collection created!");
+                });
+            }
+            mclient.close();
         });
-    }
-    //data about commands (usage count)
-    if (!db.collection("commands")) {
-        db.createCollection("commands", function (err, res) {
-            if (err) throw err;
-            console.log("Command Collection created!");
-        });
-    }
-    if (!db.collection("sounds")) {
-        db.createCollection("sounds", function (err, res) {
-            if (err) throw err;
-            console.log("Sound Collection created!");
-        });
-    }
-    //Dataset of settings (whitelist channels, etc.)
-    if (!db.collection("settings")) {
-        db.createCollection("settings", function (err, res) {
-            if (err) throw err;
-            console.log("Settings Collection created!");
-        });
-    }
-    mclient.close();
-});
     },
-    addUser: (userid)=>{
-    if(checks(userid)){
-    addUser(userid);}
+    addUser: (userid) => {
+        if (checks(userid)) {
+            addUser(userid);
+        }
     },
-    startup: ()=>{
-    if(checks(userid)){
-    OwnerStartup();}
+    getUser: (userid) => {
+        if (checks(userid)) {
+            return getUser(userid);
+        }
     },
-    usageUp: (userid)=>{
-    if(checks(userid)){
-    usageUp(userid);}
+    startup: () => {
+        if (checks(userid)) {
+            OwnerStartup();
+        }
     },
-    saltUp: (userid)=>{
-    if(checks(userid)){
-    saltUp(userid);}
+    usageUp: (userid) => {
+        if (checks(userid)) {
+            usageUp(userid);
+        }
     },
-    getSalt: (userid)=>{
-    if(checks(userid)){
-    return parseInt(getUser(userid).salt);}
+    saltUp: (userid) => {
+        if (checks(userid)) {
+            saltUp(userid);
+        }
     },
-    resetSalt: (userid)=>{
-    if(checks(userid)){
-    updateUser(userid, { $set: { salt: 0 } });}
+    getSalt: (userid) => {
+        if (checks(userid)) {
+            return parseInt(getUser(userid).salt);
+        }
+    },
+    resetSalt: (userid) => {
+        if (checks(userid)) {
+            updateUser(userid, { $set: { salt: 0 } });
+        }
     }
 };
