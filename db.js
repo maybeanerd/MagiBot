@@ -139,5 +139,8 @@ MongoClient.connect(url, function (err, mclient) {
     },
     getSalt: (userid)=>{
     return parseInt(getUser(userid).salt);
+    },
+    resetSalt: (userid)=>{
+    updateUser(userid, { $set: { salt: 0 } });
     }
 };
