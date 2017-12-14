@@ -75,7 +75,6 @@ async function updateUser(userid, update) {
 
 async function saltUp(userid) {
     let user = await getUser(userid);
-    console.log("current salt:" + parseInt(user.salt));
     await updateUser(userid, { $set: { salt: (parseInt(user.salt) + 1) } });
 }
 
@@ -134,5 +133,11 @@ MongoClient.connect(url, function (err, mclient) {
     },
     usageUp: (userid)=>{
     usageUp(userid);
+    },
+    saltUp: (userid)=>{
+    saltUp(userid);
+    },
+    getSalt: (userid)=>{
+    return parseInt(getUser(userid).salt);
     }
 };
