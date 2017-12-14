@@ -88,6 +88,14 @@ async function OwnerStartup() {
     updateUser(bot.OWNERID, { $set: { salt: 0 } }).then(saltUp(bot.OWNERID));
 }
 
+async function checks(userid){
+if (existsUser(userid)){
+//maybe add more checks
+return true;
+}
+return false;
+}
+
 
 module.exports = {
     startup: ()=>{
@@ -126,21 +134,27 @@ MongoClient.connect(url, function (err, mclient) {
 });
     },
     addUser: (userid)=>{
-    addUser(userid);
+    if(checks(userid)){
+    addUser(userid);}
     },
     startup: ()=>{
-    OwnerStartup();
+    if(checks(userid)){
+    OwnerStartup();}
     },
     usageUp: (userid)=>{
-    usageUp(userid);
+    if(checks(userid)){
+    usageUp(userid);}
     },
     saltUp: (userid)=>{
-    saltUp(userid);
+    if(checks(userid)){
+    saltUp(userid);}
     },
     getSalt: (userid)=>{
-    return parseInt(getUser(userid).salt);
+    if(checks(userid)){
+    return parseInt(getUser(userid).salt);}
     },
     resetSalt: (userid)=>{
-    updateUser(userid, { $set: { salt: 0 } });
+    if(checks(userid)){
+    updateUser(userid, { $set: { salt: 0 } });}
     }
 };
