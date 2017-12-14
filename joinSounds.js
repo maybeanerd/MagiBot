@@ -4,7 +4,7 @@ var sounds = {
     "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/386666373994250241/trumpetmom.mp3", //nico
     "201768238890221568": "https://www.myinstants.com/media/sounds/ha-gay.mp3", //Kai
     "166649033669083136": "https://cdn.discordapp.com/attachments/267743281461329920/386988382770692108/Fleiig_am_pimpen.mp3", //matti
-    //"237918762790027264": "https://cdn.discordapp.com/attachments/227833391368634369/385176456524857353/tim_warum_bin_ich_so_autistisch.wav", //stefan
+    "237918762790027264": "https://cdn.discordapp.com/attachments/239520611389538304/390999323879669761/tagliches_mantra_kayle.mp3", //stefan
     "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav", //flavio
     "186052540729655296": "https://cdn.discordapp.com/attachments/186064880556703744/387294494497964036/Mine_Is_An_Evil_Laugh.mp3", //severin
     "216979437865009152": "https://cdn.discordapp.com/attachments/229604639069175809/385902962737938432/NiksDa_-_Leb_deinen_Champ_Digimon_LoL_Parodie.mp3", //Hannes
