@@ -22,7 +22,7 @@ function printHelp(msg, bot) {
 }
 
 module.exports = {
-    main: (bot, msg) => {
+    main: async function f(bot, msg) {
         var command = msg.content.split(" ")[0];
         msg.content = msg.content.replace(command + " ", "");
         if (command == "help") {
@@ -32,14 +32,16 @@ module.exports = {
                 switch (command) {
                     case 'info':
                         var info = [];
+                        var salt = await data.getSalt(msg.author.id);
+                        var usage = await data.getUsage(msg.author.id);
                         info.push({
                             name: "Dein Salz",
-                            value: parseInt(data.getUser(msg.author.id).salt),
+                            value: salt,
                             inline: false
                         });
                         info.push({
                             name: "Deine Bot Nutzung",
-                            value: parseInt(data.getUser(msg.author.id).botusage),
+                            value: usage,
                             inline: false
                         });
                         let embed = {

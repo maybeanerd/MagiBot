@@ -8,13 +8,11 @@ var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongod
 
 //Define Methods:
 async function getUser(userid) {
-
     let mclient = await MongoClient.connect(url);
     try {
         //do stuff
         var db = mclient.db('MagiBot');
         let result = await db.collection("users").findOne({ _id: userid });
-        console.log(result);
         return result;
     } finally {
         mclient.close();
@@ -45,9 +43,7 @@ async function template(data) {
 }
 
 async function addUser(userid) {
-    console.log("trying to add an user");
     if (existsUser(userid)) {
-        console.log("This User already exists lol");
         return true;
     }
     else {
@@ -143,9 +139,10 @@ module.exports = {
             addUser(userid);
         }
     },
-    getUser: (userid) => {
+    getUser: async function f(userid) {
         if (checks(userid)) {
-            return getUser(userid);
+            let result = await getUser(userid);
+            return result;
         }
     },
     startup: () => {
@@ -163,9 +160,21 @@ module.exports = {
             saltUp(userid);
         }
     },
-    getSalt: (userid) => {
+    getSalt: async function f(userid) {
+        console.log("salty bitch");
         if (checks(userid)) {
-            return parseInt(getUser(userid).salt);
+            let user = await getUser(userid);
+            let result = parseInt(user.salt);
+            console.log(result);
+            return result;
+        }
+    },
+    getUsage: async function f(userid) {
+        if (checks(userid)) {
+            let user = await getUser(userid);
+            let result = parseInt(user.botusage);
+            console.log(result);
+            return result;
         }
     },
     resetSalt: (userid) => {
