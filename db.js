@@ -104,6 +104,16 @@ async function saltDowntimeDone(userid1, userid2) {
     }
 }
 
+async function getSalt(userid) {
+    MongoClient.connect(url, function (err, mclient) {
+        if (err) throw err;
+        var db = mclient.db('MagiBot');
+        res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
+        mclient.close();
+        return res[userid].salt;
+    });
+}
+
 async function saltUp(userid1, userid2) {
     if (await saltDowntimeDone(userid1, userid2)) {
         return addSalt(userid1, userid2);
@@ -195,8 +205,7 @@ module.exports = {
     getSalt: async function f(userid) {
         console.log("salty bitch");
         if (checks(userid)) {
-            let user = await getUser(userid);
-            return parseInt(user.salt);
+            return getSalt(userid);
         }
     },
     getUsage: async function f(userid) {
