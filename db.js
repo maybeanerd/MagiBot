@@ -93,12 +93,13 @@ async function saltDowntimeDone(userid1, userid2) {
     MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
+        //gives undefined needs fix
         d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1);
         mclient.close();
     });
     if (d2) {
         var d1 = new Date();
-        return ((d2 - d1) / 1000 / 60 / 60 / 60) > 1;
+        return ((d2.date - d1) / 1000 / 60 / 60 / 60) > 1;
     } else {
         return true;
     }
@@ -107,10 +108,13 @@ async function saltDowntimeDone(userid1, userid2) {
 async function getSalt(userid) {
     MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
-        var db = mclient.db('MagiBot');
+        var db = await mclient.db('MagiBot');
         //gives undefined needs fix
-        let res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
-        console.log(res);
+        console.log(await db.collection("salt").find({ salter: userid }).sort({ date: -1 }).limit(1, async function f(err, out) {
+            return out;
+        }).date);
+        //gives undefined needs fix
+        let res = console.log(await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result);
         mclient.close();
         if (res) {
             return res[userid].salt;
