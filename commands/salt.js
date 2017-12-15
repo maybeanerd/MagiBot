@@ -8,6 +8,12 @@ function printHelp(msg, bot) {
         inline: true
     });
 
+    info.push({
+        name: "add @User",
+        value: "Reporte einen Nutzer fürs salten!",
+        inline: true
+    });
+
     let embed = {
         color: bot.COLOR,
         description: "Nutzbare Befehle in der Rubrik salt:",
@@ -49,11 +55,23 @@ module.exports = {
                             description: "Hier sind ein paar Informationen über deinen Salzgehalt:",
                             fields: info,
                             footer: {
-                                icon_url: bot.user.avatarURL,
-                                text: bot.user.username
+                                icon_url: msg.author.avatarURL,
+                                text: msg.author.username
                             }
                         }
                         msg.channel.send('', { embed });
+                        break;
+                    case 'add':
+                        const salty = bot.emojis.find("name", "salty");
+                        var mention = msg.content.split(" ")[0];
+                        if (mention.startsWith('<@') && mention.endsWith('>')) {
+                            mention.replace("<@", "");
+                            mention.replace(">", "");
+                            data.saltUp(msg.author.id, mention);
+                            msg.channel.send("${salty} Erfolgreich <@" + mention + "> für salt reportet!");
+                        } else {
+                            msg.channel.send("${salty} Du musst schon einen Nutzer angeben, den du reporten willst!");
+                        }
                         break;
                     default:
                         msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');
