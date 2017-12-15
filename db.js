@@ -201,7 +201,6 @@ module.exports = {
             saltUp(userid1, userid2);
         }
     },
-    //todo
     getSalt: async function f(userid) {
         console.log("salty bitch");
         if (checks(userid)) {
