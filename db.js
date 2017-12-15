@@ -73,6 +73,7 @@ async function addSalt(userid, reporter) {
             return true;
         });
     });
+    return false;
 }
 async function updateUser(userid, update) {
     MongoClient.connect(url, function (err, mclient) {
@@ -92,7 +93,7 @@ async function saltDowntimeDone(userid1, userid2) {
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
-        d2 = db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1);
+        d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1);
         mclient.close();
     });
     if (d2) {
