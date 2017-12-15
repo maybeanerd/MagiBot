@@ -49,8 +49,8 @@ module.exports = {
                             description: "Hier sind ein paar Informationen über deinen Salzgehalt:",
                             fields: info,
                             footer: {
-                                icon_url: bot.user.avatarURL,
-                                text: bot.user.username
+                                icon_url: msg.author.avatarURL,
+                                text: msg.author.username
                             }
                         }
                         msg.channel.send('', { embed });

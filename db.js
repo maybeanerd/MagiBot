@@ -50,7 +50,7 @@ async function addUser(userid) {
         MongoClient.connect(url, function (err, mclient) {
             if (err) throw err;
             var db = mclient.db('MagiBot');
-            var myobj = { _id: userid, salt: 0, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
+            var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
             db.collection("users").insertOne(myobj, function (err, res) {
                 if (err) throw err;
                 console.log("1 User inserted");
@@ -60,7 +60,20 @@ async function addUser(userid) {
         });
     }
 }
-
+async function addSalt(userid, reporter) {
+    MongoClient.connect(url, function (err, mclient) {
+        if (err) throw err;
+        var db = mclient.db('MagiBot');
+        let date = new Date();
+        var myobj = { salter: userid, date: date, reporter: reporter };
+        db.collection("salt").insertOne(myobj, function (err, res) {
+            if (err) throw err;
+            console.log("1 Salter inserted");
+            mclient.close();
+            return true;
+        });
+    });
+}
 async function updateUser(userid, update) {
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
@@ -73,19 +86,34 @@ async function updateUser(userid, update) {
     });
 }
 
-async function saltUp(userid) {
-    let user = await getUser(userid);
-    await updateUser(userid, { $set: { salt: (parseInt(user.salt) + 1) } });
+async function saltDowntimeDone(userid1, userid2) {
+    //get newest entry in salt
+    var d2;
+    MongoClient.connect(url, function (err, mclient) {
+        if (err) throw err;
+        var db = mclient.db('MagiBot');
+        d2 = db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1);
+        mclient.close();
+    });
+    if (d2) {
+        var d1 = new Date();
+        return ((d2 - d1) / 1000 / 60 / 60 / 60) > 1;
+    } else {
+        return true;
+    }
+}
+
+async function saltUp(userid1, userid2) {
+    if (await saltDowntimeDone(userid1, userid2)) {
+        return addSalt(userid1, userid2);
+    } else {
+        return false;
+    }
 }
 
 async function usageUp(userid) {
     let user = await getUser(userid);
     await updateUser(userid, { $set: { botusage: (parseInt(user.botusage) + 1) } });
-}
-
-async function OwnerStartup() {
-    await addUser(bot.OWNERID);
-    updateUser(bot.OWNERID, { $set: { salt: 0 } }).then(saltUp(bot.OWNERID));
 }
 
 async function checks(userid) {
@@ -131,6 +159,13 @@ module.exports = {
                     console.log("Settings Collection created!");
                 });
             }
+            //Dataset of salt
+            if (!db.collection("salt")) {
+                db.createCollection("salt", function (err, res) {
+                    if (err) throw err;
+                    console.log("Salt Collection created!");
+                });
+            }
             mclient.close();
         });
     },
@@ -145,21 +180,17 @@ module.exports = {
             return result;
         }
     },
-    startup: () => {
-        if (checks(userid)) {
-            OwnerStartup();
-        }
-    },
     usageUp: (userid) => {
         if (checks(userid)) {
             usageUp(userid);
         }
     },
-    saltUp: (userid) => {
-        if (checks(userid)) {
-            saltUp(userid);
+    saltUp: (userid1, userid2) => {
+        if (checks(userid1) && checks(userid2)) {
+            saltUp(userid1, userid2);
         }
     },
+    //todo
     getSalt: async function f(userid) {
         console.log("salty bitch");
         if (checks(userid)) {
@@ -173,6 +204,7 @@ module.exports = {
             return parseInt(user.botusage);
         }
     },
+    //todo
     resetSalt: (userid) => {
         if (checks(userid)) {
             updateUser(userid, { $set: { salt: 0 } });
