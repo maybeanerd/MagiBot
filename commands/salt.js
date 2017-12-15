@@ -62,15 +62,14 @@ module.exports = {
                         msg.channel.send('', { embed });
                         break;
                     case 'add':
-                        const salty = bot.emojis.find("name", "salty");
                         var mention = msg.content.split(" ")[0];
                         if (mention.startsWith('<@') && mention.endsWith('>')) {
                             mention.replace("<@", "");
                             mention.replace(">", "");
                             data.saltUp(msg.author.id, mention);
-                            msg.channel.send("${salty} Erfolgreich <@" + mention + "> für salt reportet!");
+                            msg.channel.send("Erfolgreich " + mention + " für salt reportet!");
                         } else {
-                            msg.channel.send("${salty} Du musst schon einen Nutzer angeben, den du reporten willst!");
+                            msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
                         break;
                     default:
