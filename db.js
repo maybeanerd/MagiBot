@@ -90,7 +90,7 @@ async function updateUser(userid, update) {
 async function saltDowntimeDone(userid1, userid2) {
     //get newest entry in salt
     var d2;
-    MongoClient.connect(url, function (err, mclient) {
+    MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
         d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1);
@@ -105,12 +105,18 @@ async function saltDowntimeDone(userid1, userid2) {
 }
 
 async function getSalt(userid) {
-    MongoClient.connect(url, function (err, mclient) {
+    MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
-        res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
+        //gives undefined needs fix
+        let res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
+        console.log(res);
         mclient.close();
-        return res[userid].salt;
+        if (res) {
+            return res[userid].salt;
+        } else {
+            return 0;
+        }
     });
 }
 
@@ -216,7 +222,7 @@ module.exports = {
     //todo
     resetSalt: (userid) => {
         if (checks(userid)) {
-            updateUser(userid, { $set: { salt: 0 } });
+            //todo reset salt
         }
     }
 };
