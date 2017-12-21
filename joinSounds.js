@@ -6,7 +6,7 @@ var sounds = {
     "166649033669083136": "https://cdn.discordapp.com/attachments/267743281461329920/386988382770692108/Fleiig_am_pimpen.mp3", //matti
     "237918762790027264": "https://cdn.discordapp.com/attachments/239520611389538304/390999323879669761/tagliches_mantra_kayle.mp3", //stefan
     "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav", //flavio
-    "186052540729655296": "https://cdn.discordapp.com/attachments/186064880556703744/387294494497964036/Mine_Is_An_Evil_Laugh.mp3", //severin
+    "186052540729655296": "https://cdn.discordapp.com/attachments/186064880556703744/393105851423916033/Mine_Is_An_Evil_Laugh.mp3", //severin
     "216979437865009152": "https://cdn.discordapp.com/attachments/229604639069175809/385902962737938432/NiksDa_-_Leb_deinen_Champ_Digimon_LoL_Parodie.mp3", //Hannes
     "165854980262199297": "https://www.myinstants.com/media/sounds/im-really-feeling-it.mp3", //Tobi
     "295899170454372352": "https://cdn.discordapp.com/attachments/301696653877051393/386176575923552256/OVERWATCH__-_Bastion_Ultimate_Sound.mp3", //Lucas Ashura
