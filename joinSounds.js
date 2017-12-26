@@ -13,7 +13,8 @@ var sounds = {
     "186481395416170496": "https://cdn.discordapp.com/attachments/386915523524558849/386915547788607488/Betrunkene_schreiben_Drehbcher_Dr_Hollywood_Dr_Dr_Sunshine_on_Tour_Circus_HalliGalli.mp3", //Julian
     "220957687683219458": "https://cdn.discordapp.com/attachments/354273411935240192/388034541945618438/MLG_SOUND_EFFECT-_AIR_HORNS.mp3", //Rizzers
     "339901226185392131": "https://cdn.discordapp.com/attachments/388068452314775553/388068621873577985/Hitler_NEIN_1.mp3", //tauri
-    "206502772533624832": "https://cdn.discordapp.com/attachments/237986334302535680/394940046232256522/80187__robinhood76__01277-witch-cackle-laughter-1.wav" //hendrik
+    "206502772533624832": "https://cdn.discordapp.com/attachments/237986334302535680/394940046232256522/80187__robinhood76__01277-witch-cackle-laughter-1.wav", //hendrik
+    "189452193739309068": "https://cdn.discordapp.com/attachments/192029546327965697/395001521361649674/Allahu_-_Akbar.mp3" //jonas
 }
 
 module.exports = {
