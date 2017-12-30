@@ -95,24 +95,26 @@ async function saltDowntimeDone(userid1, userid2) {
         var db = mclient.db('MagiBot');
         //gives undefined needs fix
         d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
+        console.log(d2);
         mclient.close();
     });
     if (d2) {
         var d1 = new Date();
-        return ((d2[0].date - d1) / 1000 / 60 / 60 / 60) > 1;
+        let ret = ((d2[0].date - d1) / 1000 / 60 / 60 / 60);
+        console.log("d2 exists");
+        return ret > 1;
     } else {
         return true;
     }
+
 }
 
 async function getSalt(userid) {
     MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = await mclient.db('MagiBot');
-        //gives undefined needs fix
-        console.log(await db.collection("salt").find({ salter: userid }).sort({ date: -1 }).limit(1).toArray(async function f(err, out) {
-            return out;
-        }).date);
+
+        console.log(await db.collection("salt").find({ salter: userid }).sort({ date: -1 }).limit(1).toArray());
         //gives undefined needs fix
         let res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
         console.log(res);

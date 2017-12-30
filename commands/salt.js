@@ -63,11 +63,10 @@ module.exports = {
                         break;
                     case 'add':
                         var mention = msg.content.split(" ")[0];
-                        if (mention.startsWith('<@') && mention.endsWith('>')) {
-                            mention.replace("<@", "");
-                            mention.replace(">", "");
+                        if (mention.startsWith('<@!') && mention.endsWith('>')) {
+                            mention = mention.substr(3).slice(0, -1);
                             data.saltUp(msg.author.id, mention);
-                            msg.channel.send("Erfolgreich " + mention + " für salt reportet!");
+                            msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
                         } else {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
