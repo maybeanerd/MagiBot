@@ -65,8 +65,13 @@ module.exports = {
                         var mention = msg.content.split(" ")[0];
                         if (mention.startsWith('<@!') && mention.endsWith('>')) {
                             mention = mention.substr(3).slice(0, -1);
-                            data.saltUp(msg.author.id, mention);
-                            msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
+                            let time = await data.saltUp(msg.author.id, mention);
+                            console.log(time);
+                            if (time == 0) {
+                                msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
+                            } else {
+                                msg.channel.send("Du kannst <@!" + mention + "> erst in " + (time * 60) % 60 + "min und " + (time * 60 * 60) % 60 + "sec wieder für salt reporten!");
+                            }
                         } else {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }

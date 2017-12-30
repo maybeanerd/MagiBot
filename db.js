@@ -70,10 +70,10 @@ async function addSalt(userid, reporter) {
             if (err) throw err;
             console.log("1 Salter inserted");
             mclient.close();
-            return true;
+            return 0;
         });
     });
-    return false;
+    return 1;
 }
 async function updateUser(userid, update) {
     MongoClient.connect(url, function (err, mclient) {
@@ -88,25 +88,26 @@ async function updateUser(userid, update) {
 }
 
 async function saltDowntimeDone(userid1, userid2) {
+    //TODO Returning undefined
     //get newest entry in salt
-    var d2;
-    MongoClient.connect(url, async function (err, mclient) {
+    var re;
+    await MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = mclient.db('MagiBot');
         //gives undefined needs fix
-        d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
-        console.log(d2);
+        let d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
         mclient.close();
+        console.log(d2);
+        if (d2) {
+            let d1 = new Date();
+            let ret = ((d1 - d2[0].date) / 1000 / 60 / 60 / 60);
+            re = ret;
+        } else {
+            re = 2;
+        }
     });
-    if (d2) {
-        var d1 = new Date();
-        let ret = ((d2[0].date - d1) / 1000 / 60 / 60 / 60);
-        console.log("d2 exists");
-        return ret > 1;
-    } else {
-        return true;
-    }
-
+    console.log(re);
+    return re;
 }
 
 async function getSalt(userid) {
@@ -128,10 +129,12 @@ async function getSalt(userid) {
 }
 
 async function saltUp(userid1, userid2) {
-    if (await saltDowntimeDone(userid1, userid2)) {
+    let time = await saltDowntimeDone(userid1, userid2);
+    console.log(time);
+    if (time > 1) {
         return addSalt(userid1, userid2);
     } else {
-        return false;
+        return time;
     }
 }
 
@@ -209,9 +212,9 @@ module.exports = {
             usageUp(userid);
         }
     },
-    saltUp: (userid1, userid2) => {
+    saltUp: async function f(userid1, userid2) {
         if (checks(userid1) && checks(userid2)) {
-            saltUp(userid1, userid2);
+            return saltUp(userid1, userid2);
         }
     },
     getSalt: async function f(userid) {
