@@ -90,31 +90,27 @@ async function updateUser(userid, update) {
 async function saltDowntimeDone(userid1, userid2) {
     //TODO Returning undefined
     //get newest entry in salt
-    var re;
-    await MongoClient.connect(url, async function (err, mclient) {
+    return MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
-        var db = mclient.db('MagiBot');
-        //gives undefined needs fix
+        let db = mclient.db('MagiBot');
         let d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
         mclient.close();
         console.log(d2);
         if (d2) {
             let d1 = new Date();
             let ret = ((d1 - d2[0].date) / 1000 / 60 / 60 / 60);
-            re = ret;
+            console.log(ret);
+            return ret;
         } else {
-            re = 2;
+            return 2;
         }
     });
-    console.log(re);
-    return re;
 }
 
 async function getSalt(userid) {
     MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
         var db = await mclient.db('MagiBot');
-
         console.log(await db.collection("salt").find({ salter: userid }).sort({ date: -1 }).limit(1).toArray());
         //gives undefined needs fix
         let res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
