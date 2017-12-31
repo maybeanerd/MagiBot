@@ -61,19 +61,17 @@ async function addUser(userid) {
     }
 }
 async function addSalt(userid, reporter) {
-    MongoClient.connect(url, function (err, mclient) {
-        if (err) throw err;
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let date = new Date();
         var myobj = { salter: userid, date: date, reporter: reporter };
-        db.collection("salt").insertOne(myobj, function (err, res) {
-            if (err) throw err;
+        return db.collection("salt").insertOne(myobj).then(function (res) {
             console.log("1 Salter inserted");
             mclient.close();
             return 0;
         });
     });
-    return 1;
+    //return 1;
 }
 async function updateUser(userid, update) {
     MongoClient.connect(url, function (err, mclient) {
@@ -95,9 +93,11 @@ async function saltDowntimeDone(userid1, userid2) {
         let d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
         mclient.close();
         console.log(d2);
-        if (d2) {
+        if (d2[0]) {
             let d1 = new Date();
-            let ret = ((d1 - d2[0].date) / 1000 / 60 / 60 / 60);
+            console.log(d2[0].date);
+            console.log(d1);
+            let ret = ((d1 - d2[0].date) / 1000 / 60 / 60);
             console.log(ret);
             return ret;
         } else {
@@ -125,7 +125,6 @@ async function getSalt(userid) {
 
 async function saltUp(userid1, userid2) {
     let time = await saltDowntimeDone(userid1, userid2);
-    console.log(time);
     if (time > 1) {
         return addSalt(userid1, userid2);
     } else {

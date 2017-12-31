@@ -70,7 +70,7 @@ module.exports = {
                             if (time == 0) {
                                 msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
                             } else {
-                                msg.channel.send("Du kannst <@!" + mention + "> erst in " + Math.floor((time * 60) % 60) + " min und " + Math.floor((time * 60 * 60) % 60) + " sek wieder für salt reporten!");
+                                msg.channel.send("Du kannst <@!" + mention + "> erst in " + (60 - Math.floor((time * 60) % 60)) + " min und " + (60 - Math.floor((time * 60 * 60) % 60)) + " sek wieder für salt reporten!");
                             }
                         } else {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
