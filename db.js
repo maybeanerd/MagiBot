@@ -106,6 +106,17 @@ async function saltDowntimeDone(userid1, userid2) {
     });
 }
 
+//idea for autmoatic deletion of reports and saltking evaluation:
+function doSomething() {
+    var d = new Date(),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
+        e = h - d;
+    if (e > 100) { // some arbitrary time period
+        window.setTimeout(doSomething, e);
+    }
+    // your code
+}
+
 async function getSalt(userid) {
     MongoClient.connect(url, async function (err, mclient) {
         if (err) throw err;
