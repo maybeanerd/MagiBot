@@ -8,25 +8,21 @@ var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongod
 
 //Define Methods:
 async function getUser(userid) {
-    let mclient = await MongoClient.connect(url);
-    try {
-        //do stuff
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let result = await db.collection("users").findOne({ _id: userid });
-        return result;
-    } finally {
         mclient.close();
-    }
+        return result;
+    });
 }
 
 async function existsUser(userid) {
     return MongoClient.connect(url).then(
         async function (mclient) {
             let db = mclient.db('MagiBot');
-            let collection = db.collection('users');
-            let userCount = (await collection.find(
-                { _id: userid }).limit(1).count());
+            let userCount = await db.collection("users").find({ _id: userid }).limit(1).count();
             mclient.close();
+            console.log(userCount > 0);
             return userCount > 0;
         });
 }
@@ -49,11 +45,10 @@ async function addUser(userid) {
         return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
-            return db.collection("users").insertOne(myobj).then(function (res) {
-                console.log("1 User inserted");
-                mclient.close();
-                return true;
-            });
+            db.collection("users").insertOne(myobj);
+            console.log("1 User inserted");
+            mclient.close();
+            return true;
         });
     }
 }
@@ -243,6 +238,7 @@ module.exports = {
     getUsage: async function f(userid) {
         if (checks(userid)) {
             let user = await getUser(userid);
+            console.log(user);
             return parseInt(user.botusage);
         }
     },

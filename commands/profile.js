@@ -9,6 +9,7 @@ module.exports = {
             if (mention.length > 9) {
                 if (mention.startsWith('<@!') && mention.endsWith('>')) {
                     id = mention.substr(3).slice(0, -1);
+                    console.log(id);
                 } else {
                     msg.channel.send("Bitte gib entweder keinen Nutzer an, oder erwähne ihn korrekt.");
                     return;
