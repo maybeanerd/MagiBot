@@ -21,7 +21,7 @@ module.exports = {
             var salt = await data.getSalt(id);
             var usage = await data.getUsage(id);
             info.push({
-                name: "Salz",
+                name: "Salzlevel",
                 value: salt,
                 inline: false
             });

@@ -138,9 +138,9 @@ async function getSalt(userid) {
     });
 }
 
-async function saltUp(userid1, userid2) {
+async function saltUp(userid1, userid2, ad) {
     let time = await saltDowntimeDone(userid1, userid2);
-    if (time > 1) {
+    if (time > 1 || ad) {
         return addSalt(userid1, userid2);
     } else {
         return time;
@@ -216,39 +216,55 @@ module.exports = {
         checks(userid);
     },
     getUser: async function (userid) {
-        if (checks(userid)) {
+        if (await checks(userid)) {
             let result = await getUser(userid);
             return result;
         }
     },
     usageUp: (userid) => {
-        if (checks(userid)) {
+        if (await checks(userid)) {
             usageUp(userid);
         }
     },
     saltUp: async function (userid1, userid2) {
-        if (checks(userid1) && checks(userid2)) {
-            return saltUp(userid1, userid2);
+        if (await checks(userid1) && await checks(userid2)) {
+            return saltUp(userid1, userid2, false);
+        }
+    },
+    saltUpAdmin: async function (userid1, userid2) {
+        if (await checks(userid1) && await checks(userid2)) {
+            return saltUp(userid1, userid2, true);
         }
     },
     getSalt: async function (userid) {
         console.log("salty bitch");
-        if (checks(userid)) {
+        if (await checks(userid)) {
             return getSalt(userid);
         }
     },
     getUsage: async function (userid) {
         console.log("get usage for ", userid);
-        if (checks(userid)) {
+        if (await checks(userid)) {
             let user = await getUser(userid);
             console.log(user);
             return parseInt(user.botusage);
         }
     },
-    //todo
     resetSalt: (userid) => {
-        if (checks(userid)) {
+        if (await checks(userid)) {
             //todo reset salt
         }
+    },
+    remOldestSalt: (userid) => {
+        if (await checks(userid)) {
+            return MongoClient.connect(url).then(async function (mclient) {
+                let db = mclient.db('MagiBot');
+                let id = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray()[0]["_id"];
+                console.log(id);
+                db.collection("salt").deleteOne({ _id: id });
+                mclient.close();
+            });
+        }
+
     }
 };
