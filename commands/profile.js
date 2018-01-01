@@ -8,8 +8,7 @@ module.exports = {
             console.log(mention);
             if (mention.length > 9) {
                 if (mention.startsWith('<@!') && mention.endsWith('>')) {
-                    mention = mention.substr(3).slice(0, -1);
-                    id = mention;
+                    id = mention.substr(3).slice(0, -1);
                 } else {
                     msg.channel.send("Bitte gib entweder keinen Nutzer an, oder erwähne ihn korrekt.");
                     return;
