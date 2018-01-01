@@ -35,7 +35,7 @@ module.exports = {
                         var mention = msg.content.split(" ")[0];
                         if (mention.startsWith('<@!') && mention.endsWith('>')) {
                             mention = mention.substr(3).slice(0, -1);
-                            let time = await data.saltUp(msg.author.id, mention);
+                            let time = await data.saltUp(mention, msg.author.id);
                             console.log(time);
                             if (time == 0) {
                                 msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
