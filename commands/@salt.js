@@ -52,14 +52,15 @@ module.exports = {
                 switch (command) {
                     case 'add':
                         await data.saltUpAdmin(mention, msg.author.id);
+                        msg.channel.send("Erfolgreich <@!" + mention + "> wegen salt reported!");
                         break;
                     case 'rem':
-
+                        await data.remOldestSalt(mention);
                         break;
                     case 'clr':
                         break;
                     default:
-                        msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');
+                        msg.reply('Dies ist kein gültiger Befehl. Nutze k@salt help für mehr Information.');
                         break;
                 }
             } else {

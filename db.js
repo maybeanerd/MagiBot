@@ -221,7 +221,7 @@ module.exports = {
             return result;
         }
     },
-    usageUp: (userid) => {
+    usageUp: async function (userid) {
         if (await checks(userid)) {
             usageUp(userid);
         }
@@ -250,16 +250,18 @@ module.exports = {
             return parseInt(user.botusage);
         }
     },
-    resetSalt: (userid) => {
+    resetSalt: async function (userid) {
         if (await checks(userid)) {
             //todo reset salt
         }
     },
-    remOldestSalt: (userid) => {
+    remOldestSalt: async function (userid) {
         if (await checks(userid)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
-                let id = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray()[0]["_id"];
+                let uid = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray();
+                console.log(uid);
+                let id = uid[0]["_id"];
                 console.log(id);
                 db.collection("salt").deleteOne({ _id: id });
                 mclient.close();
