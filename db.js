@@ -118,16 +118,14 @@ function doSomething() {
 }
 
 async function getSalt(userid) {
-    MongoClient.connect(url, async function (err, mclient) {
-        if (err) throw err;
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db('MagiBot');
-        console.log(await db.collection("salt").find({ salter: userid }).sort({ date: -1 }).limit(1).toArray());
-        //gives undefined needs fix
-        let res = await db.collection("salt").aggregate({ $group: { _id: '$salter', salt: { $sum: 1 } } }).result;
+        let res = await db.collection("salt").count({ salter: userid });
+        //let res = await db.collection("salt").aggregate([{ $match: { salter: userid } }, { $group: { _id: null, count: { $sum: 1 } } }]).result; //was an idea
         console.log(res);
         mclient.close();
         if (res) {
-            return res[userid].salt;
+            return res;
         } else {
             return 0;
         }
