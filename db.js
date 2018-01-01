@@ -106,15 +106,27 @@ async function saltDowntimeDone(userid1, userid2) {
     });
 }
 
-//idea for autmoatic deletion of reports and saltking evaluation:
-function doSomething() {
+//autmoatic deletion of reports and saltking evaluation:
+async function onHour() {
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
-        window.setTimeout(doSomething, e);
+        setTimeout(onHour, e);
     }
-    // your code
+    // my code
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = mclient.db('MagiBot');
+        let nd = new Date();
+        nd.setDate(nd.getDate() - 14);
+        db.collection("salt").remove({ date: { $lt: nd } });
+        mclient.close();
+    });
+}
+
+//top 5 salty people
+async function topSalt() {
+
 }
 
 async function getSalt(userid) {
@@ -198,6 +210,7 @@ module.exports = {
             }
             mclient.close();
         });
+        onHour();
     },
     addUser: (userid) => {
         if (checks(userid)) {
