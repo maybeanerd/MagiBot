@@ -62,6 +62,11 @@ module.exports = {
                         }
                         break;
                     case 'clr':
+                        if (await data.resetSalt(mention)) {
+                            msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
+                        } else {
+                            msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
+                        }
                         break;
                     default:
                         msg.reply('Dies ist kein gültiger Befehl. Nutze k@salt help für mehr Information.');

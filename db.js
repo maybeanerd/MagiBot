@@ -100,8 +100,9 @@ async function saltDowntimeDone(userid1, userid2) {
     });
 }
 
-//autmoatic deletion of reports and saltking evaluation:
+//autmoatic deletion of reports and saltking evaluation: 
 async function onHour() {
+    var SaltkingRole = "387280939413274624";
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
@@ -114,6 +115,20 @@ async function onHour() {
         let nd = new Date();
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
+        /*
+        //get highest salter
+        let saltkingId;
+
+        for (G in await bot.guilds) {
+            if (await G.available) {
+                for (M in await G.members) {
+                    M.removeRole(SaltkingRole);
+                    if (M.id == saltkingId) {
+                        M.addRole(SaltkingRole);
+                    }
+                }
+            }
+        }*/
         mclient.close();
     });
 }
@@ -252,7 +267,14 @@ module.exports = {
     },
     resetSalt: async function (userid) {
         if (await checks(userid)) {
-            //todo reset salt
+            return MongoClient.connect(url).then(async function (mclient) {
+                let db = mclient.db('MagiBot');
+                await db.collection("salt").remove({ salter: userid });
+                mclient.close();
+                return true;
+            });
+        } else {
+            return false;
         }
     },
     remOldestSalt: async function (userid) {
