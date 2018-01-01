@@ -30,13 +30,14 @@ module.exports = {
                 value: usage,
                 inline: false
             });
+            let user = await bot.fetchUser(id);
             let embed = {
                 color: bot.COLOR,
-                description: ("Hier sind ein paar Informationen über " + bot.fetchUser(id).username),
+                description: ("Hier sind ein paar Informationen über " + user.username),
                 fields: info,
                 footer: {
-                    icon_url: bot.fetchUser(id).avatarURL,
-                    text: bot.fetchUser(id).username
+                    icon_url: user.avatarURL,
+                    text: user.username
                 }
             }
             msg.channel.send('', { embed });
