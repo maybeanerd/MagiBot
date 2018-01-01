@@ -20,16 +20,15 @@ async function getUser(userid) {
 }
 
 async function existsUser(userid) {
-    let mclient = await MongoClient.connect(url);
-    try {
-        let db = mclient.db('MagiBot');
-        let collection = db.collection('users');
-        let userCount = (await collection.find(
-            { _id: userid }).limit(1).count());
-        return userCount > 0;
-    } finally {
-        mclient.close();
-    }
+    return MongoClient.connect(url).then(
+        async function (mclient) {
+            let db = mclient.db('MagiBot');
+            let collection = db.collection('users');
+            let userCount = (await collection.find(
+                { _id: userid }).limit(1).count());
+            mclient.close();
+            return userCount > 0;
+        });
 }
 
 async function template(data) {
@@ -47,12 +46,10 @@ async function addUser(userid) {
         return true;
     }
     else {
-        MongoClient.connect(url, function (err, mclient) {
-            if (err) throw err;
+        return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
-            db.collection("users").insertOne(myobj, function (err, res) {
-                if (err) throw err;
+            return db.collection("users").insertOne(myobj).then(function (res) {
                 console.log("1 User inserted");
                 mclient.close();
                 return true;
@@ -155,7 +152,13 @@ async function saltUp(userid1, userid2) {
 
 async function usageUp(userid) {
     let user = await getUser(userid);
-    await updateUser(userid, { $set: { botusage: (parseInt(user.botusage) + 1) } });
+    var updateval;
+    if (user.botusage) {
+        updateval = user.botusage + 1
+    } else {
+        updateval = 1;
+    }
+    updateUser(userid, { $set: { botusage: (updateval) } });
 }
 
 async function checks(userid) {
@@ -213,9 +216,7 @@ module.exports = {
         onHour();
     },
     addUser: (userid) => {
-        if (checks(userid)) {
-            addUser(userid);
-        }
+        checks(userid);
     },
     getUser: async function f(userid) {
         if (checks(userid)) {
