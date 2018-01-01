@@ -20,9 +20,9 @@ async function existsUser(userid) {
     return MongoClient.connect(url).then(
         async function (mclient) {
             let db = mclient.db('MagiBot');
-            let userCount = await db.collection("users").find({ _id: userid }).limit(1).count();
+            let userCount = await db.collection("users").find({ _id: userid }).count();
             mclient.close();
-            console.log(userCount > 0);
+            console.log("Does User Exist?: ", userCount > 0);
             return userCount > 0;
         });
 }
@@ -38,10 +38,12 @@ async function template(data) {
 }
 
 async function addUser(userid) {
-    if (existsUser(userid)) {
+    if (await existsUser(userid)) {
+        console.log("addUser says User exists");
         return true;
     }
     else {
+        console.log("addUser says trying to create a User in DB");
         return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
@@ -158,7 +160,7 @@ async function usageUp(userid) {
 
 async function checks(userid) {
     //maybe add more checks
-    if (addUser(userid)) {
+    if (await addUser(userid)) {
         return true;
     }
     //else
@@ -213,7 +215,7 @@ module.exports = {
     addUser: (userid) => {
         checks(userid);
     },
-    getUser: async function f(userid) {
+    getUser: async function (userid) {
         if (checks(userid)) {
             let result = await getUser(userid);
             return result;
@@ -224,18 +226,19 @@ module.exports = {
             usageUp(userid);
         }
     },
-    saltUp: async function f(userid1, userid2) {
+    saltUp: async function (userid1, userid2) {
         if (checks(userid1) && checks(userid2)) {
             return saltUp(userid1, userid2);
         }
     },
-    getSalt: async function f(userid) {
+    getSalt: async function (userid) {
         console.log("salty bitch");
         if (checks(userid)) {
             return getSalt(userid);
         }
     },
-    getUsage: async function f(userid) {
+    getUsage: async function (userid) {
+        console.log("get usage for ", userid);
         if (checks(userid)) {
             let user = await getUser(userid);
             console.log(user);
