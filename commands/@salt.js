@@ -55,7 +55,11 @@ module.exports = {
                         msg.channel.send("Erfolgreich <@!" + mention + "> wegen salt reported!");
                         break;
                     case 'rem':
-                        await data.remOldestSalt(mention);
+                        if (await data.remOldestSalt(mention)) {
+                            msg.channel.send("Erfolgreich den ältesten Salt von <@!" + mention + "> entfernt!");
+                        } else {
+                            msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
+                        }
                         break;
                     case 'clr':
                         break;

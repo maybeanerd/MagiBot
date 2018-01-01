@@ -259,13 +259,18 @@ module.exports = {
         if (await checks(userid)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
-                let uid = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray();
-                console.log(uid);
-                let id = uid[0]["_id"];
-                console.log(id);
-                db.collection("salt").deleteOne({ _id: id });
-                mclient.close();
+                let id = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray();
+                if (id[0]) {
+                    await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
+                    mclient.close();
+                    return true;
+                } else {
+                    mclient.close();
+                    return false;
+                }
             });
+        } else {
+            return false;
         }
 
     }
