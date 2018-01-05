@@ -2,11 +2,6 @@ var data = require(__dirname + '/../db.js');
 
 function printHelp(msg, bot) {
     var info = [];
-    info.push({
-        name: "info",
-        value: "Gibt dir Informationen über deinen Salzgehalt",
-        inline: true
-    });
 
     info.push({
         name: "add @User",
@@ -36,38 +31,17 @@ module.exports = {
         } else {
             if (msg.guild) {
                 switch (command) {
-                    case 'info':
-                        var info = [];
-                        var salt = await data.getSalt(msg.author.id);
-                        var usage = await data.getUsage(msg.author.id);
-                        info.push({
-                            name: "Dein Salz",
-                            value: salt,
-                            inline: false
-                        });
-                        info.push({
-                            name: "Deine Bot Nutzung",
-                            value: usage,
-                            inline: false
-                        });
-                        let embed = {
-                            color: bot.COLOR,
-                            description: "Hier sind ein paar Informationen über deinen Salzgehalt:",
-                            fields: info,
-                            footer: {
-                                icon_url: msg.author.avatarURL,
-                                text: msg.author.username
-                            }
-                        }
-                        msg.channel.send('', { embed });
-                        break;
                     case 'add':
                         var mention = msg.content.split(" ")[0];
-                        if (mention.startsWith('<@') && mention.endsWith('>')) {
-                            mention.replace("<@", "");
-                            mention.replace(">", "");
-                            data.saltUp(msg.author.id, mention);
-                            msg.channel.send("Erfolgreich " + mention + " für salt reportet!");
+                        if (mention.startsWith('<@!') && mention.endsWith('>')) {
+                            mention = mention.substr(3).slice(0, -1);
+                            let time = await data.saltUp(mention, msg.author.id);
+                            console.log(time);
+                            if (time == 0) {
+                                msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
+                            } else {
+                                msg.channel.send("Du kannst <@!" + mention + "> erst in " + (59 - Math.floor((time * 60) % 60)) + " min und " + (60 - Math.floor((time * 60 * 60) % 60)) + " sek wieder für salt reporten!");
+                            }
                         } else {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
