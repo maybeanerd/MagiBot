@@ -1,7 +1,7 @@
 var sounds = {
     "185865492576075776": "https://cdn.discordapp.com/attachments/267743281461329920/399331498781573123/horseWhinny_1_11a_Jack_1-bssh.mp3", //ich
     "226383324262825985": "https://cdn.discordapp.com/attachments/227833391368634369/386665940181450772/Stalker_-_Bandit.mp3", //tim
-    "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/396055236482957323/Angelaaa.mp3", //nico
+    "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/399342278122143744/FunnyTimeWithTrynda.mp3", //nico
     "201768238890221568": "https://www.myinstants.com/media/sounds/ha-gay.mp3", //Kai
     "166649033669083136": "https://cdn.discordapp.com/attachments/267743281461329920/386985806402682881/Tschuldigung_lauter.mp3", //matti
     "237918762790027264": "https://cdn.discordapp.com/attachments/239520611389538304/390999323879669761/tagliches_mantra_kayle.mp3", //stefan
@@ -16,7 +16,8 @@ var sounds = {
     "206502772533624832": "https://cdn.discordapp.com/attachments/237986334302535680/394940046232256522/80187__robinhood76__01277-witch-cackle-laughter-1.wav", //hendrik
     "189452193739309068": "https://cdn.discordapp.com/attachments/192029546327965697/395001521361649674/Allahu_-_Akbar.mp3", //jonas
     "223034095339307008": "https://cdn.discordapp.com/attachments/386915523524558849/395578991509110794/achso_du_hast_uns_getrollt.mp3", //arrge
-    "391927619701964805": "https://cdn.discordapp.com/attachments/386915523524558849/395578994109710346/DDDDEPORTED.mp3" //filip
+    "391927619701964805": "https://cdn.discordapp.com/attachments/386915523524558849/395578994109710346/DDDDEPORTED.mp3", //filip
+    "204331591705690114": "https://cdn.discordapp.com/attachments/185868764137390080/399335035997782026/Du_Schwamm.mp3" //johann
 }
 
 module.exports = {
