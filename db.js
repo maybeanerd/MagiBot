@@ -128,6 +128,13 @@ async function topSalt() {
 }
 
 async function getSalt(userid) {
+/* new salt should work like this
+return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db('MagiBot');
+        let result = await db.collection("saltrank").findOne({ _id: userid });
+        mclient.close();
+        return result[salt];
+    });*/
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db('MagiBot');
         let res = await db.collection("salt").count({ salter: userid });
