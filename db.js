@@ -1,10 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
+var config= require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
-var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongodb.net:27017,magibot-shard-00-01-1nbod.mongodb.net:27017,magibot-shard-00-02-1nbod.mongodb.net:27017/test?ssl=true&replicaSet=MagiBot-shard-0&authSource=admin";
-/*MongoClient.connect(url, function (err, mclient) {
-    console.log("Database created!");
-    mclient.close();
-});*/
+var url = config.dburl;
 
 //Define Methods:
 async function getUser(userid) {
