@@ -212,6 +212,13 @@ module.exports = {
                     console.log("Salt Collection created!");
                 });
             }
+            //Dataset of saltranking
+            if (!db.collection("saltrank")) {
+                db.createCollection("saltrank", function (err, res) {
+                    if (err) throw err;
+                    console.log("Saltrank Collection created!");
+                });
+            }
             mclient.close();
         });
         onHour();
