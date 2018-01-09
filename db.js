@@ -70,7 +70,6 @@ async function updateUser(userid, update) {
 }
 
 async function saltDowntimeDone(userid1, userid2) {
-    //TODO Returning undefined
     //get newest entry in salt
     return MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
