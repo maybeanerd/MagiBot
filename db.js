@@ -27,16 +27,6 @@ async function existsUser(userid) {
         });
 }
 
-async function template(data) {
-    let mclient = await MongoClient.connect(url);
-    try {
-        //do stuff
-
-    } finally {
-        mclient.close();
-    }
-}
-
 async function addUser(userid) {
     if (await existsUser(userid)) {
         console.log("addUser says User exists");
