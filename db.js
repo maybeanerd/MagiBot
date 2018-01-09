@@ -1,10 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
+var config= require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
-var url = "mongodb://T0TProduction:yourpassword@magibot-shard-00-00-1nbod.mongodb.net:27017,magibot-shard-00-01-1nbod.mongodb.net:27017,magibot-shard-00-02-1nbod.mongodb.net:27017/test?ssl=true&replicaSet=MagiBot-shard-0&authSource=admin";
-/*MongoClient.connect(url, function (err, mclient) {
-    console.log("Database created!");
-    mclient.close();
-});*/
+var url = config.dburl;
 
 //Define Methods:
 async function getUser(userid) {
@@ -25,16 +22,6 @@ async function existsUser(userid) {
             console.log("Does User Exist?: ", userCount > 0);
             return userCount > 0;
         });
-}
-
-async function template(data) {
-    let mclient = await MongoClient.connect(url);
-    try {
-        //do stuff
-
-    } finally {
-        mclient.close();
-    }
 }
 
 async function addUser(userid) {
@@ -80,7 +67,6 @@ async function updateUser(userid, update) {
 }
 
 async function saltDowntimeDone(userid1, userid2) {
-    //TODO Returning undefined
     //get newest entry in salt
     return MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
@@ -139,6 +125,13 @@ async function topSalt() {
 }
 
 async function getSalt(userid) {
+/* new salt should work like this
+return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db('MagiBot');
+        let result = await db.collection("saltrank").findOne({ _id: userid });
+        mclient.close();
+        return result[salt];
+    });*/
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db('MagiBot');
         let res = await db.collection("salt").count({ salter: userid });
@@ -221,6 +214,13 @@ module.exports = {
                 db.createCollection("salt", function (err, res) {
                     if (err) throw err;
                     console.log("Salt Collection created!");
+                });
+            }
+            //Dataset of saltranking
+            if (!db.collection("saltrank")) {
+                db.createCollection("saltrank", function (err, res) {
+                    if (err) throw err;
+                    console.log("Saltrank Collection created!");
                 });
             }
             mclient.close();
