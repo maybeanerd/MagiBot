@@ -1,5 +1,5 @@
 var sounds = {
-    "185865492576075776": "https://cdn.discordapp.com/attachments/267743281461329920/399331498781573123/horseWhinny_1_11a_Jack_1-bssh.mp3", //ich
+    "185865492576075776": "https://cdn.discordapp.com/attachments/185868764137390080/387360631671488513/onward.mp3", //ich
     "226383324262825985": "https://cdn.discordapp.com/attachments/227833391368634369/386665940181450772/Stalker_-_Bandit.mp3", //tim
     "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/399342278122143744/FunnyTimeWithTrynda.mp3", //nico
     "201768238890221568": "https://cdn.discordapp.com/attachments/212909971224920065/400688108158451712/Join_Sound.wav", //Kai
