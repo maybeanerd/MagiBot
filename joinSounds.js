@@ -2,7 +2,7 @@ var sounds = {
     "185865492576075776": "https://cdn.discordapp.com/attachments/267743281461329920/399331498781573123/horseWhinny_1_11a_Jack_1-bssh.mp3", //ich
     "226383324262825985": "https://cdn.discordapp.com/attachments/227833391368634369/386665940181450772/Stalker_-_Bandit.mp3", //tim
     "185845248163840002": "https://cdn.discordapp.com/attachments/185868764137390080/399342278122143744/FunnyTimeWithTrynda.mp3", //nico
-    "201768238890221568": "https://www.myinstants.com/media/sounds/ha-gay.mp3", //Kai
+    "201768238890221568": "https://cdn.discordapp.com/attachments/212909971224920065/400688108158451712/Join_Sound.wav", //Kai
     "166649033669083136": "https://cdn.discordapp.com/attachments/267743281461329920/386985806402682881/Tschuldigung_lauter.mp3", //matti
     "237918762790027264": "https://cdn.discordapp.com/attachments/239520611389538304/390999323879669761/tagliches_mantra_kayle.mp3", //stefan
     "209642947287711744": "https://cdn.discordapp.com/attachments/209646040675123200/385177764678074379/flavio_mweeeeeh.wav", //flavio
