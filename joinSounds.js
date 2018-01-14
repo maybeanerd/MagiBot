@@ -20,7 +20,7 @@ var sounds = {
     "204331591705690114": "https://cdn.discordapp.com/attachments/185868764137390080/399335035997782026/Du_Schwamm.mp3", //johann
     "203247775209619456": "https://cdn.discordapp.com/attachments/203248018231787520/401465484676956161/Hearthstone_-_Murloc.mp3", //paul
     "364416438305292291": "https://cdn.discordapp.com/attachments/399617351701758002/401453955336372234/DA_DA_DA_DA_online-audio-converter.com_1.mp3", //adrian
-    "358707393623752705": "https://cdn.discordapp.com/attachments/399617351701758002/402116391647445012/Calvins_Datei_xD.mp3" //Calvin
+    "358707393623752705": "https://cdn.discordapp.com/attachments/386915523524558849/402131512818139146/CalvinSound.mp3" //Calvin
 }
 
 module.exports = {
