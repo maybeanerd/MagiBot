@@ -206,8 +206,8 @@ async function getSettings(guildID){
 }
 
 //TODO
-async function joinsounds(userid,url){
-
+async function joinsound(userid,url){
+return false;
 }
 
 //TODO
