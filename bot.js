@@ -188,6 +188,7 @@ var checkCommand = function (msg, isMention) {
                 command = command.substr(1, command.length);
                 break;
             case '@':
+            //TODO add AdminRoles from DB, also Owner of Server
                 if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
@@ -197,10 +198,12 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
+        //TODO add Bot command channel from DB
             if (msg.channel.id == '198764451132997632' || pre == '@') {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
+                //TODO add Bot command Channel from DB
                 (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern <#198764451132997632>.")).then(mess => mess.delete(15000));
             }
         }
@@ -247,6 +250,11 @@ var vcfree = true;
 function joinableChannel(cid) {
     return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842"));
 };
+
+//TODO
+function joinableChannelFromDB(guildID,cid){
+return data.joinable(guilID,cid);
+}
 
 bot.on("voiceStateUpdate", (o, n) => {
     if (vcfree && joinableChannel(n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
