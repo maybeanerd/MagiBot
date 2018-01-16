@@ -1,5 +1,5 @@
 var MongoClient = require('mongodb').MongoClient;
-var config= require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
+var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
 var url = config.dburl;
 
@@ -41,7 +41,7 @@ async function addUser(userid) {
         });
     }
 }
-async function addSalt(userid, reporter,guildID = 0) {
+async function addSalt(userid, reporter, guildID = 0) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let date = new Date();
@@ -125,13 +125,13 @@ async function topSalt() {
 }
 
 async function getSalt(userid) {
-/* new salt should work like this
-return MongoClient.connect(url).then(async function (mclient) {
-        var db = mclient.db('MagiBot');
-        let result = await db.collection("saltrank").findOne({ _id: userid });
-        mclient.close();
-        return result[salt];
-    });*/
+    /* new salt should work like this
+    return MongoClient.connect(url).then(async function (mclient) {
+            var db = mclient.db('MagiBot');
+            let result = await db.collection("saltrank").findOne({ _id: userid });
+            mclient.close();
+            return result[salt];
+        });*/
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db('MagiBot');
         let res = await db.collection("salt").count({ salter: userid });
@@ -175,50 +175,51 @@ async function checks(userid) {
     return false;
 }
 
-async function checkGuild(id){
-return MongoClient.connect(url).then( async function(mclient){
+async function checkGuild(id) {
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db(id);
         //Dataset for settings
         if (await !db.collection("settings")) {
-                await db.createCollection("settings").then(()=>{
-                    console.log("Settings Collection created!");}
-                    );
-         }
-         //Dataset of saltranking
-            if (!db.collection("saltrank")) {
-                db.createCollection("saltrank", function (err, res) {
-                    if (err) throw err;
-                    console.log("Saltrank Collection created!");
-                });
+            await db.createCollection("settings").then(() => {
+                console.log("Settings Collection created!");
             }
+            );
+        }
+        //Dataset of saltranking
+        if (!db.collection("saltrank")) {
+            db.createCollection("saltrank", function (err, res) {
+                if (err) throw err;
+                console.log("Saltrank Collection created!");
+            });
+        }
         return true;
     });
 }
 
 //TODO
-async function guildSettings(guildID,settings){
+async function guildSettings(guildID, settings) {
 
 }
 
 //TODO 
-function saltGuild(salter,guildID,add=1){
- MongoClient.connect(url).then(async function (mclient) {
+function saltGuild(salter, guildID, add = 1) {
+    MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
-        let user= await db.findOne({salter:salter});
-        if(!user){
-        var myobj = {salter:salter,salt:1};
-        await db.collection("saltrank").insertOne(myobj);
-        }else{
-        var update={user.salt+add};
-        await db.collection("saltrank").updateOne({ salter: salter }, update); 
+        let user = await db.findOne({ salter: salter });
+        if (!user) {
+            var myobj = { salter: salter, salt: 1 };
+            await db.collection("saltrank").insertOne(myobj);
+        } else {
+            var update = { salt: user.salt + add };
+            await db.collection("saltrank").updateOne({ salter: salter }, update);
         }
         mclient.close();
     });
 }
 
 //TODO
-async function getSettings(guildID){
-return MongoClient.connect(url).then(async function (mclient) {
+async function getSettings(guildID) {
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         let result = await db.collection("settings").toArray();
         mclient.close();
@@ -227,12 +228,12 @@ return MongoClient.connect(url).then(async function (mclient) {
 }
 
 //TODO
-async function joinsound(userid,url){
-return false;
+async function joinsound(userid, url) {
+    return false;
 }
 
-async function getSound(userid){
-return MongoClient.connect(url).then(async function (mclient) {
+async function getSound(userid) {
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let result = await db.collection("sounds").findOne({ _id: userid });
         mclient.close();
@@ -346,9 +347,9 @@ module.exports = {
         }
 
     },
-    addGuild: async function(guildID){
-    if(await checkGuild(guildID)){
-    console.log(guild.name+" was added!");
-    }
+    addGuild: async function (guildID) {
+        if (await checkGuild(guildID)) {
+            console.log(guild.name + " was added!");
+        }
     }
 };
