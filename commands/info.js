@@ -38,6 +38,11 @@ module.exports = {
             inline: false
         });
         info.push({
+            name: "Offizieller Discord für Support, Ideen und Bug Reports",
+            value: "https://discord.gg/2Evcf4T",
+            inline: false
+        });
+        info.push({
             name: "Roadmap und bekannte Bugs",
             value: "https://github.com/T0TProduction/MagiBot/projects/1",
             inline: false
