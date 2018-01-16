@@ -176,12 +176,12 @@ async function checks(userid) {
 }
 
 async function checkGuild(id){
-return MongoClient.connect(url).then( 
+return MongoClient.connect(url).then( async function(mclient){
         var db = await mclient.db(id);
         //Dataset for settings
         if (await !db.collection("settings")) {
-                await db.createCollection("settings").then(
-                    console.log("Settings Collection created!");
+                await db.createCollection("settings").then(()=>{
+                    console.log("Settings Collection created!");}
                     );
          }
          //Dataset of saltranking
@@ -192,12 +192,28 @@ return MongoClient.connect(url).then(
                 });
             }
         return true;
-    );
+    });
 }
 
 //TODO
 async function guildSettings(guildID,settings){
 
+}
+
+//TODO 
+function saltGuild(salter,guildID,add=1){
+ MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db(guildID);
+        let user= await db.findOne({salter:salter});
+        if(!user){
+        var myobj = {salter:salter,salt:1};
+        await db.collection("saltrank").insertOne(myobj);
+        }else{
+        var update={user.salt+add};
+        await db.collection("saltrank").updateOne({ salter: salter }, update); 
+        }
+        mclient.close();
+    });
 }
 
 //TODO
