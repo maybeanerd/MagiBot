@@ -46,7 +46,7 @@ module.exports = {
         //Entwickler Info
         info.push({
             name: "Entwickler",
-            value: "<@185865492576075776>",
+            value: "<@!185865492576075776>",
             inline: false
         });
 

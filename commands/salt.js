@@ -53,7 +53,7 @@ module.exports = {
                                 info.push({
                                     name: (i + 1) + ". Platz mit " + salters[i].salt + " Salz",
                                     value: "<@!" + salters[i].salter + ">",
-                                    inline: true
+                                    inline: false
                                 });
                             } else { break; }
                         }
