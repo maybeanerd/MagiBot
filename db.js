@@ -202,7 +202,12 @@ async function guildSettings(guildID,settings){
 
 //TODO
 async function getSettings(guildID){
-
+return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db(guildID);
+        let result = await db.collection("settings").toArray();
+        mclient.close();
+        return result;
+    });
 }
 
 //TODO
@@ -210,9 +215,13 @@ async function joinsound(userid,url){
 return false;
 }
 
-//TODO
 async function getSound(userid){
-
+return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db('MagiBot');
+        let result = await db.collection("sounds").findOne({ _id: userid });
+        mclient.close();
+        return result;
+    });
 }
 
 module.exports = {
