@@ -41,11 +41,11 @@ async function addUser(userid) {
         });
     }
 }
-async function addSalt(userid, reporter) {
+async function addSalt(userid, reporter,guildID = 0) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let date = new Date();
-        var myobj = { salter: userid, date: date, reporter: reporter };
+        var myobj = { salter: userid, reporter: reporter, date: date, guild: guildID };
         return db.collection("salt").insertOne(myobj).then(function (res) {
             console.log("1 Salter inserted");
             mclient.close();
