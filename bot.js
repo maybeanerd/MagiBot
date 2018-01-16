@@ -236,7 +236,7 @@ bot.on("message", msg => {
 
 bot.on("guildCreate", guild=>{
 if(guild.available){
-data.addGuild(guild); 
+data.addGuild(guild.id); 
 }
 });
 

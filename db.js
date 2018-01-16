@@ -187,6 +187,16 @@ return MongoClient.connect(url).then(
     );
 }
 
+//TODO
+async function guildSettings(guildID){
+
+}
+
+//TODO
+async function joinsounds(userid,url){
+
+}
+
 module.exports = {
     startup: () => {
         //create Collection
@@ -307,8 +317,8 @@ module.exports = {
         }
 
     },
-    addGuild: async function(guild){
-    if(await checkGuild(guild.id)){
+    addGuild: async function(guildID){
+    if(await checkGuild(guildID)){
     console.log(guild.name+" was added!");
     }
     }
