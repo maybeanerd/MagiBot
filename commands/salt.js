@@ -46,6 +46,28 @@ module.exports = {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
                         break;
+                    case "top": var salters = await data.topSalt(msg.guild);
+                        var info = [];
+                        for (var i = 0; i < 5; i++) {
+                            if (salters[i]) {
+                                info.push({
+                                    name: (i + 1) + ". Platz mit " + salters[i].salt + " Salz",
+                                    value: "<@!" + salters[i].salter + ">",
+                                    inline: true
+                                });
+                            } else { break; }
+                        }
+                        let embed = {
+                            color: 0xffffff,
+                            description: "Top 5 Salter des " + msg.guild.name + ":",
+                            fields: info,
+                            footer: {
+                                icon_url: await msg.guild.iconURL,
+                                text: await msg.guild.name
+                            }
+                        }
+                        msg.channel.send('', { embed });
+                        break;
                     default:
                         msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');
                         break;

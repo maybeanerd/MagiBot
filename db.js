@@ -121,8 +121,16 @@ async function onHour() {
 }
 
 //top 5 salty people
-async function topSalt() {
-
+async function topSalt(guild) {
+    return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db(guild.id);
+        var result = await db.collection("saltrank").find().sort({ salt: -1 }).limit(5).toArray();
+        if (!result) {
+            return [];
+        }
+        mclient.close();
+        return result;
+    });
 }
 
 async function getSalt(userid, guildID = 0) {
@@ -356,6 +364,11 @@ module.exports = {
     addGuild: async function (guildID) {
         if (await checkGuild(guildID)) {
             console.log(guild.name + " was added!");
+        }
+    },
+    topSalt: async function (guild) {
+        if (await checkGuild(guild.id)) {
+            return topSalt(guild);
         }
     }
 };
