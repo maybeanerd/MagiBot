@@ -121,9 +121,9 @@ async function onHour() {
 }
 
 //top 5 salty people
-async function topSalt(guild) {
+async function topSalt(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
-        var db = mclient.db(guild.id);
+        var db = mclient.db(guildID);
         var result = await db.collection("saltrank").find().sort({ salt: -1 }).limit(5).toArray();
         if (!result) {
             return [];
@@ -366,9 +366,9 @@ module.exports = {
             console.log(guild.name + " was added!");
         }
     },
-    topSalt: async function (guild) {
-        if (await checkGuild(guild.id)) {
-            return topSalt(guild);
+    topSalt: async function (guildID) {
+        if (await checkGuild(guildID)) {
+            return topSalt(guildID);
         }
     }
 };

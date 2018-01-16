@@ -46,7 +46,7 @@ module.exports = {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
                         break;
-                    case "top": var salters = await data.topSalt(msg.guild);
+                    case "top": var salters = await data.topSalt(msg.guild.id);
                         var info = [];
                         for (var i = 0; i < 5; i++) {
                             if (salters[i]) {
