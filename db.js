@@ -125,14 +125,17 @@ async function topSalt() {
 
 }
 
-async function getSalt(userid) {
-    /* new salt should work like this
+async function getSalt(userid, guildID = 0) {
     return MongoClient.connect(url).then(async function (mclient) {
-            var db = mclient.db('MagiBot');
-            let result = await db.collection("saltrank").findOne({ _id: userid });
-            mclient.close();
-            return result[salt];
-        });*/
+        var db = mclient.db(guildID);
+        var result = await db.collection("saltrank").findOne({ salter: userid });
+        if (!result) {
+            return 0;
+        }
+        mclient.close();
+        return result.salt;
+    });
+    /*
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db('MagiBot');
         let res = await db.collection("salt").count({ salter: userid });
@@ -144,7 +147,7 @@ async function getSalt(userid) {
         } else {
             return 0;
         }
-    });
+    });*/
 }
 
 async function saltUp(userid1, userid2, ad, guildID = 0) {
@@ -205,12 +208,14 @@ async function guildSettings(guildID, settings) {
 function saltGuild(salter, guildID, add = 1) {
     MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
-        let user = await db.findOne({ salter: salter });
+        var user = await db.collection("saltrank").findOne({ salter: salter });
         if (!user) {
             var myobj = { salter: salter, salt: 1 };
             await db.collection("saltrank").insertOne(myobj);
         } else {
-            var update = { salt: user.salt + add };
+            let slt = user.salt + add;
+            if (slt < 0) { slt = 0; }
+            var update = { $set: { salt: slt } };
             await db.collection("saltrank").updateOne({ salter: salter }, update);
         }
         mclient.close();
@@ -302,10 +307,10 @@ module.exports = {
             return saltUp(userid1, userid2, true, guildID);
         }
     },
-    getSalt: async function (userid) {
+    getSalt: async function (userid, guildID = 0) {
         console.log("salty bitch");
-        if (await checks(userid)) {
-            return getSalt(userid);
+        if (await checks(userid) && await checkGuild(guildID)) {
+            return getSalt(userid, guildID);
         }
     },
     getUsage: async function (userid) {

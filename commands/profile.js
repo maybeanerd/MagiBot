@@ -18,7 +18,7 @@ module.exports = {
                 id = msg.author.id;
             }
             var info = [];
-            var salt = await data.getSalt(id);
+            var salt = await data.getSalt(id, msg.guild.id);
             var usage = await data.getUsage(id);
             info.push({
                 name: "Salzlevel",
