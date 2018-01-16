@@ -51,20 +51,22 @@ module.exports = {
                 }
                 switch (command) {
                     case 'add':
-                        await data.saltUpAdmin(mention, msg.author.id);
+                        await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
                         msg.channel.send("Erfolgreich <@!" + mention + "> wegen salt reported!");
                         break;
                     case 'rem':
-                        if (await data.remOldestSalt(mention)) {
+                        if (await data.remOldestSalt(mention, msg.guild.id)) {
                             msg.channel.send("Erfolgreich den ältesten Salt von <@!" + mention + "> entfernt!");
                         } else {
                             msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
                         }
                         break;
                     case 'clr':
-                        if (await data.resetSalt(mention)) {
+                        if (await data.remOldestSalt(mention, msg.guild.id)) {
+                            while (await data.remOldestSalt(mention, msg.guild.id)) { }
                             msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
-                        } else {
+                        }
+                        else {
                             msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
                         }
                         break;

@@ -47,6 +47,7 @@ async function addSalt(userid, reporter, guildID = 0) {
         let date = new Date();
         var myobj = { salter: userid, reporter: reporter, date: date, guild: guildID };
         return db.collection("salt").insertOne(myobj).then(function (res) {
+            saltGuild(userid, guildID, 1);
             console.log("1 Salter inserted");
             mclient.close();
             return 0;
@@ -146,10 +147,10 @@ async function getSalt(userid) {
     });
 }
 
-async function saltUp(userid1, userid2, ad) {
+async function saltUp(userid1, userid2, ad, guildID = 0) {
     let time = await saltDowntimeDone(userid1, userid2);
     if (time > 1 || ad) {
-        return addSalt(userid1, userid2);
+        return addSalt(userid1, userid2, guildID);
     } else {
         return time;
     }
@@ -182,8 +183,7 @@ async function checkGuild(id) {
         if (await !db.collection("settings")) {
             await db.createCollection("settings").then(() => {
                 console.log("Settings Collection created!");
-            }
-            );
+            });
         }
         //Dataset of saltranking
         if (!db.collection("saltrank")) {
@@ -235,7 +235,7 @@ async function joinsound(userid, url) {
 async function getSound(userid) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
-        let result = await db.collection("sounds").findOne({ _id: userid });
+        let result = await db.collection("sounds").findOne({ user: userid });
         mclient.close();
         return result;
     });
@@ -292,14 +292,14 @@ module.exports = {
             usageUp(userid);
         }
     },
-    saltUp: async function (userid1, userid2) {
-        if (await checks(userid1) && await checks(userid2)) {
-            return saltUp(userid1, userid2, false);
+    saltUp: async function (userid1, userid2, guildID = 0) {
+        if (await checks(userid1) && await checks(userid2) && await checkGuild(guildID)) {
+            return saltUp(userid1, userid2, false, guildID);
         }
     },
-    saltUpAdmin: async function (userid1, userid2) {
-        if (await checks(userid1) && await checks(userid2)) {
-            return saltUp(userid1, userid2, true);
+    saltUpAdmin: async function (userid1, userid2, guildID = 0) {
+        if (await checks(userid1) && await checks(userid2) && await checkGuild(guildID)) {
+            return saltUp(userid1, userid2, true, guildID);
         }
     },
     getSalt: async function (userid) {
@@ -328,13 +328,14 @@ module.exports = {
             return false;
         }
     },
-    remOldestSalt: async function (userid) {
-        if (await checks(userid)) {
+    remOldestSalt: async function (userid, guildID = 0) {
+        if (await checks(userid) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
                 let id = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray();
                 if (id[0]) {
                     await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
+                    saltGuild(userid, guildID, -1);
                     mclient.close();
                     return true;
                 } else {
