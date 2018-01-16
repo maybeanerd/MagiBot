@@ -175,6 +175,17 @@ async function checks(userid) {
     return false;
 }
 
+async function checkGuild(id){
+return MongoClient.connect(url).then( 
+        var db = await mclient.db(id);
+        if (await !db.collection("settings")) {
+                await db.createCollection("settings").then(
+                    console.log("Settings Collection created!");
+                    );
+            }
+        return true;
+    );
+}
 
 module.exports = {
     startup: () => {
@@ -295,5 +306,10 @@ module.exports = {
             return false;
         }
 
+    },
+    addGuild: async function(guild){
+    if(await checkGuild(guild.id)){
+    console.log(guild.name+" was added!");
+    }
     }
 };

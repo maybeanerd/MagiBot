@@ -231,6 +231,12 @@ bot.on("message", msg => {
     }
 });
 
+bot.on("guildCreate", guild=>{
+if(guild.available){
+data.addGuild(guild); 
+}
+});
+
 bot.on('error', (err) => {
     console.log("————— BIG ERROR —————");
     console.log(err);
