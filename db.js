@@ -178,10 +178,18 @@ async function checks(userid) {
 async function checkGuild(id){
 return MongoClient.connect(url).then( 
         var db = await mclient.db(id);
+        //Dataset for settings
         if (await !db.collection("settings")) {
                 await db.createCollection("settings").then(
                     console.log("Settings Collection created!");
                     );
+         }
+         //Dataset of saltranking
+            if (!db.collection("saltrank")) {
+                db.createCollection("saltrank", function (err, res) {
+                    if (err) throw err;
+                    console.log("Saltrank Collection created!");
+                });
             }
         return true;
     );
@@ -233,25 +241,11 @@ module.exports = {
                     console.log("Sound Collection created!");
                 });
             }
-            //Dataset of settings (whitelist channels, etc.)
-            if (!db.collection("settings")) {
-                db.createCollection("settings", function (err, res) {
-                    if (err) throw err;
-                    console.log("Settings Collection created!");
-                });
-            }
             //Dataset of salt
             if (!db.collection("salt")) {
                 db.createCollection("salt", function (err, res) {
                     if (err) throw err;
                     console.log("Salt Collection created!");
-                });
-            }
-            //Dataset of saltranking
-            if (!db.collection("saltrank")) {
-                db.createCollection("saltrank", function (err, res) {
-                    if (err) throw err;
-                    console.log("Saltrank Collection created!");
                 });
             }
             mclient.close();
