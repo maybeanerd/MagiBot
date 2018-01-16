@@ -188,12 +188,22 @@ return MongoClient.connect(url).then(
 }
 
 //TODO
-async function guildSettings(guildID){
+async function guildSettings(guildID,settings){
+
+}
+
+//TODO
+async function getSettings(guildID){
 
 }
 
 //TODO
 async function joinsounds(userid,url){
+
+}
+
+//TODO
+async function getSound(userid){
 
 }
 
