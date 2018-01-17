@@ -188,7 +188,7 @@ var checkCommand = function (msg, isMention) {
                 command = command.substr(1, command.length);
                 break;
             case '@':
-            //TODO add AdminRoles from DB, also Owner of Server
+                //TODO add AdminRoles from DB, also Owner of Server
                 if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
@@ -198,7 +198,7 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-        //TODO add Bot command channel from DB
+            //TODO add Bot command channel from DB
             if (msg.channel.id == '198764451132997632' || pre == '@') {
                 commands[command].main(bot, msg);
             } else {
@@ -234,10 +234,10 @@ bot.on("message", msg => {
     }
 });
 
-bot.on("guildCreate", guild=>{
-if(guild.available){
-data.addGuild(guild.id); 
-}
+bot.on("guildCreate", guild => {
+    if (guild.available) {
+        data.addGuild(guild.id);
+    }
 });
 
 bot.on('error', (err) => {
@@ -248,17 +248,13 @@ bot.on('error', (err) => {
 var vcfree = true;
 
 function joinableChannel(cid) {
-    return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842"));
+    return data.joinable(guildID, cid);
 };
 
-//TODO
-function joinableChannelFromDB(guildID,cid){
-return data.joinable(guilID,cid);
-}
 
-bot.on("voiceStateUpdate", (o, n) => {
-    if (vcfree && joinableChannel(n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        n.voiceChannel.join().then(connection => {
+bot.on("voiceStateUpdate", async function (o, n) {
+    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+        n.voiceChannel.join().then(connection => { //TODO joinsounds from DB here
             var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
             dispatcher.on("start", () => {
                 vcfree = false;

@@ -239,6 +239,17 @@ async function getSettings(guildID) {
         return result;
     });
 }
+//TODO
+async function getAdminRole(guildID) {
+
+}
+async function getCommandChannel(guildID) {
+
+}
+async function getJoinChannel(guildID) {
+
+}
+
 
 //TODO
 async function joinsound(userid, url) {
@@ -370,5 +381,10 @@ module.exports = {
         if (await checkGuild(guildID)) {
             return topSalt(guildID);
         }
+    },
+    joinable: async function (guildID, cid) {
+        return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842"));
+        //TODO ask database with 
+        getJoinChannel(guildID);
     }
 };
