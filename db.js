@@ -241,7 +241,8 @@ async function getSettings(guildID) {
 }
 //TODO
 async function getAdminRole(guildID) {
-
+    var admins = ["186032268995723264"]; //TODO add DB access
+    return admins;
 }
 async function getCommandChannel(guildID) {
 
@@ -385,5 +386,18 @@ module.exports = {
     joinable: async function (guildID, cid) {
         let channels = await getJoinChannel(guildID);
         return channels.includes(cid);
+    },
+    isAdmin: async function (guild, user) {
+        //checks for admin and Owner, they can always use
+        if (user.hasPermission("", false, true, true)) {
+            return true;
+        }
+        var roles = await getAdminRole(guild.id);
+        for (var role in roles) {
+            if (user.roles.has(roles[role])) {
+                return true;
+            }
+        }
+        return false;
     }
 };

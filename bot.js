@@ -172,7 +172,7 @@ var loadCommands = function () {
     console.log("———— All Commands Loaded! ————");
 }
 
-var checkCommand = function (msg, isMention) {
+var checkCommand = async function (msg, isMention) {
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
@@ -189,7 +189,7 @@ var checkCommand = function (msg, isMention) {
                 break;
             case '@':
                 //TODO add AdminRoles from DB, also Owner of Server
-                if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
+                if (!(msg.member && await data.isAdmin(msg.guild, msg.member))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
                 }
