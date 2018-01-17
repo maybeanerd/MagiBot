@@ -197,11 +197,11 @@ var checkCommand = async function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-            if (/*!msg.guild ||*/ pre == '@' || await data.commandAllowed(guildID, cid)) {
+            if (/*!msg.guild ||*/ pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
-                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern <#198764451132997632>.")).then(mess => mess.delete(15000));
+                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern" + await data.commandChannel(msg.guild.id) + ".")).then(mess => mess.delete(15000));
             }
         }
     }

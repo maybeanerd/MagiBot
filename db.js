@@ -403,9 +403,17 @@ module.exports = {
     },
     commandAllowed: async function (guildID, cid) {
         var channels = await getCommandChannel(guildID);
-        if (channels.contains(cid)) {
+        if (channels.includes(cid)) {
             return true;
         }
         return false;
+    },
+    commandChannel: async function (guildID) {
+        var channels = await getCommandChannel(guildID);
+        var out = "";
+        for (var channel in channels) {
+            out += " <#" + channels[channel] + ">"
+        }
+        return out;
     }
 };
