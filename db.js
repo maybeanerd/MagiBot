@@ -389,7 +389,7 @@ module.exports = {
     },
     isAdmin: async function (guild, user) {
         //checks for admin and Owner, they can always use
-        if (user.hasPermission("", false, true, true)) {
+        if (user.hasPermission("ADMINISTRATOR", false, true, true)) {
             return true;
         }
         var roles = await getAdminRole(guild.id);
