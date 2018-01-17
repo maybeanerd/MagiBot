@@ -197,7 +197,7 @@ var checkCommand = async function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-            if (!msg.guild || pre == '@' || await data.commandAllowed(guildID, cid)) {
+            if (/*!msg.guild ||*/ pre == '@' || await data.commandAllowed(guildID, cid)) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
