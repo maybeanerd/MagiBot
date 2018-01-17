@@ -247,12 +247,7 @@ bot.on('error', (err) => {
 });
 var vcfree = true;
 
-function joinableChannel(cid) {
-    return data.joinable(guildID, cid);
-};
-
-
-bot.on("voiceStateUpdate", async function (o, n) {
+bot.on("voiceStateUpdate").then(async function (o, n) {
     if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         n.voiceChannel.join().then(connection => { //TODO joinsounds from DB here
             var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
