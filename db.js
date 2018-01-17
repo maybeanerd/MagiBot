@@ -212,7 +212,6 @@ async function guildSettings(guildID, settings) {
 
 }
 
-//TODO 
 function saltGuild(salter, guildID, add = 1) {
     MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
@@ -244,10 +243,12 @@ async function getAdminRole(guildID) {
     var admins = ["186032268995723264"]; //TODO add DB access
     return admins;
 }
+//TODO
 async function getCommandChannel(guildID) {
     var channels = ["198764451132997632", "402946769190780939", "382233880469438465"];
     return channels;
 }
+//TODO
 async function getJoinChannel(guildID) {
     return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
 }
@@ -257,7 +258,7 @@ async function getJoinChannel(guildID) {
 async function joinsound(userid, url) {
     return false;
 }
-
+//TODO actually use
 async function getSound(userid) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
