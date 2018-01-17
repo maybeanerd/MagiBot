@@ -188,8 +188,7 @@ var checkCommand = async function (msg, isMention) {
                 command = command.substr(1, command.length);
                 break;
             case '@':
-                //TODO add AdminRoles from DB, also Owner of Server
-                if (!(msg.member && await data.isAdmin(msg.guild, msg.member))) {
+                if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
                 }
@@ -198,12 +197,10 @@ var checkCommand = async function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-            //TODO add Bot command channel from DB
-            if (msg.channel.id == '198764451132997632' || pre == '@') {
+            if (!msg.guild || pre == '@' || await data.commandAllowed(guildID, cid)) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
-                //TODO add Bot command Channel from DB
                 (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern <#198764451132997632>.")).then(mess => mess.delete(15000));
             }
         }

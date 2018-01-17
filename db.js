@@ -245,7 +245,8 @@ async function getAdminRole(guildID) {
     return admins;
 }
 async function getCommandChannel(guildID) {
-
+    var channels = ["198764451132997632", "402946769190780939", "382233880469438465"];
+    return channels;
 }
 async function getJoinChannel(guildID) {
     return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
@@ -387,16 +388,23 @@ module.exports = {
         let channels = await getJoinChannel(guildID);
         return channels.includes(cid);
     },
-    isAdmin: async function (guild, user) {
+    isAdmin: async function (guildID, user) {
         //checks for admin and Owner, they can always use
         if (user.hasPermission("ADMINISTRATOR", false, true, true)) {
             return true;
         }
-        var roles = await getAdminRole(guild.id);
+        var roles = await getAdminRole(guildID);
         for (var role in roles) {
             if (user.roles.has(roles[role])) {
                 return true;
             }
+        }
+        return false;
+    },
+    commandAllowed: async function (guildID, cid) {
+        var channels = await getCommandChannel(guildID);
+        if (channels.contains(cid)) {
+            return true;
         }
         return false;
     }
