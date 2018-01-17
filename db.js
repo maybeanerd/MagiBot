@@ -247,7 +247,7 @@ async function getCommandChannel(guildID) {
 
 }
 async function getJoinChannel(guildID) {
-
+    return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
 }
 
 
@@ -383,13 +383,7 @@ module.exports = {
         }
     },
     joinable: async function (guildID, cid) {
-        //tmp hardcoded
-        return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842") || (cid == "402798475709906944"));
-        //TODO ask database with 
         let channels = await getJoinChannel(guildID);
-        if (channels[cid]) {
-            return true;
-        }
-        return false;
+        return channels.includes(cid);
     }
 };
