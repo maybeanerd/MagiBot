@@ -4,18 +4,6 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add [Link zu Audio Datei]",
-        value: "Richte dir einen Joinsound ein. Der Link darf nicht auf eine Website verlinken, sondern muss direkt auf die Datei zeigen. Ein guter Weg ist, die Datei über Discord zu verschicken und den Link, der dabei generiert wird zu verwenden.Bisher wird nur .MP3 oder .WAV unterstützt. Ein Beispiel Link wäre: `https://cdn.discordapp.com/attachments/386915523524558849/402131512818139146/SoundName.mp3`",
-        inline: true
-    });
-
-    info.push({
-        name: "rem",
-        value: "Lösche deinen Joinsound",
-        inline: true
-    });
-
-    info.push({
         name: "del @User",
         value: "Lösche den Joinsound des erwähnten Nutzers",
         inline: true
@@ -45,30 +33,10 @@ module.exports = {
             var mention = msg.content.split(" ")[0];
 
             switch (command) {
-                case 'add':
-                    if (!(mention.startsWith("http") && (mention.endsWith(".wav") || mention.endsWith(".mp3")))) {
-                        msg.channel.send("Du musst schon einen kompatiblen Link angeben!");
-                        return;
-                    }
-                    if (await data.addSound(msg.author.id, mention)) {
-                        msg.reply("Du hast erfolgreich deinen Joinsound verändert!");
-                    }
-                    else {
-                        msg.reply("Aaaaaand you failed.");
-                    }
-                    break;
-                case 'rem':
-                    if (await data.addSound(msg.author.id, false)) {
-                        msg.reply("Du hast erfolgreich deinen Joinsound entfernt!");
-                    }
-                    else {
-                        msg.reply("Aaaaaand you failed.");
-                    }
-                    break;
                 case 'del':
                     if (mention.startsWith('<@!') && mention.endsWith('>')) {
                         mention = mention.substr(3).slice(0, -1);
-                        if (await data.addSound(mention, false)) {
+                        if (await data.addSound(mention, false, msg.guild.id)) {
                             msg.reply("Du hast erfolgreich den Joinsound von <@!" + mention + "> entfernt!");
                         }
                         else {

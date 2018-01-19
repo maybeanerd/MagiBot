@@ -42,7 +42,7 @@ module.exports = {
                         msg.channel.send("Du musst schon einen kompatiblen Link angeben!");
                         return;
                     }
-                    if (await data.addSound(msg.author.id, mention)) {
+                    if (await data.addSound(msg.author.id, mention, msg.guild.id)) {
                         msg.reply("Du hast erfolgreich deinen Joinsound verändert!");
                     }
                     else {
@@ -50,7 +50,7 @@ module.exports = {
                     }
                     break;
                 case 'rem':
-                    if (await data.addSound(msg.author.id, false)) {
+                    if (await data.addSound(msg.author.id, false, msg.guild.id)) {
                         msg.reply("Du hast erfolgreich deinen Joinsound entfernt!");
                     }
                     else {

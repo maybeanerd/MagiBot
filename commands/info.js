@@ -69,7 +69,7 @@ module.exports = {
 
         msg.channel.send('', { embed });
     },
-    help: 'Gibt dir info über den Bot',
+    help: 'Gibt dir Info über den Bot',
     admin: false,
     hide: false
 };

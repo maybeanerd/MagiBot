@@ -245,7 +245,7 @@ var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
     if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        let sound = await data.getSound(n.id);
+        let sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {
                 var dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
