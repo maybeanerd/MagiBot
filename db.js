@@ -241,7 +241,7 @@ async function getJoinChannel(guildID) {
 
 
 async function joinsound(userid, surl) {
-    MongoClient.connect(url).then(async function (mclient) {
+    return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
         var user = await db.collection("users").findOne({ _id: userid });
         if (checks(user)) {
@@ -249,6 +249,7 @@ async function joinsound(userid, surl) {
             await db.collection("users").updateOne({ _id: userid }, update);
         }
         mclient.close();
+        return true;
     });
 }
 
@@ -406,6 +407,6 @@ module.exports = {
         }
     },
     addSound: async function (userid, surl) {
-        joinsound(userid, surl);
+        return joinsound(userid, surl);
     }
 };
