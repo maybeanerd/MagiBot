@@ -3,7 +3,6 @@
 var Discord = require("discord.js");
 var fs = require('fs');
 var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
-var sounds = require(__dirname + '/joinSounds.js');
 var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
@@ -245,7 +244,7 @@ bot.on('error', (err) => {
 var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         let sound = await data.getSound(n.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {
