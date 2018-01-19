@@ -41,7 +41,7 @@ async function addUser(userid, guildID) {
         });
     }
 }
-async function addSalt(userid, reporter, guildID = 0) {
+async function addSalt(userid, reporter, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
         let date = new Date();
@@ -132,7 +132,7 @@ async function topSalt(guildID) {
     });
 }
 
-async function getSalt(userid, guildID = 0) {
+async function getSalt(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         var result = await db.collection("saltrank").findOne({ salter: userid });
@@ -144,7 +144,7 @@ async function getSalt(userid, guildID = 0) {
     });
 }
 
-async function saltUp(userid1, userid2, ad, guildID = 0) {
+async function saltUp(userid1, userid2, ad, guildID) {
     let time = await saltDowntimeDone(userid1, userid2);
     if (time > 1 || ad) {
         return addSalt(userid1, userid2, guildID);
@@ -297,7 +297,7 @@ module.exports = {
             usageUp(userid, guildID);
         }
     },
-    saltUp: async function (userid1, userid2, guildID = 0) {
+    saltUp: async function (userid1, userid2, guildID) {
         if (await checks(userid1, guildID) && await checks(userid2, guildID) && await checkGuild(guildID)) {
             return saltUp(userid1, userid2, false, guildID);
         }
@@ -307,7 +307,7 @@ module.exports = {
             return saltUp(userid1, userid2, true, guildID);
         }
     },
-    getSalt: async function (userid, guildID = 0) {
+    getSalt: async function (userid, guildID) {
         console.log("salty bitch");
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return getSalt(userid, guildID);
@@ -331,7 +331,7 @@ module.exports = {
             return false;
         }
     },
-    remOldestSalt: async function (userid, guildID = 0) {
+    remOldestSalt: async function (userid, guildID) {
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');

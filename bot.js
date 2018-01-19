@@ -223,7 +223,7 @@ bot.on("message", msg => {
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
         //database stuff
-        data.usageUp(msg.author.id);
+        data.usageUp(msg.author.id, msg.guild.id);
         //end database stuff
         checkCommand(msg, false);
         if (bot.DELETE_COMMANDS) msg.delete();
