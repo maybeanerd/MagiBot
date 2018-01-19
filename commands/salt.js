@@ -35,7 +35,7 @@ module.exports = {
                         var mention = msg.content.split(" ")[0];
                         if (mention.startsWith('<@!') && mention.endsWith('>')) {
                             mention = mention.substr(3).slice(0, -1);
-                            let time = await data.saltUp(mention, msg.author.id);
+                            let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
                             console.log(time);
                             if (time == 0) {
                                 msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
@@ -45,6 +45,28 @@ module.exports = {
                         } else {
                             msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
                         }
+                        break;
+                    case "top": var salters = await data.topSalt(msg.guild.id);
+                        var info = [];
+                        for (var i = 0; i < 5; i++) {
+                            if (salters[i]) {
+                                info.push({
+                                    name: (i + 1) + ". Platz mit " + salters[i].salt + " Salz",
+                                    value: "<@!" + salters[i].salter + ">",
+                                    inline: false
+                                });
+                            } else { break; }
+                        }
+                        let embed = {
+                            color: 0xffffff,
+                            description: "Top 5 Salter des " + msg.guild.name + ":",
+                            fields: info,
+                            footer: {
+                                icon_url: await msg.guild.iconURL,
+                                text: await msg.guild.name
+                            }
+                        }
+                        msg.channel.send('', { embed });
                         break;
                     default:
                         msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');

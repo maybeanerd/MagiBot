@@ -38,6 +38,11 @@ module.exports = {
             inline: false
         });
         info.push({
+            name: "Offizieller Discord für Support, Ideen und Bug Reports",
+            value: "https://discord.gg/2Evcf4T",
+            inline: false
+        });
+        info.push({
             name: "Roadmap und bekannte Bugs",
             value: "https://github.com/T0TProduction/MagiBot/projects/1",
             inline: false
@@ -46,7 +51,7 @@ module.exports = {
         //Entwickler Info
         info.push({
             name: "Entwickler",
-            value: "<@185865492576075776>",
+            value: "<@!185865492576075776>",
             inline: false
         });
 
@@ -64,7 +69,7 @@ module.exports = {
 
         msg.channel.send('', { embed });
     },
-    help: 'Gibt dir info über den Bot',
+    help: 'Gibt dir Info über den Bot',
     admin: false,
     hide: false
 };

@@ -3,7 +3,6 @@
 var Discord = require("discord.js");
 var fs = require('fs');
 var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
-var sounds = require(__dirname + '/joinSounds.js');
 var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
@@ -172,7 +171,7 @@ var loadCommands = function () {
     console.log("———— All Commands Loaded! ————");
 }
 
-var checkCommand = function (msg, isMention) {
+var checkCommand = async function (msg, isMention) {
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
@@ -188,7 +187,7 @@ var checkCommand = function (msg, isMention) {
                 command = command.substr(1, command.length);
                 break;
             case '@':
-                if (!(msg.member && msg.member.roles.has('186032268995723264'))) {
+                if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
                     msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
                     return;
                 }
@@ -197,11 +196,11 @@ var checkCommand = function (msg, isMention) {
                 return;
         }
         if (command && commands[command]) {
-            if (msg.channel.id == '198764451132997632' || pre == '@') {
+            if (/*!msg.guild ||*/ pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
-                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern <#198764451132997632>.")).then(mess => mess.delete(15000));
+                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern" + await data.commandChannel(msg.guild.id) + ".")).then(mess => mess.delete(15000));
             }
         }
     }
@@ -224,10 +223,16 @@ bot.on("message", msg => {
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
         //database stuff
-        data.usageUp(msg.author.id);
+        data.usageUp(msg.author.id, msg.guild.id);
         //end database stuff
         checkCommand(msg, false);
         if (bot.DELETE_COMMANDS) msg.delete();
+    }
+});
+
+bot.on("guildCreate", guild => {
+    if (guild.available) {
+        data.addGuild(guild.id);
     }
 });
 
@@ -238,25 +243,24 @@ bot.on('error', (err) => {
 });
 var vcfree = true;
 
-function joinableChannel(cid) {
-    return ((cid == "195175213367820288") || (cid == "218859225185648640") || (cid == "347741043485048842"));
-};
+bot.on("voiceStateUpdate", async function (o, n) {
+    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+        let sound = await data.getSound(n.id, n.guild.id);
+        if (sound) {
+            n.voiceChannel.join().then(connection => {
+                var dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                dispatcher.on("start", () => {
+                    vcfree = false;
+                });
+                dispatcher.on("end", () => {
+                    if (!vcfree) {
+                        connection.disconnect();
+                        vcfree = true;
+                    }
+                });
 
-bot.on("voiceStateUpdate", (o, n) => {
-    if (vcfree && joinableChannel(n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        n.voiceChannel.join().then(connection => {
-            var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-            dispatcher.on("start", () => {
-                vcfree = false;
             });
-            dispatcher.on("end", () => {
-                if (!vcfree) {
-                    connection.disconnect();
-                    vcfree = true;
-                }
-            });
-
-        });
+        }
     };
 });
 
