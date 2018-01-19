@@ -43,12 +43,13 @@ module.exports = {
             printHelp(msg, bot);
         } else {
             var mention = msg.content.split(" ")[0];
-            if (!(mention.startsWith("http") && (mention.endsWith(".wav") || mention.endsWith(".mp3")))) {
-                msg.channel.send("Du musst schon einen kompatiblen Link angeben!");
-                return;
-            }
+
             switch (command) {
                 case 'add':
+                    if (!(mention.startsWith("http") && (mention.endsWith(".wav") || mention.endsWith(".mp3")))) {
+                        msg.channel.send("Du musst schon einen kompatiblen Link angeben!");
+                        return;
+                    }
                     if (await data.addSound(msg.author.id, mention)) {
                         msg.reply("Du hast erfolgreich deinen Joinsound verändert!");
                     }
