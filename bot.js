@@ -246,19 +246,22 @@ var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
     if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && sounds.path(n.id) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        n.voiceChannel.join().then(connection => { //TODO joinsounds from DB here
-            var dispatcher = connection.playArbitraryInput(sounds.path(n.id), { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-            dispatcher.on("start", () => {
-                vcfree = false;
-            });
-            dispatcher.on("end", () => {
-                if (!vcfree) {
-                    connection.disconnect();
-                    vcfree = true;
-                }
-            });
+        let sound = await data.getSound(n.id);
+        if (sound) {
+            n.voiceChannel.join().then(connection => {
+                var dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                dispatcher.on("start", () => {
+                    vcfree = false;
+                });
+                dispatcher.on("end", () => {
+                    if (!vcfree) {
+                        connection.disconnect();
+                        vcfree = true;
+                    }
+                });
 
-        });
+            });
+        }
     };
 });
 

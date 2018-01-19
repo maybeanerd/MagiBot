@@ -33,7 +33,7 @@ async function addUser(userid) {
         console.log("addUser says trying to create a User in DB");
         return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
-            var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0 };
+            var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false };
             db.collection("users").insertOne(myobj);
             console.log("1 User inserted");
             mclient.close();
@@ -53,7 +53,6 @@ async function addSalt(userid, reporter, guildID = 0) {
             return 0;
         });
     });
-    //return 1;
 }
 async function updateUser(userid, update) {
     MongoClient.connect(url, function (err, mclient) {
@@ -143,19 +142,6 @@ async function getSalt(userid, guildID = 0) {
         mclient.close();
         return result.salt;
     });
-    /*
-    return MongoClient.connect(url).then(async function (mclient) {
-        var db = await mclient.db('MagiBot');
-        let res = await db.collection("salt").count({ salter: userid });
-        //let res = await db.collection("salt").aggregate([{ $match: { salter: userid } }, { $group: { _id: null, count: { $sum: 1 } } }]).result; //was an idea
-        console.log(res);
-        mclient.close();
-        if (res) {
-            return res;
-        } else {
-            return 0;
-        }
-    });*/
 }
 
 async function saltUp(userid1, userid2, ad, guildID = 0) {
@@ -254,17 +240,15 @@ async function getJoinChannel(guildID) {
 }
 
 
-//TODO
-async function joinsound(userid, url) {
-    return false;
-}
-//TODO actually use
-async function getSound(userid) {
-    return MongoClient.connect(url).then(async function (mclient) {
-        var db = mclient.db('MagiBot');
-        let result = await db.collection("sounds").findOne({ user: userid });
+async function joinsound(userid, surl) {
+    MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db("MagiBot");
+        var user = await db.collection("users").findOne({ _id: userid });
+        if (checks(user)) {
+            var update = { $set: { sound: surl } };
+            await db.collection("users").updateOne({ _id: userid }, update);
+        }
         mclient.close();
-        return result;
     });
 }
 
@@ -286,12 +270,6 @@ module.exports = {
                 db.createCollection("commands", function (err, res) {
                     if (err) throw err;
                     console.log("Command Collection created!");
-                });
-            }
-            if (!db.collection("sounds")) {
-                db.createCollection("sounds", function (err, res) {
-                    if (err) throw err;
-                    console.log("Sound Collection created!");
                 });
             }
             //Dataset of salt
@@ -416,5 +394,18 @@ module.exports = {
             out += " <#" + channels[channel] + ">"
         }
         return out;
+    },
+    getSound: async function (userid) {
+        if (await checks(userid)) {
+            let user = await getUser(userid);
+            if (user.sound) {
+                return user.sound;
+            } else {
+                return false;
+            }
+        }
+    },
+    addSound: async function (userid, surl) {
+        joinsound(userid, surl);
     }
 };
