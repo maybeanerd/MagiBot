@@ -182,19 +182,20 @@ async function checkGuild(id) {
                 console.log("Settings Collection created!");
             });
         }
-        if (!db.collection("users")) {
+        if (await !db.collection("users")) {
             db.createCollection("users", function (err, res) {
                 if (err) throw err;
                 console.log("User Collection created!");
             });
         }
         //Dataset of saltranking
-        if (!db.collection("saltrank")) {
+        if (await !db.collection("saltrank")) {
             db.createCollection("saltrank", function (err, res) {
                 if (err) throw err;
                 console.log("Saltrank Collection created!");
             });
         }
+        mclient.close();
         return true;
     });
 }
