@@ -15,9 +15,15 @@ function printHelp(msg, bot) {
         inline: true
     });
 
+    info.push({
+        name: "del @User",
+        value: "Lösche den Joinsound des erwähnten Nutzers",
+        inline: true
+    });
+
     let embed = {
         color: bot.COLOR,
-        description: "Nutzbare Befehle in der Rubrik " + bot.PREFIX + "!sound :",
+        description: "Nutzbare Befehle in der Rubrik " + bot.PREFIX + "@sound :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -27,6 +33,7 @@ function printHelp(msg, bot) {
 
     msg.channel.send('', { embed });
 }
+
 
 module.exports = {
     main: async function f(bot, msg) {
@@ -55,6 +62,20 @@ module.exports = {
                     }
                     else {
                         msg.reply("Aaaaaand you failed.");
+                    }
+                    break;
+                case 'del':
+                    if (mention.startsWith('<@!') && mention.endsWith('>')) {
+                        mention = mention.substr(3).slice(0, -1);
+                        if (await data.addSound(mention, false)) {
+                            msg.reply("Du hast erfolgreich den Joinsound von <@!" + mention + "> entfernt!");
+                        }
+                        else {
+                            msg.reply("Aaaaaand you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        return;
                     }
                     break;
                 default:
