@@ -200,12 +200,29 @@ async function checkGuild(id) {
     });
 }
 
-//TODO
-async function guildSettings(guildID, settings) {
-
+async function setSettings(guildID, settings) {
+    return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db("MagiBot");
+        if (await getSettings(guildID)) {
+            await db.collection("settings").updateOne({ _id: guildID }, { $set: { settings } });
+        }
+        mclient.close();
+        return true;
+    });
 }
 
-function saltGuild(salter, guildID, add = 1) {
+async function firstSettings(guildID) {
+    return MongoClient.connect(url).then(async function (mclient) {
+        var db = mclient.db("MagiBot");
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [] });
+        var ret = await db.collection("settings").findOne({ _id: guildID });
+        mclient.close();
+        return ret;
+    });
+}
+
+
+async function saltGuild(salter, guildID, add = 1) {
     MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         var user = await db.collection("saltrank").findOne({ salter: salter });
@@ -222,19 +239,26 @@ function saltGuild(salter, guildID, add = 1) {
     });
 }
 
-//TODO
 async function getSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
-        var db = mclient.db(guildID);
-        let result = await db.collection("settings").toArray();
+        var db = mclient.db("MagiBot");
+        var result = await db.collection("settings").findOne({ _id: guildID });
+        if (!result) {
+            result = await firstSettings(guildID);
+        }
         mclient.close();
         return result;
     });
 }
+
 //TODO
 async function getAdminRole(guildID) {
     var admins = ["186032268995723264"]; //TODO add DB access
     return admins;
+}
+//TODO
+async function setAdminRole(guildID, roleID) {
+    setSettings(guildID, settings);
 }
 //TODO
 async function getCommandChannel(guildID) {
@@ -242,8 +266,33 @@ async function getCommandChannel(guildID) {
     return channels;
 }
 //TODO
+async function setCommandChannel(guildID, cid) {
+
+}
+//TODO
 async function getJoinChannel(guildID) {
     return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
+}
+//TODO
+async function setJoinChannel(guildID, cid) {
+
+}
+
+
+
+
+//TODO
+async function isBlacklistedUser(userid, guildID) {
+    return false;
+}
+//TODO
+async function setBlacklistedUser(userid, guildID) {
+
+}
+//TODO some time later , blacklist @everyone in these channels
+async function getBlacklistedEveryone(guildID) {
+}
+async function setBlacklistedEveryone(guildID, cid) {
 }
 
 
@@ -261,16 +310,21 @@ async function joinsound(userid, surl, guildID) {
 }
 
 module.exports = {
-    startup: () => {
+    startup: async function () {
         //create Collection
-        MongoClient.connect(url, function (err, mclient) {
+        MongoClient.connect(url).then(async function (err, mclient) {
             if (err) throw err;
             var db = mclient.db('MagiBot');
             //data about commands (usage count)
-            if (!db.collection("commands")) {
+            if (await !db.collection("commands")) {
                 db.createCollection("commands", function (err, res) {
                     if (err) throw err;
                     console.log("Command Collection created!");
+                });
+            }
+            if (await !db.collection("settings")) {
+                await db.createCollection("settings").then(() => {
+                    console.log("Settings Collection created!");
                 });
             }
             //Dataset of salt
@@ -284,6 +338,7 @@ module.exports = {
         });
         onHour();
     },
+
     addUser: (userid) => {
         checks(userid);
     },
@@ -406,5 +461,20 @@ module.exports = {
     },
     addSound: async function (userid, surl, guildID) {
         return joinsound(userid, surl, guildID);
+    },
+    isBlacklistedUser: async function (userID, guildID) {
+        return isBlacklistedUser(userID, guildID);
+    },
+    setJoinable: async function (guildID, channelID) {
+
+    },
+    setCommandChannel: async function (guildID, channelID) {
+
+    },
+    setAdmin: async function (guildID, roleID) {
+
+    },
+    setBlacklistedUser: async function (guildID, userID) {
+
     }
 };
