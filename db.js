@@ -101,20 +101,22 @@ async function onHour() {
         let nd = new Date();
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
-        /*
-        //get highest salter
-        let saltkingId;
 
-        for (G in await bot.guilds) {
-            if (await G.available) {
-                for (M in await G.members) {
-                    M.removeRole(SaltkingRole);
-                    if (M.id == saltkingId) {
-                        M.addRole(SaltkingRole);
+        /* Saltking stuff TODO
+                for (G in await bot.guilds) {
+                    let saltkingID = getSaltKing(G.id);
+        
+                    if (await G.available) {
+                        for (M in await G.members) {
+                            M.removeRole(SaltkingRole);
+                            if (M.id == saltkingId) {
+                                M.addRole(SaltkingRole);
+                            }
+                        }
                     }
                 }
-            }
-        }*/
+                */
+
         mclient.close();
     });
 }
@@ -221,9 +223,14 @@ async function firstSettings(guildID) {
     });
 }
 //TODO
-async function getSaltKing(guildID) { }
+async function getSaltKing(guildID) {
+    //new should work:
+    return getSettings(guildID).saltKing;
+}
 //TODO
-async function setSaltKing(guildID) { }
+async function setSaltKing(guildID, userID) {
+    setSettings(guildID, { saltKing: userID });
+}
 
 
 async function saltGuild(salter, guildID, add = 1) {
