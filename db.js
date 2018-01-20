@@ -214,12 +214,16 @@ async function setSettings(guildID, settings) {
 async function firstSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
-        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [] });
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false });
         var ret = await db.collection("settings").findOne({ _id: guildID });
         mclient.close();
         return ret;
     });
 }
+//TODO
+async function getSaltKing(guildID) { }
+//TODO
+async function setSaltKing(guildID) { }
 
 
 async function saltGuild(salter, guildID, add = 1) {
@@ -255,27 +259,66 @@ async function getSettings(guildID) {
 async function getAdminRole(guildID) {
     var admins = ["186032268995723264"]; //TODO add DB access
     return admins;
+    //new should work:
+    return getSettings(guildID).adminRoles;
 }
 //TODO
-async function setAdminRole(guildID, roleID) {
+async function setAdminRole(guildID, roleID, insert) {
+    var roles = await getAdminRoles(guildID);
+    if (insert) {
+        roles.push(roleID);
+    }
+    else {
+        var index = roles.indexOf(roleID);
+        if (index > -1) {
+            roles.splice(index, 1);
+        }
+    }
+    var settings = { adminRoles: roles }
     setSettings(guildID, settings);
 }
 //TODO
 async function getCommandChannel(guildID) {
     var channels = ["198764451132997632", "402946769190780939", "382233880469438465"];
     return channels;
+    //new should work:
+    return getSettings(guildID).commandChannels;
 }
 //TODO
-async function setCommandChannel(guildID, cid) {
-
+async function setCommandChannel(guildID, cid, insert) {
+    var channels = await getCommandChannel(guildID);
+    if (insert) {
+        channels.push(cid);
+    }
+    else {
+        var index = channels.indexOf(cid);
+        if (index > -1) {
+            channels.splice(index, 1);
+        }
+    }
+    var settings = { commandChannels: channels }
+    setSettings(guildID, settings);
 }
 //TODO
 async function getJoinChannel(guildID) {
     return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
+    //new should work:
+    return getSettings(guildID).joinChannels;
 }
 //TODO
-async function setJoinChannel(guildID, cid) {
-
+async function setJoinChannel(guildID, cid, insert) {
+    var channels = await getJoinChannel(guildID);
+    if (insert) {
+        channels.push(cid);
+    }
+    else {
+        var index = channels.indexOf(cid);
+        if (index > -1) {
+            channels.splice(index, 1);
+        }
+    }
+    var settings = { joinChannels: channels }
+    setSettings(guildID, settings);
 }
 
 
@@ -284,15 +327,19 @@ async function setJoinChannel(guildID, cid) {
 //TODO
 async function isBlacklistedUser(userid, guildID) {
     return false;
+    //new should work:
+    return getSettings(guildID).blacklistedUsers;
 }
 //TODO
-async function setBlacklistedUser(userid, guildID) {
+async function setBlacklistedUser(userid, guildID, insert) {
 
 }
 //TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID) {
+    //new should work:
+    return getSettings(guildID).blacklistedEveryone;
 }
-async function setBlacklistedEveryone(guildID, cid) {
+async function setBlacklistedEveryone(guildID, cid, insert) {
 }
 
 
@@ -465,16 +512,16 @@ module.exports = {
     isBlacklistedUser: async function (userID, guildID) {
         return isBlacklistedUser(userID, guildID);
     },
-    setJoinable: async function (guildID, channelID) {
+    setJoinable: async function (guildID, channelID, insert) {
 
     },
-    setCommandChannel: async function (guildID, channelID) {
+    setCommandChannel: async function (guildID, channelID, insert) {
 
     },
-    setAdmin: async function (guildID, roleID) {
+    setAdmin: async function (guildID, roleID, insert) {
 
     },
-    setBlacklistedUser: async function (guildID, userID) {
+    setBlacklistedUser: async function (guildID, userID, insert) {
 
     }
 };
