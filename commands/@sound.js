@@ -56,7 +56,7 @@ module.exports = {
             }
         }
     },
-    help: 'Füge dir einen Joinsound hinzu, der bis zu maximal 5 Sekunden lang ist.',
+    help: 'Lösche joinsounds von Nutzern',
     admin: true,
     hide: false
 };

@@ -47,7 +47,7 @@ module.exports = {
             msg.reply("Dieser Befehl ist nur auf Servern verfügbar.");
         }
     },
-    help: 'Information über dich oder den Nutzer, den du erwähnst.',
+    help: 'Information über dich oder einen anderen Nutzer',
     admin: false,
     hide: false
 };
