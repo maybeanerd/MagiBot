@@ -8,7 +8,7 @@ module.exports = {
             if (mention.length > 9) {
                 if (mention.startsWith('<@') && mention.endsWith('>')) {
                     id = mention.substr(2).slice(0, -1);
-                    if (mention.startsWith('!')) {
+                    if (id.startsWith('!')) {
                         id = id.substr(1);
                     }
                 } else {
