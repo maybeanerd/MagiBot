@@ -5,12 +5,11 @@ module.exports = {
         if (msg.guild) {
             var id;
             var mention = msg.content.split(" ")[0];
-            console.log(mention);
             if (mention.length > 9) {
                 if (mention.startsWith('<@') && mention.endsWith('>')) {
-                    mention = mention.substr(2).slice(0, -1);
+                    id = mention.substr(2).slice(0, -1);
                     if (mention.startsWith('!')) {
-                        mention = mention.substr(1);
+                        id = id.substr(1);
                     }
                 } else {
                     msg.channel.send("Bitte gib entweder keinen Nutzer an, oder erwähne ihn korrekt.");
