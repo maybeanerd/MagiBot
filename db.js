@@ -366,8 +366,7 @@ async function joinsound(userid, surl, guildID) {
 module.exports = {
     startup: async function () {
         //create Collection
-        MongoClient.connect(url).then(async function (err, mclient) {
-            if (err) throw err;
+        MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             //data about commands (usage count)
             if (await !db.collection("commands")) {
