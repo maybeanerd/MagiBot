@@ -126,10 +126,10 @@ async function topSalt(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         var result = await db.collection("saltrank").find().sort({ salt: -1 }).limit(5).toArray();
+        mclient.close();
         if (!result) {
             return [];
         }
-        mclient.close();
         return result;
     });
 }
@@ -138,10 +138,10 @@ async function getSalt(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         var result = await db.collection("saltrank").findOne({ salter: userid });
+        mclient.close();
         if (!result) {
             return 0;
         }
-        mclient.close();
         return result.salt;
     });
 }
