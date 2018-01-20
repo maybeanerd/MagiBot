@@ -33,8 +33,11 @@ module.exports = {
                 switch (command) {
                     case 'add':
                         var mention = msg.content.split(" ")[0];
-                        if (mention.startsWith('<@!') && mention.endsWith('>')) {
-                            mention = mention.substr(3).slice(0, -1);
+                        if (mention.startsWith('<@') && mention.endsWith('>')) {
+                            mention = mention.substr(2).slice(0, -1);
+                            if (mention.startsWith('!')) {
+                                mention = mention.substr(1);
+                            }
                             let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
                             console.log(time);
                             if (time == 0) {

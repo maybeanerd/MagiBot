@@ -34,8 +34,11 @@ module.exports = {
 
             switch (command) {
                 case 'del':
-                    if (mention.startsWith('<@!') && mention.endsWith('>')) {
-                        mention = mention.substr(3).slice(0, -1);
+                    if (mention.startsWith('<@') && mention.endsWith('>')) {
+                        mention = mention.substr(2).slice(0, -1);
+                        if (mention.startsWith('!')) {
+                            mention = mention.substr(1);
+                        }
                         if (await data.addSound(mention, false, msg.guild.id)) {
                             msg.reply("Du hast erfolgreich den Joinsound von <@!" + mention + "> entfernt!");
                         }
@@ -48,12 +51,12 @@ module.exports = {
                     }
                     break;
                 default:
-                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "!sound help für mehr Information.");
+                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");
                     break;
             }
         }
     },
     help: 'Füge dir einen Joinsound hinzu, der bis zu maximal 5 Sekunden lang ist.',
-    admin: false,
+    admin: true,
     hide: false
 };
