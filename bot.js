@@ -172,6 +172,11 @@ var loadCommands = function () {
 }
 
 var checkCommand = async function (msg, isMention) {
+    //ignore blacklisted users
+    if (await data.isBlacklistedUser(msg.author.id, msg.guild.id)) {
+        msg.delete();
+        return;
+    }
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
@@ -188,7 +193,8 @@ var checkCommand = async function (msg, isMention) {
                 break;
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
-                    msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
+                    msg.delete();
+                    (msg.reply("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.")).then(mess => mess.delete(5000));
                     return;
                 }
                 break;
@@ -244,7 +250,7 @@ bot.on('error', (err) => {
 var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    if (vcfree && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         let sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {

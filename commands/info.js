@@ -42,16 +42,16 @@ module.exports = {
             value: "https://discord.gg/2Evcf4T",
             inline: false
         });
-        info.push({
+        /*info.push({
             name: "Roadmap und bekannte Bugs",
             value: "https://github.com/T0TProduction/MagiBot/projects/1",
             inline: false
-        });
+        });*/
 
         //Entwickler Info
         info.push({
             name: "Entwickler",
-            value: "<@!185865492576075776>",
+            value: "<@185865492576075776>",
             inline: false
         });
 

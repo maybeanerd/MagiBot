@@ -5,11 +5,12 @@ module.exports = {
         if (msg.guild) {
             var id;
             var mention = msg.content.split(" ")[0];
-            console.log(mention);
             if (mention.length > 9) {
-                if (mention.startsWith('<@!') && mention.endsWith('>')) {
-                    id = mention.substr(3).slice(0, -1);
-                    console.log(id);
+                if (mention.startsWith('<@') && mention.endsWith('>')) {
+                    id = mention.substr(2).slice(0, -1);
+                    if (id.startsWith('!')) {
+                        id = id.substr(1);
+                    }
                 } else {
                     msg.channel.send("Bitte gib entweder keinen Nutzer an, oder erwähne ihn korrekt.");
                     return;
@@ -45,7 +46,7 @@ module.exports = {
             msg.reply("Dieser Befehl ist nur auf Servern verfügbar.");
         }
     },
-    help: 'Information über dich oder den Nutzer, den du erwähnst.',
+    help: 'Information über dich oder einen anderen Nutzer',
     admin: false,
     hide: false
 };

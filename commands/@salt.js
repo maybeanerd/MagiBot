@@ -43,8 +43,11 @@ module.exports = {
         } else {
             if (msg.guild) {
                 var mention = msg.content.split(" ")[0];
-                if (mention.startsWith('<@!') && mention.endsWith('>')) {
-                    mention = mention.substr(3).slice(0, -1);
+                if (mention.startsWith('<@') && mention.endsWith('>')) {
+                    mention = mention.substr(2).slice(0, -1);
+                    if (mention.startsWith('!')) {
+                        mention = mention.substr(1);
+                    }
                 } else {
                     msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
                     return;
