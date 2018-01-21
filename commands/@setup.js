@@ -155,14 +155,14 @@ module.exports = {
                     break;
                 case 'command+':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in " + await msg.channel.name + " aktiviert.");
+                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.name + "> aktiviert.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
                     break;
                 case 'command-':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in " + await msg.channel.name + " deaktiviert.");
+                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.name + "> deaktiviert.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }

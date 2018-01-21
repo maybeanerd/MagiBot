@@ -169,19 +169,19 @@ async function checkGuild(id) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db(id);
         //Dataset for settings
-        if (await !db.collection("settings")) {
+        if (!(await db.collection("settings"))) {
             await db.createCollection("settings").then(() => {
                 console.log("Settings Collection created!");
             });
         }
-        if (await !db.collection("users")) {
+        if (!(await db.collection("users"))) {
             db.createCollection("users", function (err, res) {
                 if (err) throw err;
                 console.log("User Collection created!");
             });
         }
         //Dataset of saltranking
-        if (await !db.collection("saltrank")) {
+        if (!(await db.collection("saltrank"))) {
             db.createCollection("saltrank", function (err, res) {
                 if (err) throw err;
                 console.log("Saltrank Collection created!");
@@ -308,7 +308,6 @@ async function getJoinChannel(guildID) {
 
 async function setJoinChannel(guildID, cid, insert) {
     var channels = await getJoinChannel(guildID);
-    console.log(channels);
     if (insert) {
         if (!channels.includes(cid)) {
             channels.push(cid);
@@ -378,13 +377,13 @@ module.exports = {
         MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             //data about commands (usage count)
-            if (await !db.collection("commands")) {
+            if (!(await db.collection("commands"))) {
                 db.createCollection("commands", function (err, res) {
                     if (err) throw err;
                     console.log("Command Collection created!");
                 });
             }
-            if (await !db.collection("settings")) {
+            if (!(await db.collection("settings"))) {
                 await db.createCollection("settings").then(() => {
                     console.log("Settings Collection created!");
                 });
@@ -470,7 +469,6 @@ module.exports = {
     },
     addGuild: async function (guildID) {
         if (await checkGuild(guildID)) {
-            console.log(guild.name + " was added!");
         }
     },
     topSalt: async function (guildID) {
@@ -524,7 +522,7 @@ module.exports = {
         return joinsound(userid, surl, guildID);
     },
     isBlacklistedUser: async function (userID, guildID) {
-        if (checks(userID, guildID) && checkGuild(guildID)) {
+        if (await checks(userID, guildID) && await checkGuild(guildID)) {
             return isBlacklistedUser(userID, guildID);
         }
         return false;
