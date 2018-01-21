@@ -249,7 +249,7 @@ bot.on('error', (err) => {
 var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    if (vcfree && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    if (vcfree && await !data.isBlacklistedUser(n.id, n.guild.id) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         let sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {

@@ -1,0 +1,174 @@
+var data = require(__dirname + '/../db.js');
+
+function printHelp(msg, bot) {
+    var info = [];
+
+    info.push({
+        name: "ban @User",
+        value: "Deaktiviere alle Funktionen des Bots für einen Nutzer",
+        inline: true
+    });
+    info.push({
+        name: "unban @User",
+        value: "Reaktiviere alle Funktionen des Bots für einen Nutzer",
+        inline: true
+    });
+    info.push({
+        name: "join+",
+        value: "Aktiviere Joinsounds für den Voicechannel, mit dem du verbunden bist",
+        inline: true
+    });
+    info.push({
+        name: "join-",
+        value: "Deaktiviere Joinsounds für den Voicechannel, mit dem du verbunden bist",
+        inline: true
+    });
+    info.push({
+        name: "admin+ @Role",
+        value: "Lege eine Rolle als Adminrolle fest",
+        inline: true
+    });
+    info.push({
+        name: "admin- @Role",
+        value: "Entferne eine Adminrolle",
+        inline: true
+    });
+    info.push({
+        name: "command+",
+        value: "Aktiviere Botbfehle in dem Textchannel, in den du diese Nachricht sendest",
+        inline: true
+    });
+    info.push({
+        name: "command-",
+        value: "Deaktiviere Botbfehle in dem Textchannel, in den du diese Nachricht sendest",
+        inline: true
+    });
+
+    let embed = {
+        color: bot.COLOR,
+        description: "Nutzbare Befehle in der Rubrik " + bot.PREFIX + "@setup :",
+        fields: info,
+        footer: {
+            icon_url: bot.user.avatarURL,
+            text: bot.user.username
+        }
+    }
+
+    msg.channel.send('', { embed });
+}
+
+
+module.exports = {
+    main: async function f(bot, msg) {
+        var command = msg.content.split(" ")[0];
+        msg.content = msg.content.replace(command + " ", ""); //TODO without the space it always gets rid of command maybe fix this later also for salt
+        if (command == "help") {
+            printHelp(msg, bot);
+        } else {
+            var mention = msg.content.split(" ")[0];
+
+            switch (command) {
+                case 'ban':
+                    if (mention.startsWith('<@') && mention.endsWith('>')) {
+                        mention = mention.substr(2).slice(0, -1);
+                        if (mention.startsWith('!')) {
+                            mention = mention.substr(1);
+                        }
+                        if (await data.setBlacklistedUser(msg.guild.id, mention, true)) {
+                            msg.channel.send("Du hast erfolgreich <@!" + mention + "> von Botfunktionen gebannt.");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        return;
+                    }
+                    break;
+                case 'unban':
+                    if (mention.startsWith('<@') && mention.endsWith('>')) {
+                        mention = mention.substr(2).slice(0, -1);
+                        if (mention.startsWith('!')) {
+                            mention = mention.substr(1);
+                        }
+                        if (await data.setBlacklistedUser(msg.guild.id, mention, false)) {
+                            msg.channel.send("Du hast erfolgreich Botfunktionen für <@!" + mention + "> aktiviert.");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        return;
+                    }
+                    break;
+                case 'join+':
+                    if (await msg.member.voiceChannelID) {
+                        if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, true)) {
+                            msg.channel.send("Du hast erfolgreich Joinsounds in " + await msg.member.voiceChannel.name + " aktiviert.");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du bist in keinem Voice Channel!");
+                    }
+                    break;
+                case 'join-':
+                    if (await msg.member.voiceChannelID) {
+                        if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, false)) {
+                            msg.channel.send("Du hast erfolgreich Joinsounds in " + await msg.member.voiceChannel.name + " deaktiviert.");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du bist in keinem Voice Channel!");
+                    }
+                    break;
+                case 'admin+':
+                    if (mention.startsWith('<@&') && mention.endsWith('>')) {
+                        mention = mention.substr(3).slice(0, -1);
+                        if (await data.setAdmin(msg.guild.id, mention, true)) {
+                            msg.channel.send("Du hast erfolgreich <@&" + mention + "> als Admin Rolle eingestellt!");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du musst schon eine Rolle angeben, die als Administrator gelten soll!");
+                        return;
+                    }
+                    break;
+                case 'admin-':
+                    if (mention.startsWith('<@&') && mention.endsWith('>')) {
+                        mention = mention.substr(3).slice(0, -1);
+                        if (await data.setAdmin(msg.guild.id, mention, false)) {
+                            msg.channel.send("Du hast erfolgreich <@&" + mention + "> als Admin Rolle deaktiviert!");
+                        } else {
+                            msg.channel.send("Error 404 you failed.");
+                        }
+                    } else {
+                        msg.channel.send("Du musst schon eine Rolle angeben, die als Administrator enfternt werden soll!");
+                        return;
+                    }
+                    break;
+                case 'command+':
+                    if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
+                        msg.channel.send("Du hast erfolgreich Botbefehle in " + await msg.channel.name + " aktiviert.");
+                    } else {
+                        msg.channel.send("Error 404 you failed.");
+                    }
+                    break;
+                case 'command-':
+                    if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
+                        msg.channel.send("Du hast erfolgreich Botbefehle in " + await msg.channel.name + " deaktiviert.");
+                    } else {
+                        msg.channel.send("Error 404 you failed.");
+                    }
+                    break;
+                default:
+                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");
+                    break;
+            }
+        }
+    },
+    help: 'Verwalte die Einstellung des Bots auf dem Server',
+    admin: true,
+    hide: false
+};

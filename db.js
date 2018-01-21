@@ -262,14 +262,11 @@ async function getSettings(guildID) {
     });
 }
 
-//TODO
+
 async function getAdminRole(guildID) {
-    var admins = ["186032268995723264"]; //TODO add DB access
-    return admins;
-    //new should work:
     return getSettings(guildID).adminRoles;
 }
-//TODO
+
 async function setAdminRole(guildID, roleID, insert) {
     var roles = await getAdminRoles(guildID);
     if (insert) {
@@ -284,14 +281,11 @@ async function setAdminRole(guildID, roleID, insert) {
     var settings = { adminRoles: roles }
     setSettings(guildID, settings);
 }
-//TODO
+
 async function getCommandChannel(guildID) {
-    var channels = ["198764451132997632", "402946769190780939", "382233880469438465"];
-    return channels;
-    //new should work:
     return getSettings(guildID).commandChannels;
 }
-//TODO
+
 async function setCommandChannel(guildID, cid, insert) {
     var channels = await getCommandChannel(guildID);
     if (insert) {
@@ -304,15 +298,13 @@ async function setCommandChannel(guildID, cid, insert) {
         }
     }
     var settings = { commandChannels: channels }
-    setSettings(guildID, settings);
+    return setSettings(guildID, settings);
 }
-//TODO
+
 async function getJoinChannel(guildID) {
-    return ["195175213367820288", "218859225185648640", "347741043485048842", "402798475709906944"];
-    //new should work:
     return getSettings(guildID).joinChannels;
 }
-//TODO
+
 async function setJoinChannel(guildID, cid, insert) {
     var channels = await getJoinChannel(guildID);
     if (insert) {
@@ -325,21 +317,30 @@ async function setJoinChannel(guildID, cid, insert) {
         }
     }
     var settings = { joinChannels: channels }
-    setSettings(guildID, settings);
+    return setSettings(guildID, settings);
 }
 
-
-
-
-//TODO
 async function isBlacklistedUser(userid, guildID) {
-    return false;
-    //new should work:
+    return getBlacklistedUser(guildID).includes(userid);
+}
+
+async function getBlacklistedUser(guildID) {
     return getSettings(guildID).blacklistedUsers;
 }
-//TODO
-async function setBlacklistedUser(userid, guildID, insert) {
 
+async function setBlacklistedUser(userid, guildID, insert) {
+    var users = await getBlacklistedUser(guildID);
+    if (insert) {
+        users.push(userid);
+    }
+    else {
+        var index = users.indexOf(userid);
+        if (index > -1) {
+            users.splice(index, 1);
+        }
+    }
+    var settings = { blacklistedUsers: users }
+    return setSettings(guildID, settings);
 }
 //TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID) {
@@ -516,18 +517,33 @@ module.exports = {
         return joinsound(userid, surl, guildID);
     },
     isBlacklistedUser: async function (userID, guildID) {
-        return isBlacklistedUser(userID, guildID);
+        if (checks(userID, guildID) && guildCheck(guildID)) {
+            return isBlacklistedUser(userID, guildID);
+        }
+        return false;
     },
     setJoinable: async function (guildID, channelID, insert) {
-
+        if (await checkGuild(guildID)) {
+            return setJoinChannel(guildID, channelID, insert);
+        }
+        return false;
     },
     setCommandChannel: async function (guildID, channelID, insert) {
-
+        if (await checkGuild(guildID)) {
+            return setCommandChannel(guildID, channelID, insert);
+        }
+        return false;
     },
     setAdmin: async function (guildID, roleID, insert) {
-
+        if (await checkGuild(guildID)) {
+            return setAdminRole(guildID, roleID, insert);
+        }
+        return false;
     },
     setBlacklistedUser: async function (guildID, userID, insert) {
-
+        if (await checkGuild(guildID) && checks(userID, guildID)) {
+            return setBlacklistedUser(userID, guildID, insert);
+        }
+        return false;
     }
 };
