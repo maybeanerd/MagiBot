@@ -43,6 +43,11 @@ function printHelp(msg, bot) {
         value: "Deaktiviere Botbfehle in dem Textchannel, in den du diese Nachricht sendest",
         inline: true
     });
+    info.push({
+        name: "info",
+        value: "Zeigt aktuelle Einstellungen",
+        inline: true
+    });
 
     let embed = {
         color: bot.COLOR,
@@ -161,6 +166,103 @@ module.exports = {
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
+                    break;
+                case "info":
+                    var info = [];
+                    var set = await data.getSettings(msg.guild.id);
+
+                    let str = "";
+                    let cmd = set["commandChannels"];
+                    if (!cmd.toString()) {
+                        str = "Empty";
+                    } else {
+                        for (let s in cmd) {
+                            str += "<#" + cmd[s] + ">, ";
+                        }
+                    }
+                    info.push({
+                        name: "Command Channel",
+                        value: str,
+                        inline: false
+                    });
+
+                    str = "";
+                    cmd = set["adminRoles"];
+                    if (!cmd.toString()) {
+                        str = "Empty";
+                    } else {
+                        for (let s in cmd) {
+                            str += "<@&" + cmd[s] + ">, ";
+                        }
+                    }
+                    info.push({
+                        name: "Adminrollen",
+                        value: str,
+                        inline: false
+                    });
+
+                    str = "";
+                    cmd = set["joinChannels"];
+                    if (!cmd.toString()) {
+                        str = "Empty";
+                    } else {
+                        for (let s in cmd) {
+                            str += cmd[s] + ", ";
+                        }
+                    }
+                    info.push({
+                        name: "Joinsound Channel IDs",
+                        value: str,
+                        inline: false
+                    });
+
+                    str = "";
+                    cmd = set["blacklistedUsers"];
+                    if (!cmd.toString()) {
+                        str = "Empty";
+                    } else {
+                        for (let s in cmd) {
+                            str += "<@!" + cmd[s] + ">, ";
+                        }
+                    }
+                    info.push({
+                        name: "Blacklisted Users",
+                        value: str,
+                        inline: false
+                    });
+
+                    str = "";
+                    cmd = set["blacklistedEveryone"];
+                    if (!cmd.toString()) {
+                        str = "Empty";
+                    } else {
+                        for (let s in cmd) {
+                            str += "<#" + cmd[s] + ">, ";
+                        }
+                    }
+                    info.push({
+                        name: "Channel mit @everyone blacklist",
+                        value: str,
+                        inline: false
+                    });
+
+
+                    info.push({
+                        name: "Salt King",
+                        value: set['saltKing'].toString(),
+                        inline: false
+                    });
+
+                    let embed = {
+                        color: bot.COLOR,
+                        description: "Server Einstellungen des " + msg.guild.name + ":",
+                        fields: info,
+                        footer: {
+                            icon_url: await msg.guild.iconURL,
+                            text: await msg.guild.name
+                        }
+                    }
+                    msg.channel.send('', { embed });
                     break;
                 default:
                     msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");

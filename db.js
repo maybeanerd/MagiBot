@@ -200,7 +200,7 @@ async function setSettings(guildID, settings) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
         if (await getSettings(guildID)) {
-            await db.collection("settings").updateOne({ _id: guildID }, { $set: { settings } });
+            await db.collection("settings").updateOne({ _id: guildID }, { $set: settings });
         }
         mclient.close();
         return true;
@@ -263,9 +263,11 @@ async function getAdminRole(guildID) {
 }
 
 async function setAdminRole(guildID, roleID, insert) {
-    var roles = await getAdminRoles(guildID);
+    var roles = await getAdminRole(guildID);
     if (insert) {
-        roles.push(roleID);
+        if (!roles.includes(roleID)) {
+            roles.push(roleID);
+        }
     }
     else {
         var index = roles.indexOf(roleID);
@@ -274,7 +276,7 @@ async function setAdminRole(guildID, roleID, insert) {
         }
     }
     var settings = { adminRoles: roles }
-    setSettings(guildID, settings);
+    return setSettings(guildID, settings);
 }
 
 async function getCommandChannel(guildID) {
@@ -285,7 +287,9 @@ async function getCommandChannel(guildID) {
 async function setCommandChannel(guildID, cid, insert) {
     var channels = await getCommandChannel(guildID);
     if (insert) {
-        channels.push(cid);
+        if (!channels.includes(cid)) {
+            channels.push(cid);
+        }
     }
     else {
         var index = channels.indexOf(cid);
@@ -304,8 +308,11 @@ async function getJoinChannel(guildID) {
 
 async function setJoinChannel(guildID, cid, insert) {
     var channels = await getJoinChannel(guildID);
+    console.log(channels);
     if (insert) {
-        channels.push(cid);
+        if (!channels.includes(cid)) {
+            channels.push(cid);
+        }
     }
     else {
         var index = channels.indexOf(cid);
@@ -330,7 +337,9 @@ async function getBlacklistedUser(guildID) {
 async function setBlacklistedUser(userid, guildID, insert) {
     var users = await getBlacklistedUser(guildID);
     if (insert) {
-        users.push(userid);
+        if (!users.includes(userid)) {
+            users.push(userid);
+        }
     }
     else {
         var index = users.indexOf(userid);
@@ -543,5 +552,8 @@ module.exports = {
             return setBlacklistedUser(userID, guildID, insert);
         }
         return false;
+    },
+    getSettings: async function (guildID) {
+        return getSettings(guildID);
     }
 };

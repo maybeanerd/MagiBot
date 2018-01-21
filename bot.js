@@ -193,7 +193,8 @@ var checkCommand = async function (msg, isMention) {
                 break;
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
-                    msg.channel.send("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.");
+                    msg.delete();
+                    (msg.reply("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.")).then(mess => mess.delete(5000));
                     return;
                 }
                 break;
