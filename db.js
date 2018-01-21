@@ -19,23 +19,19 @@ async function existsUser(userid, guildID) {
             let db = mclient.db(guildID);
             let userCount = await db.collection("users").find({ _id: userid }).count();
             mclient.close();
-            console.log("Does User Exist?: ", userCount > 0);
             return userCount > 0;
         });
 }
 
 async function addUser(userid, guildID) {
     if (await existsUser(userid, guildID)) {
-        console.log("addUser says User exists");
         return true;
     }
     else {
-        console.log("addUser says trying to create a User in DB");
         return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db(guildID);
             var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false };
             db.collection("users").insertOne(myobj);
-            console.log("1 User inserted");
             mclient.close();
             return true;
         });
@@ -48,7 +44,6 @@ async function addSalt(userid, reporter, guildID) {
         var myobj = { salter: userid, reporter: reporter, date: date, guild: guildID };
         return db.collection("salt").insertOne(myobj).then(function (res) {
             saltGuild(userid, guildID, 1);
-            console.log("1 Salter inserted");
             mclient.close();
             return 0;
         });
@@ -60,7 +55,6 @@ async function updateUser(userid, update, guildID) {
         var db = mclient.db(guildID);
         db.collection("users").updateOne({ _id: userid }, update, function (err, res) {
             if (err) throw err;
-            console.log("1 document updated");
             mclient.close();
         });
     });
@@ -72,13 +66,9 @@ async function saltDowntimeDone(userid1, userid2) {
         let db = mclient.db('MagiBot');
         let d2 = await db.collection("salt").find({ salter: userid1, reporter: userid2 }).sort({ date: -1 }).limit(1).toArray();
         mclient.close();
-        console.log(d2);
         if (d2[0]) {
             let d1 = new Date();
-            console.log(d2[0].date);
-            console.log(d1);
             let ret = ((d1 - d2[0].date) / 1000 / 60 / 60);
-            console.log(ret);
             return ret;
         } else {
             return 2;
@@ -198,7 +188,11 @@ async function checkGuild(id) {
             });
         }
         mclient.close();
-        return true;
+        if (await getSettings(id)) {
+            return true;
+        } else {
+            return false;
+        }
     });
 }
 
@@ -224,8 +218,8 @@ async function firstSettings(guildID) {
 }
 //TODO
 async function getSaltKing(guildID) {
-    //new should work:
-    return getSettings(guildID).saltKing;
+    var settings = await getSettings(guildID);
+    return settings.saltKing;
 }
 //TODO
 async function setSaltKing(guildID, userID) {
@@ -264,7 +258,8 @@ async function getSettings(guildID) {
 
 
 async function getAdminRole(guildID) {
-    return getSettings(guildID).adminRoles;
+    var settings = await getSettings(guildID);
+    return settings.adminRoles;
 }
 
 async function setAdminRole(guildID, roleID, insert) {
@@ -283,7 +278,8 @@ async function setAdminRole(guildID, roleID, insert) {
 }
 
 async function getCommandChannel(guildID) {
-    return getSettings(guildID).commandChannels;
+    var settings = await getSettings(guildID);
+    return settings.commandChannels;
 }
 
 async function setCommandChannel(guildID, cid, insert) {
@@ -302,7 +298,8 @@ async function setCommandChannel(guildID, cid, insert) {
 }
 
 async function getJoinChannel(guildID) {
-    return getSettings(guildID).joinChannels;
+    var settings = await getSettings(guildID);
+    return settings.joinChannels;
 }
 
 async function setJoinChannel(guildID, cid, insert) {
@@ -321,11 +318,13 @@ async function setJoinChannel(guildID, cid, insert) {
 }
 
 async function isBlacklistedUser(userid, guildID) {
-    return getBlacklistedUser(guildID).includes(userid);
+    var users = await getBlacklistedUser(guildID);
+    return users.includes(userid);
 }
 
 async function getBlacklistedUser(guildID) {
-    return getSettings(guildID).blacklistedUsers;
+    var settings = await getSettings(guildID);
+    return settings.blacklistedUsers;
 }
 
 async function setBlacklistedUser(userid, guildID, insert) {
@@ -344,8 +343,8 @@ async function setBlacklistedUser(userid, guildID, insert) {
 }
 //TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID) {
-    //new should work:
-    return getSettings(guildID).blacklistedEveryone;
+    var settings = await getSettings(guildID);
+    return settings.blacklistedEveryone;
 }
 async function setBlacklistedEveryone(guildID, cid, insert) {
 }
@@ -418,7 +417,6 @@ module.exports = {
         }
     },
     getSalt: async function (userid, guildID) {
-        console.log("salty bitch");
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return getSalt(userid, guildID);
         }
@@ -517,7 +515,7 @@ module.exports = {
         return joinsound(userid, surl, guildID);
     },
     isBlacklistedUser: async function (userID, guildID) {
-        if (checks(userID, guildID) && guildCheck(guildID)) {
+        if (checks(userID, guildID) && checkGuild(guildID)) {
             return isBlacklistedUser(userID, guildID);
         }
         return false;
