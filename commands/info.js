@@ -39,7 +39,7 @@ module.exports = {
         });
         info.push({
             name: "Invite me to your Server!",
-            value: "https://discordapp.com/oauth2/authorize?response_type=code&client_id=384820232583249921&scope=bot",
+            value: "https://goo.gl/NDWDZX",
             inline: false
         });
         info.push({
