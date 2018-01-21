@@ -38,6 +38,11 @@ module.exports = {
             inline: false
         });
         info.push({
+            name: "Invite me to your Server!",
+            value: "https://discordapp.com/oauth2/authorize?response_type=code&client_id=384820232583249921&scope=bot",
+            inline: false
+        });
+        info.push({
             name: "Offizieller Discord für Support, Ideen und Bug Reports",
             value: "https://discord.gg/2Evcf4T",
             inline: false
