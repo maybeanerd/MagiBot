@@ -39,7 +39,7 @@ module.exports = {
         });
         info.push({
             name: "Lade mich auf deinen Server ein!",
-            value: "https://goo.gl/NDWDZX",
+            value: "https://goo.gl/RQ7Pdo",
             inline: false
         });
         info.push({
