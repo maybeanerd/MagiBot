@@ -38,7 +38,7 @@ module.exports = {
             inline: false
         });
         info.push({
-            name: "Invite me to your Server!",
+            name: "Lade mich auf deinen Server ein!",
             value: "https://goo.gl/NDWDZX",
             inline: false
         });

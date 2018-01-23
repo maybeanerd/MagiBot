@@ -1,7 +1,7 @@
 module.exports = {
     main: function (bot, msg) {
-        msg.channel.send("Hier der Link zum Einladen: https://discord.gg/PMngCak");   
+        msg.channel.send("Lade mich auf deinen Server ein: https://goo.gl/NDWDZX");   
     },
-    help: 'Der Invite-Link für den Server',
+    help: "Invitelink um MagiBot deinem Server hinzuzufügen",
     admin:false
 };
