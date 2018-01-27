@@ -47,6 +47,11 @@ module.exports = {
             value: "https://discord.gg/2Evcf4T",
             inline: false
         });
+        info.push({
+            name: "Support the bot on Patreon!",
+            value: "https://www.patreon.com/MagiBot",
+            inline: false
+        });
         /*info.push({
             name: "Roadmap und bekannte Bugs",
             value: "https://github.com/T0TProduction/MagiBot/projects/1",
