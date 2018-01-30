@@ -44,13 +44,13 @@ module.exports = {
         info.push({
             name: throws[size - 1],
             value: "Gesamtergebnis mit " + throws[size - 5] + "*" + throws[size - 4] + "d" + throws[size - 3] + " + " + throws[size - 2],
-            inline: true
+            inline: false
         });
         for (let i = 0; i < size - 5; i++) {
             info.push({
                 name: throws[i],
                 value: "Wurf " + (i + 1),
-                inline: false
+                inline: true
             });
         }
         let embed = {

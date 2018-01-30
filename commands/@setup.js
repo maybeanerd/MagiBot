@@ -265,7 +265,7 @@ module.exports = {
                     msg.channel.send('', { embed });
                     break;
                 default:
-                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");
+                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@setup help für mehr Information.");
                     break;
             }
         }
