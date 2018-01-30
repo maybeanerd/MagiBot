@@ -92,6 +92,8 @@ async function onHour() {
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
 
+        //TODO delete salt in ranking every 2 weeks
+
         /* Saltking stuff TODO
                 for (G in await bot.guilds) {
                     let saltkingID = getSaltKing(G.id);

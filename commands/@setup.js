@@ -155,14 +155,14 @@ module.exports = {
                     break;
                 case 'command+':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.name + "> aktiviert.");
+                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.id + "> aktiviert.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
                     break;
                 case 'command-':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.name + "> deaktiviert.");
+                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.id + "> deaktiviert.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
@@ -177,7 +177,7 @@ module.exports = {
                         str = "Empty";
                     } else {
                         for (let s in cmd) {
-                            str += "<#" + cmd[s] + ">, ";
+                            str += "<#" + cmd[s] + "> ";
                         }
                     }
                     info.push({
@@ -192,7 +192,7 @@ module.exports = {
                         str = "Empty";
                     } else {
                         for (let s in cmd) {
-                            str += "<@&" + cmd[s] + ">, ";
+                            str += "<@&" + cmd[s] + "> ";
                         }
                     }
                     info.push({
@@ -265,7 +265,7 @@ module.exports = {
                     msg.channel.send('', { embed });
                     break;
                 default:
-                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");
+                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@setup help für mehr Information.");
                     break;
             }
         }

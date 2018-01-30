@@ -38,8 +38,18 @@ module.exports = {
             inline: false
         });
         info.push({
+            name: "Lade mich auf deinen Server ein!",
+            value: "https://goo.gl/RQ7Pdo",
+            inline: false
+        });
+        info.push({
             name: "Offizieller Discord für Support, Ideen und Bug Reports",
             value: "https://discord.gg/2Evcf4T",
+            inline: false
+        });
+        info.push({
+            name: "Support the bot on Patreon!",
+            value: "https://www.patreon.com/MagiBot",
             inline: false
         });
         /*info.push({
