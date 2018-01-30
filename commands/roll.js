@@ -35,7 +35,7 @@ module.exports = {
     main: function (bot, msg) {
         var input = msg.content.split(" ")[0];
         if (input == "help") {
-            msg.channel.send("Lasse " + bot.user.username + " für dich würfeln. Dabei kannst du [multiplier]*[anzahl würfe]d<Würfelaugen> [+ Modifier] verwenden. Beispiele: `3d6 + 12`, `4*d12 + 3`, `d100`");
+            msg.channel.send("Lasse <@!" + bot.user.id + "> für dich würfeln. Nutze `" + bot.PREFIX + "!roll [multiplier]*[Anzahl Würfe]d<Würfelaugen>+[Modifier]`");
             return;
         }
         var throws = parse(input);
