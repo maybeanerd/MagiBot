@@ -177,7 +177,7 @@ module.exports = {
                         str = "Empty";
                     } else {
                         for (let s in cmd) {
-                            str += "<#" + cmd[s] + ">, ";
+                            str += "<#" + cmd[s] + "> ";
                         }
                     }
                     info.push({
@@ -192,7 +192,7 @@ module.exports = {
                         str = "Empty";
                     } else {
                         for (let s in cmd) {
-                            str += "<@&" + cmd[s] + ">, ";
+                            str += "<@&" + cmd[s] + "> ";
                         }
                     }
                     info.push({
