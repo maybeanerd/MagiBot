@@ -26,7 +26,7 @@ function comp(s, m, n, f, a) {
     ret.push(r * m + a);
 
     return ret;
-};
+}
 function parse(de) {
     return comp.apply(this, de.match(/(?:(\d+)\s*\*\s*)?(\d*)d(\d+)(?:\s*([\+\-]\s*\d+))?/i));
 }
@@ -68,5 +68,5 @@ module.exports = {
     ehelp: function (bot, msg) {
         msg.channel.send("Lasse botnameTODO für dich würfeln. Dabei kannst du 3d6 + 12, 4*d12 + 3, d100 verwenden");
     },
-    admin: false,
+    admin: false
 };
