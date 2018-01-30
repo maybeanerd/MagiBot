@@ -46,13 +46,13 @@ module.exports = {
         }
         var throws = parse(input);
         if (!throws) {
-            msg.channel.send("Du hast keine akzeptablen Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!roll help.");
+            msg.channel.send("Du hast unpassende Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!roll help.");
             return;
         }
         var info = [];
         let size = throws.length;
         if (throws[size - 6]) {
-            msg.reply("es werden nur bis zu 24 Würfe pro Befehl gemacht!");
+            msg.reply("der Dungeon Master hat nur 24 Würfel, mit denen er gleichzeitig werfen kann!");
         }
         let thro = throws[size - 4];
         if (thro > 24) {
