@@ -15,7 +15,7 @@ function comp(s, m, n, f, a) {
     var ret = [];
     var r = 0;
     for (var i = 0; i < n; i++) {
-        var tmp = Math.floor(Math.random() * f);
+        var tmp = Math.floor(Math.random() * f) + 1;
         ret.push(tmp);
         r += tmp;
     }
@@ -42,24 +42,24 @@ module.exports = {
         var info = [];
         let size = throws.length;
         info.push({
-            name: throws[size - 1],
-            value: "Gesamtergebnis mit " + throws[size - 5] + "*" + throws[size - 4] + "d" + throws[size - 3] + " + " + throws[size - 2],
+            name: "Gesamtergebnis mit " + throws[size - 5] + " * " + throws[size - 4] + "d" + throws[size - 3] + " + " + throws[size - 2],
+            value: throws[size - 1],
             inline: false
         });
         for (let i = 0; i < size - 5; i++) {
             info.push({
-                name: throws[i],
-                value: "Wurf " + (i + 1),
+                name: "Wurf " + (i + 1),
+                value: throws[i],
                 inline: true
             });
         }
         let embed = {
             color: bot.COLOR,
-            description: "Dein Würfelergebnis:",
+            description: ":game_die: Dein Würfelergebnis:",
             fields: info,
             footer: {
-                icon_url: bot.user.avatarURL,
-                text: bot.user.username
+                icon_url: "https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png",
+                text: "The real Dungeon Master"
             }
         }
         msg.channel.send('', { embed });
