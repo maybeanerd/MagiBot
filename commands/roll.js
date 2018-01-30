@@ -14,11 +14,17 @@ function comp(s, m, n, f, a) {
     //ab hier selber ändern, array von würfen als ausgabe?
     var ret = [];
     var r = 0;
+    let overload = false;
     for (var i = 0; i < n; i++) {
+        if (i > 23) {
+            overload = true;
+            break;
+        }
         var tmp = Math.floor(Math.random() * f) + 1;
         ret.push(tmp);
         r += tmp;
     }
+    ret.push(overload);
     ret.push(m);
     ret.push(n);
     ret.push(f);
@@ -45,12 +51,19 @@ module.exports = {
         }
         var info = [];
         let size = throws.length;
+        if (throws[size - 6]) {
+            msg.reply("es werden nur bis zu 24 Würfe pro Befehl gemacht!");
+        }
+        let thro = throws[size - 4];
+        if (thro > 24) {
+            thro = 24;
+        }
         info.push({
-            name: "Gesamtergebnis mit " + throws[size - 5] + " * " + throws[size - 4] + "d" + throws[size - 3] + " + " + throws[size - 2],
+            name: "Gesamtergebnis mit " + throws[size - 5] + " * " + thro + "d" + throws[size - 3] + " + " + throws[size - 2],
             value: throws[size - 1],
             inline: false
         });
-        for (let i = 0; i < size - 5; i++) {
+        for (let i = 0; i < size - 6; i++) {
             info.push({
                 name: "Wurf " + (i + 1),
                 value: throws[i],
