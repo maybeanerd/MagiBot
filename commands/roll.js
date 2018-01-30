@@ -34,9 +34,13 @@ function parse(de) {
 module.exports = {
     main: function (bot, msg) {
         var input = msg.content.split(" ")[0];
+        if (input == "help") {
+            msg.channel.send("Lasse " + bot.user.username + " für dich würfeln. Dabei kannst du [multiplier]*[anzahl würfe]d<Würfelaugen> [+ Modifier] verwenden. Beispiele: `3d6 + 12`, `4*d12 + 3`, `d100`");
+            return;
+        }
         var throws = parse(input);
         if (!throws) {
-            msg.channel.send("Du hast keine akzeptablen Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!help roll.");
+            msg.channel.send("Du hast keine akzeptablen Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!roll help.");
             return;
         }
         var info = [];
@@ -66,7 +70,7 @@ module.exports = {
     },
     help: 'Werfe Würfel',
     ehelp: function (bot, msg) {
-        msg.channel.send("Lasse botnameTODO für dich würfeln. Dabei kannst du 3d6 + 12, 4*d12 + 3, d100 verwenden");
+        msg.channel.send("Lasse " + bot.user.username + " für dich würfeln. Dabei kannst du [multiplier]*[anzahl würfe]d<Würfelaugen> [+ Modifier] verwenden. Beispiele: `3d6 + 12`, `4*d12 + 3`, `d100`");
     },
     admin: false
 };
