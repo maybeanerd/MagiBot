@@ -5,9 +5,13 @@ function comp (s, m, n, f, a) {
     n = parseInt( n );
     if( isNaN( n ) ) n = 1;
     f = parseInt( f );
+if(isNaN(f)){
+//command falsch verwendet!
+}
     a = typeof(a) == 'string' ? parseInt( a.replace(/\s/g, '') ) : 0;
     if( isNaN( a ) ) a = 0;
     var r = 0;
+//ab hier selber ändern, array von würfen als ausgabe?
     for( var i=0; i<n; i++ )
         r += Math.floor( Math.random() * f );
     return r * m + a;
