@@ -72,7 +72,7 @@ module.exports = {
         }
         let embed = {
             color: bot.COLOR,
-            description: ":game_die: Dein Würfelergebnis:",
+            description: ":game_die: <@!" + msg.author.id + ">s Würfelergebnis:",
             fields: info,
             footer: {
                 icon_url: "https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png",
