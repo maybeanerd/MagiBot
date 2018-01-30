@@ -19,8 +19,10 @@ function comp(s, m, n, f, a) {
         ret.push(tmp);
         r += tmp;
     }
-    ret.push(a);
     ret.push(m);
+    ret.push(n);
+    ret.push(f);
+    ret.push(a);
     ret.push(r * m + a);
 
     return ret;
@@ -32,18 +34,25 @@ function parse(de) {
 module.exports = {
     main: function (bot, msg) {
         var input = msg.content.split(" ")[0];
-        msg.channel.send("Für Hilfe nutze " + bot.PREFIX + "!help roll.");
         var throws = parse(input);
-
+        if (!throws) {
+            msg.channel.send("Du hast keine akzeptablen Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!help roll.");
+            return;
+        }
         var info = [];
-
-
+        let size = throws.length;
         info.push({
-            name: "bla",
-            value: "val",
-            inline: false
+            name: throws[size - 1],
+            value: "Gesamtergebnis mit " + throws[size - 5] + "*" + throws[size - 4] + "d" + throws[size - 3] + " + " + throws[size - 2],
+            inline: true
         });
-
+        for (let i = 0; i < size - 5; i++) {
+            info.push({
+                name: throws[i],
+                value: "Wurf " + (i + 1),
+                inline: false
+            });
+        }
         let embed = {
             color: bot.COLOR,
             description: "Dein Würfelergebnis:",
@@ -53,7 +62,6 @@ module.exports = {
                 text: bot.user.username
             }
         }
-
         msg.channel.send('', { embed });
     },
     help: 'Werfe Würfel',
