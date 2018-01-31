@@ -257,7 +257,7 @@ bot.on("voiceStateUpdate", async function (o, n) {
         let sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {
-                var dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                const dispatcher = connection.play(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
                 dispatcher.on("start", () => {
                     vcfree = false;
                 });
