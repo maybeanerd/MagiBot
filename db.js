@@ -93,6 +93,8 @@ async function onHour() {
         db.collection("salt").remove({ date: { $lt: nd } });
 
         //TODO delete salt in ranking every 2 weeks
+        //maybe use object from remove 
+        //or delete before removing
 
         /* Saltking stuff TODO
                 for (G in await bot.guilds) {
@@ -229,7 +231,7 @@ async function setSaltKing(guildID, userID) {
 }
 
 
-async function saltGuild(salter, guildID, add = 1) {
+async function saltGuild(salter, guildID, add = 1, reset = false) {
     MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
         var user = await db.collection("saltrank").findOne({ salter: salter });
@@ -238,7 +240,7 @@ async function saltGuild(salter, guildID, add = 1) {
             await db.collection("saltrank").insertOne(myobj);
         } else {
             let slt = user.salt + add;
-            if (slt < 0) { slt = 0; }
+            if (slt < 0 || reset) { slt = 0; }
             var update = { $set: { salt: slt } };
             await db.collection("saltrank").updateOne({ salter: salter }, update);
         }
