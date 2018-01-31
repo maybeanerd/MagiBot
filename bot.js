@@ -214,7 +214,7 @@ var checkCommand = async function (msg, isMention) {
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setGame("nutze " + bot.PREFIX + "!help für Hilfe");
+    bot.user.setActivity("nutze " + bot.PREFIX + "!help für Hilfe", { type: "WATCHING" });
     data.startup();
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
@@ -257,7 +257,8 @@ bot.on("voiceStateUpdate", async function (o, n) {
         let sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
             n.voiceChannel.join().then(connection => {
-                const dispatcher = connection.play(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                //TODO use connection.play when discord.js updates
+                const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
                 dispatcher.on("start", () => {
                     vcfree = false;
                 });
