@@ -53,9 +53,10 @@ module.exports = {
                         var info = [];
                         for (var i = 0; i < 5; i++) {
                             if (salters[i]) {
+                            let member=await msg.guild.fetchMember(salters[i].salter);
                                 info.push({
-                                    name: (i + 1) + ". Platz mit " + salters[i].salt + " Salz",
-                                    value: "<@!" + salters[i].salter + ">",
+                                    name: (i + 1) + ". Platz: " + member.displayName,
+                                    value: salters[i].salt + " Salz",
                                     inline: false
                                 });
                             } else { break; }
