@@ -77,21 +77,20 @@ async function saltDowntimeDone(userid1, userid2) {
 }
 
 //autmoatic deletion of reports and saltking evaluation: 
-async function onHour() {
+async function onHour(bot) {
     var SaltkingRole = "387280939413274624";
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
-        setTimeout(onHour, e);
+        setTimeout(onHour(bot), e);
     }
     // my code
     await MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
         let nd = new Date();
         nd.setDate(nd.getDate() - 14);
-        let test = await db.collection("salt").remove({ date: { $lt: nd } });
-        console.log(test);
+        db.collection("salt").remove({ date: { $lt: nd } });
 
         //use something like 
         /*
@@ -106,6 +105,9 @@ async function onHour() {
         endfor
         close  connection to saltDB
         */
+        /*for (var guild in bot.guilds) {
+            console.log(guild[0]);
+        }
 
         //TODO delete salt in ranking every 2 weeks
         //maybe use object from remove 
@@ -391,7 +393,7 @@ async function joinsound(userid, surl, guildID) {
 }
 
 module.exports = {
-    startup: async function () {
+    startup: async function (bot) {
         //create Collection
         MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
@@ -416,7 +418,7 @@ module.exports = {
             }
             mclient.close();
         });
-        onHour();
+        onHour(bot);
     },
 
     addUser: (userid) => {

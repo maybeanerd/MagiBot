@@ -215,7 +215,7 @@ var checkCommand = async function (msg, isMention) {
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
     bot.user.setActivity("nutze " + bot.PREFIX + "!help für Hilfe", { type: "WATCHING" });
-    data.startup();
+    data.startup(bot);
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }
@@ -242,16 +242,16 @@ bot.on("guildCreate", guild => {
         guild.owner.send("Hi there " + guild.owner.displayName + ".\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use `"
             + bot.PREFIX + "@setup help`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
-            let chan = bot.channels.get("408611226998800390");
-            chan.send("joined "+guild.name);
+        let chan = bot.channels.get("408611226998800390");
+        chan.send("joined " + guild.name);
     }
 });
 
-bot.on("guildDelete", guild =>{
-if (guild.available) {
-let chan = bot.channels.get("408611226998800390");
-            chan.send("left "+guild.name);
-}
+bot.on("guildDelete", guild => {
+    if (guild.available) {
+        let chan = bot.channels.get("408611226998800390");
+        chan.send("left " + guild.name);
+    }
 });
 
 bot.on('error', (err) => {
