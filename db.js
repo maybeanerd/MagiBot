@@ -83,7 +83,7 @@ async function onHour(bot) {
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
-        setTimeout(onHour(bot), e);
+        setTimeout(onHour.bind(null, bot), e);
     }
     // my code
     await MongoClient.connect(url).then(async function (mclient) {
@@ -92,22 +92,23 @@ async function onHour(bot) {
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
 
-        //use something like 
-        /*
-        open connection to SaltDB
-        for every guild
-            open connection to guild DB
-            for every user
-                delete older than 12days
-                use nRemoved from that-> subtract from score
-            endfor
-            close connection to guild DB
-        endfor
-        close  connection to saltDB
-        */
-        /*for (var guild in bot.guilds) {
-            console.log(guild[0]);
+        //TODO test if this works on callback
+        var guilds = bot.guilds.array();
+        for (let guild in guilds) {
+            //getting DB for guild
+            let guildID = await guilds[guild].id;
+            var dbTwo = await mclient.db(guildID);
+
+            //TODO iterate through users
+            var users = await dbTwo.collection("saltrank").find().toArray();
+            for (var user in users) {
+                let userID = users[user].id;
+                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: userID });
+                let slt = user.salt - removeData.nRemoved;
+                await dbTwo.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: slt } });
+            }
         }
+
 
         //TODO delete salt in ranking every 2 weeks
         //maybe use object from remove 
