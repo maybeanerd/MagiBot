@@ -98,13 +98,14 @@ async function onHour(bot) {
             //getting DB for guild
             let guildID = await guilds[guild].id;
             var dbTwo = await mclient.db(guildID);
-
-            //TODO iterate through users
             var users = await dbTwo.collection("saltrank").find().toArray();
             for (var user in users) {
                 let userID = users[user].id;
                 let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: userID });
                 let slt = user.salt - removeData.nRemoved;
+                if (slt < 0) {
+                    slt = 0;
+                }
                 await dbTwo.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: slt } });
             }
         }
@@ -575,5 +576,15 @@ module.exports = {
     },
     getSettings: async function (guildID) {
         return getSettings(guildID);
+    },
+    clrSalt: async function (userid, guildID) {
+        if (await checks(userid, guildID) && await checkGuild(guildID)) {
+            return MongoClient.connect(url).then(async function (mclient) {
+                let db = mclient.db('MagiBot');
+                let removeData = await db.collection("salt").remove({ guild: guildID, salter: userid });
+                saltGuild(userid, guildID, 1, true);
+                mclient.close();
+            });
+        }
     }
 };

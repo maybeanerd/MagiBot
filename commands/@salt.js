@@ -65,13 +65,8 @@ module.exports = {
                         }
                         break;
                     case 'clr':
-                        if (await data.remOldestSalt(mention, msg.guild.id)) {
-                            while (await data.remOldestSalt(mention, msg.guild.id)) { }
-                            msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
-                        }
-                        else {
-                            msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
-                        }
+                        await data.clrSalt(mention, msg.guild.id)) 
+                        msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
                         break;
                     default:
                         msg.reply('Dies ist kein gültiger Befehl. Nutze k@salt help für mehr Information.');
