@@ -458,18 +458,6 @@ module.exports = {
             return parseInt(user.botusage);
         }
     },
-    resetSalt: async function (userid, guildID) {
-        if (await checks(userid, guildID)) {
-            return MongoClient.connect(url).then(async function (mclient) {
-                let db = mclient.db('MagiBot');
-                await db.collection("salt").remove({ salter: userid });
-                mclient.close();
-                return true;
-            });
-        } else {
-            return false;
-        }
-    },
     remOldestSalt: async function (userid, guildID) {
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
@@ -581,8 +569,23 @@ module.exports = {
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
-                let removeData = await db.collection("salt").remove({ guild: guildID, salter: userid });
+                await db.collection("salt").remove({ guild: guildID, salter: userid });
                 saltGuild(userid, guildID, 1, true);
+                mclient.close();
+            });
+        }
+    },
+    resetSalt: async function (guildID) {
+        if (await checkGuild(guildID)) {
+            await MongoClient.connect(url).then(async function (mclient) {
+                var db = await mclient.db('MagiBot');
+                var guildDB = await mclient.db(guildID);
+                var users = await guildDB.collection("saltrank").find().toArray();
+                for (var user in users) {
+                    var userID = users[user].id;
+                    await db.collection("salt").remove({ guild: guildID, salter: userID });
+                    await guildDB.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: 0 } });
+                }
                 mclient.close();
             });
         }

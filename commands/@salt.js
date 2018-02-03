@@ -21,6 +21,12 @@ function printHelp(msg, bot) {
         inline: true
     });
 
+    info.push({
+        name: "reset",
+        value: "Lösche das komplette Salz auf dem Server",
+        inline: true
+    });
+
     let embed = {
         color: bot.COLOR,
         description: "Nutzbare Befehle in der Rubrik salt:",
@@ -49,6 +55,11 @@ module.exports = {
                         mention = mention.substr(1);
                     }
                 } else {
+                    if (command == "reset") {
+                        await data.resetSalt(msg.guild.id);
+                        msg.channel.send("Erfolgreich das Salz des Servers **" + msg.guild.name + "** entfernt!");
+                        return;
+                    }
                     msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
                     return;
                 }
