@@ -473,7 +473,7 @@ module.exports = {
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
-                let id = await db.collection("salt").find({ salter: userid }).sort({ date: 1 }).limit(1).toArray();
+                let id = await db.collection("salt").find({ salter: userid, guild: guildID }).sort({ date: 1 }).limit(1).toArray();
                 if (id[0]) {
                     await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
                     saltGuild(userid, guildID, -1);
