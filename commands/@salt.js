@@ -65,7 +65,7 @@ module.exports = {
                         }
                         break;
                     case 'clr':
-                        await data.clrSalt(mention, msg.guild.id)) 
+                        await data.clrSalt(mention, msg.guild.id);
                         msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
                         break;
                     default:
