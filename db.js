@@ -582,7 +582,7 @@ module.exports = {
                 var guildDB = await mclient.db(guildID);
                 var users = await guildDB.collection("saltrank").find().toArray();
                 for (var user in users) {
-                    var userID = users[user].id;
+                    var userID = await users[user].salter;
                     await db.collection("salt").remove({ guild: guildID, salter: userID });
                     await guildDB.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: 0 } });
                 }
