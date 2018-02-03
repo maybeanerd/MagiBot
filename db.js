@@ -90,7 +90,22 @@ async function onHour() {
         let db = mclient.db('MagiBot');
         let nd = new Date();
         nd.setDate(nd.getDate() - 14);
-        db.collection("salt").remove({ date: { $lt: nd } });
+        let test = await db.collection("salt").remove({ date: { $lt: nd } });
+        console.log(test);
+
+        //use something like 
+        /*
+        open connection to SaltDB
+        for every guild
+            open connection to guild DB
+            for every user
+                delete older than 12days
+                use nRemoved from that-> subtract from score
+            endfor
+            close connection to guild DB
+        endfor
+        close  connection to saltDB
+        */
 
         //TODO delete salt in ranking every 2 weeks
         //maybe use object from remove 
