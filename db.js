@@ -111,21 +111,17 @@ async function onHour(bot) {
         var guilds = await bot.guilds.array();
         for (let GN in guilds) {
             var G = guilds[GN];
-            console.log(G.name);
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
                 if (await G.member(bot.user).hasPermission("ADMINISTRATOR")) {
-                    console.log("we get in here");
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
                     if (!SaltRole || !G.roles.has(SaltRole)) {
                         await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 1, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
                             setSaltRole(G.id, role.id);
                             SaltRole = role.id
-                            console.log("role creation");
                         });
                     }
-                    console.log("after role creation");
                     let saltID = await topSalt(G.id);
                     if (saltID[0]) {
                         saltID = saltID[0].salter;
