@@ -110,25 +110,31 @@ async function onHour(bot) {
             }
         }
 
-
-        //TODO delete salt in ranking every 2 weeks
-        //maybe use object from remove 
-        //or delete before removing
-
-        /* Saltking stuff TODO
-                for (G in await bot.guilds) {
-                    let saltkingID = getSaltKing(G.id);
-        
-                    if (await G.available) {
-                        for (M in await G.members) {
-                            M.removeRole(SaltkingRole);
-                            if (M.id == saltkingId) {
-                                M.addRole(SaltkingRole);
-                            }
-                        }
-                    }
+        for (let G in await bot.guilds) {
+            let saltkingID = await getSaltKing(G.id);
+            if (await G.available) {
+                let SaltKing = await getSaltKing(G.id);
+                let SaltRole = await getSaltRole(G.id);
+                if (!SaltRole) {
+                    await G.createRole({ name: "SaltKing", color: "WHITE", permissions: "", position: 1 }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
+                        setSaltRole(G.id, role.id);
+                        SaltRole = role.id
+                    });
                 }
-                */
+                let saltID = await topSalt(G.id);
+                saltID = saltID[0];
+                if (SaltKing && saltID != SaltKing) {
+                    let user = await G.fetchMember(SaltKing);
+                    user.removeRole(SaltRole, "Is not as salty anymore");
+                }
+                if (saltID) {
+                    let nuser = await G.fetchMember(saltID);
+                    await nuser.addRole(SaltRole, "Saltiest user");
+                    await setSaltKing(G.id, saltID);
+                }
+            }
+        }
+
 
         mclient.close();
     });
@@ -219,6 +225,15 @@ async function checkGuild(id) {
     });
 }
 
+async function setSaltRole(guildID, roleID) {
+    await setSettings(guildID, { saltRole: roleID });
+}
+
+async function getSaltRole(guildID) {
+    let set = await getSettings(guildID);
+    return set.saltRole;
+}
+
 async function setSettings(guildID, settings) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
@@ -233,7 +248,7 @@ async function setSettings(guildID, settings) {
 async function firstSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
-        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false });
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false });
         var ret = await db.collection("settings").findOne({ _id: guildID });
         mclient.close();
         return ret;
