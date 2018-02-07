@@ -91,7 +91,6 @@ async function onHour(bot) {
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
 
-        //TODO test if this works on callback
         var guilds = bot.guilds.array();
         for (let guild in guilds) {
             //getting DB for guild
@@ -114,6 +113,7 @@ async function onHour(bot) {
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
                 if (await G.member(bot.user).hasPermission("ADMINISTRATOR")) {
+                    console.log(G.name);
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
                     if (!SaltRole || !G.roles.has(SaltRole)) {
@@ -129,14 +129,15 @@ async function onHour(bot) {
                         saltID = false;
                     }
                     if (SaltKing && saltID != SaltKing) {
-                        let user = await G.member(SaltKing); //TODO see if this has errors
+                        let user = await G.member(SaltKing);
                         user.removeRole(SaltRole, "Is not as salty anymore");
                     }
                     if (saltID) {
-                        let nuser = await G.member(saltID); //TODO see if this has errors
+                        let nuser = await G.member(saltID);
                         await nuser.addRole(SaltRole, "Saltiest user");
                         await setSaltKing(G.id, saltID);
                     }
+                    console.log(G.name + " done");
                 }
             }
         }

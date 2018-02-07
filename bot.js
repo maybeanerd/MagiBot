@@ -228,11 +228,13 @@ bot.on("message", msg => {
         checkCommand(msg, true);
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
-        //database stuff
-        data.usageUp(msg.author.id, msg.guild.id);
-        //end database stuff
-        checkCommand(msg, false);
-        if (bot.DELETE_COMMANDS) msg.delete();
+        if (msg.guild.member(bot.user).hasPermission("ADMINISTRATOR")) {
+            //database stuff
+            data.usageUp(msg.author.id, msg.guild.id);
+            //end database stuff
+            checkCommand(msg, false);
+            if (bot.DELETE_COMMANDS) msg.delete();
+        }
     }
 });
 
