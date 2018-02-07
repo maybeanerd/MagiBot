@@ -144,7 +144,7 @@ async function onHour(bot) {
                         });
                     }
                 } else {
-                    G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that i have no administrative permissions and i need them do be able to use all my features.").catch(function (err) {
+                    G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that i have no administrative permissions and i need them to be able to use all my features.").catch(function (err) {
                         console.log(err.name + ": " + err.message);
                     });
                 }
