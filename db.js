@@ -112,11 +112,11 @@ async function onHour(bot) {
             var G = guilds[GN];
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
-                if (await G.member(bot.user).hasPermission("ADMINISTRATOR")) {
-                    console.log(G.name);
+                if (await G.me.hasPermission("ADMINISTRATOR")) {
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
-                    if (!SaltRole || !G.roles.has(SaltRole)) {
+                    let groles = await G.roles;
+                    if (!SaltRole || !groles.has(SaltRole)) {
                         await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 1, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
                             setSaltRole(G.id, role.id);
                             SaltRole = role.id
@@ -128,16 +128,25 @@ async function onHour(bot) {
                     } else {
                         saltID = false;
                     }
-                    if (SaltKing && saltID != SaltKing) {
-                        let user = await G.member(SaltKing);
-                        user.removeRole(SaltRole, "Is not as salty anymore");
+                    if (groles.get(SaltRole).position < G.me.highestRole.position) {
+                        if (SaltKing && saltID != SaltKing) {
+                            let user = await G.member(SaltKing);
+                            user.removeRole(SaltRole, "Is not as salty anymore");
+                        }
+                        if (saltID) {
+                            let nuser = await G.member(saltID);
+                            await nuser.addRole(SaltRole, "Saltiest user");
+                            await setSaltKing(G.id, saltID);
+                        }
+                    } else {
+                        G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that my role is beneath the SaltKing role, which has the effect that i cannot give or take if from users.").catch(function (err) {
+                            console.log(err.name + ": " + err.message);
+                        });
                     }
-                    if (saltID) {
-                        let nuser = await G.member(saltID);
-                        await nuser.addRole(SaltRole, "Saltiest user");
-                        await setSaltKing(G.id, saltID);
-                    }
-                    console.log(G.name + " done");
+                } else {
+                    G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that i have no administrative permissions and i need them do be able to use all my features.").catch(function (err) {
+                        console.log(err.name + ": " + err.message);
+                    });
                 }
             }
         }
