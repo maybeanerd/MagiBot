@@ -11,7 +11,7 @@ bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
 bot.TOKEN = token.tk;
 
-bot.DETAILED_LOGGING = true;
+bot.DETAILED_LOGGING = false;
 bot.DELETE_COMMANDS = false;
 
 bot.COLOR = 0x351C75;

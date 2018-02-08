@@ -14,13 +14,12 @@ async function getUser(userid, guildID) {
 }
 
 async function existsUser(userid, guildID) {
-    return MongoClient.connect(url).then(
-        async function (mclient) {
-            let db = mclient.db(guildID);
-            let userCount = await db.collection("users").find({ _id: userid }).count();
-            mclient.close();
-            return userCount > 0;
-        });
+    let user = await getUser(userid, guildID);
+    if (user) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 async function addUser(userid, guildID) {
@@ -130,11 +129,11 @@ async function onHour(bot) {
                     }
                     if (groles.get(SaltRole).position < G.me.highestRole.position) {
                         if (SaltKing && saltID != SaltKing) {
-                            let user = await G.member(SaltKing);
+                            let user = await G.fetchMember(SaltKing);
                             user.removeRole(SaltRole, "Is not as salty anymore");
                         }
                         if (saltID) {
-                            let nuser = await G.member(saltID);
+                            let nuser = await G.fetchMember(saltID);
                             await nuser.addRole(SaltRole, "Saltiest user");
                             await setSaltKing(G.id, saltID);
                         }
@@ -428,8 +427,7 @@ async function setBlacklistedEveryone(guildID, cid, insert) {
 async function joinsound(userid, surl, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db(guildID);
-        var user = await db.collection("users").findOne({ _id: userid });
-        if (await checks(user, guildID)) {
+        if (await checks(userid, guildID)) {
             var update = { $set: { sound: surl } };
             await db.collection("users").updateOne({ _id: userid }, update);
         }

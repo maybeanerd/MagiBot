@@ -5,7 +5,7 @@ module.exports = {
         msg.channel.send("Pong!").then(function (newMsg) {
             var stop = Date.now();
             var diff = (stop - start);
-            newMsg.edit("Pong! \nReaktionszeit: `(" + diff + "ms)`\nWebsocket Ping: `(" + bot.ping + "ms)`");
+            newMsg.edit("Pong! \nReactiontime: `(" + diff + "ms)`");
         });
     },
     help: 'Ping den Bot',
