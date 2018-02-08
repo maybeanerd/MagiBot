@@ -173,9 +173,6 @@ async function setNotChannel(guildID, channeldID) {
 }
 
 async function getNotChannel(guildID) {
-    //TODO change
-    return (await getCommandChannel(guildID))[0];
-    //new:
     let set = await getSettings(guildID);
     return set.notChannel;
 }
@@ -630,6 +627,16 @@ module.exports = {
                 }
                 mclient.close();
             });
+        }
+    },
+    setNotification: async function (guildID, cid) {
+        if (await checkGuild(guildID)) {
+            setNotChannel(cid);
+        }
+    },
+    getNotification: async function (guildID) {
+        if (await checkGuild(guildID)) {
+            return getNotChannel(guildID);
         }
     }
 };

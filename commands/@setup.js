@@ -44,6 +44,16 @@ function printHelp(msg, bot) {
         inline: true
     });
     info.push({
+        name: "notification-",
+        value: "Deactivate the notification channel.",
+        inline: true
+    });
+    info.push({
+        name: "notification+",
+        value: "Activate a text channel for notifications of the bot.",
+        inline: true
+    });
+    info.push({
         name: "info",
         value: "Zeigt aktuelle Einstellungen",
         inline: true
@@ -166,6 +176,14 @@ module.exports = {
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
+                    break;
+                case 'notification+':
+                    data.setNotification(await msg.channel.id);
+                    msg.channel.send("Du hast erfolgreich Notifications in <#" + await msg.channel.id + "> aktiviert.");
+                    break;
+                case 'notification-':
+                    data.setNotification(false);
+                    msg.channel.send("Du hast erfolgreich Notifications deaktiviert.");
                     break;
                 case "info":
                     var info = [];
