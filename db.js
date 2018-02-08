@@ -153,7 +153,7 @@ async function onHour(bot) {
     });
 }
 
-async function sendUpdate(update) {
+async function sendUpdate(update, bot) {
     await MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
         var guilds = await bot.guilds.array();
@@ -191,8 +191,8 @@ async function topSalt(guildID) {
     });
 }
 
-async function setNotChannel(guildID, channeldID) {
-    setSettings(guildID, { notChannel: channeldID });
+async function setNotChannel(guildID, channelID) {
+    setSettings(guildID, { notChannel: channelID });
 }
 
 async function getNotChannel(guildID) {
@@ -654,7 +654,10 @@ module.exports = {
     },
     setNotification: async function (guildID, cid) {
         if (await checkGuild(guildID)) {
-            await setNotChannel(cid);
+            await setNotChannel(guildID, cid);
         }
+    },
+    sendUpdate: async function (update, bot) {
+        sendUpdate(update, bot);
     }
 };
