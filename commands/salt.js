@@ -38,6 +38,14 @@ module.exports = {
                             if (mention.startsWith('!')) {
                                 mention = mention.substr(1);
                             }
+                            if (mention == bot.user.id) {
+                                msg.reply("du kannst mich nicht für salt reporten!");
+                                return;
+                            }
+                            if (mention == msg.author.id) {
+                                msg.reply("du kannst dich nicht für salt reporten!");
+                                return;
+                            }
                             let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
                             console.log(time);
                             if (time == 0) {
@@ -53,7 +61,7 @@ module.exports = {
                         var info = [];
                         for (var i = 0; i < 5; i++) {
                             if (salters[i]) {
-                            let member=await msg.guild.fetchMember(salters[i].salter);
+                                let member = await msg.guild.fetchMember(salters[i].salter);
                                 info.push({
                                     name: (i + 1) + ". Platz: " + member.displayName,
                                     value: salters[i].salt + " Salz",

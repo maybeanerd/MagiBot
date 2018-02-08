@@ -65,6 +65,10 @@ module.exports = {
                 }
                 switch (command) {
                     case 'add':
+                        if (mention == bot.user.id) {
+                            msg.reply("du kannst mich nicht für salt reporten!");
+                            return;
+                        }
                         await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
                         msg.channel.send("Erfolgreich <@!" + mention + "> wegen salt reported!");
                         break;
