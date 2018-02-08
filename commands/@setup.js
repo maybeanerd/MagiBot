@@ -178,11 +178,11 @@ module.exports = {
                     }
                     break;
                 case 'notification+':
-                    data.setNotification(await msg.channel.id);
+                    await data.setNotification(await msg.guild.id, await msg.channel.id);
                     msg.channel.send("Du hast erfolgreich Notifications in <#" + await msg.channel.id + "> aktiviert.");
                     break;
                 case 'notification-':
-                    data.setNotification(false);
+                    await data.setNotification(await msg.guild.id, false);
                     msg.channel.send("Du hast erfolgreich Notifications deaktiviert.");
                     break;
                 case "info":

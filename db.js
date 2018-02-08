@@ -90,10 +90,11 @@ async function onHour(bot) {
         nd.setDate(nd.getDate() - 14);
         db.collection("salt").remove({ date: { $lt: nd } });
 
-        var guilds = bot.guilds.array();
-        for (let guild in guilds) {
-            //getting DB for guild
-            let guildID = await guilds[guild].id;
+        var guilds = await bot.guilds.array();
+        for (let GN in guilds) {
+            var G = guilds[GN];
+
+            let guildID = await G.id;
             var dbTwo = await mclient.db(guildID);
             var users = await dbTwo.collection("saltrank").find().toArray();
             for (var user in users) {
@@ -105,10 +106,7 @@ async function onHour(bot) {
                 }
                 await dbTwo.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: slt } });
             }
-        }
-        var guilds = await bot.guilds.array();
-        for (let GN in guilds) {
-            var G = guilds[GN];
+
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
                 if (await G.me.hasPermission("ADMINISTRATOR")) {
@@ -149,6 +147,31 @@ async function onHour(bot) {
                         G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that i have no administrative permissions and need them to use all of my features.").catch(function (err) { console.log(err); });
                     }
                 }
+            }
+        }
+        mclient.close();
+    });
+}
+
+async function sendUpdate(update) {
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = mclient.db('MagiBot');
+        var guilds = await bot.guilds.array();
+        for (let GN in guilds) {
+            var G = guilds[GN];
+            if (await G.available) {
+                if (await G.me.hasPermission("ADMINISTRATOR")) {
+                    let cid = await getNotChannel(G.id);
+                    if (cid) {
+                        let channel = await G.channels.get(cid);
+                        if (channel) {
+                            channel.send(update);
+                        } else {
+                            setNotChannel(G.id, false);
+                        }
+                    }
+                }
+
             }
         }
         mclient.close();
@@ -631,12 +654,7 @@ module.exports = {
     },
     setNotification: async function (guildID, cid) {
         if (await checkGuild(guildID)) {
-            setNotChannel(cid);
-        }
-    },
-    getNotification: async function (guildID) {
-        if (await checkGuild(guildID)) {
-            return getNotChannel(guildID);
+            await setNotChannel(cid);
         }
     }
 };
