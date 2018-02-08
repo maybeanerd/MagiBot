@@ -206,12 +206,13 @@ module.exports = {
                     if (!cmd.toString()) {
                         str = "Empty";
                     } else {
+                        let guild = msg.guild;
                         for (let s in cmd) {
-                            str += cmd[s] + ", ";
+                            str += await guild.channels.get(cmd[s]).name + ", ";
                         }
                     }
                     info.push({
-                        name: "Joinsound Channel IDs",
+                        name: "Joinsound Channels",
                         value: str,
                         inline: false
                     });
