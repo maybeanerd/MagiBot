@@ -168,14 +168,17 @@ async function topSalt(guildID) {
         return result;
     });
 }
-//TODO
-async function setNotChannel(guildID, channeldID) {
 
+async function setNotChannel(guildID, channeldID) {
+    setSettings(guildID, { notChannel: channeldID });
 }
 
 async function getNotChannel(guildID) {
     //TODO change
     return (await getCommandChannel(guildID))[0];
+    //new:
+    let set = await getSettings(guildID);
+    return set.notChannel;
 }
 
 
@@ -274,7 +277,7 @@ async function setSettings(guildID, settings) {
 async function firstSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
-        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false });
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false });
         var ret = await db.collection("settings").findOne({ _id: guildID });
         mclient.close();
         return ret;
