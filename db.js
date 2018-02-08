@@ -139,14 +139,16 @@ async function onHour(bot) {
                             await setSaltKing(G.id, saltID);
                         }
                     } else {
-                        G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that my role is beneath the SaltKing role, which has the effect that i cannot give or take if from users.").catch(function (err) {
-                            console.log(err.name + ": " + err.message);
-                        });
+                        let channel = await getNotChannel(G.id);
+                        if (channel) {
+                            G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.").catch(function (err) { console.log(err); });
+                        }
                     }
                 } else {
-                    G.owner.send("Hey there Owner of " + G.name + "!\nI regret to inform you that i have no administrative permissions and i need them to be able to use all my features.").catch(function (err) {
-                        console.log(err.name + ": " + err.message);
-                    });
+                    let channel = await getNotChannel(G.id);
+                    if (channel) {
+                        G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that i have no administrative permissions and need them to use all of my features.").catch(function (err) { console.log(err); });
+                    }
                 }
             }
         }
@@ -166,6 +168,16 @@ async function topSalt(guildID) {
         return result;
     });
 }
+//TODO
+async function setNotChannel(guildID, channeldID) {
+
+}
+
+async function getNotChannel(guildID) {
+    //TODO change
+    return (await getCommandChannel(guildID))[0];
+}
+
 
 async function getSalt(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
