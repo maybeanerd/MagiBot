@@ -4,8 +4,9 @@ module.exports = {
     main: async function f(bot, msg) {
         if (msg.guild) {
             var id;
-            var mention = msg.content.split(" ")[0];
-            if (mention.length > 9) {
+            const args = msg.content.split(/ +/);
+            var mention = args[0];
+            if (mention.length > 0) {
                 if (mention.startsWith('<@') && mention.endsWith('>')) {
                     id = mention.substr(2).slice(0, -1);
                     if (id.startsWith('!')) {

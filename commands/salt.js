@@ -24,15 +24,15 @@ function printHelp(msg, bot) {
 
 module.exports = {
     main: async function f(bot, msg) {
-        var command = msg.content.split(" ")[0];
-        msg.content = msg.content.replace(command + " ", "");
+        const args = msg.content.split(/ +/);
+        var command = args[0].toLowerCase();
         if (command == "help") {
             printHelp(msg, bot);
         } else {
             if (msg.guild) {
                 switch (command) {
                     case 'add':
-                        var mention = msg.content.split(" ")[0];
+                        var mention = args[1];
                         if (mention.startsWith('<@') && mention.endsWith('>')) {
                             mention = mention.substr(2).slice(0, -1);
                             if (mention.startsWith('!')) {

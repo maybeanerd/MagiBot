@@ -39,7 +39,8 @@ function parse(de) {
 
 module.exports = {
     main: function (bot, msg) {
-        var input = msg.content.split(" ")[0];
+        const args = msg.content.split(/ +/);
+        var input = args[0];
         if (input == "help") {
             msg.channel.send("Lasse <@!" + bot.user.id + "> für dich würfeln. Nutze `" + bot.PREFIX + "!roll [multiplier]*[Anzahl Würfe]d<Würfelaugen>+[Modifier]`");
             return;

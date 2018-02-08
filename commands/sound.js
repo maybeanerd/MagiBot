@@ -31,7 +31,7 @@ function printHelp(msg, bot) {
 module.exports = {
     main: async function f(bot, msg) {
         const args = msg.content.split(/ +/);
-        var command = args[0];
+        var command = args[0].toLowerCase();
         if (command == "help") {
             printHelp(msg, bot);
         } else {
