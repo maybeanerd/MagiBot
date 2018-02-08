@@ -246,10 +246,34 @@ module.exports = {
                         inline: false
                     });
 
-
+                    if (!set['saltKing']) {
+                        str = "None";
+                    } else {
+                        str = "<@" + set['saltKing'] + ">";
+                    }
                     info.push({
                         name: "Salt King",
-                        value: set['saltKing'].toString(),
+                        value: str,
+                        inline: false
+                    });
+                    if (!set['saltRole']) {
+                        str = "None";
+                    } else {
+                        str = "<@&" + set['saltRole'] + ">";
+                    }
+                    info.push({
+                        name: "Salt King Role",
+                        value: str,
+                        inline: false
+                    });
+                    if (!set['notChannel']) {
+                        str = "None";
+                    } else {
+                        str = "<#" + set['notChannel'] + ">";
+                    }
+                    info.push({
+                        name: "Notification Channel",
+                        value: str,
                         inline: false
                     });
 
