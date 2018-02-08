@@ -30,12 +30,12 @@ function printHelp(msg, bot) {
 
 module.exports = {
     main: async function f(bot, msg) {
-        var command = msg.content.split(" ")[0];
-        msg.content = msg.content.replace(command + " ", ""); //TODO without the space it always gets rid of command maybe fix this later also for salt
+        const args = msg.content.split(/ +/);
+        var command = args[0];
         if (command == "help") {
             printHelp(msg, bot);
         } else {
-            var mention = msg.content.split(" ")[0];
+            var mention = args[1];
             switch (command) {
                 case 'add':
                     if (!(mention.startsWith("http") && (mention.endsWith(".wav") || mention.endsWith(".mp3")))) {

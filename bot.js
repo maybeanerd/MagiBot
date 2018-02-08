@@ -173,7 +173,7 @@ var loadCommands = function () {
 
 var checkCommand = async function (msg, isMention) {
     //ignore blacklisted users
-    if (await data.isBlacklistedUser(msg.author.id, msg.guild.id)) {
+    if (await data.isBlacklistedUser(await msg.author.id, await msg.guild.id)) {
         msg.delete();
         return;
     }
@@ -182,14 +182,15 @@ var checkCommand = async function (msg, isMention) {
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
 
     } else {
-        var command = msg.content.split(bot.PREFIX)[1].split(" ")[0];
-        msg.content = msg.content.replace(bot.PREFIX + command + " ", "");
+        var command = msg.content.split(bot.PREFIX)[1].split(" ")[0].toLowerCase();
+        msg.content = msg.content.slice(command.length + 1); //delete prefix and command
+        msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
         var pre = command.charAt(0);
         switch (pre) {
             case '!':
-                command = command.substr(1, command.length);
+                command = command.slice(1);
                 break;
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
