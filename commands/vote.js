@@ -63,7 +63,7 @@
         };
 
     },
-    help: 'Start a quickvote',
+    help: 'Start a vote',
     admin: false,
     dev: true
 };

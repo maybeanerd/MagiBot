@@ -47,8 +47,12 @@ commands.help.main = function (bot, msg) {
 
     for (let command in commands) {
         if (!(commands[command].hide || commands[command].admin)) {
+            let nm = command;
+            if (commands[command].dev) {
+                nm = "Under construction: " + nm;
+            }
             cmds.push({
-                name: command,
+                name: nm,
                 value: commands[command].help,
                 inline: true
             });
@@ -71,15 +75,19 @@ commands.help.main = function (bot, msg) {
 commands['@help'] = {};
 commands['@help'].args = '';
 commands['@help'].help = "Zeigt dir eine Liste der Admin Befehle";
-commands['@help'].hide = true;
+commands['@help'].hide = false;
 commands['@help'].admin = true;
 commands['@help'].main = function (bot, msg) {
     var cmds = [];
 
     for (let command in commands) {
         if (commands[command].admin && !commands[command].hide) {
+            let nm = command.substr(1, command.length);
+            if (commands[command].dev) {
+                nm = "Under construction: " + nm;
+            }
             cmds.push({
-                name: command.substr(1, command.length),
+                name: nm,
                 value: commands[command].help,
                 inline: true
             });
