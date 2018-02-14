@@ -39,12 +39,15 @@
                                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                                 mess.delete();
                                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                                    msg.channel.send("**Quickvote: **" + topic + "\n**Options:**\n" + str).then(vote => { //TODO add emoji to options
+                                                    msg.channel.send("**Vote: **\n" + topic + "\n\n**Options:**\n" + str).then(vote => { //TODO add emoji to options
                                                         let fil = () => { return false; }//TODO add filter
                                                         time *= 60000;
-                                                        vote.awaitReactions(fil, { max: 1, time: time }).then(reacts => {
-                                                            //do something with the votes
-                                                        });
+                                                        //vote.awaitReactions(fil, { max: 1, time: time }).then(reacts => {
+                                                        //do something with the votes
+
+                                                        //TODO add vote to DB, it will then be automatically evaluated
+
+                                                        //});
                                                     });
                                                 } else if (reacts.first()) {
                                                     msg.channel.send("successfully canceled vote **" + topic + "**");
