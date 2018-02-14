@@ -77,7 +77,7 @@ commands['@help'].main = function (bot, msg) {
     var cmds = [];
 
     for (let command in commands) {
-        if (commands[command].admin) {
+        if (commands[command].admin && !commands[command].hide) {
             cmds.push({
                 name: command.substr(1, command.length),
                 value: commands[command].help,
