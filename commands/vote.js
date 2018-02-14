@@ -1,9 +1,5 @@
 ﻿module.exports = {
     main: function (bot, msg) {
-        if (msg.author.id != bot.OWNERID) {
-            msg.channel.send("This is under construction and can only be used by the Dev for now.");
-            return;
-        }
         if (msg.content.split(/ +/)[0] == "help") {
             msg.channel.send("Just type `" + bot.PREFIX + "!qvote` and follow the instructions.");
         } else {
@@ -69,4 +65,5 @@
     },
     help: 'Start a quickvote',
     admin: false,
+    dev: true
 };

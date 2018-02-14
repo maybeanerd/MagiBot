@@ -104,6 +104,7 @@ commands.load.args = '<command>';
 commands.load.help = '';
 commands.load.hide = true;
 commands.load.admin = false;
+commands.load.dev = true;
 commands.load.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
         try {
@@ -123,6 +124,7 @@ commands.unload = {};
 commands.unload.args = '<command>';
 commands.unload.help = '';
 commands.unload.hide = true;
+commands.unload.dev = true;
 commands.unload.admin = false;
 commands.unload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
@@ -143,6 +145,7 @@ commands.reload = {};
 commands.reload.args = '';
 commands.reload.help = '';
 commands.reload.hide = true;
+commands.reload.dev = true;
 commands.reload.admin = false;
 commands.reload.main = function (bot, msg) {
     if (msg.author.id == bot.OWNERID) {
@@ -202,8 +205,8 @@ var checkCommand = async function (msg, isMention) {
             default:
                 return;
         }
-        if (command && commands[command]) {
-            if (/*!msg.guild ||*/ pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
+        if (commands[command] && (!(commands[command].dev) || msg.author.id == bot.OWNERID)) {
+            if (pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
