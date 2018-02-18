@@ -68,5 +68,6 @@
     },
     help: 'Start a vote',
     admin: false,
+    hide: true,
     dev: true
 };
