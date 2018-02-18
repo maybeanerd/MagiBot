@@ -4,7 +4,7 @@ module.exports = {
 
 
         info.push({
-            name: "Anzahl Server die gerade verbunden sind",
+            name: "Number of guilds currently being served",
             value: bot.guilds.array().length,
             inline: false
         });
@@ -38,12 +38,12 @@ module.exports = {
             inline: false
         });
         info.push({
-            name: "Lade mich auf deinen Server ein!",
+            name: "Invite me to your server!",
             value: "https://goo.gl/RQ7Pdo",
             inline: false
         });
         info.push({
-            name: "Offizieller Discord für Support, Ideen und Bug Reports",
+            name: "Official Discord for support, ideas und bug reports",
             value: "https://discord.gg/2Evcf4T",
             inline: false
         });
@@ -59,17 +59,18 @@ module.exports = {
         });*/
 
         //Entwickler Info
+        /*
         info.push({
             name: "Entwickler",
             value: "<@185865492576075776>",
             inline: false
         });
-
+        */
 
 
         let embed = {
             color: bot.COLOR,
-            description: "Hier sind ein paar Informationen über den Bot:",
+            description: "Some information about the bot:",
             fields: info,
             footer: {
                 icon_url: bot.user.avatarURL,
