@@ -61,7 +61,7 @@ commands.help.main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "!`: (to get more info on a single command use `" + bot.PREFIX + "!<command> help`)",
+        description: "Commands available via the prefix `" + bot.PREFIX + "!`:\nto get more info on a single command use `" + bot.PREFIX + "!<command> help`",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -96,7 +96,7 @@ commands['@help'].main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "@`: (to get more info on a single command use `" + bot.PREFIX + "@<command> help`)",
+        description: "Commands available via the prefix `" + bot.PREFIX + "@`:\nto get more info on a single command use `" + bot.PREFIX + "@<command> help`",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,

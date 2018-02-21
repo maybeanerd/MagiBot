@@ -92,7 +92,7 @@ module.exports = {
             }
         }
     },
-    help: 'Salt commands for admins. Use `k@salt help` for more info',
+    help: 'Salt commands for admins',
     admin: true,
     hide: false
 };

@@ -5,13 +5,18 @@ function printHelp(msg, bot) {
 
     info.push({
         name: "add @User",
-        value: "Report a user being salty!",
+        value: "Report a user being salty",
+        inline: true
+    });
+    info.push({
+        name: "top",
+        value: "Displays the top 5 salter of " + msg.guild.name,
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "!salt:",
+        description: "Commands available via the prefix `" + bot.PREFIX + "!salt`:",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -89,7 +94,7 @@ module.exports = {
             }
         }
     },
-    help: "Salt commands. Use `k!salt help` for more info",
+    help: "Salt commands",
     admin: false,
     hide: false
 };
