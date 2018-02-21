@@ -53,7 +53,7 @@
                                                     msg.channel.send("successfully canceled vote **" + topic + "**");
                                                 }
                                             });
-                                        })
+                                        });
                                     } else {
                                         msg.channel.send("Please try again and add some options");
                                     }
