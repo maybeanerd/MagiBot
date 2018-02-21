@@ -42,49 +42,49 @@ module.exports = {
         const args = msg.content.split(/ +/);
         var input = args[0];
         if (input == "help") {
-            msg.channel.send("Lasse <@!" + bot.user.id + "> für dich würfeln. Nutze `" + bot.PREFIX + "!roll [multiplier]*[Anzahl Würfe]d<Würfelaugen>+[Modifier]`");
+            msg.channel.send("Let <@!" + bot.user.id + "> roll some dice for you. Use `" + bot.PREFIX + "!roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
             return;
         }
         var throws = parse(input);
         if (!throws) {
-            msg.channel.send("Du hast unpassende Parameter übergeben. Für Hilfe nutze " + bot.PREFIX + "!roll help.");
+            msg.channel.send("Your inputs could not be interpreted. Use `" + bot.PREFIX + "!roll help` for more info.");
             return;
         }
         var info = [];
         let size = throws.length;
         if (throws[size - 6]) {
-            msg.reply("der Dungeon Master hat nur 24 Würfel, mit denen er gleichzeitig werfen kann!");
+            msg.reply("the dungeon master can only roll 24 dice at a time!");
         }
         let thro = throws[size - 4];
         if (thro > 24) {
             thro = 24;
         }
         info.push({
-            name: "Gesamtergebnis mit " + throws[size - 5] + " * " + thro + "d" + throws[size - 3] + " + " + throws[size - 2],
+            name: "Sum of " + throws[size - 5] + " * " + thro + "d" + throws[size - 3] + " + " + throws[size - 2],
             value: throws[size - 1],
             inline: false
         });
         for (let i = 0; i < size - 6; i++) {
             info.push({
-                name: "Wurf " + (i + 1),
+                name: (i + 1) + ". roll",
                 value: throws[i],
                 inline: true
             });
         }
         let embed = {
             color: bot.COLOR,
-            description: ":game_die: <@!" + msg.author.id + ">s Würfelergebnis:",
+            description: ":game_die: <@!" + msg.author.id + ">s dice have been rolled:",
             fields: info,
             footer: {
                 icon_url: "https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png",
-                text: "The real Dungeon Master"
+                text: "The real dungeon master"
             }
         }
         msg.channel.send('', { embed });
     },
-    help: 'Werfe Würfel',
+    help: "Roll dice. Use `" + bot.PREFIX + "!roll help` for more info",
     ehelp: function (bot, msg) {
-        msg.channel.send("Lasse " + bot.user.username + " für dich würfeln. Dabei kannst du [multiplier]*[anzahl würfe]d<Würfelaugen> [+ Modifier] verwenden. Beispiele: `3d6 + 12`, `4*d12 + 3`, `d100`");
+        msg.channel.send("Let <@!" + bot.user.id + "> roll some dice for you. Use `" + bot.PREFIX + "!roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
     },
     admin: false
 };

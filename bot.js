@@ -40,7 +40,7 @@ var commands = {}
 
 commands.help = {};
 commands.help.args = '';
-commands.help.help = "Zeigt dir eine Liste der Befehle";
+commands.help.help = "Shows all available commands";
 commands.help.admin = false;
 commands.help.main = function (bot, msg) {
     var cmds = [];
@@ -61,7 +61,7 @@ commands.help.main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Befehle die du mit dem Präfix " + bot.PREFIX + "! verwenden kannst:",
+        description: "Commands available via the prefix `" + bot.PREFIX + "!`: (to get more info on a single command use `" + bot.PREFIX + "!<command> help`)",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -74,7 +74,7 @@ commands.help.main = function (bot, msg) {
 
 commands['@help'] = {};
 commands['@help'].args = '';
-commands['@help'].help = "Zeigt dir eine Liste der Admin Befehle";
+commands['@help'].help = "Shows all available admin commands";
 commands['@help'].hide = false;
 commands['@help'].admin = true;
 commands['@help'].main = function (bot, msg) {
@@ -96,7 +96,7 @@ commands['@help'].main = function (bot, msg) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Liste der Admin Befehle die du mit dem Präfix " + bot.PREFIX + "@ verwenden kannst:",
+        description: "Commands available via the prefix `" + bot.PREFIX + "@`: (to get more info on a single command use `" + bot.PREFIX + "@<command> help`)",
         fields: cmds,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -124,7 +124,7 @@ commands.load.main = function (bot, msg) {
             bot.sendNotification("The command was not found, or there was an error loading it.", "error", msg);
         }
     } else {
-        bot.sendNotification("Du hast nicht die Berechtigung diesen Befehl zu verwenden.", "error", msg);
+        bot.sendNotification("You're not allowed to use this..", "error", msg);
     }
 }
 
@@ -145,7 +145,7 @@ commands.unload.main = function (bot, msg) {
             bot.sendNotification("Command not found.", "error", msg);
         }
     } else {
-        bot.sendNotification("Du hast nicht die Berechtigung diesen Befehl zu verwenden.", "error", msg);
+        bot.sendNotification("You're not allowed to use this..", "error", msg);
     }
 }
 
@@ -167,7 +167,7 @@ commands.reload.main = function (bot, msg) {
             msg.channel.sen("Command not found");
         }
     } else {
-        bot.sendNotification("Du hast nicht die Berechtigung diesen Befehl zu verwenden.", "error", msg);
+        bot.sendNotification("You're not allowed to use this..", "error", msg);
     }
 }
 
@@ -206,7 +206,7 @@ var checkCommand = async function (msg, isMention) {
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
                     msg.delete();
-                    (msg.reply("Du hast nicht die Berechtigung, diesen Befehl zu nutzen.")).then(mess => mess.delete(5000));
+                    (msg.reply("you're not allowed to use this command.")).then(mess => mess.delete(5000));
                     return;
                 }
                 break;
@@ -218,7 +218,7 @@ var checkCommand = async function (msg, isMention) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
-                (msg.reply("Bot Befehle gehören nicht in <#" + msg.channel.id + ">, sondern" + await data.commandChannel(msg.guild.id) + ".")).then(mess => mess.delete(15000));
+                (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ".")).then(mess => mess.delete(15000));
             }
         }
     }

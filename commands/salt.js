@@ -5,13 +5,13 @@ function printHelp(msg, bot) {
 
     info.push({
         name: "add @User",
-        value: "Reporte einen Nutzer fürs salten!",
+        value: "Report a user being salty!",
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Nutzbare Befehle in der Rubrik salt:",
+        description: "Commands available via the prefix `" + bot.PREFIX + "!salt:",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -39,22 +39,22 @@ module.exports = {
                                 mention = mention.substr(1);
                             }
                             if (mention == bot.user.id) {
-                                msg.reply("du kannst mich nicht für salt reporten!");
+                                msg.reply("you can't report me!");
                                 return;
                             }
                             if (mention == msg.author.id) {
-                                msg.reply("du kannst dich nicht für salt reporten!");
+                                msg.reply("you can't report yourself!");
                                 return;
                             }
                             let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
                             console.log(time);
                             if (time == 0) {
-                                msg.channel.send("Erfolgreich <@!" + mention + "> für salt reportet!");
+                                msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
                             } else {
-                                msg.channel.send("Du kannst <@!" + mention + "> erst in " + (59 - Math.floor((time * 60) % 60)) + " min und " + (60 - Math.floor((time * 60 * 60) % 60)) + " sek wieder für salt reporten!");
+                                msg.reply("you can report <@!" + mention + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
                             }
                         } else {
-                            msg.channel.send("Du musst schon einen Nutzer angeben, den du reporten willst!");
+                            msg.reply("you need to mention a user you want to report!");
                         }
                         break;
                     case "top": var salters = await data.topSalt(msg.guild.id);
@@ -63,15 +63,15 @@ module.exports = {
                             if (salters[i]) {
                                 let member = await msg.guild.fetchMember(salters[i].salter);
                                 info.push({
-                                    name: (i + 1) + ". Platz: " + member.displayName,
-                                    value: salters[i].salt + " Salz",
+                                    name: (i + 1) + ". place: " + member.displayName,
+                                    value: salters[i].salt + " salt",
                                     inline: false
                                 });
                             } else { break; }
                         }
                         let embed = {
                             color: 0xffffff,
-                            description: "Top 5 Salter des " + msg.guild.name + ":",
+                            description: "Top 5 salter in " + msg.guild.name + ":",
                             fields: info,
                             footer: {
                                 icon_url: await msg.guild.iconURL,
@@ -81,15 +81,15 @@ module.exports = {
                         msg.channel.send('', { embed });
                         break;
                     default:
-                        msg.reply('Dies ist kein gültiger Befehl. Nutze k!salt help für mehr Information.');
+                        msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "!salt help` for more info.");
                         break;
                 }
             } else {
-                msg.reply("Befehle ausser help sind nur auf Servern verfügbar.");
+                msg.reply("commands are only functional when used in a guild.");
             }
         }
     },
-    help: 'Salz Befehle. Nutze k!salt help für mehr Information',
+    help: "Salt commands. Use `k!salt help` for more info",
     admin: false,
     hide: false
 };

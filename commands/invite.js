@@ -1,7 +1,7 @@
 module.exports = {
     main: function (bot, msg) {
-        msg.channel.send("Lade mich auf deinen Server ein: https://goo.gl/RQ7Pdo");   
+        msg.channel.send("Invite me to your guild: https://goo.gl/RQ7Pdo");
     },
-    help: "Invitelink um MagiBot deinem Server hinzuzufügen",
-    admin:false
+    help: "Invitelink to invite MagiBot to your own guild",
+    admin: false
 };

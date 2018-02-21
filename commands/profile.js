@@ -13,7 +13,7 @@ module.exports = {
                         id = id.substr(1);
                     }
                 } else {
-                    msg.channel.send("Bitte gib entweder keinen Nutzer an, oder erwähne ihn korrekt.");
+                    msg.reply("mention no user at all to get your own profile or mention a user correctly.");
                     return;
                 }
             } else {
@@ -23,19 +23,19 @@ module.exports = {
             var salt = await data.getSalt(id, msg.guild.id);
             var usage = await data.getUsage(id, msg.guild.id);
             info.push({
-                name: "Salzlevel",
+                name: "Saltlevel",
                 value: salt,
                 inline: false
             });
             info.push({
-                name: "Bot Nutzung",
+                name: "Bot usage",
                 value: usage,
                 inline: false
             });
             let user = await bot.fetchUser(id);
             let embed = {
                 color: bot.COLOR,
-                description: ("Hier sind ein paar Informationen über " + user.username),
+                description: ("Here's some info on " + user.username),
                 fields: info,
                 footer: {
                     icon_url: user.avatarURL,
@@ -44,10 +44,10 @@ module.exports = {
             }
             msg.channel.send('', { embed });
         } else {
-            msg.reply("Dieser Befehl ist nur auf Servern verfügbar.");
+            msg.reply("This command is only available in guilds.");
         }
     },
-    help: 'Information über dich oder einen anderen Nutzer',
+    help: 'Get some info on yourself or a user you mention',
     admin: false,
     hide: false
 };

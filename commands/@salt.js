@@ -5,31 +5,31 @@ function printHelp(msg, bot) {
 
     info.push({
         name: "add @User",
-        value: "Reporte einen Nutzer fürs salten",
+        value: "Report a user for being salty",
         inline: true
     });
 
     info.push({
         name: "rem @User",
-        value: "Lösche den ältesten Salt Eintrag eines Nutzers",
+        value: "Remove the oldest salt report of a user",
         inline: true
     });
 
     info.push({
         name: "clr @User",
-        value: "Lösche das komplette Salz eines Nutzers",
+        value: "Clear all salt of a user",
         inline: true
     });
 
     info.push({
         name: "reset",
-        value: "Lösche das komplette Salz auf dem Server",
+        value: "Reset all salt of this guild. Use with caution",
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Nutzbare Befehle in der Rubrik salt:",
+        description: "Commands available via the prefix `" + bot.PREFIX + "@salt`:",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -57,42 +57,42 @@ module.exports = {
                 } else {
                     if (command == "reset") {
                         await data.resetSalt(msg.guild.id);
-                        msg.channel.send("Erfolgreich das Salz des Servers **" + msg.guild.name + "** entfernt!");
+                        msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
                         return;
                     }
-                    msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                    msg.reply("you need to mention a user you want to use this on!");
                     return;
                 }
                 switch (command) {
                     case 'add':
                         if (mention == bot.user.id) {
-                            msg.reply("du kannst mich nicht für salt reporten!");
+                            msg.reply("you can't report me!");
                             return;
                         }
                         await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
-                        msg.channel.send("Erfolgreich <@!" + mention + "> wegen salt reported!");
+                        msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
                         break;
                     case 'rem':
                         if (await data.remOldestSalt(mention, msg.guild.id)) {
-                            msg.channel.send("Erfolgreich den ältesten Salt von <@!" + mention + "> entfernt!");
+                            msg.channel.send("Successfully removed the oldest salt from <@!" + mention + ">!");
                         } else {
-                            msg.channel.send("<@!" + mention + "> hat kein Salt, das gelöscht werden könnte!");
+                            msg.channel.send("<@!" + mention + "> has no salt that could be removed!");
                         }
                         break;
                     case 'clr':
                         await data.clrSalt(mention, msg.guild.id);
-                        msg.channel.send("Erfolgreich den Salt von <@!" + mention + "> entfernt!");
+                        msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
                         break;
                     default:
-                        msg.reply('Dies ist kein gültiger Befehl. Nutze k@salt help für mehr Information.');
+                        msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@salt help` to get more info.");
                         break;
                 }
             } else {
-                msg.reply("Befehle ausser help sind nur auf Servern verfügbar.");
+                msg.reply("Commands are only available on guilds.");
             }
         }
     },
-    help: 'Salz Befehle der Admins. Nutze k@salt help für mehr Info',
+    help: 'Salt commands for admins. Use `k@salt help` for more info',
     admin: true,
     hide: false
 };

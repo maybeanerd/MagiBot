@@ -619,7 +619,7 @@ module.exports = {
         return false;
     },
     setBlacklistedUser: async function (guildID, userID, insert) {
-        if (await checkGuild(guildID) && checks(userID, guildID)) {
+        if (await checkGuild(guildID) && await checks(userID, guildID)) {
             return setBlacklistedUser(userID, guildID, insert);
         }
         return false;

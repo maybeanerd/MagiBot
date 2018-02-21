@@ -8,6 +8,6 @@ module.exports = {
             newMsg.edit("Pong! \nReactiontime: `(" + diff + "ms)`");
         });
     },
-    help: 'Ping den Bot',
+    help: 'Ping the bot',
     admin: false,
 };

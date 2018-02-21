@@ -38,7 +38,7 @@ module.exports = {
             inline: false
         });
         info.push({
-            name: "Invite me to your server!",
+            name: "Invite me to your guild!",
             value: "https://goo.gl/RQ7Pdo",
             inline: false
         });
@@ -80,7 +80,7 @@ module.exports = {
 
         msg.channel.send('', { embed });
     },
-    help: 'Gibt dir Info über den Bot',
+    help: 'Get some info about the bot',
     admin: false,
     hide: false
 };

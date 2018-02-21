@@ -5,13 +5,13 @@ function printHelp(msg, bot) {
 
     info.push({
         name: "del @User",
-        value: "Lösche den Joinsound des erwähnten Nutzers",
+        value: "Delete the joinsound of a user",
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Nutzbare Befehle in der Rubrik " + bot.PREFIX + "@sound :",
+        description: "Commands available via the prefix `" + bot.PREFIX + "@sound` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -39,23 +39,23 @@ module.exports = {
                             mention = mention.substr(1);
                         }
                         if (await data.addSound(mention, false, msg.guild.id)) {
-                            msg.reply("Du hast erfolgreich den Joinsound von <@!" + mention + "> entfernt!");
+                            msg.reply("you successfully removed <@!" + mention + ">s joinsound!");
                         }
                         else {
                             msg.reply("Aaaaaand you failed.");
                         }
                     } else {
-                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        msg.reply("you need to mention a user you want to use this on!");
                         return;
                     }
                     break;
                 default:
-                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@sound help für mehr Information.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@sound help` for more info.");
                     break;
             }
         }
     },
-    help: 'Lösche joinsounds von Nutzern',
+    help: 'Modify the joinsounds of other users',
     admin: true,
     hide: false
 };

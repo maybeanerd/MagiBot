@@ -5,63 +5,43 @@ function printHelp(msg, bot) {
 
     info.push({
         name: "ban @User",
-        value: "Deaktiviere alle Funktionen des Bots für einen Nutzer",
+        value: "Deactivate all functions of the bot for a user",
         inline: true
     });
     info.push({
         name: "unban @User",
-        value: "Reaktiviere alle Funktionen des Bots für einen Nutzer",
+        value: "Reactivate all functions of the bot for a user",
         inline: true
     });
     info.push({
-        name: "join+",
-        value: "Aktiviere Joinsounds für den Voicechannel, mit dem du verbunden bist",
+        name: "join[-/+]",
+        value: "(De)activate joinsounds for the voicechannel you're connected to",
         inline: true
     });
     info.push({
-        name: "join-",
-        value: "Deaktiviere Joinsounds für den Voicechannel, mit dem du verbunden bist",
+        name: "admin[-/+] @Role",
+        value: "(Un)set a role to be considered admin by the bot",
         inline: true
     });
     info.push({
-        name: "admin+ @Role",
-        value: "Lege eine Rolle als Adminrolle fest",
+        name: "command[-/+]",
+        value: "(De)activate bot commands for the text channel you're sending this in",
         inline: true
     });
     info.push({
-        name: "admin- @Role",
-        value: "Entferne eine Adminrolle",
-        inline: true
-    });
-    info.push({
-        name: "command+",
-        value: "Aktiviere Botbfehle in dem Textchannel, in den du diese Nachricht sendest",
-        inline: true
-    });
-    info.push({
-        name: "command-",
-        value: "Deaktiviere Botbfehle in dem Textchannel, in den du diese Nachricht sendest",
-        inline: true
-    });
-    info.push({
-        name: "notification-",
-        value: "Deactivate the notification channel.",
-        inline: true
-    });
-    info.push({
-        name: "notification+",
-        value: "Activate a text channel for notifications of the bot.",
+        name: "notification[-/+]",
+        value: "(Un)set a textchannel to be notification channel",
         inline: true
     });
     info.push({
         name: "info",
-        value: "Zeigt aktuelle Einstellungen",
+        value: "Displays current settings",
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Nutzbare Befehle in der Rubrik " + bot.PREFIX + "@setup :",
+        description: "Commands available via the prefix `" + bot.PREFIX + "@setup` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -90,12 +70,12 @@ module.exports = {
                             mention = mention.substr(1);
                         }
                         if (await data.setBlacklistedUser(msg.guild.id, mention, true)) {
-                            msg.channel.send("Du hast erfolgreich <@!" + mention + "> von Botfunktionen gebannt.");
+                            msg.channel.send("Successfully banned <@!" + mention + "> from using the bot.");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        msg.reply("you need to mention a user you want to use this on!");
                         return;
                     }
                     break;
@@ -106,47 +86,47 @@ module.exports = {
                             mention = mention.substr(1);
                         }
                         if (await data.setBlacklistedUser(msg.guild.id, mention, false)) {
-                            msg.channel.send("Du hast erfolgreich Botfunktionen für <@!" + mention + "> aktiviert.");
+                            msg.channel.send("Successfully activated the bot for <@!" + mention + "> again.");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du musst schon einen Nutzer angeben, auf den du das anwenden willst!");
+                        msg.channel.send("you need to mention a user you want to use this on!");
                         return;
                     }
                     break;
                 case 'join+':
                     if (await msg.member.voiceChannelID) {
                         if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, true)) {
-                            msg.channel.send("Du hast erfolgreich Joinsounds in " + await msg.member.voiceChannel.name + " aktiviert.");
+                            msg.channel.send("Successfully activated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du bist in keinem Voice Channel!");
+                        msg.channel.send("You're in no voice channel!");
                     }
                     break;
                 case 'join-':
                     if (await msg.member.voiceChannelID) {
                         if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, false)) {
-                            msg.channel.send("Du hast erfolgreich Joinsounds in " + await msg.member.voiceChannel.name + " deaktiviert.");
+                            msg.channel.send("Successfully deactivated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du bist in keinem Voice Channel!");
+                        msg.channel.send("You're in no voice channel!");
                     }
                     break;
                 case 'admin+':
                     if (mention.startsWith('<@&') && mention.endsWith('>')) {
                         mention = mention.substr(3).slice(0, -1);
                         if (await data.setAdmin(msg.guild.id, mention, true)) {
-                            msg.channel.send("Du hast erfolgreich <@&" + mention + "> als Admin Rolle eingestellt!");
+                            msg.channel.send("Successfully set <@&" + mention + "> as admin role!");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du musst schon eine Rolle angeben, die als Administrator gelten soll!");
+                        msg.channel.send("You need to mention a role!");
                         return;
                     }
                     break;
@@ -154,36 +134,36 @@ module.exports = {
                     if (mention.startsWith('<@&') && mention.endsWith('>')) {
                         mention = mention.substr(3).slice(0, -1);
                         if (await data.setAdmin(msg.guild.id, mention, false)) {
-                            msg.channel.send("Du hast erfolgreich <@&" + mention + "> als Admin Rolle deaktiviert!");
+                            msg.channel.send("Successfully removed <@&" + mention + "> from the admin roles!");
                         } else {
                             msg.channel.send("Error 404 you failed.");
                         }
                     } else {
-                        msg.channel.send("Du musst schon eine Rolle angeben, die als Administrator enfternt werden soll!");
+                        msg.channel.send("You need to mention a role!");
                         return;
                     }
                     break;
                 case 'command+':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.id + "> aktiviert.");
+                        msg.channel.send("Successfully activated commands in <#" + await msg.channel.id + ">.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
                     break;
                 case 'command-':
                     if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
-                        msg.channel.send("Du hast erfolgreich Botbefehle in <#" + await msg.channel.id + "> deaktiviert.");
+                        msg.channel.send("Successfully deactivated commands in <#" + await msg.channel.id + ">.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
                     break;
                 case 'notification+':
                     await data.setNotification(await msg.guild.id, await msg.channel.id);
-                    msg.channel.send("Du hast erfolgreich Notifications in <#" + await msg.channel.id + "> aktiviert.").then(mess => { mess.delete(5000); msg.delete(); });
+                    msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000); msg.delete(); });
                     break;
                 case 'notification-':
                     await data.setNotification(await msg.guild.id, false);
-                    msg.channel.send("Du hast erfolgreich Notifications deaktiviert.");
+                    msg.channel.send("Successfully deactivated notifications.");
                     break;
                 case "info":
                     var info = [];
@@ -199,7 +179,7 @@ module.exports = {
                         }
                     }
                     info.push({
-                        name: "Command Channel",
+                        name: "Command channels",
                         value: str,
                         inline: false
                     });
@@ -214,7 +194,7 @@ module.exports = {
                         }
                     }
                     info.push({
-                        name: "Adminrollen",
+                        name: "Admin roles",
                         value: str,
                         inline: false
                     });
@@ -230,7 +210,7 @@ module.exports = {
                         }
                     }
                     info.push({
-                        name: "Joinsound Channels",
+                        name: "Joinsound channels",
                         value: str,
                         inline: false
                     });
@@ -245,7 +225,7 @@ module.exports = {
                         }
                     }
                     info.push({
-                        name: "Blacklisted Users",
+                        name: "Blacklisted users",
                         value: str,
                         inline: false
                     });
@@ -260,7 +240,7 @@ module.exports = {
                         }
                     }
                     info.push({
-                        name: "Channel mit @everyone blacklist",
+                        name: "Channel with @everyone blacklist",
                         value: str,
                         inline: false
                     });
@@ -271,7 +251,7 @@ module.exports = {
                         str = "<@" + set['saltKing'] + ">";
                     }
                     info.push({
-                        name: "Salt King",
+                        name: "SaltKing",
                         value: str,
                         inline: false
                     });
@@ -281,7 +261,7 @@ module.exports = {
                         str = "<@&" + set['saltRole'] + ">";
                     }
                     info.push({
-                        name: "Salt King Role",
+                        name: "SaltKing role",
                         value: str,
                         inline: false
                     });
@@ -291,14 +271,14 @@ module.exports = {
                         str = "<#" + set['notChannel'] + ">";
                     }
                     info.push({
-                        name: "Notification Channel",
+                        name: "Notification channel",
                         value: str,
                         inline: false
                     });
 
                     let embed = {
                         color: bot.COLOR,
-                        description: "Server Einstellungen des " + msg.guild.name + ":",
+                        description: "Guild settings of " + msg.guild.name + ":",
                         fields: info,
                         footer: {
                             icon_url: await msg.guild.iconURL,
@@ -308,12 +288,12 @@ module.exports = {
                     msg.channel.send('', { embed });
                     break;
                 default:
-                    msg.reply("Dies ist kein gültiger Befehl. Nutze " + bot.PREFIX + "@setup help für mehr Information.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@setup help` for more info.");
                     break;
             }
         }
     },
-    help: 'Verwalte die Einstellung des Bots auf dem Server',
+    help: 'Modify the settings for the bot',
     admin: true,
     hide: false
 };

@@ -8,7 +8,7 @@ module.exports = {
 
     },
     admin: true,
-    help: 'Fährt den Bot herunter',
+    help: 'Shuts the bot down',
     hide: true,
     dev: true
 };
