@@ -44,55 +44,52 @@ module.exports = {
     main: async function f(bot, msg) {
         const args = msg.content.split(/ +/);
         var command = args[0].toLowerCase();
-        if (command == "help") {
-            printHelp(msg, bot);
-        } else {
-            if (msg.guild) {
-                var mention = args[1];
-                if (mention.startsWith('<@') && mention.endsWith('>')) {
-                    mention = mention.substr(2).slice(0, -1);
-                    if (mention.startsWith('!')) {
-                        mention = mention.substr(1);
-                    }
-                } else {
-                    if (command == "reset") {
-                        await data.resetSalt(msg.guild.id);
-                        msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
-                        return;
-                    }
-                    msg.reply("you need to mention a user you want to use this on!");
-                    return;
-                }
-                switch (command) {
-                    case 'add':
-                        if (mention == bot.user.id) {
-                            msg.reply("you can't report me!");
-                            return;
-                        }
-                        await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
-                        msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
-                        break;
-                    case 'rem':
-                        if (await data.remOldestSalt(mention, msg.guild.id)) {
-                            msg.channel.send("Successfully removed the oldest salt from <@!" + mention + ">!");
-                        } else {
-                            msg.channel.send("<@!" + mention + "> has no salt that could be removed!");
-                        }
-                        break;
-                    case 'clr':
-                        await data.clrSalt(mention, msg.guild.id);
-                        msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
-                        break;
-                    default:
-                        msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@salt help` to get more info.");
-                        break;
+        if (msg.guild) {
+            var mention = args[1];
+            if (mention.startsWith('<@') && mention.endsWith('>')) {
+                mention = mention.substr(2).slice(0, -1);
+                if (mention.startsWith('!')) {
+                    mention = mention.substr(1);
                 }
             } else {
-                msg.reply("Commands are only available on guilds.");
+                if (command == "reset") {
+                    await data.resetSalt(msg.guild.id);
+                    msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
+                    return;
+                }
+                msg.reply("you need to mention a user you want to use this on!");
+                return;
             }
+            switch (command) {
+                case 'add':
+                    if (mention == bot.user.id) {
+                        msg.reply("you can't report me!");
+                        return;
+                    }
+                    await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
+                    msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
+                    break;
+                case 'rem':
+                    if (await data.remOldestSalt(mention, msg.guild.id)) {
+                        msg.channel.send("Successfully removed the oldest salt from <@!" + mention + ">!");
+                    } else {
+                        msg.channel.send("<@!" + mention + "> has no salt that could be removed!");
+                    }
+                    break;
+                case 'clr':
+                    await data.clrSalt(mention, msg.guild.id);
+                    msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
+                    break;
+                default:
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@help salt` to get more info.");
+                    break;
+            }
+        } else {
+            msg.reply("Commands are only available on guilds.");
         }
     },
     help: 'Salt commands for admins',
+    ehelp: async function (msg, bot) { printHelp(msg, bot); },
     admin: true,
     hide: false
 };

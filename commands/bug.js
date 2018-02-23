@@ -2,7 +2,7 @@
 module.exports = {
     main: async function (bot, msg) {
         if (!((await msg.content.length) > 0)) {
-            msg.reply("you need to add info about the report after the command.")
+            msg.reply("you need to add info about the report after the command. Use `k!help bug` to get more info.")
             return;
         }
         chann = await msg.guild.channels.get("414809410448261132");
@@ -13,6 +13,7 @@ module.exports = {
     },
     admin: false,
     help: 'Report a bug concerning MagiBot',
+    ehelp: async function (msg, bot) { msg.channel.send("To report a bug use `k!bug <bugreport with information about what you did, what was expected, and what went wrong>`."); },
     hide: false,
     dev: false
 };

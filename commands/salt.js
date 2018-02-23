@@ -31,70 +31,68 @@ module.exports = {
     main: async function f(bot, msg) {
         const args = msg.content.split(/ +/);
         var command = args[0].toLowerCase();
-        if (command == "help") {
-            printHelp(msg, bot);
-        } else {
-            if (msg.guild) {
-                switch (command) {
-                    case 'add':
-                        var mention = args[1];
-                        if (mention.startsWith('<@') && mention.endsWith('>')) {
-                            mention = mention.substr(2).slice(0, -1);
-                            if (mention.startsWith('!')) {
-                                mention = mention.substr(1);
-                            }
-                            if (mention == bot.user.id) {
-                                msg.reply("you can't report me!");
-                                return;
-                            }
-                            if (mention == msg.author.id) {
-                                msg.reply("you can't report yourself!");
-                                return;
-                            }
-                            let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
-                            console.log(time);
-                            if (time == 0) {
-                                msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
-                            } else {
-                                msg.reply("you can report <@!" + mention + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
-                            }
+        if (msg.guild) {
+            switch (command) {
+                case 'add':
+                    var mention = args[1];
+                    if (mention.startsWith('<@') && mention.endsWith('>')) {
+                        mention = mention.substr(2).slice(0, -1);
+                        if (mention.startsWith('!')) {
+                            mention = mention.substr(1);
+                        }
+                        if (mention == bot.user.id) {
+                            msg.reply("you can't report me!");
+                            return;
+                        }
+                        if (mention == msg.author.id) {
+                            msg.reply("you can't report yourself!");
+                            return;
+                        }
+                        let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
+                        console.log(time);
+                        if (time == 0) {
+                            msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
                         } else {
-                            msg.reply("you need to mention a user you want to report!");
+                            msg.reply("you can report <@!" + mention + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
                         }
-                        break;
-                    case "top": var salters = await data.topSalt(msg.guild.id);
-                        var info = [];
-                        for (var i = 0; i < 5; i++) {
-                            if (salters[i]) {
-                                let member = await msg.guild.fetchMember(salters[i].salter);
-                                info.push({
-                                    name: (i + 1) + ". place: " + member.displayName,
-                                    value: salters[i].salt + " salt",
-                                    inline: false
-                                });
-                            } else { break; }
+                    } else {
+                        msg.reply("you need to mention a user you want to report!");
+                    }
+                    break;
+                case "top": var salters = await data.topSalt(msg.guild.id);
+                    var info = [];
+                    for (var i = 0; i < 5; i++) {
+                        if (salters[i]) {
+                            let member = await msg.guild.fetchMember(salters[i].salter);
+                            info.push({
+                                name: (i + 1) + ". place: " + member.displayName,
+                                value: salters[i].salt + " salt",
+                                inline: false
+                            });
+                        } else { break; }
+                    }
+                    let embed = {
+                        color: 0xffffff,
+                        description: "Top 5 salter in " + msg.guild.name + ":",
+                        fields: info,
+                        footer: {
+                            icon_url: await msg.guild.iconURL,
+                            text: await msg.guild.name
                         }
-                        let embed = {
-                            color: 0xffffff,
-                            description: "Top 5 salter in " + msg.guild.name + ":",
-                            fields: info,
-                            footer: {
-                                icon_url: await msg.guild.iconURL,
-                                text: await msg.guild.name
-                            }
-                        }
-                        msg.channel.send('', { embed });
-                        break;
-                    default:
-                        msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "!salt help` for more info.");
-                        break;
-                }
-            } else {
-                msg.reply("commands are only functional when used in a guild.");
+                    }
+                    msg.channel.send('', { embed });
+                    break;
+                default:
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "!help salt` for more info.");
+                    break;
             }
+        } else {
+            msg.reply("commands are only functional when used in a guild.");
         }
+
     },
     help: "Salt commands",
+    ehelp: async function (msg, bot) { printHelp(msg, bot); },
     admin: false,
     hide: false
 };

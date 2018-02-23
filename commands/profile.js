@@ -13,7 +13,7 @@ module.exports = {
                         id = id.substr(1);
                     }
                 } else {
-                    msg.reply("mention no user at all to get your own profile or mention a user correctly.");
+                    msg.reply("your mention did not work. Use `k!help profile` for more info.");
                     return;
                 }
             } else {
@@ -48,6 +48,7 @@ module.exports = {
         }
     },
     help: 'Get some info on yourself or a user you mention',
+    ehelp: async function (msg, bot) { msg.channel.send("Use `k!profile` to get info about yourself or `k!profile @user` to get info about a certain user."); },
     admin: false,
     hide: false
 };

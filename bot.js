@@ -43,33 +43,47 @@ commands.help.args = '';
 commands.help.help = "Shows all available commands";
 commands.help.admin = false;
 commands.help.main = function (bot, msg) {
-    var cmds = [];
-
-    for (let command in commands) {
-        if (!(commands[command].hide || commands[command].admin)) {
-            let nm = command;
-            if (commands[command].dev) {
-                nm = "Under construction: " + nm;
+    const args = msg.content.split(/ +/);
+    var command = args[0].toLowerCase();
+    if (command) {
+        if (!commands[command]) {
+            msg.reply("this command does not exist. Use `" + bot.PREFIX + "!help` to get a full list of the commands available.");
+        } else {
+            if (commands[command].ehelp) {
+                commands[command].ehelp(msg, bot);
+            } else {
+                msg.reply("there is no extended help available for this command.");
             }
-            cmds.push({
-                name: nm,
-                value: commands[command].help,
-                inline: true
-            });
         }
-    }
+    } else {
+        var cmds = [];
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "!`:\nto get more info on a single command use `" + bot.PREFIX + "!<command> help`",
-        fields: cmds,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
+        for (let command in commands) {
+            if (!(commands[command].hide || commands[command].admin)) {
+                let nm = command;
+                if (commands[command].dev) {
+                    nm = "Under construction: " + nm;
+                }
+                cmds.push({
+                    name: nm,
+                    value: commands[command].help,
+                    inline: true
+                });
+            }
         }
-    }
 
-    msg.channel.send('', { embed });
+        let embed = {
+            color: bot.COLOR,
+            description: "Commands available via the prefix `" + bot.PREFIX + "!`:\nto get more info on a single command use `" + bot.PREFIX + "!help <command>`",
+            fields: cmds,
+            footer: {
+                icon_url: bot.user.avatarURL,
+                text: bot.user.username
+            }
+        }
+
+        msg.channel.send('', { embed });
+    }
 }
 
 commands['@help'] = {};
@@ -78,33 +92,49 @@ commands['@help'].help = "Shows all available admin commands";
 commands['@help'].hide = false;
 commands['@help'].admin = true;
 commands['@help'].main = function (bot, msg) {
-    var cmds = [];
-
-    for (let command in commands) {
-        if (commands[command].admin && !commands[command].hide) {
-            let nm = command.substr(1, command.length);
-            if (commands[command].dev) {
-                nm = "Under construction: " + nm;
+    const args = msg.content.split(/ +/);
+    var command = args[0].toLowerCase();
+    if (command) {
+        command = "@" + command;
+        if (!commands[command]) {
+            msg.reply("this command does not exist. Use `" + bot.PREFIX + "@help` to get a full list of the admin commands available.");
+        } else {
+            if (commands[command].ehelp) {
+                commands[command].ehelp(msg, bot);
+            } else {
+                msg.reply("there is no extended help available for this command.");
             }
-            cmds.push({
-                name: nm,
-                value: commands[command].help,
-                inline: true
-            });
         }
-    }
+    } else {
+        var cmds = [];
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "@`:\nto get more info on a single command use `" + bot.PREFIX + "@<command> help`",
-        fields: cmds,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
+        for (let command in commands) {
+            if (commands[command].admin && !commands[command].hide) {
+                let nm = command.substr(1, command.length);
+                if (commands[command].dev) {
+                    nm = "Under construction: " + nm;
+                }
+                cmds.push({
+                    name: nm,
+                    value: commands[command].help,
+                    inline: true
+                });
+            }
+
         }
-    }
 
-    msg.channel.send('', { embed });
+        let embed = {
+            color: bot.COLOR,
+            description: "Commands available via the prefix `" + bot.PREFIX + "@`:\nto get more info on a single command use `" + bot.PREFIX + "@help <command>`",
+            fields: cmds,
+            footer: {
+                icon_url: bot.user.avatarURL,
+                text: bot.user.username
+            }
+        }
+
+        msg.channel.send('', { embed });
+    }
 }
 
 commands.load = {};
@@ -226,7 +256,7 @@ var checkCommand = async function (msg, isMention) {
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setActivity("nutze " + bot.PREFIX + "!help", { type: "WATCHING" });
+    bot.user.setActivity("use " + bot.PREFIX + "!help", { type: "WATCHING" });
     data.startup(bot);
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());

@@ -41,13 +41,10 @@ module.exports = {
     main: function (bot, msg) {
         const args = msg.content.split(/ +/);
         var input = args[0];
-        if (input == "help") {
-            msg.channel.send("Let <@!" + bot.user.id + "> roll some dice for you. Use `" + bot.PREFIX + "!roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
-            return;
-        }
+
         var throws = parse(input);
         if (!throws) {
-            msg.channel.send("Your inputs could not be interpreted. Use `" + bot.PREFIX + "!roll help` for more info.");
+            msg.channel.send("Your inputs could not be interpreted. Use `" + bot.PREFIX + "!help roll` for more info.");
             return;
         }
         var info = [];
