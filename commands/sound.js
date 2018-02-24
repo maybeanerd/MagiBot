@@ -4,8 +4,8 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add [Link to audio file]",
-        value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file. An easy way to achieve this is by sending the file via Discord and then using the link that is generated.\nOnly .mp3 and .wav are being supported at the moment.\n An example Link created with Discord would be: `https://cdn.discordapp.com/attachments/386915523524558849/402131512818139146/SoundName.mp3`",
+        name: "add <Link to audio file>",
+        value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file. An easy way to achieve this is by sending the file via Discord and then using the link that is generated.\nOnly .mp3 and .wav are being supported at the moment.\n An example Link created with Discord would be: `https://cdn.discordapp.com/attachments/395966673900929034/415595902011572235/mpfc-15-the-spanish-inquisition.mp3`",
         inline: true
     });
 

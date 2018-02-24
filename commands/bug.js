@@ -5,8 +5,8 @@ module.exports = {
             msg.reply("you need to add info about the report after the command. Use `k!help bug` to get more info.")
             return;
         }
-        chann = await msg.guild.channels.get("414809410448261132");
-        chann.send("**Bugreport by " + await msg.author.username + ":**\n" + await msg.content).then(mes => {
+        let chann = await bot.channels.get("414809410448261132");
+        chann.send("**Bugreport** by " + await msg.author.username + " (<@" + msg.author.id + ">) on server " + msg.guild.name + "( " + msg.guild.id + " ) :\n" + await msg.content).then(mes => {
             msg.reply("succesfully sent bugreport:\n\n" + mes.content)
         });
 
