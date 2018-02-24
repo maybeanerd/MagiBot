@@ -97,16 +97,18 @@ async function onHour(bot) {
             let guildID = await G.id;
             var dbTwo = await mclient.db(guildID);
             var users = await dbTwo.collection("saltrank").find().toArray();
-            for (var user in users) {
-                let userID = users[user].id;
-                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: userID });
-                let slt = user.salt - removeData.nRemoved;
-                if (slt < 0) {
-                    slt = 0;
+            for (var usr in users) {
+                let user = users[usr];
+                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: user.id });
+                console.log(removeData.nRemoved)
+                if (removeData.nRemoved > 0) {
+                    let slt = user.salt - removeData.nRemoved;
+                    if (slt < 0) {
+                        slt = 0;
+                    }
+                    await dbTwo.collection("saltrank").updateOne({ salter: user.id }, { $set: { salt: slt } });
                 }
-                await dbTwo.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: slt } });
             }
-
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
                 if (await G.me.hasPermission("MANAGE_ROLES")) {

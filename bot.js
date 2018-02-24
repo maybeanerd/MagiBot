@@ -7,6 +7,11 @@ var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
+process.on('uncaughtException', function (err) {
+    let chann = bot.channels.get("414809410448261132");
+    chann.send("**Exception**:\n" + err);
+});
+
 bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
 bot.TOKEN = token.tk;
@@ -271,11 +276,6 @@ var checkCommand = async function (msg, isMention) {
         }
     }
 }
-
-process.on('uncaughtException', function (err) {
-    let chann = bot.channels.get("414809410448261132");
-    chann.send("**Exception**:\n" + err);
-});
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
