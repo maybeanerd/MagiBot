@@ -39,7 +39,7 @@ module.exports = {
         });
         info.push({
             name: "Invite me to your guild!",
-            value: "https://goo.gl/RQ7Pdo",
+            value: "https://goo.gl/G1mtTB",
             inline: false
         });
         info.push({
