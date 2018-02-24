@@ -108,8 +108,8 @@ async function onHour(bot) {
             }
 
             let saltkingID = await getSaltKing(G.id);
-            if (await G.available) { //TODO change perms to everything i actually need
-                if (await G.me.hasPermission("ADMINISTRATOR")) {
+            if (await G.available) {
+                if (await G.me.hasPermission("MANAGE_ROLES")) {
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
                     let groles = await G.roles;
@@ -138,15 +138,19 @@ async function onHour(bot) {
                     } else {
                         let channel = await getNotChannel(G.id);
                         if (channel) {
-                            //TODO check for send perms
-                            G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
+                            let chan = await G.channels.get(channel);
+                            if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                                chan.send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
+                            }
                         }
                     }
                 } else {
                     let channel = await getNotChannel(G.id);
                     if (channel) {
-                        //TODO check for send perms
-                        G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that i have no administrative permissions and need them to use all of my features.");
+                        let chan = await G.channels.get(channel);
+                        if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                            chan.send("Hey there " + G.owner + "!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.");
+                        }
                     }
                 }
             }

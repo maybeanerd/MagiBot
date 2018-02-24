@@ -236,10 +236,12 @@ var checkCommand = async function (msg, isMention) {
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
 
-                    //TODO check for perms
-
-                    msg.delete();
-                    (msg.reply("you're not allowed to use this command.")).then(mess => mess.delete(5000));
+                    if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
+                        if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
+                            msg.delete();
+                        }
+                        (msg.reply("you're not allowed to use this command.")).then(mess => mess.delete(5000));
+                    }
                     return;
                 }
                 break;
@@ -254,10 +256,12 @@ var checkCommand = async function (msg, isMention) {
                 commands[command].main(bot, msg);
             } else {
 
-                //TODO check for perms
-
-                msg.delete();
-                (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + "@help` to see how you can change that.")).then(mess => mess.delete(15000));
+                if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
+                    if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
+                        msg.delete();
+                    }
+                    (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + "@help` to see how you can change that.")).then(mess => mess.delete(15000));
+                }
             }
         }
     }
@@ -325,7 +329,6 @@ var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
     if (vcfree && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        //TODO check bot perms for sound
         if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
             let sound = await data.getSound(n.id, n.guild.id);
             if (sound) {
