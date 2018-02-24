@@ -248,7 +248,7 @@ var checkCommand = async function (msg, isMention) {
                 commands[command].main(bot, msg);
             } else {
                 msg.delete();
-                (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use " + bot.PREFIX + "@help to see how you can change that.")).then(mess => mess.delete(15000));
+                (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + "@help` to see how you can change that.")).then(mess => mess.delete(15000));
             }
         }
     }
