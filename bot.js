@@ -235,6 +235,9 @@ var checkCommand = async function (msg, isMention) {
                 break;
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
+
+                    //TODO check for perms
+
                     msg.delete();
                     (msg.reply("you're not allowed to use this command.")).then(mess => mess.delete(5000));
                     return;
@@ -250,6 +253,9 @@ var checkCommand = async function (msg, isMention) {
 
                 commands[command].main(bot, msg);
             } else {
+
+                //TODO check for perms
+
                 msg.delete();
                 (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + "@help` to see how you can change that.")).then(mess => mess.delete(15000));
             }
@@ -271,6 +277,8 @@ bot.on("ready", () => {
     }
     bot.user.setStatus("online", "");
     loadCommands();
+    let chann = bot.channels.get("382233880469438465");
+    chann.send("Im up and ready!");
 });
 
 bot.on("message", msg => {
@@ -317,22 +325,26 @@ var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
     if (vcfree && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        let sound = await data.getSound(n.id, n.guild.id);
-        if (sound) {
-            n.voiceChannel.join().then(connection => {
-                //TODO use connection.play when discord.js updates
-                const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-                dispatcher.on("start", () => {
-                    vcfree = false;
-                });
-                dispatcher.on("end", () => {
-                    if (!vcfree) {
-                        connection.disconnect();
-                        vcfree = true;
-                    }
-                });
+        //TODO check bot perms for sound
+        if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
+            let sound = await data.getSound(n.id, n.guild.id);
+            if (sound) {
+                n.voiceChannel.join().then(connection => {
+                    //TODO use connection.play when discord.js updates
+                    const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                    dispatcher.on("start", () => {
+                        vcfree = false;
+                    });
+                    //TODO set max time
+                    dispatcher.on("end", () => {
+                        if (!vcfree) {
+                            connection.disconnect();
+                            vcfree = true;
+                        }
+                    });
 
-            });
+                });
+            }
         }
     };
 });

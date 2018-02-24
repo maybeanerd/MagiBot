@@ -108,7 +108,7 @@ async function onHour(bot) {
             }
 
             let saltkingID = await getSaltKing(G.id);
-            if (await G.available) {
+            if (await G.available) { //TODO change perms to everything i actually need
                 if (await G.me.hasPermission("ADMINISTRATOR")) {
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
@@ -138,13 +138,15 @@ async function onHour(bot) {
                     } else {
                         let channel = await getNotChannel(G.id);
                         if (channel) {
-                            G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.").catch(function (err) { console.log(err); });
+                            //TODO check for send perms
+                            G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
                         }
                     }
                 } else {
                     let channel = await getNotChannel(G.id);
                     if (channel) {
-                        G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that i have no administrative permissions and need them to use all of my features.").catch(function (err) { console.log(err); });
+                        //TODO check for send perms
+                        G.channels.get(channel).send("Hey there " + G.owner + "!\nI regret to inform you that i have no administrative permissions and need them to use all of my features.");
                     }
                 }
             }
@@ -159,7 +161,7 @@ async function sendUpdate(update, bot) {
         var guilds = await bot.guilds.array();
         for (let GN in guilds) {
             var G = guilds[GN];
-            if (await G.available) {
+            if (await G.available) {//TODO change perms to everything i actually need
                 if (await G.me.hasPermission("ADMINISTRATOR")) {
                     let cid = await getNotChannel(G.id);
                     if (cid) {
