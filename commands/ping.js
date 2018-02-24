@@ -9,5 +9,6 @@ module.exports = {
         });
     },
     help: 'Ping the bot',
+    perm: "SEND_MESSAGES",
     admin: false,
 };

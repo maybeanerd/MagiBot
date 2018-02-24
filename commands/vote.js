@@ -68,6 +68,6 @@
     },
     help: 'Start a vote',
     admin: false,
-    hide: true,
+    hide: true, //TODO perms
     dev: true
 };

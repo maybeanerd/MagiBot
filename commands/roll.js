@@ -83,5 +83,6 @@ module.exports = {
     ehelp: function (bot, msg) {
         msg.channel.send("Let <@!" + bot.user.id + "> roll some dice for you. Use `" + bot.PREFIX + "!roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
     },
+    perm: "SEND_MESSAGES",
     admin: false
 };

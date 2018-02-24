@@ -62,5 +62,6 @@ module.exports = {
     help: 'Manage your joinsound',
     ehelp: async function (msg, bot) { printHelp(msg, bot); },
     admin: false,
+    perm: "SEND_MESSAGES",
     hide: false
 };

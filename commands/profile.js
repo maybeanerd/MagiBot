@@ -49,6 +49,7 @@ module.exports = {
     },
     help: 'Get some info on yourself or a user you mention',
     ehelp: async function (msg, bot) { msg.channel.send("Use `k!profile` to get info about yourself or `k!profile @user` to get info about a certain user."); },
+    perm: "SEND_MESSAGES",
     admin: false,
     hide: false
 };

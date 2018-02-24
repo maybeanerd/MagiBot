@@ -166,18 +166,17 @@ async function sendUpdate(update, bot) {
         for (let GN in guilds) {
             var G = guilds[GN];
             if (await G.available) {//TODO change perms to everything i actually need
-                if (await G.me.hasPermission("ADMINISTRATOR")) {
-                    let cid = await getNotChannel(G.id);
-                    if (cid) {
-                        let channel = await G.channels.get(cid);
-                        if (channel) {
+                let cid = await getNotChannel(G.id);
+                if (cid) {
+                    let channel = await G.channels.get(cid);
+                    if (channel) {
+                        if (await channel.permissionsFor(G.me).has("SEND_MESSAGES")) {
                             channel.send(update);
-                        } else {
-                            setNotChannel(G.id, false);
                         }
+                    } else {
+                        setNotChannel(G.id, false);
                     }
                 }
-
             }
         }
         mclient.close();

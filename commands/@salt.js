@@ -90,6 +90,7 @@ module.exports = {
     },
     help: 'Salt commands for admins',
     ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    perm: "SEND_MESSAGES",
     admin: true,
     hide: false
 };

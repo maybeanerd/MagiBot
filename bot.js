@@ -42,6 +42,7 @@ commands.help = {};
 commands.help.args = '';
 commands.help.help = "Shows all available commands";
 commands.help.admin = false;
+commands.help.perm = "SEND_MESSAGE";
 commands.help.main = function (bot, msg) {
     const args = msg.content.split(/ +/);
     var command = args[0].toLowerCase();
@@ -91,6 +92,7 @@ commands['@help'].args = '';
 commands['@help'].help = "Shows all available admin commands";
 commands['@help'].hide = false;
 commands['@help'].admin = true;
+commands['@help'].perm = "SEND_MESSAGE";
 commands['@help'].main = function (bot, msg) {
     const args = msg.content.split(/ +/);
     var command = args[0].toLowerCase();
@@ -235,7 +237,6 @@ var checkCommand = async function (msg, isMention) {
                 break;
             case '@':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
-
                     if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
                             msg.delete();
@@ -250,10 +251,14 @@ var checkCommand = async function (msg, isMention) {
         }
         if (commands[command] && (!(commands[command].dev) || msg.author.id == bot.OWNERID)) {
             if (pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
-
-                //TODO check for bot perms before using command
-
-                commands[command].main(bot, msg);
+                let perms = commands[command].perm;
+                if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
+                    commands[command].main(bot, msg);
+                } else {
+                    if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
+                        msg.channel.send("I don't have the permissions needed for this command. (" + perms + ") ");
+                    }
+                }
             } else {
 
                 if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
@@ -290,15 +295,11 @@ bot.on("message", msg => {
         checkCommand(msg, true);
         if (bot.DELETE_COMMANDS) msg.delete();
     } else if (msg.content.startsWith(bot.PREFIX)) {
-        if (msg.guild.me.hasPermission("ADMINISTRATOR")) {
-            //database stuff
-            data.usageUp(msg.author.id, msg.guild.id);
-            //end database stuff
-            checkCommand(msg, false);
-            if (bot.DELETE_COMMANDS) msg.delete();
-        } else {
-            msg.reply("I don't have administrative permissions yet, i can't use my commands.");
-        }
+        //database stuff
+        data.usageUp(msg.author.id, msg.guild.id);
+        //end database stuff
+        checkCommand(msg, false);
+        if (bot.DELETE_COMMANDS) msg.delete();
     }
 });
 

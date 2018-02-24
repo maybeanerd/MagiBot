@@ -14,6 +14,7 @@ module.exports = {
     admin: false,
     help: 'Report a bug concerning MagiBot',
     ehelp: async function (msg, bot) { msg.channel.send("To report a bug use `k!bug <bugreport with information about what you did, what was expected, and what went wrong>`."); },
+    perm: "SEND_MESSAGES",
     hide: false,
     dev: false
 };

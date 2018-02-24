@@ -82,6 +82,7 @@ module.exports = {
     },
     help: 'Get some info about the bot',
     ehelp: async function (msg, bot) { msg.channel.send("Use `k!info` to get some information about the bot."); },
+    perm: "SEND_MESSAGES",
     admin: false,
     hide: false
 };
