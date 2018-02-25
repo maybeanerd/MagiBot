@@ -83,13 +83,13 @@ async function onHour(bot) {
     if (e > 100) { // some arbitrary time period
         setTimeout(onHour.bind(null, bot), e);
     }
-    await MongoClient.connect(url).then(async function (mclient) {
-        let nd = new Date();
-        nd.setDate(nd.getDate() - 8);
-        var guilds = await bot.guilds.array();
-        for (let GN in guilds) {
+    let nd = new Date();
+    nd.setDate(nd.getDate() - 8);
+    var guilds = await bot.guilds.array();
+    for (let GN in guilds) {
+        var G = guilds[GN];
+        await MongoClient.connect(url).then(async function (mclient) {
             let db = mclient.db('MagiBot');
-            var G = guilds[GN];
             console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
             var dbTwo = await mclient.db(guildID);
@@ -106,59 +106,59 @@ async function onHour(bot) {
                     await dbTwo.collection("saltrank").updateOne({ salter: report.salter }, { $set: { salt: slt } });
                 }
             }
-            let saltkingID = await getSaltKing(G.id);
-            if (await G.available) {
-                if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
-                    let SaltKing = await getSaltKing(G.id);
-                    let SaltRole = await getSaltRole(G.id);
-                    let groles = await G.roles;
-                    if (!SaltRole || !groles.has(SaltRole)) {
-                        await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
-                            await setSaltRole(G.id, role.id);
-                            SaltRole = role.id
-                        });
+            mclient.close();
+        });
+        let saltkingID = await getSaltKing(G.id);
+        if (await G.available) {
+            if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
+                let SaltKing = await getSaltKing(G.id);
+                let SaltRole = await getSaltRole(G.id);
+                let groles = await G.roles;
+                if (!SaltRole || !groles.has(SaltRole)) {
+                    await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
+                        await setSaltRole(G.id, role.id);
+                        SaltRole = role.id
+                    });
+                }
+                let sltID = await topSalt(G.id);
+                let saltID = false;
+                if (sltID[0]) {
+                    saltID = sltID[0].salter;
+                }
+                if (groles.get(SaltRole).position < G.me.highestRole.position) {
+                    if (SaltKing && saltID != SaltKing) {
+                        let user = await G.fetchMember(SaltKing);
+                        if (user) {
+                            user.removeRole(SaltRole, "Is not as salty anymore");
+                        }
                     }
-                    let sltID = await topSalt(G.id);
-                    let saltID = false;
-                    if (sltID[0]) {
-                        saltID = sltID[0].salter;
-                    }
-                    if (groles.get(SaltRole).position < G.me.highestRole.position) {
-                        if (SaltKing && saltID != SaltKing) {
-                            let user = await G.fetchMember(SaltKing);
-                            if (user) {
-                                user.removeRole(SaltRole, "Is not as salty anymore");
-                            }
+                    if (saltID && saltID != SaltKing) {
+                        let nuser = await G.fetchMember(saltID);
+                        if (nuser) {
+                            await nuser.addRole(SaltRole, "Saltiest user");
                         }
-                        if (saltID && saltID != SaltKing) {
-                            let nuser = await G.fetchMember(saltID);
-                            if (nuser) {
-                                await nuser.addRole(SaltRole, "Saltiest user");
-                            }
-                            await setSaltKing(G.id, saltID);
-                        }
-                    } else {
-                        let channel = await getNotChannel(G.id);
-                        if (channel) {
-                            let chan = await G.channels.get(channel);
-                            if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                                chan.send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
-                            }
-                        }
+                        await setSaltKing(G.id, saltID);
                     }
                 } else {
                     let channel = await getNotChannel(G.id);
                     if (channel) {
                         let chan = await G.channels.get(channel);
                         if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                            chan.send("Hey there " + G.owner + "!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.");
+                            chan.send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
                         }
+                    }
+                }
+            } else {
+                let channel = await getNotChannel(G.id);
+                if (channel) {
+                    let chan = await G.channels.get(channel);
+                    if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                        chan.send("Hey there " + G.owner + "!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.");
                     }
                 }
             }
         }
-        mclient.close();
-    });
+    }
 }
 
 async function sendUpdate(update, bot) {
