@@ -311,7 +311,7 @@ bot.on("guildCreate", guild => {
             + bot.PREFIX + "@help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
         let chan = bot.channels.get("408611226998800390");
-        chan.send("joined " + guild.name);
+        chan.send("joined " + guild.name + " (" + guild.memberCount + " users)");
     }
 });
 
@@ -334,7 +334,7 @@ bot.on("voiceStateUpdate", async function (o, n) {
             let sound = await data.getSound(n.id, n.guild.id);
             if (sound) {
                 n.voiceChannel.join().then(connection => {
-                    //TODO use connection.play when discord.js updates
+                    //TODO use connection.play when discord.js updates, get rid of nested listener
                     const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
                     dispatcher.on("end", () => {
                         connection.disconnect();
