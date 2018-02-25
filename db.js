@@ -83,30 +83,27 @@ async function onHour(bot) {
     if (e > 100) { // some arbitrary time period
         setTimeout(onHour.bind(null, bot), e);
     }
-    // my code
     await MongoClient.connect(url).then(async function (mclient) {
-        let db = mclient.db('MagiBot');
         let nd = new Date();
-        nd.setDate(nd.getDate() - 14);
-        db.collection("salt").remove({ date: { $lt: nd } });
-
+        nd.setDate(nd.getDate() - 8);
         var guilds = await bot.guilds.array();
         for (let GN in guilds) {
+            let db = mclient.db('MagiBot');
             var G = guilds[GN];
             console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
             var dbTwo = await mclient.db(guildID);
-            var users = await dbTwo.collection("saltrank").find().toArray();
-            for (var usr in users) {
-                let user = users[usr];
-                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: user.id });
+            var ranking = await dbTwo.collection("saltrank").find().toArray();
+            for (var i in ranking) {
+                let report = ranking[i];
+                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: report.salter });
                 console.log(G.name + ": " + removeData.nRemoved);
                 if (removeData.nRemoved && removeData.nRemoved > 0) {
-                    let slt = user.salt - removeData.nRemoved;
+                    let slt = report.salt - removeData.nRemoved;
                     if (slt < 0) {
                         slt = 0;
                     }
-                    await dbTwo.collection("saltrank").updateOne({ salter: user.id }, { $set: { salt: slt } });
+                    await dbTwo.collection("saltrank").updateOne({ salter: report.salter }, { $set: { salt: slt } });
                 }
             }
             let saltkingID = await getSaltKing(G.id);
