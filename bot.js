@@ -12,6 +12,7 @@ process.on('uncaughtException', function (err) {
     chann.send("**Exception**:\n" + err);
 });
 
+
 bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
 bot.TOKEN = token.tk;
@@ -308,7 +309,7 @@ bot.on("guildCreate", guild => {
         data.addGuild(guild.id);
         guild.owner.send("Hi there " + guild.owner.displayName + ".\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use `"
             + bot.PREFIX + "@help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
-            "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev").catch(function (err) { console.log(err); });
+            "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
         let chan = bot.channels.get("408611226998800390");
         chan.send("joined " + guild.name);
     }
@@ -326,25 +327,17 @@ bot.on('error', (err) => {
     console.log(err);
     console.log("——— END BIG ERROR ———");
 });
-var vcfree = true;
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    if (vcfree && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    if (!(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
             let sound = await data.getSound(n.id, n.guild.id);
             if (sound) {
                 n.voiceChannel.join().then(connection => {
                     //TODO use connection.play when discord.js updates
                     const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-                    dispatcher.on("start", () => {
-                        vcfree = false;
-                    });
-                    //TODO set max time
                     dispatcher.on("end", () => {
-                        if (!vcfree) {
-                            connection.disconnect();
-                            vcfree = true;
-                        }
+                        connection.disconnect();
                     });
 
                 });

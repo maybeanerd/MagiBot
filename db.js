@@ -93,15 +93,15 @@ async function onHour(bot) {
         var guilds = await bot.guilds.array();
         for (let GN in guilds) {
             var G = guilds[GN];
-
+            console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
             var dbTwo = await mclient.db(guildID);
             var users = await dbTwo.collection("saltrank").find().toArray();
             for (var usr in users) {
                 let user = users[usr];
                 let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: user.id });
-                console.log(removeData.nRemoved)
-                if (removeData.nRemoved > 0) {
+                console.log(G.name + ": " + removeData.nRemoved);
+                if (removeData.nRemoved && removeData.nRemoved > 0) {
                     let slt = user.salt - removeData.nRemoved;
                     if (slt < 0) {
                         slt = 0;
@@ -111,30 +111,33 @@ async function onHour(bot) {
             }
             let saltkingID = await getSaltKing(G.id);
             if (await G.available) {
-                if (await G.me.hasPermission("MANAGE_ROLES")) {
+                if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
                     let SaltKing = await getSaltKing(G.id);
                     let SaltRole = await getSaltRole(G.id);
                     let groles = await G.roles;
                     if (!SaltRole || !groles.has(SaltRole)) {
-                        await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 1, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
-                            setSaltRole(G.id, role.id);
+                        await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
+                            await setSaltRole(G.id, role.id);
                             SaltRole = role.id
                         });
                     }
-                    let saltID = await topSalt(G.id);
-                    if (saltID[0]) {
-                        saltID = saltID[0].salter;
-                    } else {
-                        saltID = false;
+                    let sltID = await topSalt(G.id);
+                    let saltID = false;
+                    if (sltID[0]) {
+                        saltID = sltID[0].salter;
                     }
                     if (groles.get(SaltRole).position < G.me.highestRole.position) {
                         if (SaltKing && saltID != SaltKing) {
                             let user = await G.fetchMember(SaltKing);
-                            user.removeRole(SaltRole, "Is not as salty anymore");
+                            if (user) {
+                                user.removeRole(SaltRole, "Is not as salty anymore");
+                            }
                         }
-                        if (saltID) {
+                        if (saltID && saltID != SaltKing) {
                             let nuser = await G.fetchMember(saltID);
-                            await nuser.addRole(SaltRole, "Saltiest user");
+                            if (nuser) {
+                                await nuser.addRole(SaltRole, "Saltiest user");
+                            }
                             await setSaltKing(G.id, saltID);
                         }
                     } else {
@@ -490,10 +493,6 @@ module.exports = {
             mclient.close();
         });
         onHour(bot);
-    },
-
-    addUser: (userid) => {
-        checks(userid);
     },
     getUser: async function (userid, guildID) {
         if (await checks(userid, guildID)) {
