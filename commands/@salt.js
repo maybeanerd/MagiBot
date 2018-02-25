@@ -46,7 +46,7 @@ module.exports = {
         var command = args[0].toLowerCase();
         if (msg.guild) {
             var mention = args[1];
-            if (mention.startsWith('<@') && mention.endsWith('>')) {
+            if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
                 mention = mention.substr(2).slice(0, -1);
                 if (mention.startsWith('!')) {
                     mention = mention.substr(1);
