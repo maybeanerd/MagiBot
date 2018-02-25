@@ -311,14 +311,14 @@ bot.on("guildCreate", guild => {
             + bot.PREFIX + "@help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
         let chan = bot.channels.get("408611226998800390");
-        chan.send("joined " + guild.name + " (" + guild.memberCount + " users)");
+        chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users)");
     }
 });
 
 bot.on("guildDelete", guild => {
     if (guild.available) {
         let chan = bot.channels.get("408611226998800390");
-        chan.send("left " + guild.name);
+        chan.send(":x: left " + guild.name + " (" + guild.memberCount + " users)");
     }
 });
 
