@@ -1,11 +1,19 @@
 module.exports = {
     main: (bot, msg) => {
         var info = [];
-
-
+        let guilds = bot.guilds.array();
         info.push({
             name: "Number of guilds currently being served",
-            value: bot.guilds.array().length,
+            value: guilds.length,
+            inline: false
+        });
+        let usercount = 0;
+        for (let i in guilds) {
+            usercount += guilds[i].memberCount;
+        }
+        info.push({
+            name: "Number of users currently being served",
+            value: usercount,
             inline: false
         });
         //uptime calc
