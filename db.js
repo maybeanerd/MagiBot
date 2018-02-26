@@ -109,7 +109,6 @@ async function onHour(bot) {
             }
             mclient.close();
         });
-        let saltkingID = await getSaltKing(G.id);
         if (await G.available) {
             if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
                 let SaltKing = await getSaltKing(G.id);
