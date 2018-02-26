@@ -1,4 +1,4 @@
-var data = require(__dirname + '/../db.js');
+﻿var data = require(__dirname + '/../db.js');
 
 function printHelp(msg, bot) {
     var info = [];
@@ -62,32 +62,60 @@ module.exports = {
 
         switch (command) {
             case 'ban':
-                if (mention.startsWith('<@') && mention.endsWith('>')) {
+                if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
                     mention = mention.substr(2).slice(0, -1);
                     if (mention.startsWith('!')) {
                         mention = mention.substr(1);
                     }
-                    if (await data.setBlacklistedUser(msg.guild.id, mention, true)) {
-                        msg.channel.send("Successfully banned <@!" + mention + "> from using the bot.");
-                    } else {
-                        msg.channel.send("Error 404 you failed.");
-                    }
+                    msg.channel.send("Do you really want to ban <@!" + mention + "> from using the bot?").then(mess => {
+                        const filter = (reaction, user) => {
+                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
+                        };
+                        mess.react('☑');
+                        mess.react('❌');
+                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+                            mess.delete();
+                            if (reacts.first() && reacts.first().emoji.name == '☑') {
+                                if (data.setBlacklistedUser(msg.guild.id, mention, true)) {
+                                    msg.channel.send("Successfully banned <@!" + mention + "> from using the bot.");
+                                } else {
+                                    msg.channel.send("Error 404 you failed.");
+                                }
+                            } else if (reacts.first()) {
+                                msg.channel.send("Successfully canceled ban.");
+                            }
+                        });
+                    });
                 } else {
                     msg.reply("you need to mention a user you want to use this on!");
                     return;
                 }
                 break;
             case 'unban':
-                if (mention.startsWith('<@') && mention.endsWith('>')) {
+                if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
                     mention = mention.substr(2).slice(0, -1);
                     if (mention.startsWith('!')) {
                         mention = mention.substr(1);
                     }
-                    if (await data.setBlacklistedUser(msg.guild.id, mention, false)) {
-                        msg.channel.send("Successfully activated the bot for <@!" + mention + "> again.");
-                    } else {
-                        msg.channel.send("Error 404 you failed.");
-                    }
+                    msg.channel.send("Do you really want to reactivate bot usage for <@!" + mention + "> ?").then(mess => {
+                        const filter = (reaction, user) => {
+                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
+                        };
+                        mess.react('☑');
+                        mess.react('❌');
+                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+                            mess.delete();
+                            if (reacts.first() && reacts.first().emoji.name == '☑') {
+                                if (data.setBlacklistedUser(msg.guild.id, mention, false)) {
+                                    msg.channel.send("Successfully activated the bot for <@!" + mention + "> again.");
+                                } else {
+                                    msg.channel.send("Error 404 you failed.");
+                                }
+                            } else if (reacts.first()) {
+                                msg.channel.send("Successfully canceled unban.");
+                            }
+                        });
+                    });
                 } else {
                     msg.channel.send("you need to mention a user you want to use this on!");
                     return;

@@ -1,4 +1,4 @@
-var data = require(__dirname + '/../db.js');
+﻿var data = require(__dirname + '/../db.js');
 
 function printHelp(msg, bot) {
     var info = [];
@@ -53,8 +53,22 @@ module.exports = {
                 }
             } else {
                 if (command == "reset") {
-                    await data.resetSalt(msg.guild.id);
-                    msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
+                    msg.channel.send("Do you really want to reset all salt on this server?").then(mess => {
+                        const filter = (reaction, user) => {
+                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
+                        };
+                        mess.react('☑');
+                        mess.react('❌');
+                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+                            mess.delete();
+                            if (reacts.first() && reacts.first().emoji.name == '☑') {
+                                data.resetSalt(msg.guild.id);
+                                msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
+                            } else if (reacts.first()) {
+                                msg.channel.send("Successfully canceled salt reset.");
+                            }
+                        });
+                    });
                     return;
                 }
                 msg.reply("you need to mention a user you want to use this on!");
