@@ -100,10 +100,11 @@ async function onHour(bot) {
                 console.log(G.name + ": " + removeData.nRemoved);
                 if (removeData.nRemoved && removeData.nRemoved > 0) {
                     let slt = report.salt - removeData.nRemoved;
-                    if (slt < 0) {
-                        slt = 0;
+                    if (slt <= 0) {
+                        await dbTwo.collection("saltrank").deleteOne({ salter: report.salter });
+                    } else {
+                        await dbTwo.collection("saltrank").updateOne({ salter: report.salter }, { $set: { salt: slt } });
                     }
-                    await dbTwo.collection("saltrank").updateOne({ salter: report.salter }, { $set: { salt: slt } });
                 }
             }
             mclient.close();
@@ -329,9 +330,12 @@ async function saltGuild(salter, guildID, add = 1, reset = false) {
             await db.collection("saltrank").insertOne(myobj);
         } else {
             let slt = user.salt + add;
-            if (slt < 0 || reset) { slt = 0; }
-            var update = { $set: { salt: slt } };
-            await db.collection("saltrank").updateOne({ salter: salter }, update);
+            if (slt <= 0 || reset) {
+                await db.collection("saltrank").deleteOne({ salter: salter });
+            } else {
+                var update = { $set: { salt: slt } };
+                await db.collection("saltrank").updateOne({ salter: salter }, update);
+            }
         }
         mclient.close();
     });
@@ -645,12 +649,8 @@ module.exports = {
             await MongoClient.connect(url).then(async function (mclient) {
                 var db = await mclient.db('MagiBot');
                 var guildDB = await mclient.db(guildID);
-                var users = await guildDB.collection("saltrank").find().toArray();
+                await guildDB.collection("saltrank").remove({});
                 await db.collection("salt").remove({ guild: guildID });
-                for (var user in users) {
-                    var userID = await users[user].salter;
-                    await guildDB.collection("saltrank").updateOne({ salter: userID }, { $set: { salt: 0 } });
-                }
                 mclient.close();
             });
         }
