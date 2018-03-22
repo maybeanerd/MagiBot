@@ -16,6 +16,7 @@ module.exports = {
             value: usercount,
             inline: false
         });
+        /*
         //uptime calc
         var u = bot.uptime;
         var uptime = "";
@@ -45,6 +46,7 @@ module.exports = {
             value: uptime,
             inline: false
         });
+        */
         info.push({
             name: "Invite me to your guild!",
             value: "https://goo.gl/G1mtTB",
@@ -82,7 +84,7 @@ module.exports = {
             fields: info,
             footer: {
                 icon_url: bot.user.avatarURL,
-                text: bot.user.username
+                text: bot.SIGN
             }
         }
 
