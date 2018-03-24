@@ -1,4 +1,7 @@
 var data = require(__dirname + '/../db.js');
+var ffprobe = require('ffprobe'),
+    ffprobeStatic = require('ffprobe-static');
+
 
 function printHelp(msg, bot) {
     var info = [];
@@ -35,15 +38,27 @@ module.exports = {
         var mention = args[1];
         switch (command) {
             case 'add':
-                if (!(mention.startsWith("http") && (mention.endsWith(".wav") || mention.endsWith(".mp3")))) {
-                    msg.channel.send("You need to use a compatible link! For more info use `" + bot.PREFIX + "!sound help`");
+                let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
+                if (!sound) {
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!sound help`");
+                    return;
+                }
+                console.log(sound);
+                sound = sound.streams[0];
+                if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!sound help`");
+                    return;
+                }
+                console.log("duration: " + sound.duration);
+                if (sound.duration > 8) {
+                    msg.reply("the joinsound you're trying to add is longer than 8 seconds.");
                     return;
                 }
                 if (await data.addSound(msg.author.id, mention, msg.guild.id)) {
                     msg.reply("you successfully changed your joinsound!");
                 }
                 else {
-                    msg.reply("Aaaaaand you failed.");
+                    msg.reply("Something went wrong...");
                 }
                 break;
             case 'rem':
@@ -53,6 +68,7 @@ module.exports = {
                 else {
                     msg.reply("Aaaaaand you failed.");
                 }
+
                 break;
             default:
                 msg.reply("This is not a valid command. Use `" + bot.PREFIX + "!help sound` for more info.");
