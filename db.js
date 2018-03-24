@@ -232,7 +232,7 @@ async function saltUp(userid1, userid2, ad, guildID) {
 async function usageUp(userid, guildID) {
     let user = await getUser(userid, guildID);
     var updateval;
-    if (user.botusage) {
+    if (user && user.botusage) {
         updateval = user.botusage + 1
     } else {
         updateval = 1;
@@ -523,7 +523,11 @@ module.exports = {
     getUsage: async function (userid, guildID) {
         if (await checks(userid, guildID)) {
             let user = await getUser(userid, guildID);
-            return parseInt(user.botusage);
+            if (user) {
+                return parseInt(user.botusage);
+            } else {
+                return 0;
+            }
         }
     },
     remOldestSalt: async function (userid, guildID) {

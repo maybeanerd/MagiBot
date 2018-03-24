@@ -35,7 +35,7 @@ module.exports = {
             switch (command) {
                 case 'add':
                     var mention = args[1];
-                    if (mention.startsWith('<@') && mention.endsWith('>')) {
+                    if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
                         mention = mention.substr(2).slice(0, -1);
                         if (mention.startsWith('!')) {
                             mention = mention.substr(1);
