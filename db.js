@@ -96,10 +96,10 @@ async function onHour(bot) {
             var ranking = await dbTwo.collection("saltrank").find().toArray();
             for (var i in ranking) {
                 let report = ranking[i];
-                let removeData = await db.collection("salt").remove({ date: { $lt: nd }, guild: guildID, salter: report.salter });
-                console.log(G.name + ": " + removeData.nRemoved);
-                if (removeData.nRemoved && removeData.nRemoved > 0) {
-                    let slt = report.salt - removeData.nRemoved;
+                let removeData = await db.collection("salt").deleteMany({ date: { $lt: nd }, guild: guildID, salter: report.salter });
+                console.log(G.name + ": " + removeData.deletedCount);
+                if (removeData.deletedCount && removeData.deletedCount > 0) {
+                    let slt = report.salt - removeData.deletedCount;
                     if (slt <= 0) {
                         await dbTwo.collection("saltrank").deleteOne({ salter: report.salter });
                     } else {
@@ -127,13 +127,13 @@ async function onHour(bot) {
                 }
                 if (groles.get(SaltRole).position < G.me.highestRole.position) {
                     if (SaltKing && saltID != SaltKing) {
-                        let user = await G.fetchMember(SaltKing);
+                        let user = await G.fetchMember(SaltKing).catch(() => { });
                         if (user) {
                             user.removeRole(SaltRole, "Is not as salty anymore");
                         }
                     }
                     if (saltID && saltID != SaltKing) {
-                        let nuser = await G.fetchMember(saltID);
+                        let nuser = await G.fetchMember(saltID).catch(() => { });
                         if (nuser) {
                             await nuser.addRole(SaltRole, "Saltiest user");
                         }
@@ -637,7 +637,7 @@ module.exports = {
         if (await checks(userid, guildID) && await checkGuild(guildID)) {
             return MongoClient.connect(url).then(async function (mclient) {
                 let db = mclient.db('MagiBot');
-                await db.collection("salt").remove({ guild: guildID, salter: userid });
+                await db.collection("salt").deleteMany({ guild: guildID, salter: userid });
                 saltGuild(userid, guildID, 1, true);
                 mclient.close();
             });
@@ -648,8 +648,8 @@ module.exports = {
             await MongoClient.connect(url).then(async function (mclient) {
                 var db = await mclient.db('MagiBot');
                 var guildDB = await mclient.db(guildID);
-                await guildDB.collection("saltrank").remove({});
-                await db.collection("salt").remove({ guild: guildID });
+                await guildDB.collection("saltrank").deleteMany({});
+                await db.collection("salt").deleteMany({ guild: guildID });
                 mclient.close();
             });
         }

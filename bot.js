@@ -11,6 +11,10 @@ process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
     chann.send("**Exception**:\n" + err);
 });
+process.on('unhandledRejection', function (err) {
+    let chann = bot.channels.get("414809410448261132");
+    chann.send("Uncaught promise rejection: " + err);
+});
 
 
 bot.OWNERID = token.owner;

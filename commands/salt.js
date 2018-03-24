@@ -62,10 +62,14 @@ module.exports = {
                 case "top": var salters = await data.topSalt(msg.guild.id);
                     var info = [];
                     for (var i = 0; i < 5; i++) {
+                        let mname = "User left guild";
                         if (salters[i]) {
-                            let member = await msg.guild.fetchMember(salters[i].salter);
+                            let member = await msg.guild.fetchMember(salters[i].salter).catch((err) => { });
+                            if (member) {
+                                mname = member.displayName;
+                            }
                             info.push({
-                                name: (i + 1) + ". place: " + member.displayName,
+                                name: (i + 1) + ". place: " + mname,
                                 value: salters[i].salt + " salt",
                                 inline: false
                             });
