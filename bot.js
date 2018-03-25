@@ -298,6 +298,7 @@ bot.on("ready", () => {
 });
 
 bot.on("message", msg => {
+if(!msg.author.bot){
     if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
         checkCommand(msg, true);
         if (bot.DELETE_COMMANDS) msg.delete();
@@ -308,6 +309,7 @@ bot.on("message", msg => {
         checkCommand(msg, false);
         if (bot.DELETE_COMMANDS) msg.delete();
     }
+}
 });
 
 bot.on("guildCreate", guild => {
