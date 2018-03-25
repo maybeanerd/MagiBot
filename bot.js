@@ -9,11 +9,11 @@ var bot = new Discord.Client({ autoReconnect: true });
 
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
-    chann.send("**Exception**:\n" + err);
+    chann.send("**Exception:**\n```" + err+"```");
 });
 process.on('unhandledRejection', function (err) {
     let chann = bot.channels.get("414809410448261132");
-    chann.send("Uncaught promise rejection: " + err);
+    chann.send("**Uncaught promise rejection:**\n```" + err+"```");
 });
 
 
