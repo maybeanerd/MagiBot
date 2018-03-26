@@ -30,7 +30,7 @@ async function addUser(userid, guildID) {
         return MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db(guildID);
             var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false };
-            db.collection("users").insertOne(myobj);
+            await db.collection("users").insertOne(myobj);
             mclient.close();
             return true;
         });
