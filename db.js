@@ -81,8 +81,8 @@ async function saltDowntimeDone(userid1, userid2) {
 
 //autmoatic deletion of reports and saltking evaluation: 
 async function onHour(bot) {
-let guilds = await bot.guilds.array();
-const servercount = guilds.length;
+var guilds = await bot.guilds.array();
+//const servercount = guilds.length;
 //post server count to Discord Bot Lists:
 //to Discord Bot List
 /*
