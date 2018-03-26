@@ -4,9 +4,9 @@ var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on 
 var url = config.dburl;
 
 //Define Methods:
-async function getUser(userid, guildID) {
+async function getuser(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
-        var db = mclient.db(guildID);
+        var db =await mclient.db(guildID);
         let result = await db.collection("users").findOne({ _id: userid });
         mclient.close();
         return result;
@@ -14,7 +14,7 @@ async function getUser(userid, guildID) {
 }
 
 async function existsUser(userid, guildID) {
-    let user = await getUser(userid, guildID);
+    let user = await getuser(userid, guildID);
     if (user) {
         return true;
     } else {
@@ -230,7 +230,7 @@ async function saltUp(userid1, userid2, ad, guildID) {
 }
 
 async function usageUp(userid, guildID) {
-    let user = await getUser(userid, guildID);
+    let user = await getuser(userid, guildID);
     var updateval;
     if (user && user.botusage) {
         updateval = user.botusage + 1
@@ -496,7 +496,7 @@ module.exports = {
     },
     getUser: async function (userid, guildID) {
         if (await checks(userid, guildID)) {
-            let result = await getUser(userid, guildID);
+            let result = await getuser(userid, guildID);
             return result;
         }
     },
@@ -510,7 +510,7 @@ module.exports = {
             return saltUp(userid1, userid2, false, guildID);
         }
     },
-    saltUpAdmin: async function (userid1, userid2, guildID = 0) {
+    saltUpAdmin: async function (userid1, userid2, guildID) {
         if (await checks(userid1, guildID) && await checks(userid2, guildID) && await checkGuild(guildID)) {
             return saltUp(userid1, userid2, true, guildID);
         }
@@ -522,7 +522,7 @@ module.exports = {
     },
     getUsage: async function (userid, guildID) {
         if (await checks(userid, guildID)) {
-            let user = await getUser(userid, guildID);
+            let user = await getuser(userid, guildID);
             if (user) {
                 return parseInt(user.botusage);
             } else {
@@ -593,7 +593,7 @@ module.exports = {
     },
     getSound: async function (userid, guildID) {
         if (await checks(userid, guildID)) {
-            let user = await getUser(userid, guildID);
+            let user = await getuser(userid, guildID);
             if (user.sound) {
                 return user.sound;
             } else {
