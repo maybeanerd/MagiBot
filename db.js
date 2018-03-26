@@ -2,6 +2,10 @@ var MongoClient = require('mongodb').MongoClient;
 var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
 var url = config.dburl;
+/*
+const { DiscordBotsList } = require("discordbots-api");
+const DiscordBots = new DiscordBotsList('token');
+*/
 
 //Define Methods:
 async function getUser(userid, guildID) {
@@ -77,6 +81,17 @@ async function saltDowntimeDone(userid1, userid2) {
 
 //autmoatic deletion of reports and saltking evaluation: 
 async function onHour(bot) {
+let guilds = await bot.guilds.array();
+const servercount = guilds.length;
+//post server count to Discord Bot Lists:
+//to Discord Bot List
+/*
+DiscordBots.postStats(servercount);
+*/
+//to Discord Bots
+// TODO
+//endof Botlists
+
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
@@ -85,7 +100,6 @@ async function onHour(bot) {
     }
     let nd = new Date();
     nd.setDate(nd.getDate() - 8);
-    var guilds = await bot.guilds.array();
     for (let GN in guilds) {
         var G = guilds[GN];
         await MongoClient.connect(url).then(async function (mclient) {
