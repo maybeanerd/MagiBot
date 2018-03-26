@@ -11,7 +11,7 @@ var bot = new Discord.Client({ autoReconnect: true });
 const dbl = require("dblposter");
 const DBLPoster = new dbl(`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0`);
 // Then, depending on what you called your client
-DBLPoster.bind(bot);
+//DBLPoster.bind(bot);
 
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
