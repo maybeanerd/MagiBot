@@ -8,7 +8,8 @@ async function getuser(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db =await mclient.db(guildID);
         let result = await db.collection("users").findOne({ _id: userid });
-        mclient.close();
+//let result = await db.collection("users").findOneAndUpdate({_id:userid}, {$setOnInsert:{ warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false }}, {returnNewDocument:true, upsert:true});        
+mclient.close();
         return result;
     });
 }
