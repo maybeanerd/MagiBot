@@ -6,11 +6,10 @@ var url = config.dburl;
 //Define Methods:
 async function getuser(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
-        var db =await mclient.db(guildID);
-        let result = await db.collection("users").findOne({ _id: userid });
-//let result = await db.collection("users").findOneAndUpdate({_id:userid}, {$setOnInsert:{ warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false }}, {returnNewDocument:true, upsert:true});        
-mclient.close();
-        return result;
+        var db = await mclient.db(guildID);
+        let result = await db.collection("users").findOneAndUpdate({ _id: userid }, { $setOnInsert: { warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false } }, { returnOriginal: false, upsert: true });
+        mclient.close();
+        return result.value;
     });
 }
 
@@ -86,7 +85,7 @@ async function onHour(bot) {
     }
     let nd = new Date();
     nd.setDate(nd.getDate() - 8);
-var guilds = await bot.guilds.array();
+    var guilds = await bot.guilds.array();
     for (let GN in guilds) {
         var G = guilds[GN];
         await MongoClient.connect(url).then(async function (mclient) {
@@ -310,12 +309,10 @@ async function firstSettings(guildID) {
         return ret;
     });
 }
-//TODO
 async function getSaltKing(guildID) {
     var settings = await getSettings(guildID);
     return settings.saltKing;
 }
-//TODO
 async function setSaltKing(guildID, userID) {
     setSettings(guildID, { saltKing: userID });
 }
