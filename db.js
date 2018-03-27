@@ -13,29 +13,6 @@ async function getuser(userid, guildID) {
     });
 }
 
-async function existsUser(userid, guildID) {
-    let user = await getuser(userid, guildID);
-    if (user) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-async function addUser(userid, guildID) {
-    if (await existsUser(userid, guildID)) {
-        return true;
-    }
-    else {
-        return MongoClient.connect(url).then(async function (mclient) {
-            var db = mclient.db(guildID);
-            var myobj = { _id: userid, warnings: 0, bans: 0, kicks: 0, botusage: 0, sound: false };
-            await db.collection("users").insertOne(myobj);
-            mclient.close();
-            return true;
-        });
-    }
-}
 async function addSalt(userid, reporter, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db('MagiBot');
@@ -92,6 +69,8 @@ async function onHour(bot) {
             let db = mclient.db('MagiBot');
             console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
+            //make sure guilds that were added while bot was offline are in DB:
+            await checkGuild(guildID);
             var dbTwo = await mclient.db(guildID);
             var ranking = await dbTwo.collection("saltrank").find().toArray();
             for (var i in ranking) {
@@ -231,18 +210,13 @@ async function saltUp(userid1, userid2, ad, guildID) {
 
 async function usageUp(userid, guildID) {
     let user = await getuser(userid, guildID);
-    var updateval;
-    if (user && user.botusage) {
-        updateval = user.botusage + 1
-    } else {
-        updateval = 1;
-    }
-    updateUser(userid, { $set: { botusage: (updateval) } }, guildID);
+    var updateval = user.botusage + 1;
+        updateUser(userid, { $set: { botusage: (updateval) } }, guildID);
 }
 
 async function checks(userid, guildID) {
     //maybe add more checks
-    if (await addUser(userid, guildID)) {
+    if (await getuser(userid, guildID)) {
         return true;
     }
     //else
@@ -493,69 +467,46 @@ module.exports = {
         onHour(bot);
     },
     getUser: async function (userid, guildID) {
-        if (await checks(userid, guildID)) {
-            let result = await getuser(userid, guildID);
-            return result;
-        }
+        let result = await getuser(userid, guildID);
+        return result;
     },
     usageUp: async function (userid, guildID) {
-        if (await checks(userid, guildID)) {
-            usageUp(userid, guildID);
-        }
+        usageUp(userid, guildID);
     },
     saltUp: async function (userid1, userid2, guildID) {
-        if (await checks(userid1, guildID) && await checks(userid2, guildID) && await checkGuild(guildID)) {
-            return saltUp(userid1, userid2, false, guildID);
-        }
+        return saltUp(userid1, userid2, false, guildID);
     },
     saltUpAdmin: async function (userid1, userid2, guildID) {
-        if (await checks(userid1, guildID) && await checks(userid2, guildID) && await checkGuild(guildID)) {
-            return saltUp(userid1, userid2, true, guildID);
-        }
+        return saltUp(userid1, userid2, true, guildID);
     },
     getSalt: async function (userid, guildID) {
-        if (await checks(userid, guildID) && await checkGuild(guildID)) {
-            return getSalt(userid, guildID);
-        }
+        return getSalt(userid, guildID);
     },
     getUsage: async function (userid, guildID) {
-        if (await checks(userid, guildID)) {
-            let user = await getuser(userid, guildID);
-            if (user) {
-                return parseInt(user.botusage);
-            } else {
-                return 0;
-            }
-        }
+        let user = await getuser(userid, guildID);
+        return parseInt(user.botusage);
     },
     remOldestSalt: async function (userid, guildID) {
-        if (await checks(userid, guildID) && await checkGuild(guildID)) {
-            return MongoClient.connect(url).then(async function (mclient) {
-                let db = mclient.db('MagiBot');
-                let id = await db.collection("salt").find({ salter: userid, guild: guildID }).sort({ date: 1 }).limit(1).toArray();
-                if (id[0]) {
-                    await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
-                    saltGuild(userid, guildID, -1);
-                    mclient.close();
-                    return true;
-                } else {
-                    mclient.close();
-                    return false;
-                }
-            });
-        } else {
-            return false;
-        }
-
+        return MongoClient.connect(url).then(async function (mclient) {
+            let db = mclient.db('MagiBot');
+            let id = await db.collection("salt").find({ salter: userid, guild: guildID }).sort({ date: 1 }).limit(1).toArray();
+            if (id[0]) {
+                await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
+                saltGuild(userid, guildID, -1);
+                mclient.close();
+                return true;
+            } else {
+                mclient.close();
+                return false;
+            }
+        });
     },
     addGuild: async function (guildID) {
         if (await checkGuild(guildID)) {
         }
     },
     topSalt: async function (guildID) {
-        if (await checkGuild(guildID)) {
-            return topSalt(guildID);
-        }
+        return topSalt(guildID);
     },
     joinable: async function (guildID, cid) {
         let channels = await getJoinChannel(guildID);
@@ -590,44 +541,29 @@ module.exports = {
         return out;
     },
     getSound: async function (userid, guildID) {
-        if (await checks(userid, guildID)) {
-            let user = await getuser(userid, guildID);
-            if (user.sound) {
-                return user.sound;
-            } else {
-                return false;
-            }
-        }
+        let user = await getuser(userid, guildID);
+        return user.sound;
     },
     addSound: async function (userid, surl, guildID) {
         return joinsound(userid, surl, guildID);
     },
     isBlacklistedUser: async function (userID, guildID) {
-        if (await checks(userID, guildID) && await checkGuild(guildID)) {
+        if (await checks(userID, guildID)) {
             return isBlacklistedUser(userID, guildID);
         }
         return false;
     },
     setJoinable: async function (guildID, channelID, insert) {
-        if (await checkGuild(guildID)) {
-            return setJoinChannel(guildID, channelID, insert);
-        }
-        return false;
+        return setJoinChannel(guildID, channelID, insert);
     },
     setCommandChannel: async function (guildID, channelID, insert) {
-        if (await checkGuild(guildID)) {
-            return setCommandChannel(guildID, channelID, insert);
-        }
-        return false;
+        return setCommandChannel(guildID, channelID, insert);
     },
     setAdmin: async function (guildID, roleID, insert) {
-        if (await checkGuild(guildID)) {
-            return setAdminRole(guildID, roleID, insert);
-        }
-        return false;
+        return setAdminRole(guildID, roleID, insert);
     },
     setBlacklistedUser: async function (guildID, userID, insert) {
-        if (await checkGuild(guildID) && await checks(userID, guildID)) {
+        if (await checks(userID, guildID)) {
             return setBlacklistedUser(userID, guildID, insert);
         }
         return false;
@@ -636,30 +572,24 @@ module.exports = {
         return getSettings(guildID);
     },
     clrSalt: async function (userid, guildID) {
-        if (await checks(userid, guildID) && await checkGuild(guildID)) {
-            return MongoClient.connect(url).then(async function (mclient) {
-                let db = mclient.db('MagiBot');
-                await db.collection("salt").deleteMany({ guild: guildID, salter: userid });
-                saltGuild(userid, guildID, 1, true);
-                mclient.close();
-            });
-        }
+        return MongoClient.connect(url).then(async function (mclient) {
+            let db = mclient.db('MagiBot');
+            await db.collection("salt").deleteMany({ guild: guildID, salter: userid });
+            saltGuild(userid, guildID, 1, true);
+            mclient.close();
+        });
     },
     resetSalt: async function (guildID) {
-        if (await checkGuild(guildID)) {
-            await MongoClient.connect(url).then(async function (mclient) {
-                var db = await mclient.db('MagiBot');
-                var guildDB = await mclient.db(guildID);
-                await guildDB.collection("saltrank").deleteMany({});
-                await db.collection("salt").deleteMany({ guild: guildID });
-                mclient.close();
-            });
-        }
+        await MongoClient.connect(url).then(async function (mclient) {
+            var db = await mclient.db('MagiBot');
+            var guildDB = await mclient.db(guildID);
+            await guildDB.collection("saltrank").deleteMany({});
+            await db.collection("salt").deleteMany({ guild: guildID });
+            mclient.close();
+        });
     },
     setNotification: async function (guildID, cid) {
-        if (await checkGuild(guildID)) {
-            await setNotChannel(guildID, cid);
-        }
+        await setNotChannel(guildID, cid);
     },
     sendUpdate: async function (update, bot) {
         sendUpdate(update, bot);
