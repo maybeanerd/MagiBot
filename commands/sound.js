@@ -40,13 +40,13 @@ module.exports = {
             case 'add':
                 let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
                 if (!sound) {
-                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!sound help`");
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!help sound`");
                     return;
                 }
                 console.log(sound);
                 sound = sound.streams[0];
                 if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
-                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!sound help`");
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!help sound`");
                     return;
                 }
                 console.log("duration: " + sound.duration);

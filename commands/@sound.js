@@ -4,8 +4,8 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "del @User",
-        value: "Delete the joinsound of a user",
+        name: "rem @User",
+        value: "Remove the joinsound of a user",
         inline: true
     });
 
@@ -29,7 +29,7 @@ module.exports = {
         var command = args[0].toLowerCase();
         var mention = args[1];
         switch (command) {
-            case 'del':
+            case 'rem':
                 if (mention.startsWith('<@') && mention.endsWith('>')) {
                     mention = mention.substr(2).slice(0, -1);
                     if (mention.startsWith('!')) {
