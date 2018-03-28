@@ -62,7 +62,7 @@ module.exports = {
                         mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                             mess.delete();
                             if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                data.resetSalt(msg.guild.id);
+                                data.resetSalt(msg.guild);
                                 msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
                             } else if (reacts.first()) {
                                 msg.channel.send("Successfully canceled salt reset.");
@@ -80,18 +80,18 @@ module.exports = {
                         msg.reply("you can't report me!");
                         return;
                     }
-                    await data.saltUpAdmin(mention, msg.author.id, msg.guild.id);
+                    await data.saltUpAdmin(mention, msg.author.id, msg.guild);
                     msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
                     break;
                 case 'rem':
-                    if (await data.remOldestSalt(mention, msg.guild.id)) {
+                    if (await data.remOldestSalt(mention, msg.guild)) {
                         msg.channel.send("Successfully removed the oldest salt from <@!" + mention + ">!");
                     } else {
                         msg.channel.send("<@!" + mention + "> has no salt that could be removed!");
                     }
                     break;
                 case 'clr':
-                    await data.clrSalt(mention, msg.guild.id);
+                    await data.clrSalt(mention, msg.guild);
                     msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
                     break;
                 default:

@@ -48,7 +48,7 @@ module.exports = {
                             msg.reply("you can't report yourself!");
                             return;
                         }
-                        let time = await data.saltUp(mention, msg.author.id, msg.guild.id);
+                        let time = await data.saltUp(mention, msg.author.id, msg.guild);
                         console.log(time);
                         if (time == 0) {
                             msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");

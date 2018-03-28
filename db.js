@@ -69,7 +69,7 @@ async function onHour(bot) {
             let db = mclient.db('MagiBot');
             console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
-            //make sure guilds that were added while bot was offline are in DB:
+            //make sure guilds that were added while bot was offline are in DB:            
             await checkGuild(guildID);
             var dbTwo = await mclient.db(guildID);
             var ranking = await dbTwo.collection("saltrank").find().toArray();
@@ -88,52 +88,56 @@ async function onHour(bot) {
             }
             mclient.close();
         });
-        if (await G.available) {
-            if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
-                let SaltKing = await getSaltKing(G.id);
-                let SaltRole = await getSaltRole(G.id);
-                let groles = await G.roles;
-                if (!SaltRole || !groles.has(SaltRole)) {
-                    await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
-                        await setSaltRole(G.id, role.id);
-                        SaltRole = role.id
-                    });
+        await updateSaltKing(G);
+    }
+}
+
+async function updateSaltKing(G) {
+    if (await G.available) {
+        if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
+            let SaltKing = await getSaltKing(G.id);
+            let SaltRole = await getSaltRole(G.id);
+            let groles = await G.roles;
+            if (!SaltRole || !groles.has(SaltRole)) {
+                await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
+                    await setSaltRole(G.id, role.id);
+                    SaltRole = role.id
+                });
+            }
+            let sltID = await topSalt(G.id);
+            let saltID = false;
+            if (sltID[0]) {
+                saltID = sltID[0].salter;
+            }
+            if (groles.get(SaltRole).position < G.me.highestRole.position) {
+                if (SaltKing && saltID != SaltKing) {
+                    let user = await G.fetchMember(SaltKing).catch(() => { });
+                    if (user) {
+                        user.removeRole(SaltRole, "Is not as salty anymore");
+                    }
                 }
-                let sltID = await topSalt(G.id);
-                let saltID = false;
-                if (sltID[0]) {
-                    saltID = sltID[0].salter;
-                }
-                if (groles.get(SaltRole).position < G.me.highestRole.position) {
-                    if (SaltKing && saltID != SaltKing) {
-                        let user = await G.fetchMember(SaltKing).catch(() => { });
-                        if (user) {
-                            user.removeRole(SaltRole, "Is not as salty anymore");
-                        }
+                if (saltID && saltID != SaltKing) {
+                    let nuser = await G.fetchMember(saltID).catch(() => { });
+                    if (nuser) {
+                        await nuser.addRole(SaltRole, "Saltiest user");
                     }
-                    if (saltID && saltID != SaltKing) {
-                        let nuser = await G.fetchMember(saltID).catch(() => { });
-                        if (nuser) {
-                            await nuser.addRole(SaltRole, "Saltiest user");
-                        }
-                        await setSaltKing(G.id, saltID);
-                    }
-                } else {
-                    let channel = await getNotChannel(G.id);
-                    if (channel) {
-                        let chan = await G.channels.get(channel);
-                        if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                            chan.send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
-                        }
-                    }
+                    await setSaltKing(G.id, saltID);
                 }
             } else {
                 let channel = await getNotChannel(G.id);
                 if (channel) {
                     let chan = await G.channels.get(channel);
                     if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                        chan.send("Hey there " + G.owner + "!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.");
+                        chan.send("Hey there " + G.owner + "!\nI regret to inform you that my highest role is beneath <@&" + SaltRole + ">, which has the effect that i cannot give or take if from users.");
                     }
+                }
+            }
+        } else {
+            let channel = await getNotChannel(G.id);
+            if (channel) {
+                let chan = await G.channels.get(channel);
+                if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                    chan.send("Hey there " + G.owner + "!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.");
                 }
             }
         }
@@ -211,7 +215,7 @@ async function saltUp(userid1, userid2, ad, guildID) {
 async function usageUp(userid, guildID) {
     let user = await getuser(userid, guildID);
     var updateval = user.botusage + 1;
-        updateUser(userid, { $set: { botusage: (updateval) } }, guildID);
+    updateUser(userid, { $set: { botusage: (updateval) } }, guildID);
 }
 
 async function checks(userid, guildID) {
@@ -473,11 +477,15 @@ module.exports = {
     usageUp: async function (userid, guildID) {
         usageUp(userid, guildID);
     },
-    saltUp: async function (userid1, userid2, guildID) {
-        return saltUp(userid1, userid2, false, guildID);
+    saltUp: async function (userid1, userid2, G) {
+        let ret = await saltUp(userid1, userid2, false, G.id);
+        updateSaltKing(G);
+        return ret;
     },
-    saltUpAdmin: async function (userid1, userid2, guildID) {
-        return saltUp(userid1, userid2, true, guildID);
+    saltUpAdmin: async function (userid1, userid2, G) {
+        let ret = await saltUp(userid1, userid2, true, G.id);
+        updateSaltKing(G);
+        return ret;
     },
     getSalt: async function (userid, guildID) {
         return getSalt(userid, guildID);
@@ -486,14 +494,16 @@ module.exports = {
         let user = await getuser(userid, guildID);
         return parseInt(user.botusage);
     },
-    remOldestSalt: async function (userid, guildID) {
+    remOldestSalt: async function (userid, G) {
         return MongoClient.connect(url).then(async function (mclient) {
+            let guildID = G.id;
             let db = mclient.db('MagiBot');
             let id = await db.collection("salt").find({ salter: userid, guild: guildID }).sort({ date: 1 }).limit(1).toArray();
             if (id[0]) {
                 await db.collection("salt").deleteOne({ _id: id[0]["_id"] });
                 saltGuild(userid, guildID, -1);
                 mclient.close();
+                updateSaltKing(G);
                 return true;
             } else {
                 mclient.close();
@@ -571,20 +581,24 @@ module.exports = {
     getSettings: async function (guildID) {
         return getSettings(guildID);
     },
-    clrSalt: async function (userid, guildID) {
+    clrSalt: async function (userid, G) {
         return MongoClient.connect(url).then(async function (mclient) {
+            let guildID = G.id;
             let db = mclient.db('MagiBot');
             await db.collection("salt").deleteMany({ guild: guildID, salter: userid });
             saltGuild(userid, guildID, 1, true);
             mclient.close();
+            updateSaltKing(G);
         });
     },
-    resetSalt: async function (guildID) {
+    resetSalt: async function (G) {
         await MongoClient.connect(url).then(async function (mclient) {
+            let guildID = G.id;
             var db = await mclient.db('MagiBot');
             var guildDB = await mclient.db(guildID);
             await guildDB.collection("saltrank").deleteMany({});
             await db.collection("salt").deleteMany({ guild: guildID });
+            updateSaltKing(G);
             mclient.close();
         });
     },
