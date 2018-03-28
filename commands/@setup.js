@@ -232,7 +232,12 @@ module.exports = {
                 } else {
                     let guild = msg.guild;
                     for (let s in cmd) {
-                        str += await guild.channels.get(cmd[s]).name + ", ";
+                        let chann = await guild.channels.get(cmd[s]);
+                        if (chann) {
+                            str += chann.name + ", ";
+                        } else {
+                            await data.setJoinable(msg.guild.id, cmd[s], false);
+                        }
                     }
                 }
                 info.push({
