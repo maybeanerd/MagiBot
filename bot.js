@@ -9,15 +9,15 @@ var bot = new Discord.Client({ autoReconnect: true });
 
 //Posting stats to Discord Bot List:
 const DBL = require("dblapi.js");
-const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0',bot);
+const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
 
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
-    chann.send("**Exception:**\n```" +err.name+": "+err.message+"\n"+ err.stack+"```");
+    chann.send("**Exception:**\n```" + err.stack + "```");
 });
 process.on('unhandledRejection', function (err) {
     let chann = bot.channels.get("414809410448261132");
-    chann.send("**Uncaught promise rejection:**\n```" +err.name+": "+err.message+"\n"+ err.stack+"```");
+    chann.send("**Uncaught promise rejection:**\n```" + err.stack + "```");
 });
 
 
@@ -302,18 +302,18 @@ bot.on("ready", () => {
 });
 
 bot.on("message", msg => {
-if(!msg.author.bot){
-    if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
-        checkCommand(msg, true);
-        if (bot.DELETE_COMMANDS) msg.delete();
-    } else if (msg.content.startsWith(bot.PREFIX)) {
-        //database stuff
-        data.usageUp(msg.author.id, msg.guild.id);
-        //end database stuff
-        checkCommand(msg, false);
-        if (bot.DELETE_COMMANDS) msg.delete();
+    if (!msg.author.bot) {
+        if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
+            checkCommand(msg, true);
+            if (bot.DELETE_COMMANDS) msg.delete();
+        } else if (msg.content.startsWith(bot.PREFIX)) {
+            //database stuff
+            data.usageUp(msg.author.id, msg.guild.id);
+            //end database stuff
+            checkCommand(msg, false);
+            if (bot.DELETE_COMMANDS) msg.delete();
+        }
     }
-}
 });
 
 bot.on("guildCreate", guild => {
@@ -323,14 +323,14 @@ bot.on("guildCreate", guild => {
             + bot.PREFIX + "@help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
         let chan = bot.channels.get("408611226998800390");
-        chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users, ID: "+guild.id+")\nOwner is: <@" + guild.ownerID + "> (ID: " + guild.ownerID + ")");
+        chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users, ID: " + guild.id + ")\nOwner is: <@" + guild.ownerID + "> (ID: " + guild.ownerID + ")");
     }
 });
 
 bot.on("guildDelete", guild => {
     if (guild.available) {
         let chan = bot.channels.get("408611226998800390");
-        chan.send(":x: left " + guild.name + " (" + guild.memberCount + " users, ID: "+guild.id+")");
+        chan.send(":x: left " + guild.name + " (" + guild.memberCount + " users, ID: " + guild.id + ")");
     }
 });
 
