@@ -13,9 +13,11 @@ const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMj
 
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
+    chann.send("**Exception:**\n```" +err.name+": "+err.message+"\n"+ err.stack+"```");
 });
 process.on('unhandledRejection', function (err) {
     let chann = bot.channels.get("414809410448261132");
+    chann.send("**Uncaught promise rejection:**\n```" +err.name+": "+err.message+"\n"+ err.stack+"```");
 });
 
 
