@@ -32,7 +32,7 @@ module.exports = {
                 value: usage,
                 inline: false
             });
-            let link = await data.getSound(msg.author.id, msg.guild.id);
+            let link = await data.getSound(id, msg.guild.id);
             info.push({
                 name: "Joinsound",
                 value: link,
