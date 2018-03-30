@@ -32,6 +32,12 @@ module.exports = {
                 value: usage,
                 inline: false
             });
+            let link = await data.getSound(msg.author.id, msg.guild.id);
+            info.push({
+                name: "Joinsound",
+                value: link,
+                inline: false
+            });
             let user = await bot.fetchUser(id);
             let embed = {
                 color: bot.COLOR,
