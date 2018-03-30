@@ -43,13 +43,11 @@ module.exports = {
                     msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!help sound`");
                     return;
                 }
-                console.log(sound);
                 sound = sound.streams[0];
                 if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
                     msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + "!help sound`");
                     return;
                 }
-                console.log("duration: " + sound.duration);
                 if (sound.duration > 8) {
                     msg.reply("the joinsound you're trying to add is longer than 8 seconds.");
                     return;

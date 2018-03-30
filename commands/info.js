@@ -7,13 +7,9 @@ module.exports = {
             value: guilds.length,
             inline: false
         });
-        let usercount = 0;
-        for (let i in guilds) {
-            usercount += guilds[i].memberCount;
-        }
         info.push({
             name: "Number of users currently being served",
-            value: usercount,
+            value: bot.users.size,
             inline: false
         });
         /*
