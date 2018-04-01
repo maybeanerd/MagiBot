@@ -49,7 +49,7 @@ module.exports = {
             inline: false
         });
         info.push({
-            name: "Official Discord for support, ideas und bug reports",
+            name: "Official Discord for support, ideas and bug reports",
             value: "https://discord.gg/2Evcf4T",
             inline: false
         });
