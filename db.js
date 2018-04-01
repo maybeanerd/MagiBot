@@ -99,10 +99,20 @@ async function updateSaltKing(G) {
             let SaltRole = await getSaltRole(G.id);
             let groles = await G.roles;
             if (!SaltRole || !groles.has(SaltRole)) {
+if(G.roles.size<250){
                 await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
                     await setSaltRole(G.id, role.id);
                     SaltRole = role.id
                 });
+}else{
+let channel = await getNotChannel(G.id);
+                if (channel) {
+                    let chan = await G.channels.get(channel);
+                    if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                        chan.send("Hey there " + G.owner + "!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.");
+                    }
+                }
+return;}
             }
             let sltID = await topSalt(G.id);
             let saltID = false;
