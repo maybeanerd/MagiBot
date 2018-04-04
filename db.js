@@ -129,7 +129,7 @@ return;}
                 if (saltID) {
                     let nuser = await G.fetchMember(saltID).catch(() => { });
                     if (nuser) {
-if(!(await nuser.hasRole(SaltRole))){
+if(!(nuser.roles.has(SaltRole))){
                         await nuser.addRole(SaltRole, "Saltiest user");
 }
                     }
