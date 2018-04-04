@@ -126,12 +126,15 @@ return;}
                         user.removeRole(SaltRole, "Is not as salty anymore");
                     }
                 }
-                if (saltID && saltID != SaltKing) {
+                if (saltID) {
                     let nuser = await G.fetchMember(saltID).catch(() => { });
                     if (nuser) {
+if(!(await nuser.hasRole(SaltRole))){
                         await nuser.addRole(SaltRole, "Saltiest user");
+}
                     }
-                    await setSaltKing(G.id, saltID);
+if(saltID != SaltKing){
+                    await setSaltKing(G.id, saltID);}
                 }
             } else {
                 let channel = await getNotChannel(G.id);
