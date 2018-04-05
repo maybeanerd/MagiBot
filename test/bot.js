@@ -8,8 +8,8 @@ var data = require(__dirname + '/db.js');
 var bot = new Discord.Client({ autoReconnect: true });
 
 //Posting stats to Discord Bot List:
-const DBL = require("dblapi.js");
-const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
+//const DBL = require("dblapi.js");
+//const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
 
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
