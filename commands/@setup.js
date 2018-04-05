@@ -239,6 +239,7 @@ module.exports = {
                             await data.setJoinable(msg.guild.id, cmd[s], false);
                         }
                     }
+                    str = str.substring(0, str.length - 2);
                 }
                 info.push({
                     name: "Joinsound channels",
