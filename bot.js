@@ -25,7 +25,7 @@ bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
 bot.TOKEN = token.tk;
 
-bot.DETAILED_LOGGING = false;
+bot.DETAILED_LOGGING = true;
 bot.DELETE_COMMANDS = false;
 
 bot.COLOR = 0x351C75;
@@ -224,7 +224,9 @@ var loadCommands = function () {
     for (let file of files) {
         if (file.endsWith('.js')) {
             commands[file.slice(0, -3)] = require(__dirname + '/commands/' + file);
-            if (bot.DETAILED_LOGGING) console.log("Loaded " + file);
+            if (bot.DETAILED_LOGGING) {
+                console.log("Loaded " + file);
+            }
         }
     }
     console.log("———— All Commands Loaded! ————");
@@ -239,10 +241,10 @@ var checkCommand = async function (msg, isMention) {
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
-
+        command = "!" + command;
     } else {
-        var command = msg.content.split(bot.PREFIX)[1].split(" ")[0].toLowerCase();
-        msg.content = msg.content.slice(command.length + 1); //delete prefix and command
+        var command = msg.content.substring(bot.PREFIX.length, msg.content.length).split(" ")[0].toLowerCase();
+        msg.content = msg.content.slice(command.length + bot.PREFIX.length); //delete prefix and command
         msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
