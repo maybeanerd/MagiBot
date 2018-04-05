@@ -239,7 +239,7 @@ var checkCommand = async function (msg, isMention) {
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
-
+        command = "!" + command;
     } else {
         var command = msg.content.split(bot.PREFIX)[1].split(" ")[0].toLowerCase();
         msg.content = msg.content.slice(command.length + 1); //delete prefix and command
