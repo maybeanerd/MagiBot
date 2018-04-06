@@ -296,20 +296,34 @@ async function setSettings(guildID, settings) {
 async function firstSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
-        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false });
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix });
         var ret = await db.collection("settings").findOne({ _id: guildID });
         mclient.close();
         return ret;
     });
 }
 async function getSaltKing(guildID) {
-    var settings = await getSettings(guildID);
+    let settings = await getSettings(guildID);
     return settings.saltKing;
 }
 async function setSaltKing(guildID, userID) {
-    setSettings(guildID, { saltKing: userID });
+    return setSettings(guildID, { saltKing: userID });
 }
 
+async function getPrefix(guildID) {
+    let settings = await getSettings(guildID);
+    settings = settings.prefix;
+    if (!settings) {
+        setPrefix(guildID, config.prefix);
+        return config.prefix;
+    } else {
+        return settings;
+    }
+}
+
+async function setPrefix(guildID, pref) {
+    return setSettings(guildID, { prefix: pref });
+}
 
 async function saltGuild(salter, guildID, add = 1, reset = false) {
     MongoClient.connect(url).then(async function (mclient) {
@@ -622,5 +636,20 @@ module.exports = {
     },
     sendUpdate: async function (update, bot) {
         sendUpdate(update, bot);
+    },
+    getPrefixE: async function (guildID) {
+        return getPrefix(guildID);
+    },
+    setPrefixE: async function (guildID, pref, bot) {
+        await setPrefix(guildID, pref);
+        bot.PREFIXES[guildID] = pref;
+        return pref;
+    },
+    getPrefixesE: async function (bot) {
+        let ret = {};
+        for (let G in bot.guilds) {
+            ret[G.id] = await getPrefix(guildID);
+        }
+        return ret;
     }
 };

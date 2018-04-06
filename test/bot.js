@@ -35,6 +35,8 @@ bot.INFO_COLOR = 0x0000ff;
 
 bot.SIGN = "MagiBot - created by T0TProduction";
 
+bot.PREFIXES = {};
+
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
 bot.sendNotification = function (info, type, msg) {
@@ -299,6 +301,7 @@ bot.on("ready", () => {
     }
     bot.user.setStatus("online", "");
     loadCommands();
+    bot.PREFIXES = data.getPrefixesE(bot);
     let chann = bot.channels.get("382233880469438465");
     chann.send("Im up and ready!");
 });
