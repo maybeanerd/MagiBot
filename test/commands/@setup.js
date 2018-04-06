@@ -191,6 +191,19 @@ module.exports = {
                 await data.setNotification(await msg.guild.id, false);
                 msg.channel.send("Successfully deactivated notifications.");
                 break;
+            case "setprefix":
+                //TODO bestätigung
+                if (mention) {
+                    let newpref = await data.setPrefixE(msg.guild.id, mention)
+                    if (newpref) {
+                        msg.channel.send("Successfully changed prefix to `" + newpref + "!`");
+                    } else {
+                        msg.channel.send("Something bad happened...");
+                    }
+                } else {
+                    msg.reply("you need to provide a prefix you want to use.");
+                }
+                break;
             case "info":
                 var info = [];
                 var set = await data.getSettings(msg.guild.id);
