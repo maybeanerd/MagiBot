@@ -309,12 +309,11 @@ bot.on("ready", () => {
 bot.on("message", msg => {
     if (!msg.author.bot) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
+            data.usageUp(msg.author.id, msg.guild.id);
             checkCommand(msg, true);
             if (bot.DELETE_COMMANDS) msg.delete();
-        } else if (msg.content.startsWith(bot.PREFIX)) {
-            //database stuff
+        } else if (msg.content.startsWith(bot.PREFIXES[msg.guild.id])) {
             data.usageUp(msg.author.id, msg.guild.id);
-            //end database stuff
             checkCommand(msg, false);
             if (bot.DELETE_COMMANDS) msg.delete();
         }
