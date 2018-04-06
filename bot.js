@@ -35,6 +35,8 @@ bot.INFO_COLOR = 0x0000ff;
 
 bot.SIGN = "MagiBot - created by T0TProduction";
 
+bot.PREFIXES = {};
+
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
 bot.sendNotification = function (info, type, msg) {
@@ -299,6 +301,7 @@ bot.on("ready", () => {
     }
     bot.user.setStatus("online", "");
     loadCommands();
+    data.getPrefixesE(bot);
     let chann = bot.channels.get("382233880469438465");
     chann.send("Im up and ready!");
 });
@@ -306,12 +309,11 @@ bot.on("ready", () => {
 bot.on("message", msg => {
     if (!msg.author.bot) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
+            data.usageUp(msg.author.id, msg.guild.id);
             checkCommand(msg, true);
             if (bot.DELETE_COMMANDS) msg.delete();
-        } else if (msg.content.startsWith(bot.PREFIX)) {
-            //database stuff
+        } else if (msg.content.startsWith(bot.PREFIXES[msg.guild.id])) {
             data.usageUp(msg.author.id, msg.guild.id);
-            //end database stuff
             checkCommand(msg, false);
             if (bot.DELETE_COMMANDS) msg.delete();
         }

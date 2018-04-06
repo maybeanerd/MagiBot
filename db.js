@@ -99,20 +99,21 @@ async function updateSaltKing(G) {
             let SaltRole = await getSaltRole(G.id);
             let groles = await G.roles;
             if (!SaltRole || !groles.has(SaltRole)) {
-if(G.roles.size<250){
-                await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
-                    await setSaltRole(G.id, role.id);
-                    SaltRole = role.id
-                });
-}else{
-let channel = await getNotChannel(G.id);
-                if (channel) {
-                    let chan = await G.channels.get(channel);
-                    if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                        chan.send("Hey there " + G.owner + "!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.");
+                if (G.roles.size < 250) {
+                    await G.createRole({ name: "SaltKing", color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, "SaltKing role needed for Saltranking to work. You can change the role if you like.").then(async function (role) {
+                        await setSaltRole(G.id, role.id);
+                        SaltRole = role.id
+                    });
+                } else {
+                    let channel = await getNotChannel(G.id);
+                    if (channel) {
+                        let chan = await G.channels.get(channel);
+                        if (await chan.permissionsFor(G.me).has("SEND_MESSAGES")) {
+                            chan.send("Hey there " + G.owner + "!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.");
+                        }
                     }
+                    return;
                 }
-return;}
             }
             let sltID = await topSalt(G.id);
             let saltID = false;
@@ -129,12 +130,13 @@ return;}
                 if (saltID) {
                     let nuser = await G.fetchMember(saltID).catch(() => { });
                     if (nuser) {
-if(!(nuser.roles.has(SaltRole))){
-                        await nuser.addRole(SaltRole, "Saltiest user");
-}
+                        if (!(nuser.roles.has(SaltRole))) {
+                            await nuser.addRole(SaltRole, "Saltiest user");
+                        }
                     }
-if(saltID != SaltKing){
-                    await setSaltKing(G.id, saltID);}
+                    if (saltID != SaltKing) {
+                        await setSaltKing(G.id, saltID);
+                    }
                 }
             } else {
                 let channel = await getNotChannel(G.id);
@@ -246,20 +248,17 @@ async function checkGuild(id) {
         //Dataset for settings
         if (!(await db.collection("settings"))) {
             await db.createCollection("settings").then(() => {
-                console.log("Settings Collection created!");
             });
         }
         if (!(await db.collection("users"))) {
             db.createCollection("users", function (err, res) {
                 if (err) throw err;
-                console.log("User Collection created!");
             });
         }
         //Dataset of saltranking
         if (!(await db.collection("saltrank"))) {
             db.createCollection("saltrank", function (err, res) {
                 if (err) throw err;
-                console.log("Saltrank Collection created!");
             });
         }
         mclient.close();
@@ -294,20 +293,34 @@ async function setSettings(guildID, settings) {
 async function firstSettings(guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = mclient.db("MagiBot");
-        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false });
+        await db.collection("settings").insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix });
         var ret = await db.collection("settings").findOne({ _id: guildID });
         mclient.close();
         return ret;
     });
 }
 async function getSaltKing(guildID) {
-    var settings = await getSettings(guildID);
+    let settings = await getSettings(guildID);
     return settings.saltKing;
 }
 async function setSaltKing(guildID, userID) {
-    setSettings(guildID, { saltKing: userID });
+    return setSettings(guildID, { saltKing: userID });
 }
 
+async function getPrefix(guildID) {
+    let settings = await getSettings(guildID);
+    settings = settings.prefix;
+    if (!settings) {
+        setPrefix(guildID, config.prefix);
+        return config.prefix;
+    } else {
+        return settings;
+    }
+}
+
+async function setPrefix(guildID, pref) {
+    return setSettings(guildID, { prefix: pref });
+}
 
 async function saltGuild(salter, guildID, add = 1, reset = false) {
     MongoClient.connect(url).then(async function (mclient) {
@@ -464,19 +477,16 @@ module.exports = {
             if (!(await db.collection("commands"))) {
                 db.createCollection("commands", function (err, res) {
                     if (err) throw err;
-                    console.log("Command Collection created!");
                 });
             }
             if (!(await db.collection("settings"))) {
                 await db.createCollection("settings").then(() => {
-                    console.log("Settings Collection created!");
                 });
             }
             //Dataset of salt
             if (!db.collection("salt")) {
                 db.createCollection("salt", function (err, res) {
                     if (err) throw err;
-                    console.log("Salt Collection created!");
                 });
             }
             mclient.close();
@@ -620,5 +630,21 @@ module.exports = {
     },
     sendUpdate: async function (update, bot) {
         sendUpdate(update, bot);
+    },
+    getPrefixE: async function (guildID) {
+        return getPrefix(guildID);
+    },
+    setPrefixE: async function (guildID, pref, bot) {
+        await setPrefix(guildID, pref);
+        bot.PREFIXES[guildID] = pref;
+        return pref;
+    },
+    getPrefixesE: async function (bot) {
+        bot.PREFIXES = {};
+        var guilds = bot.guilds.array();
+        for (let G in guilds) {
+            bot.PREFIXES[guilds[G].id] = await getPrefix(guilds[G].id);
+        }
+
     }
 };

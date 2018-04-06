@@ -38,6 +38,11 @@ function printHelp(msg, bot) {
         value: "Displays current settings",
         inline: true
     });
+    info.push({
+        name: "prefix <prefix>",
+        value: "Set a custom character or string as prefix",
+        inline: true
+    });
 
     let embed = {
         color: bot.COLOR,
@@ -191,9 +196,28 @@ module.exports = {
                 await data.setNotification(await msg.guild.id, false);
                 msg.channel.send("Successfully deactivated notifications.");
                 break;
+            case "prefix":
+                //TODO bestätigung
+                if (mention) {
+                    let newpref = await data.setPrefixE(msg.guild.id, mention, bot);
+                    if (newpref) {
+                        msg.channel.send("Successfully changed prefix to `" + newpref + "!` !");
+                    } else {
+                        msg.channel.send("Something bad happened...");
+                    }
+                } else {
+                    msg.reply("you need to provide a prefix you want to use.");
+                }
+                break;
             case "info":
                 var info = [];
                 var set = await data.getSettings(msg.guild.id);
+
+                info.push({
+                    name: "Prefix",
+                    value: await data.getPrefixE(msg.guild.id) + "!",
+                    inline: false
+                });
 
                 let str = "";
                 let cmd = set["commandChannels"];
