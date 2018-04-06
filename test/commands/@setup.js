@@ -215,7 +215,7 @@ module.exports = {
 
                 info.push({
                     name: "Prefix",
-                    value: await data.getPrefixE(msg.guild.id) + "!",
+                    value: await data.getPrefixE(msg.guild.id) + ".",
                     inline: false
                 });
 
