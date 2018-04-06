@@ -248,20 +248,17 @@ async function checkGuild(id) {
         //Dataset for settings
         if (!(await db.collection("settings"))) {
             await db.createCollection("settings").then(() => {
-                console.log("Settings Collection created!");
             });
         }
         if (!(await db.collection("users"))) {
             db.createCollection("users", function (err, res) {
                 if (err) throw err;
-                console.log("User Collection created!");
             });
         }
         //Dataset of saltranking
         if (!(await db.collection("saltrank"))) {
             db.createCollection("saltrank", function (err, res) {
                 if (err) throw err;
-                console.log("Saltrank Collection created!");
             });
         }
         mclient.close();
@@ -480,19 +477,16 @@ module.exports = {
             if (!(await db.collection("commands"))) {
                 db.createCollection("commands", function (err, res) {
                     if (err) throw err;
-                    console.log("Command Collection created!");
                 });
             }
             if (!(await db.collection("settings"))) {
                 await db.createCollection("settings").then(() => {
-                    console.log("Settings Collection created!");
                 });
             }
             //Dataset of salt
             if (!db.collection("salt")) {
                 db.createCollection("salt", function (err, res) {
                     if (err) throw err;
-                    console.log("Salt Collection created!");
                 });
             }
             mclient.close();
@@ -646,10 +640,11 @@ module.exports = {
         return pref;
     },
     getPrefixesE: async function (bot) {
-        let ret = {};
-        for (let G in bot.guilds) {
-            ret[G.id] = await getPrefix(guildID);
+        bot.PREFIXES = {};
+        var guilds = bot.guilds.array();
+        for (let G in guilds) {
+            bot.PREFIXES[guilds[G].id] = await getPrefix(guilds[G].id);
         }
-        return ret;
+
     }
 };
