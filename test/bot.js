@@ -301,12 +301,15 @@ bot.on("ready", () => {
     }
     bot.user.setStatus("online", "");
     loadCommands();
-    bot.PREFIXES = data.getPrefixesE(bot);
+    data.getPrefixesE(bot).then((prefixes) => {
+        bot.PREFIXES = prefixes;
+    });
     let chann = bot.channels.get("382233880469438465");
     chann.send("Im up and ready!");
 });
 
 bot.on("message", msg => {
+    console.log(bot.PREFIXES);
     if (!msg.author.bot) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
             data.usageUp(msg.author.id, msg.guild.id);
