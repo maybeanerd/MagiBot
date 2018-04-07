@@ -2,7 +2,7 @@
 module.exports = {
     main: async function (bot, msg) {
         if (!((await msg.content.length) > 0)) {
-            msg.reply("you need to add info about the report after the command. Use `" + bot.PREFIX + "!help bug` to get more info.")
+            msg.reply("you need to add info about the report after the command. Use `" + bot.PREFIX + ".help bug` to get more info.")
             return;
         }
         msg.channel.send("Do you want to send this bugreport?\n" + msg.content).then(mess => {
@@ -26,7 +26,7 @@ module.exports = {
     },
     admin: false,
     help: 'Report a bug concerning MagiBot',
-    ehelp: async function (msg, bot) { msg.channel.send("To report a bug use `" + bot.PREFIX + "!bug <bugreport with information about what you did, what was expected, and what went wrong>`."); },
+    ehelp: async function (msg, bot) { msg.channel.send("To report a bug use `" + bot.PREFIX + ".bug <bugreport with information about what you did, what was expected, and what went wrong>`."); },
     perm: "SEND_MESSAGES",
     hide: false,
     dev: false

@@ -11,7 +11,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "@sound` :",
+        description: "Commands available via the prefix `" + bot.PREFIX + ":sound` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -47,7 +47,7 @@ module.exports = {
                 }
                 break;
             default:
-                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@help sound` for more info.");
+                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help sound` for more info.");
                 break;
         }
 

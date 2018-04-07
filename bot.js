@@ -66,7 +66,7 @@ commands.help.main = function (bot, msg) {
     var command = args[0].toLowerCase();
     if (command) {
         if (!commands[command]) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIX + "!help` to get a full list of the commands available.");
+            msg.reply("this command does not exist. Use `" + bot.PREFIX + ".help` to get a full list of the commands available.");
         } else {
             if (commands[command].ehelp) {
                 commands[command].ehelp(msg, bot);
@@ -93,11 +93,11 @@ commands.help.main = function (bot, msg) {
 
         let embed = {
             color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIX + "!`:\nto get more info on a single command use `" + bot.PREFIX + "!help <command>`",
+            description: "Commands available via the prefix `" + bot.PREFIX + ".` :\nto get more info on a single command use `" + bot.PREFIX + ".help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
-                text: bot.user.username
+                text: "to get admin commands use " + bot.PREFIXES[msg.guild.id] + ":help"
             }
         }
 
@@ -117,7 +117,7 @@ commands['@help'].main = function (bot, msg) {
     if (command) {
         command = "@" + command;
         if (!commands[command]) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIX + "@help` to get a full list of the admin commands available.");
+            msg.reply("this command does not exist. Use `" + bot.PREFIX + ":help` to get a full list of the admin commands available.");
         } else {
             if (commands[command].ehelp) {
                 commands[command].ehelp(msg, bot);
@@ -145,11 +145,11 @@ commands['@help'].main = function (bot, msg) {
 
         let embed = {
             color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIX + "@`:\nto get more info on a single command use `" + bot.PREFIX + "@help <command>`",
+            description: "Commands available via the prefix `" + bot.PREFIX + ":` :\nto get more info on a single command use `" + bot.PREFIX + ":help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
-                text: bot.user.username
+                text: "to get standard commands use " + bot.PREFIXES[msg.guild.id] + ".help"
             }
         }
 
@@ -243,7 +243,7 @@ var checkCommand = async function (msg, isMention) {
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
-        command = "!" + command;
+        command = "." + command;
     } else {
         var command = msg.content.substring(bot.PREFIX.length, msg.content.length).split(" ")[0].toLowerCase();
         msg.content = msg.content.slice(command.length + bot.PREFIX.length); //delete prefix and command
@@ -252,25 +252,26 @@ var checkCommand = async function (msg, isMention) {
     if (command) {
         var pre = command.charAt(0);
         switch (pre) {
-            case '!':
+            case '.':
                 command = command.slice(1);
                 break;
-            case '@':
+            case ':':
                 if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
+                    if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
+                        msg.delete();
+                    }
                     if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
-                        if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
-                            msg.delete();
-                        }
                         (msg.reply("you're not allowed to use this command.")).then(mess => mess.delete(5000));
                     }
                     return;
                 }
+                command = "@" + command.slice(1);
                 break;
             default:
                 return;
         }
         if (commands[command] && (!(commands[command].dev) || msg.author.id == bot.OWNERID)) {
-            if (pre == '@' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
+            if (pre == ':' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
                     commands[command].main(bot, msg);
@@ -285,7 +286,7 @@ var checkCommand = async function (msg, isMention) {
                     if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
                         msg.delete();
                     }
-                    (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + "@help` to see how you can change that.")).then(mess => mess.delete(15000));
+                    (msg.reply("commands aren't allowed in <#" + msg.channel.id + ">. Use them in " + await data.commandChannel(msg.guild.id) + ". If you're an admin use `" + bot.PREFIX + ":help` to see how you can change that.")).then(mess => mess.delete(15000));
                 }
             }
         }
@@ -294,7 +295,7 @@ var checkCommand = async function (msg, isMention) {
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setActivity("use " + bot.PREFIX + "!help", { type: "WATCHING" });
+    bot.user.setActivity("use " + bot.PREFIX + ".help", { type: "WATCHING" });
     data.startup(bot);
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
@@ -324,7 +325,7 @@ bot.on("guildCreate", guild => {
     if (guild.available) {
         data.addGuild(guild.id);
         guild.owner.send("Hi there " + guild.owner.displayName + ".\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use `"
-            + bot.PREFIX + "@help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
+            + bot.PREFIX + ":help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
         let chan = bot.channels.get("408611226998800390");
         chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users, ID: " + guild.id + ")\nOwner is: <@" + guild.ownerID + "> (ID: " + guild.ownerID + ")");

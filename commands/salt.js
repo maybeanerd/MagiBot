@@ -16,7 +16,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "!salt`:",
+        description: "Commands available via the prefix `" + bot.PREFIX + ".salt`:",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -87,7 +87,7 @@ module.exports = {
                     msg.channel.send('', { embed });
                     break;
                 default:
-                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "!help salt` for more info.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ".help salt` for more info.");
                     break;
             }
         } else {

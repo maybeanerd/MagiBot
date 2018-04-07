@@ -29,7 +29,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "@salt`:",
+        description: "Commands available via the prefix `" + bot.PREFIX + ":salt` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -95,7 +95,7 @@ module.exports = {
                     msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
                     break;
                 default:
-                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@help salt` to get more info.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help salt` to get more info.");
                     break;
             }
         } else {

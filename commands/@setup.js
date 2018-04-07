@@ -46,7 +46,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + "@setup` :",
+        description: "Commands available via the prefix `" + bot.PREFIX + ":setup` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -201,7 +201,7 @@ module.exports = {
                 if (mention) {
                     let newpref = await data.setPrefixE(msg.guild.id, mention, bot);
                     if (newpref) {
-                        msg.channel.send("Successfully changed prefix to `" + newpref + "!` !");
+                        msg.channel.send("Successfully changed prefix to `" + newpref + ".` !");
                     } else {
                         msg.channel.send("Something bad happened...");
                     }
@@ -215,7 +215,7 @@ module.exports = {
 
                 info.push({
                     name: "Prefix",
-                    value: await data.getPrefixE(msg.guild.id) + "!",
+                    value: await data.getPrefixE(msg.guild.id) + ".",
                     inline: false
                 });
 
@@ -344,7 +344,7 @@ module.exports = {
                 msg.channel.send('', { embed });
                 break;
             default:
-                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + "@help setup` for more info.");
+                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help setup` for more info.");
                 break;
         }
     },
