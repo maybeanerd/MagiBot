@@ -308,7 +308,7 @@ bot.on("ready", () => {
 });
 
 bot.on("message", msg => {
-    if (!msg.author.bot) {
+    if (!msg.author.bot && msg.guild) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
             data.usageUp(msg.author.id, msg.guild.id);
             checkCommand(msg, true);
@@ -330,6 +330,9 @@ bot.on("guildCreate", guild => {
         let chan = bot.channels.get("408611226998800390");
         chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users, ID: " + guild.id + ")\nOwner is: <@" + guild.ownerID + "> (ID: " + guild.ownerID + ")");
     }
+    data.getPrefixE(guild.id).then((pref) => {
+        bot.PREFIXES[guild.id] = pref;
+    });
 });
 
 bot.on("guildDelete", guild => {
