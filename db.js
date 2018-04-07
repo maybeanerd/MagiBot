@@ -245,23 +245,15 @@ async function checks(userid, guildID) {
 async function checkGuild(id) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db(id);
-        //Dataset for settings
-        if (!(await db.collection("settings"))) {
-            await db.createCollection("settings").then(() => {
-            });
-        }
         if (!(await db.collection("users"))) {
-            db.createCollection("users", function (err, res) {
-                if (err) throw err;
-            });
+            await db.createCollection("users");
         }
         //Dataset of saltranking
         if (!(await db.collection("saltrank"))) {
-            db.createCollection("saltrank", function (err, res) {
-                if (err) throw err;
-            });
+            await db.createCollection("saltrank");
         }
         mclient.close();
+        //create settings
         if (await getSettings(id)) {
             return true;
         } else {
@@ -311,7 +303,7 @@ async function getPrefix(guildID) {
     let settings = await getSettings(guildID);
     settings = settings.prefix;
     if (!settings) {
-        setPrefix(guildID, config.prefix);
+        await setPrefix(guildID, config.prefix);
         return config.prefix;
     } else {
         return settings;
