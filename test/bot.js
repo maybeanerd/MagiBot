@@ -66,7 +66,7 @@ commands.help.main = function (bot, msg) {
     var command = args[0].toLowerCase();
     if (command) {
         if (!commands[command]) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIX + ".help` to get a full list of the commands available.");
+            msg.reply("this command does not exist. Use `" + bot.PREFIXES[msg.guild.id] + ".help` to get a full list of the commands available.");
         } else {
             if (commands[command].ehelp) {
                 commands[command].ehelp(msg, bot);
@@ -93,7 +93,7 @@ commands.help.main = function (bot, msg) {
 
         let embed = {
             color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIX + ".` :\nto get more info on a single command use `" + bot.PREFIX + ".help <command>`",
+            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
@@ -117,7 +117,7 @@ commands['@help'].main = function (bot, msg) {
     if (command) {
         command = "@" + command;
         if (!commands[command]) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIX + ":help` to get a full list of the admin commands available.");
+            msg.reply("this command does not exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help` to get a full list of the admin commands available.");
         } else {
             if (commands[command].ehelp) {
                 commands[command].ehelp(msg, bot);
@@ -145,7 +145,7 @@ commands['@help'].main = function (bot, msg) {
 
         let embed = {
             color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIX + ":` :\nto get more info on a single command use `" + bot.PREFIX + ":help <command>`",
+            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ":help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
