@@ -245,8 +245,8 @@ var checkCommand = async function (msg, isMention) {
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
         command = "." + command;
     } else {
-        var command = msg.content.substring(bot.PREFIX.length, msg.content.length).split(" ")[0].toLowerCase();
-        msg.content = msg.content.slice(command.length + bot.PREFIX.length); //delete prefix and command
+        var command = msg.content.substring(bot.PREFIXES[msg.guild.id].length, msg.content.length).split(" ")[0].toLowerCase();
+        msg.content = msg.content.slice(command.length + bot.PREFIXES[msg.guild.id].length); //delete prefix and command
         msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
