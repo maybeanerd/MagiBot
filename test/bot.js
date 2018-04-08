@@ -334,7 +334,6 @@ bot.on("guildCreate", guild => {
         let chan = bot.channels.get("408611226998800390");
         chan.send(":white_check_mark: joined " + guild.name + " (" + guild.memberCount + " users, ID: " + guild.id + ")\nOwner is: <@" + guild.ownerID + "> (ID: " + guild.ownerID + ")");
     }
-
 });
 
 bot.on("guildDelete", guild => {
