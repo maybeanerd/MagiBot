@@ -48,7 +48,7 @@ module.exports = {
                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                    msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!\n\nUse ➡ to skip to next person in queue and ❌ to ende the queue.").then(mess => {
+                                    msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(mess => {
                                         mess.react('➡');
                                         mess.react('☑');
                                         mess.react('❌');
@@ -75,7 +75,7 @@ module.exports = {
                                                                 activeUser = user;
                                                                 r.remove(activeUser);
                                                             }
-                                                            mess.edit("**" + topic + "**\nCurrent user: **" + activeUser.username + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!\n\nUse ➡ to skip to next person in queue and ❌ to ende the queue.");
+                                                            mess.edit("**" + topic + "**\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!");
                                                         }
                                                     }
                                                     break;
@@ -83,7 +83,7 @@ module.exports = {
                                                     if (queuedUsers[0]) {
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit("**" + topic + "**\nCurrent user: **" + activeUser.username + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!\n\nUse ➡ to skip to next person in queue and ❌ to ende the queue.");
+                                                        mess.edit("**" + topic + "**\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!");
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(5000);
