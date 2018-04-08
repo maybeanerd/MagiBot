@@ -89,6 +89,7 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
+}
 
 async function updateSaltKing(G) {
     if (await G.available) {
