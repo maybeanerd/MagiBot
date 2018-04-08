@@ -89,7 +89,6 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
-}
 
 async function updateSaltKing(G) {
     if (await G.available) {
@@ -245,7 +244,7 @@ async function checkGuild(id) {
     return MongoClient.connect(url).then(async function (mclient) {
         var db = await mclient.db("users");
         await db.collection(id);
-        var dbsalt=await mclient.db("saltrank");
+        var dbsalt = await mclient.db("saltrank");
         //Dataset of saltranking
         await dbsalt.collection(id);
         mclient.close();
