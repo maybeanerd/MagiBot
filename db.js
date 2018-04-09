@@ -89,6 +89,31 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
+            let db = await mclient.db('MagiBot');
+let users=await db.collection("DBLreminder").find().toArray();
+if(users){
+for(let u in users){
+let user=users[u];
+user.send("Hey there "+user+" you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err)=>{});
+}
+}
+}
+
+async function toggleDBL(userID,add){
+let db = await mclient.db('MagiBot');
+if(add&& !(await isInDBL(userID)){ //not sure if this works fine
+await db.collection("DBLreminder").insertOne({_id:userID});
+}else{
+await db.collection("DBLreminder").deleteOne({_id:userID});
+}
+mclient.close();
+}
+
+async function isInDBL(userID){
+let db = await mclient.db('MagiBot');
+let ret= await db.collection("DBLreminder").findOne({_id:userID});
+mclient.close();
+return ret;
 }
 
 async function updateSaltKing(G) {
@@ -634,5 +659,6 @@ module.exports = {
             bot.PREFIXES[guilds[G].id] = await getPrefix(guilds[G].id);
         }
 
-    }
+    },
+toggleDBLE: function (userID,
 };
