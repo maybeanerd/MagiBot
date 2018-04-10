@@ -91,7 +91,9 @@ async function onHour(bot) {
             mclient.close();
         });
         await updateSaltKing(G);
-    }
+    }    
+MongoClient.connect(url).then(async function (mclient) {
+
             let db = await mclient.db('MagiBot');
 let users=await db.collection("DBLreminder").find().toArray();
 if(users){
@@ -102,9 +104,13 @@ user.send("Hey there "+user+" you can now vote for me again! (<https://discordbo
 }
 }
 }
+mclient.close();
+});
 }
 
 async function toggleDBL(userID,add){
+MongoClient.connect(url).then(async function (mclient) {
+
 let db = await mclient.db('MagiBot');
 if(add&& !(await isInDBL(userID))){ //not sure if this works fine
 await db.collection("DBLreminder").insertOne({_id:userID});
@@ -112,13 +118,16 @@ await db.collection("DBLreminder").insertOne({_id:userID});
 await db.collection("DBLreminder").deleteOne({_id:userID});
 }
 mclient.close();
+});
 }
 
 async function isInDBL(userID){
+return MongoClient.connect(url).then(async function (mclient) {
 let db = await mclient.db('MagiBot');
-let ret= await db.collection("DBLreminder").findOne({_id:userID});
+let ret= await db.collection("DBLreminder").find({_id:userID}).count();
 mclient.close();
 return ret;
+});
 }
 
 async function updateSaltKing(G) {
@@ -665,7 +674,7 @@ module.exports = {
         }
 
     },
-toggleDBLE: function (userID,add){
+toggleDBLE: async function (userID,add){
 toggleDBL(userID,add);
 },
 getDBLE: async function(userID){
