@@ -1,29 +1,28 @@
 ﻿var data = require(__dirname + '/../db.js');
 
 module.exports = {
-    main: function (bot, msg) {
+    main: async function (bot, msg) {
                 let authorID = msg.author.id;
-let hasSubscribed=false;
-data.getDBLE(authorID).then((data)=>{
-hasSubscribed=data;
-});
-str="";
-if(hasSubscribed){
+let hasSubscribed=await data.getDBLE(authorID);
+console.log(hasSubscribed);
+let str="";
+if(!hasSubscribed){
 str="subscribe to";
 }else{
 str="unsubscribe from";
 }
+
                                 msg.channel.send("Do you want to "+str+" the Discord Botlist vote reminder?").then(mess => {
                             const filter = (reaction, user) => {
                                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id == authorID);
                             };
-                            mess.react('☑').then(()=>{
-                            mess.react('❌');
+                             mess.react('☑').then(()=>{
+                             mess.react('❌');
 });
                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-if(hasSubscribed){
+if(!hasSubscribed){
 str="subscribed to";
 }else{
 str="unsubscribed from";
@@ -32,17 +31,9 @@ str="unsubscribed from";
 data.toggleDBLE(authorID,!hasSubscribed);
                                 } else if (reacts.first()) {
                                     msg.channel.send("Okay then, no changes applied.");
-                                    used[msg.guild.id] = false;
                                     return;
                                 }
-                            });
-                        });
-
-
-
-                    });
-                });
-            });
+                                      });
         });
     },
     ehelp: function (msg, bot) {
