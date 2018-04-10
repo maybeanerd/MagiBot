@@ -49,6 +49,9 @@ module.exports = {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                                     msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(mess => {
+bot.channels.get("433357857937948672").then((chann)=>{
+    chann.send("Started queue "+topic+" on server "+mess.guild );
+)};
                                         mess.react('➡');
                                         mess.react('☑');
                                         mess.react('❌');
@@ -100,6 +103,9 @@ module.exports = {
                                         });
                                         collector.on('end', () => {
                                             msg.channel.send("**" + topic + "** ended.");
+bot.channels.get("433357857937948672").then((chann)=>{
+    chann.send("Ended queue "+topic+" on server "+mess.guild );
+)};
                                             used[msg.guild.id] = false;
                                             return;
                                         });
@@ -120,13 +126,10 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Just type `" + bot.PREFIX + ":queue` and follow the instructions.");
+        msg.channel.send("Type `" + bot.PREFIX + ":queue` and follow the instructions to start a queue where people can enlist in.");
     },
     help: 'Start a queue',
     admin: true,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
-    ehelp: (msg, bot) => {
-        msg.channel.send("Use this command to start a queue where people can enlist in.");
-    },
     dev: false
 };

@@ -3,6 +3,9 @@ var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on 
 
 var url = config.dburl;
 
+const DBL = require("dblapi.js");
+const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0');
+
 //Define Methods:
 async function getuser(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
@@ -94,14 +97,16 @@ let users=await db.collection("DBLreminder").find().toArray();
 if(users){
 for(let u in users){
 let user=users[u];
+if(await dbl.hasVoted(user.id)){
 user.send("Hey there "+user+" you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err)=>{});
+}
 }
 }
 }
 
 async function toggleDBL(userID,add){
 let db = await mclient.db('MagiBot');
-if(add&& !(await isInDBL(userID)){ //not sure if this works fine
+if(add&& !(await isInDBL(userID))){ //not sure if this works fine
 await db.collection("DBLreminder").insertOne({_id:userID});
 }else{
 await db.collection("DBLreminder").deleteOne({_id:userID});
@@ -660,5 +665,10 @@ module.exports = {
         }
 
     },
-toggleDBLE: function (userID,
+toggleDBLE: function (userID,add){
+toggleDBL(userID,add);
+},
+getDBLE: async function(userID){
+return isInDBL(userID);
+}
 };
