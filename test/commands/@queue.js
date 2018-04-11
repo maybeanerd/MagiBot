@@ -49,8 +49,8 @@ module.exports = {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                                     msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(mess => {
-let chann=bot.channels.get("433357857937948672");
-    chann.send("Started queue **"+topic+"** on server **"+mess.guild+"**" );
+                                        let chann = bot.channels.get("433357857937948672");
+                                        chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         mess.react('➡');
                                         mess.react('☑');
                                         mess.react('❌');
@@ -102,7 +102,7 @@ let chann=bot.channels.get("433357857937948672");
                                         });
                                         collector.on('end', () => {
                                             msg.channel.send("**" + topic + "** ended.");
-    chann.send("Ended queue **"+topic+"** on server **"+mess.guild+"**" );
+                                            chann.send("Ended queue **" + topic + "** on server **" + mess.guild + "**");
                                             used[msg.guild.id] = false;
                                             return;
                                         });
