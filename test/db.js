@@ -92,8 +92,8 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
-    await MongoClient.connect(url).then(async function (mclien) {
-        let db = await mclien.db('MagiBot');
+    await MongoClient.connect(url).then(async function (mclient2) {
+        let db = await mclient2.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
         if (users) {
             for (let u in users) {
@@ -103,7 +103,7 @@ async function onHour(bot) {
                 }
             }
         }
-        mclien.close();
+        mclient2.close();
     });
 }
 
@@ -130,7 +130,7 @@ async function isInDBL(userID) {
 }
 
 async function updateSaltKing(G) {
-    if (await G.available) {
+    if (await G.available && G.me) {
         if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
             let SaltKing = await getSaltKing(G.id);
             let SaltRole = await getSaltRole(G.id);
