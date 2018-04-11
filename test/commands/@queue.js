@@ -1,7 +1,7 @@
 ﻿var used = {};
 
 module.exports = {
-    main: function (bot, msg) {
+    main: async function (bot, msg) {
         if (used[msg.guild.id]) {
             msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
             return;
@@ -45,12 +45,12 @@ module.exports = {
                             };
                             mess.react('☑');
                             mess.react('❌');
-                            mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+                            mess.awaitReactions(filter, { max: 1, time: 20000 }).then(async function f(reacts) {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                    msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(mess => {
+                                    msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(async function f(mess) {
                                         let chann = bot.channels.get("433357857937948672");
-                                        chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
+                                        let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         mess.react('➡');
                                         mess.react('☑');
                                         mess.react('❌');
@@ -102,7 +102,7 @@ module.exports = {
                                         });
                                         collector.on('end', () => {
                                             msg.channel.send("**" + topic + "** ended.");
-                                            chann.send("Ended queue **" + topic + "** on server **" + mess.guild + "**");
+                                            deleteme.delete();
                                             used[msg.guild.id] = false;
                                             return;
                                         });
