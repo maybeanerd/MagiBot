@@ -92,8 +92,8 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
-    await MongoClient.connect(url).then(async function (mclient) {
-        let db = await mclient.db('MagiBot');
+    await MongoClient.connect(url).then(async function (mclien) {
+        let db = await mclien.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
         if (users) {
             for (let u in users) {
@@ -103,7 +103,7 @@ async function onHour(bot) {
                 }
             }
         }
-        mclient.close();
+        mclien.close();
     });
 }
 
