@@ -91,47 +91,47 @@ async function onHour(bot) {
             mclient.close();
         });
         await updateSaltKing(G);
-    }    
-MongoClient.connect(url).then(async function (mclient) {
-
-            let db = await mclient.db('MagiBot');
-let users=await db.collection("DBLreminder").find().toArray();
-if(users){
-for(let u in users){
-let user=users[u];
-if(await dbl.hasVoted(user.id)){
-user.send("Hey there "+user+" you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err)=>{});
-}
-}
-}
-mclient.close();
-});
-}
-
-async function toggleDBL(userID,add){
-MongoClient.connect(url).then(async function (mclient) {
-
-let db = await mclient.db('MagiBot');
-if(add&& !(await isInDBL(userID))){ //not sure if this works fine
-await db.collection("DBLreminder").insertOne({_id:userID});
-}else{
-await db.collection("DBLreminder").deleteOne({_id:userID});
-}
-mclient.close();
-});
+    }
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        let users = await db.collection("DBLreminder").find().toArray();
+        if (users) {
+            for (let u in users) {
+                let user = users[u]["_id"];
+                user = await bot.fetchUser(user);
+                if (!(await dbl.hasVoted(user.id))) {
+                    await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
+                }
+            }
+        }
+        mclient.close();
+    });
 }
 
-async function isInDBL(userID){
-return MongoClient.connect(url).then(async function (mclient) {
-let db = await mclient.db('MagiBot');
-let ret= await db.collection("DBLreminder").find({_id:userID}).count();
-mclient.close();
-return ret;
-});
+async function toggleDBL(userID, add) {
+    MongoClient.connect(url).then(async function (mclient) {
+
+        let db = await mclient.db('MagiBot');
+        if (add && !(await isInDBL(userID))) { //not sure if this works fine
+            await db.collection("DBLreminder").insertOne({ _id: userID });
+        } else {
+            await db.collection("DBLreminder").deleteOne({ _id: userID });
+        }
+        mclient.close();
+    });
+}
+
+async function isInDBL(userID) {
+    return MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        let ret = await db.collection("DBLreminder").find({ _id: userID }).count();
+        mclient.close();
+        return ret;
+    });
 }
 
 async function updateSaltKing(G) {
-    if (await G.available) {
+    if (await G.available && G.me) {
         if (await G.me.hasPermission("MANAGE_ROLES", false, true)) {
             let SaltKing = await getSaltKing(G.id);
             let SaltRole = await getSaltRole(G.id);
@@ -674,10 +674,10 @@ module.exports = {
         }
 
     },
-toggleDBLE: async function (userID,add){
-toggleDBL(userID,add);
-},
-getDBLE: async function(userID){
-return isInDBL(userID);
-}
+    toggleDBLE: async function (userID, add) {
+        toggleDBL(userID, add);
+    },
+    getDBLE: async function (userID) {
+        return isInDBL(userID);
+    }
 };
