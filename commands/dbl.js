@@ -40,7 +40,7 @@ module.exports = {
         msg.channel.send("Use `" + bot.PREFIX + ".dbl` to [un]subscribe from the Discord Bot List vote reminder.");
     },
     help: '[Un]subscribe from the Discord Bot List vote reminder',
-    admin: true,
+    admin: false,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
     dev: false
 };
