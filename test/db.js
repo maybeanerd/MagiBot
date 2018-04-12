@@ -92,18 +92,18 @@ async function onHour(bot) {
         });
         await updateSaltKing(G);
     }
-    await MongoClient.connect(url).then(async function (mclient2) {
-        let db = await mclient2.db('MagiBot');
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
         if (users) {
             for (let u in users) {
                 let user = users[u];
-                if (await dbl.hasVoted(user.id)) {
+                if (await dbl.hasVoted(user)) {
                     user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
                 }
             }
         }
-        mclient2.close();
+        mclient.close();
     });
 }
 
