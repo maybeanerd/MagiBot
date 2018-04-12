@@ -97,9 +97,10 @@ async function onHour(bot) {
         let users = await db.collection("DBLreminder").find().toArray();
         if (users) {
             for (let u in users) {
-                let user = users[u];
-                if (await dbl.hasVoted(user)) {
-                    user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
+                let user = users[u]["_id"];
+                user = await bot.fetchUser(user);
+                if (!(await dbl.hasVoted(user.id))) {
+                    await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
                 }
             }
         }
