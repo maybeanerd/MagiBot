@@ -250,6 +250,7 @@ var checkCommand = async function (msg, isMention) {
         msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
+        await data.usageUp(msg.author.id, msg.guild.id);
         var pre = command.charAt(0);
         switch (pre) {
             case '.':
@@ -310,24 +311,23 @@ bot.on("ready", () => {
 bot.on("message", msg => {
     if (!msg.author.bot && msg.guild) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
-            data.usageUp(msg.author.id, msg.guild.id);
             checkCommand(msg, true);
             if (bot.DELETE_COMMANDS) msg.delete();
         } else if (msg.content.startsWith(bot.PREFIXES[msg.guild.id])) {
-            data.usageUp(msg.author.id, msg.guild.id);
             checkCommand(msg, false);
             if (bot.DELETE_COMMANDS) msg.delete();
         }
     }
 });
 
+async function guildPrefixStartup(guild) {
+    await data.addGuild(guild.id);
+    bot.PREFIXES[guild.id] = await data.getPrefixE(guild.id);
+}
+
 bot.on("guildCreate", guild => {
     if (guild.available) {
-        data.addGuild(guild.id).then(() => {
-            data.getPrefixE(guild.id).then((pref) => {
-                bot.PREFIXES[guild.id] = pref;
-            });
-        });
+        guildPrefixStartup(guild);
         guild.owner.send("Hi there " + guild.owner.displayName + ".\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use `"
             + bot.PREFIX + ":help setup`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to " +
             "join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev");
