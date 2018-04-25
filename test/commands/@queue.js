@@ -3,10 +3,13 @@
 module.exports = {
     main: async function (bot, msg) {
         if (used[msg.guild.id]) {
-            msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
-            return;
+            var d = new Date();
+            if ((d - used[msg.guild.id]) <= 3600000) { //check if its already 2hours old
+                msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
+                return;
+            }
         }
-        used[msg.guild.id] = true;
+        used[msg.guild.id] = new Date();
         let authorID = msg.author.id;
         msg.channel.send("What do you want the queue to be about?").then(mess => { //fix when no messages TODO
             msg.delete();
@@ -48,20 +51,20 @@ module.exports = {
                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(async function f(reacts) {
                                 mess.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                    msg.channel.send("**" + topic + ":**\nUse ☑ to join the queue!").then(async function f(mess) {
+                                    msg.channel.send("Queue: **" + topic + ":**\n\nUse ☑ to join the queue!").then(async function f(mess) {
                                         let chann = bot.channels.get("433357857937948672");
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
-                                        mess.react('➡');
-                                        mess.react('☑');
-                                        mess.react('❌');
+                                        await mess.react('➡');
+                                        await mess.react('☑');
+                                        await mess.react('❌');
+                                        await mess.react('🔚');
                                         var fil = (reaction, user) => {
-                                            return (reaction.emoji.name == '☑' || ((reaction.emoji.name == '❌' || reaction.emoji.name == '➡') && user.id == authorID));
+                                            return (reaction.emoji.name == '☑' || reaction.emoji.name == '❌' || ((reaction.emoji.name == '➡' || reaction.emoji.name == '🔚') && user.id == authorID));
                                         };
                                         time *= 60000;
-                                        var queuedUsers = []; //save queued users
+                                        var queuedUsers = [];
                                         var activeUser = false;
                                         const collector = mess.createReactionCollector(fil, { time: time });
-
 
                                         collector.on('collect', r => {
                                             switch (r.emoji.name) {
@@ -73,11 +76,15 @@ module.exports = {
                                                         if (!queuedUsers.includes(user) && user != activeUser && user.id != bot.user.id) {
                                                             if (activeUser) {
                                                                 queuedUsers.push(user);
+                                                                mess.reactions.get('❌').remove(user);
                                                             } else {
                                                                 activeUser = user;
                                                                 r.remove(activeUser);
+                                                                msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
+                                                                    ms.delete(1000);
+                                                                });
                                                             }
-                                                            mess.edit("**" + topic + "**\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!");
+                                                            mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
                                                         }
                                                     }
                                                     break;
@@ -85,23 +92,43 @@ module.exports = {
                                                     if (queuedUsers[0]) {
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit("**" + topic + "**\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\nUse ☑ to join the queue!");
+                                                        mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
+                                                        mess.reactions.get('☑').remove(activeUser);
+                                                        msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
+                                                            ms.delete(1000);
+                                                        });
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
-                                                            ms.delete(5000);
+                                                            ms.delete(2000);
                                                         });
                                                     }
                                                     r.remove(authorID);
                                                     break;
                                                 case '❌':
-                                                    msg.channel.send("Successfully canceled queue **" + topic + "**");
+                                                    let sers = r.users;
+                                                    sers = sers.array();
+                                                    for (let u in sers) {
+                                                        let user = sers[u];
+                                                        if (queuedUsers.includes(user) && user.id != bot.user.id) {
+                                                            r.remove(user);
+                                                            mess.reactions.get('☑').remove(user);
+                                                            let ind = queuedUsers.findIndex(obj => obj.id == user.id);
+                                                            queuedUsers.splice(ind, 1);
+                                                            mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
+                                                        }
+                                                    }
+                                                    break;
+                                                case '🔚':
+                                                    msg.channel.send("Successfully ended queue.");
                                                     collector.stop();
+                                                    break;
                                                 default:
                                                     break;
                                             }
                                         });
                                         collector.on('end', () => {
-                                            msg.channel.send("**" + topic + "** ended.");
+                                            mess.edit("**" + topic + "** ended.").catch();
+                                            mess.clearReactions().catch();
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
                                             return;
