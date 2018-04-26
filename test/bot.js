@@ -312,7 +312,7 @@ var isInvLink = /(?:discord(?:(?:\.|.?dot.?)gg|app(?:\.|.?dot.?)com\/invite)\/((
 
 bot.on("message", msg => {
     if (!msg.author.bot && msg.guild) {
-        if (isInvLink(msg.content)) {
+        if (isInvLink.test(msg.content)) {
             msg.reply(" server invites aren't allowed here.");
             msg.delete();
             return;
