@@ -308,7 +308,8 @@ bot.on("ready", () => {
     chann.send("Im up and ready!");
 });
 
-bot.on("message", msg => {
+bot.on("message", msg => { //add regex for finding invite links 
+//  /(?:discord(?:(?:\.|.?dot.?)gg|app(?:\.|.?dot.?)com\/invite)\/(([\w]{10,16}|[abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789]{4,8})))/i
     if (!msg.author.bot && msg.guild) {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
             checkCommand(msg, true);
