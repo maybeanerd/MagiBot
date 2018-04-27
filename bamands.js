@@ -4,6 +4,7 @@
 
 module.exports = {
     findMember: async function f(guild, mention, important) {
+        if (!mention) { return false; }
         if (mention.startsWith('<@') && mention.endsWith('>')) {
             id = mention.substr(2).slice(0, -1);
             if (id.startsWith('!')) {
@@ -27,6 +28,7 @@ module.exports = {
         }
     },
     findRole: async function f(guild, mention, important) {
+        if (!mention) { return false; }
         if (mention.startsWith('<@&') && mention.endsWith('>')) {
             id = mention.substr(3).slice(0, -1);
             return id;

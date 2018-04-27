@@ -1,4 +1,5 @@
 var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamand.js');
 
 module.exports = {
     main: async function f(bot, msg) {
@@ -6,17 +7,8 @@ module.exports = {
             var id;
             const args = msg.content.split(/ +/);
             var mention = args[0];
-            if (mention.length > 0) {
-                if (mention.startsWith('<@') && mention.endsWith('>')) {
-                    id = mention.substr(2).slice(0, -1);
-                    if (id.startsWith('!')) {
-                        id = id.substr(1);
-                    }
-                } else {
-                    msg.reply("your mention did not work. Use `" + bot.PREFIX + ".help profile` for more info.");
-                    return;
-                }
-            } else {
+            id = cmds.findMember(msg.guild, mention, false);
+            if (!id) {
                 id = msg.author.id;
             }
             var info = [];
