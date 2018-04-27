@@ -12,14 +12,14 @@ module.exports = {
             }
             return id;
         } else {
-            let user = await guild.fetchMember(mention).catch();
+            let user = await guild.fetchMember(mention).catch(() => { });
             if (user) {
                 return user.id;
             }
             if (important) {
                 return false;
             }
-            let member = await guild.members.find("nickname", mention).catch();
+            let member = await guild.members.find("nickname", mention).catch(() => { });
             if (member) {
                 return member.id;
             } else {
@@ -33,14 +33,14 @@ module.exports = {
             id = mention.substr(3).slice(0, -1);
             return id;
         } else {
-            let role = await guild.roles.get(mention).catch();
+            let role = await guild.roles.get(mention).catch(() => { });
             if (role) {
                 return role.id;
             }
             if (important) {
                 return false;
             }
-            let nrole = await guild.roles.find("name", mention).catch();
+            let nrole = await guild.roles.find("name", mention).catch(() => { });
             if (nrole) {
                 return nrole.id;
             } else {

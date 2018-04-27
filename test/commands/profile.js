@@ -1,5 +1,5 @@
 var data = require(__dirname + '/../db.js');
-var cmds = require(__dirname + '/../bamand.js');
+var cmds = require(__dirname + '/../bamands.js');
 
 module.exports = {
     main: async function f(bot, msg) {
@@ -7,7 +7,7 @@ module.exports = {
             var id;
             const args = msg.content.split(/ +/);
             var mention = args[0];
-            id = cmds.findMember(msg.guild, mention, false);
+            id = await cmds.findMember(msg.guild, mention, false);
             if (!id) {
                 id = msg.author.id;
             }
