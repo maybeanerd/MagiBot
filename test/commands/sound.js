@@ -20,7 +20,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + ".sound` :",
+        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".sound` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -40,12 +40,12 @@ module.exports = {
             case 'add':
                 let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
                 if (!sound) {
-                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + ".help sound`");
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
                     return;
                 }
                 sound = sound.streams[0];
                 if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
-                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIX + ".help sound`");
+                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
                     return;
                 }
                 if (sound.duration > 8) {
@@ -69,7 +69,7 @@ module.exports = {
 
                 break;
             default:
-                msg.reply("This is not a valid command. Use `" + bot.PREFIX + ".help sound` for more info.");
+                msg.reply("This is not a valid command. Use `" + bot.PREFIXES[msg.guild.id] + ".help sound` for more info.");
                 break;
         }
     },

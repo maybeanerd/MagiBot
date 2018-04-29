@@ -1,4 +1,5 @@
 ﻿var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamands.js');
 
 function printHelp(msg, bot) {
     var info = [];
@@ -29,7 +30,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + ":salt` :",
+        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":salt` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -46,12 +47,8 @@ module.exports = {
         var command = args[0].toLowerCase();
         if (msg.guild) {
             var mention = args[1];
-            if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
-                mention = mention.substr(2).slice(0, -1);
-                if (mention.startsWith('!')) {
-                    mention = mention.substr(1);
-                }
-            } else {
+            let uid = cmds.findMember(msg.guild, mention);
+            if (!(mention && uid)) {
                 if (command == "reset") {
                     msg.channel.send("Do you really want to reset all salt on this server?").then(mess => {
                         const filter = (reaction, user) => {
@@ -76,26 +73,26 @@ module.exports = {
             }
             switch (command) {
                 case 'add':
-                    if (mention == bot.user.id) {
+                    if (uid == bot.user.id) {
                         msg.reply("you can't report me!");
                         return;
                     }
-                    await data.saltUpAdmin(mention, msg.author.id, msg.guild);
-                    msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
+                    await data.saltUpAdmin(uid, msg.author.id, msg.guild);
+                    msg.channel.send("Successfully reported <@!" + uid + "> for being a salty bitch!");
                     break;
                 case 'rem':
-                    if (await data.remOldestSalt(mention, msg.guild)) {
-                        msg.channel.send("Successfully removed the oldest salt from <@!" + mention + ">!");
+                    if (await data.remOldestSalt(uid, msg.guild)) {
+                        msg.channel.send("Successfully removed the oldest salt from <@!" + uid + ">!");
                     } else {
-                        msg.channel.send("<@!" + mention + "> has no salt that could be removed!");
+                        msg.channel.send("<@!" + uid + "> has no salt that could be removed!");
                     }
                     break;
                 case 'clr':
-                    await data.clrSalt(mention, msg.guild);
-                    msg.channel.send("Successfully cleared all salt from <@!" + mention + ">!");
+                    await data.clrSalt(uid, msg.guild);
+                    msg.channel.send("Successfully cleared all salt from <@!" + uid + ">!");
                     break;
                 default:
-                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help salt` to get more info.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help salt` to get more info.");
                     break;
             }
         } else {

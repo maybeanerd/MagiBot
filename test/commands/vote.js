@@ -62,7 +62,7 @@
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Just type `" + bot.PREFIX + ".vote` and follow the instructions.");
+        msg.channel.send("Just type `" + bot.PREFIXES[msg.guild.id] + ".vote` and follow the instructions.");
     },
     help: 'Start a vote',
     admin: false,

@@ -4,10 +4,9 @@ var cmds = require(__dirname + '/../bamands.js');
 module.exports = {
     main: async function f(bot, msg) {
         if (msg.guild) {
-            var id;
             const args = msg.content.split(/ +/);
             var mention = args[0];
-            id = await cmds.findMember(msg.guild, mention);
+            var id = await cmds.findMember(msg.guild, mention);
             if (!id && !mention) {
                 id = msg.author.id;
             } else if (!id) {

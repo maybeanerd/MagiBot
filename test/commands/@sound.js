@@ -1,17 +1,18 @@
 var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamands.js');
 
 function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "rem @User",
-        value: "Remove the joinsound of a user",
+        name: "rem @User/userid/nickname",
+        value: "Remove the joinsound of a user. If you use nickname it has to be at least three characters long",
         inline: true
     });
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + ":sound` :",
+        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":sound` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -30,13 +31,10 @@ module.exports = {
         var mention = args[1];
         switch (command) {
             case 'rem':
-                if (mention.startsWith('<@') && mention.endsWith('>')) {
-                    mention = mention.substr(2).slice(0, -1);
-                    if (mention.startsWith('!')) {
-                        mention = mention.substr(1);
-                    }
-                    if (await data.addSound(mention, false, msg.guild.id)) {
-                        msg.reply("you successfully removed <@!" + mention + ">s joinsound!");
+                let uid = cmds.findMember(msg.guild, mention);
+                if (mention && uid) {
+                    if (await data.addSound(uid, false, msg.guild.id)) {
+                        msg.reply("you successfully removed <@!" + uid + ">s joinsound!");
                     }
                     else {
                         msg.reply("Aaaaaand you failed.");
@@ -47,7 +45,7 @@ module.exports = {
                 }
                 break;
             default:
-                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help sound` for more info.");
+                msg.reply("this command doesn't exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help sound` for more info.");
                 break;
         }
 

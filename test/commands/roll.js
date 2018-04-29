@@ -44,7 +44,7 @@ module.exports = {
 
         var throws = parse(input);
         if (!throws) {
-            msg.channel.send("Your inputs could not be interpreted. Use `" + bot.PREFIX + ".help roll` for more info.");
+            msg.channel.send("Your inputs could not be interpreted. Use `" + bot.PREFIXES[msg.guild.id] + ".help roll` for more info.");
             return;
         }
         var info = [];
@@ -81,7 +81,7 @@ module.exports = {
     },
     help: "Roll dice",
     ehelp: function (msg, bot) {
-        msg.channel.send("Let me roll some dice for you.\nUsage: `" + bot.PREFIX + ".roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
+        msg.channel.send("Let me roll some dice for you.\nUsage: `" + bot.PREFIXES[msg.guild.id] + ".roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
     },
     perm: "SEND_MESSAGES",
     admin: false

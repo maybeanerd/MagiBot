@@ -1,4 +1,5 @@
 ﻿var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamands.js');
 
 function printHelp(msg, bot) {
     var info = [];
@@ -46,7 +47,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + ":setup` :",
+        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":setup` :",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -67,12 +68,9 @@ module.exports = {
 
         switch (command) {
             case 'ban':
-                if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
-                    mention = mention.substr(2).slice(0, -1);
-                    if (mention.startsWith('!')) {
-                        mention = mention.substr(1);
-                    }
-                    msg.channel.send("Do you really want to ban <@!" + mention + "> from using the bot?").then(mess => {
+                let uid = cmds.findMember(msg.guild, mention);
+                if (mention && uid) {
+                    msg.channel.send("Do you really want to ban <@!" + uid + "> from using the bot?").then(mess => {
                         const filter = (reaction, user) => {
                             return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
                         };
@@ -81,8 +79,8 @@ module.exports = {
                         mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                             mess.delete();
                             if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                if (data.setBlacklistedUser(msg.guild.id, mention, true)) {
-                                    msg.channel.send("Successfully banned <@!" + mention + "> from using the bot.");
+                                if (data.setBlacklistedUser(msg.guild.id, uid, true)) {
+                                    msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
                                 } else {
                                     msg.channel.send("Error 404 you failed.");
                                 }
@@ -97,12 +95,9 @@ module.exports = {
                 }
                 break;
             case 'unban':
-                if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
-                    mention = mention.substr(2).slice(0, -1);
-                    if (mention.startsWith('!')) {
-                        mention = mention.substr(1);
-                    }
-                    msg.channel.send("Do you really want to reactivate bot usage for <@!" + mention + "> ?").then(mess => {
+                let uid = cmds.findMember(msg.guild, mention);
+                if (mention && uid) {
+                    msg.channel.send("Do you really want to reactivate bot usage for <@!" + uid + "> ?").then(mess => {
                         const filter = (reaction, user) => {
                             return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
                         };
@@ -111,8 +106,8 @@ module.exports = {
                         mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                             mess.delete();
                             if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                if (data.setBlacklistedUser(msg.guild.id, mention, false)) {
-                                    msg.channel.send("Successfully activated the bot for <@!" + mention + "> again.");
+                                if (data.setBlacklistedUser(msg.guild.id, uid, false)) {
+                                    msg.channel.send("Successfully activated the bot for <@!" + uid + "> again.");
                                 } else {
                                     msg.channel.send("Error 404 you failed.");
                                 }
@@ -149,10 +144,10 @@ module.exports = {
                 }
                 break;
             case 'admin+':
-                if (mention.startsWith('<@&') && mention.endsWith('>')) {
-                    mention = mention.substr(3).slice(0, -1);
-                    if (await data.setAdmin(msg.guild.id, mention, true)) {
-                        msg.channel.send("Successfully set <@&" + mention + "> as admin role!");
+                let rid = cmds.findRole(msg.guild, mention);
+                if (mention && rid) {
+                    if (await data.setAdmin(msg.guild.id, rid, true)) {
+                        msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
@@ -162,10 +157,10 @@ module.exports = {
                 }
                 break;
             case 'admin-':
-                if (mention.startsWith('<@&') && mention.endsWith('>')) {
-                    mention = mention.substr(3).slice(0, -1);
-                    if (await data.setAdmin(msg.guild.id, mention, false)) {
-                        msg.channel.send("Successfully removed <@&" + mention + "> from the admin roles!");
+                let rid = cmds.findRole(msg.guild, mention);
+                if (mention && rid) {
+                    if (await data.setAdmin(msg.guild.id, rid, false)) {
+                        msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
@@ -344,7 +339,7 @@ module.exports = {
                 msg.channel.send('', { embed });
                 break;
             default:
-                msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ":help setup` for more info.");
+                msg.reply("this command doesn't exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help setup` for more info.");
                 break;
         }
     },
