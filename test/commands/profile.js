@@ -8,8 +8,11 @@ module.exports = {
             const args = msg.content.split(/ +/);
             var mention = args[0];
             id = await cmds.findMember(msg.guild, mention, false);
-            if (!id) {
+            if (!id && !mention) {
                 id = msg.author.id;
+            } else if (!id) {
+                msg.reply(" you need to define the user uniquely or not mention any user. For more help use `" + bot.PREFIXES[msg.guild.id] + ".help profile`");
+                return;
             }
             var info = [];
             var salt = await data.getSalt(id, msg.guild.id);
@@ -33,7 +36,7 @@ module.exports = {
             let user = await bot.fetchUser(id);
             let embed = {
                 color: bot.COLOR,
-                description: ("Here's some info on " + user.username),
+                description: ("Here's some info on " + user.displayName),
                 fields: info,
                 footer: {
                     icon_url: user.avatarURL,
@@ -46,7 +49,7 @@ module.exports = {
         }
     },
     help: 'Get some info on yourself or a user you mention',
-    ehelp: async function (msg, bot) { msg.channel.send("Use `" + bot.PREFIX + ".profile` to get info about yourself or `" + bot.PREFIX + ".profile @user` to get info about a certain user."); },
+    ehelp: async function (msg, bot) { msg.channel.send("Use `" + bot.PREFIXES[msg.guild.id] + ".profile` to get info about yourself or `" + bot.PREFIXES[msg.guild.id] + ".profile @user/userid/nickname` to get info about a certain user."); },
     perm: "SEND_MESSAGES",
     admin: false,
     hide: false
