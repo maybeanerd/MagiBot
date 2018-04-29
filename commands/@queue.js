@@ -150,7 +150,7 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Type `" + bot.PREFIX + ":queue` and follow the instructions to start a queue where people can enlist in.");
+        msg.channel.send("Type `" + bot.PREFIXES[msg.guild.id] + ":queue` and follow the instructions to start a queue where people can enlist in.");
     },
     help: 'Start a queue',
     admin: true,

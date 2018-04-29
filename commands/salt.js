@@ -1,11 +1,13 @@
 var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamands.js');
+
 
 function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add @User",
-        value: "Report a user being salty",
+        name: "add @User/userid/nickname",
+        value: "Report a user being salty. If you use nickname it has to be at least three characters long",
         inline: true
     });
     info.push({
@@ -16,7 +18,7 @@ function printHelp(msg, bot) {
 
     let embed = {
         color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIX + ".salt`:",
+        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".salt`:",
         fields: info,
         footer: {
             icon_url: bot.user.avatarURL,
@@ -35,25 +37,22 @@ module.exports = {
             switch (command) {
                 case 'add':
                     var mention = args[1];
-                    if (mention && mention.startsWith('<@') && mention.endsWith('>')) {
-                        mention = mention.substr(2).slice(0, -1);
-                        if (mention.startsWith('!')) {
-                            mention = mention.substr(1);
-                        }
-                        if (mention == bot.user.id) {
+                    let uid = await cmds.findMember(msg.guild, mention);
+                    if (mention && uid) {
+                        if (uid == bot.user.id) {
                             msg.reply("you can't report me!");
                             return;
                         }
-                        if (mention == msg.author.id) {
+                        if (uid == msg.author.id) {
                             msg.reply("you can't report yourself!");
                             return;
                         }
-                        let time = await data.saltUp(mention, msg.author.id, msg.guild);
+                        let time = await data.saltUp(uid, msg.author.id, msg.guild);
                         console.log(time);
                         if (time == 0) {
-                            msg.channel.send("Successfully reported <@!" + mention + "> for being a salty bitch!");
+                            msg.channel.send("Successfully reported <@!" + uid + "> for being a salty bitch!");
                         } else {
-                            msg.reply("you can report <@!" + mention + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
+                            msg.reply("you can report <@!" + uid + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
                         }
                     } else {
                         msg.reply("you need to mention a user you want to report!");
@@ -87,7 +86,7 @@ module.exports = {
                     msg.channel.send('', { embed });
                     break;
                 default:
-                    msg.reply("this command doesn't exist. Use `" + bot.PREFIX + ".help salt` for more info.");
+                    msg.reply("this command doesn't exist. Use `" + bot.PREFIXES[msg.guild.id] + ".help salt` for more info.");
                     break;
             }
         } else {
