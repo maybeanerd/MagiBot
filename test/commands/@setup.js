@@ -68,7 +68,7 @@ module.exports = {
 
         switch (command) {
             case 'ban':
-                let uid = cmds.findMember(msg.guild, mention);
+                var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
                     msg.channel.send("Do you really want to ban <@!" + uid + "> from using the bot?").then(mess => {
                         const filter = (reaction, user) => {
@@ -95,7 +95,7 @@ module.exports = {
                 }
                 break;
             case 'unban':
-                let uid = cmds.findMember(msg.guild, mention);
+                var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
                     msg.channel.send("Do you really want to reactivate bot usage for <@!" + uid + "> ?").then(mess => {
                         const filter = (reaction, user) => {
@@ -144,7 +144,7 @@ module.exports = {
                 }
                 break;
             case 'admin+':
-                let rid = cmds.findRole(msg.guild, mention);
+                var rid = await cmds.findRole(msg.guild, mention);
                 if (mention && rid) {
                     if (await data.setAdmin(msg.guild.id, rid, true)) {
                         msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
@@ -157,7 +157,7 @@ module.exports = {
                 }
                 break;
             case 'admin-':
-                let rid = cmds.findRole(msg.guild, mention);
+                var rid = await cmds.findRole(msg.guild, mention);
                 if (mention && rid) {
                     if (await data.setAdmin(msg.guild.id, rid, false)) {
                         msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");

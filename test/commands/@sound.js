@@ -31,7 +31,7 @@ module.exports = {
         var mention = args[1];
         switch (command) {
             case 'rem':
-                let uid = cmds.findMember(msg.guild, mention);
+                let uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
                     if (await data.addSound(uid, false, msg.guild.id)) {
                         msg.reply("you successfully removed <@!" + uid + ">s joinsound!");

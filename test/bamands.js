@@ -33,12 +33,12 @@ module.exports = {
             id = mention.substr(3).slice(0, -1);
             return id;
         } else {
-            let role = await guild.roles.get(mention).catch(() => { });
+            let role = await guild.roles.get(mention);
             if (role) {
                 return role.id;
             }
             if (mention.length >= 3) {
-                let roleArray = await guild.members.filterArray((rol) => {
+                let roleArray = await guild.roles.filterArray((rol) => {
                     return rol.name.toLowerCase().startsWith(mention);
                 });
                 if (roleArray.length == 1) {

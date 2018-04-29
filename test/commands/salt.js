@@ -37,7 +37,7 @@ module.exports = {
             switch (command) {
                 case 'add':
                     var mention = args[1];
-                    let uid = cmds.findMember(msg.guild, mention);
+                    let uid = await cmds.findMember(msg.guild, mention);
                     if (mention && uid) {
                         if (uid == bot.user.id) {
                             msg.reply("you can't report me!");

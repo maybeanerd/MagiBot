@@ -47,7 +47,7 @@ module.exports = {
         var command = args[0].toLowerCase();
         if (msg.guild) {
             var mention = args[1];
-            let uid = cmds.findMember(msg.guild, mention);
+            let uid = await cmds.findMember(msg.guild, mention);
             if (!(mention && uid)) {
                 if (command == "reset") {
                     msg.channel.send("Do you really want to reset all salt on this server?").then(mess => {
