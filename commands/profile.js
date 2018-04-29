@@ -50,7 +50,7 @@ module.exports = {
         }
     },
     help: 'Get some info on yourself or a user you mention',
-    ehelp: async function (msg, bot) { msg.channel.send("Use `" + bot.PREFIXES[msg.guild.id] + ".profile` to get info about yourself or `" + bot.PREFIXES[msg.guild.id] + ".profile @user/userid/nickname` to get info about a certain user."); },
+    ehelp: async function (msg, bot) { msg.channel.send("Use `" + bot.PREFIXES[msg.guild.id] + ".profile` to get info about yourself or `" + bot.PREFIXES[msg.guild.id] + ".profile @user/userid/nickname` to get info about a certain user. If you use the nickname you need to at least define three characters."); },
     perm: "SEND_MESSAGES",
     admin: false,
     hide: false

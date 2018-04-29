@@ -24,8 +24,8 @@ module.exports = {
             }
             return false;
         }
-    }
-},
+
+    },
     findRole: async function f(guild, mention) {
         if (!mention) { return false; }
         mention = mention.toLowerCase();
@@ -48,5 +48,5 @@ module.exports = {
             return false;
         }
     }
-    
+
 };
