@@ -7,7 +7,7 @@ module.exports = {
             var id;
             const args = msg.content.split(/ +/);
             var mention = args[0];
-            id = await cmds.findMember(msg.guild, mention, false);
+            id = await cmds.findMember(msg.guild, mention);
             if (!id && !mention) {
                 id = msg.author.id;
             } else if (!id) {
