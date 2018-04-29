@@ -33,14 +33,14 @@ module.exports = {
                 value: link,
                 inline: false
             });
-            let user = await bot.fetchUser(id);
+            let user = await msg.guild.fetchMember(id);
             let embed = {
-                color: bot.COLOR,
+                color: user.displayColor,
                 description: ("Here's some info on " + user.displayName),
                 fields: info,
                 footer: {
-                    icon_url: user.avatarURL,
-                    text: user.username
+                    icon_url: user.user.avatarURL,
+                    text: user.displayName
                 }
             }
             msg.channel.send('', { embed });
