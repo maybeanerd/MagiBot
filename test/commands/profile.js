@@ -38,9 +38,10 @@ module.exports = {
                 color: user.displayColor,
                 description: ("Here's some info on " + user.displayName),
                 fields: info,
+                thumbnail: { url: user.user.avatarURL },
                 footer: {
                     icon_url: user.user.avatarURL,
-                    text: user.displayName
+                    text: user.user.tag
                 }
             }
             msg.channel.send('', { embed });
