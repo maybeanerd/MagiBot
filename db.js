@@ -64,15 +64,15 @@ async function onHour(bot) {
     }
     let nd = new Date();
     nd.setDate(nd.getDate() - 8);
+    var guilds = await bot.guilds.array();
+    await checkGuild(guildID);
     await MongoClient.connect(url).then(async function (mclient) {
-        let db = mclient.db('MagiBot');
-        var guilds = await bot.guilds.array();
         for (let GN in guilds) {
-            var G = guilds[GN]; //TODO switch mongo connect with loop
-            console.log("Hourly routine in: " + G.name);
+            var G = guilds[GN];
+            console.log("Hourly routine in: " + G.name + "(N. " + GN + ")");
             let guildID = await G.id;
             //make sure guilds that were added while bot was offline are in DB:            
-            await checkGuild(guildID);
+            let db = mclient.db('MagiBot');
             var ranking = await db.collection("saltrank").find({ guild: guildID }).toArray();
             for (var i in ranking) {
                 let report = ranking[i];
@@ -87,25 +87,26 @@ async function onHour(bot) {
                     }
                 }
             }
-
-            await updateSaltKing(G);
         }
-        mclient.close();
+        await mclient.close();
     });
-    await MongoClient.connect(url).then(async function (mclient) {
-        let db = await mclient.db('MagiBot');
-        let users = await db.collection("DBLreminder").find().toArray();
-        if (users) {
-            for (let u in users) {
-                let user = users[u]["_id"];
-                user = await bot.fetchUser(user);
-                if (!(await dbl.hasVoted(user.id))) {
-                    await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
-                }
+    await updateSaltKing(G);
+}
+
+await MongoClient.connect(url).then(async function (mclient) {
+    let db = await mclient.db('MagiBot');
+    let users = await db.collection("DBLreminder").find().toArray();
+    if (users) {
+        for (let u in users) {
+            let user = users[u]["_id"];
+            user = await bot.fetchUser(user);
+            if (!(await dbl.hasVoted(user.id))) {
+                await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
             }
         }
-        mclient.close();
-    });
+    }
+    mclient.close();
+});
 }
 
 async function toggleDBL(userID, add) {
@@ -281,14 +282,13 @@ async function checks(userid, guildID) {
 }
 
 async function checkGuild(id) {
-    return MongoClient.connect(url).then(async function (mclient) {
-        //create settings
-        if (await getSettings(id)) {
-            return true;
-        } else {
-            return false;
-        }
-    });
+    //create settings
+    if (await getSettings(id)) {
+        return true;
+    } else {
+        return false;
+    }
+
 }
 
 async function setSaltRole(guildID, roleID) {
