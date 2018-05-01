@@ -130,7 +130,7 @@ async function toggleDBL(userID, add) {
 async function toggleDBLvoted(userid, votd) {
     MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
-        await db.collection("DBLreminder").updateOne({ _id: userID }, { $set: { voted: votd } });
+        await db.collection("DBLreminder").updateOne({ _id: userid }, { $set: { voted: votd } });
         mclient.close();
     });
 }
