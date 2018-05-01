@@ -297,7 +297,10 @@ var checkCommand = async function (msg, isMention) {
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
     bot.user.setActivity("use " + bot.PREFIX + ".help", { type: "WATCHING" });
-    data.startup(bot);
+    let chann = bot.channels.get("382233880469438465");
+    data.startup(bot).then(() => {
+        chann.send("Done with hourly start!");
+    });
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }
@@ -307,9 +310,7 @@ bot.on("ready", () => {
     let chann = bot.channels.get("382233880469438465");
     chann.send("Im up and ready!");
 });
-
 var isInvLink = /(?:discord(?:(?:\.|.?dot.?)gg|app(?:\.|.?dot.?)com\/invite)\/(([\w]{10,16}|[a-z0-9]{4,8})))/i;
-
 bot.on("message", msg => {
     if (!msg.author.bot && msg.guild) {
         if (isInvLink.test(msg.content)) {
