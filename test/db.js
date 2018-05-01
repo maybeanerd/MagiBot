@@ -97,9 +97,13 @@ async function onHour(bot, isFirst) {
         if (users) {
             for (let u in users) {
                 let user = users[u]["_id"];
+                let usr = users[u];
                 user = await bot.fetchUser(user);
-                if (!(await dbl.hasVoted(user.id))) {
+                if (!(await dbl.hasVoted(user.id)) && !(usr.voted)) {
                     await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
+                    toggleDBLvoted(user.id, true);
+                } else if (await dbl.hasVoted(user.id) && usr.voted) {
+                    toggleDBLvoted(user.id, false);
                 }
             }
         }
@@ -113,13 +117,20 @@ async function onHour(bot, isFirst) {
 
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
-
         let db = await mclient.db('MagiBot');
         if (add && !(await isInDBL(userID))) { //not sure if this works fine
-            await db.collection("DBLreminder").insertOne({ _id: userID });
-        } else {
+            await db.collection("DBLreminder").insertOne({ _id: userID, voted: false });
+        } else if (!add) {
             await db.collection("DBLreminder").deleteOne({ _id: userID });
         }
+        mclient.close();
+    });
+}
+
+async function toggleDBLvoted(userid, votd) {
+    MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        await db.collection("DBLreminder").updateOne({ _id: userID }, { $set: { voted: votd } });
         mclient.close();
     });
 }
