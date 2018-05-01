@@ -27,6 +27,30 @@ async function addSalt(userid, reporter, guildID) {
         });
     });
 }
+
+async function moveAllDataToNewDB() {
+    return MongoClient.connect(url).then(async function (mclient) {
+        var newDB = mclient.db("MagiBot");
+        var dbOldSalt = mclient.db("saltrank");
+        var dbOldUsers = mclient.db("users");
+        var newSalts = newDB.collection("saltrank");
+        var newUsers = newDB.collection("users");
+        dbOldSalt.getCollectionNames().forEach(function (collname) {
+            var salts = dbOldSalt.collection(collname).find().toArray();
+            for (let s in salts) {
+                newSalts.insertOne({ salter: salts[s].salter, salt: salts[s].salt, guild: collname });
+            }
+        });
+        dbOldUsers.getCollectionNames().forEach(function (collname) {
+            var usrs = dbOldUsers.collection(collname).find().toArray();
+            for (let u in usrs) {
+                newUsers.insertOne({ userID: usrs[u].userid, guildID: collname, warnings: usrs[u].warnings, kicks: usrs[u].kicks, bans: usrs[u].bans, botusage: usrs[u].botusage, sound: usrs[u].sound });
+            }
+        });
+        mclient.close();
+    });
+}
+
 async function updateUser(userid, update, guildID) {
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
@@ -490,7 +514,7 @@ async function joinsound(userid, surl, guildID) {
 module.exports = {
     startup: async function (bot) {
         //create Collection
-        MongoClient.connect(url).then(async function (mclient) {
+        await MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             if (!(await db.collection("settings"))) {
                 await db.createCollection("settings").then(() => {
@@ -514,6 +538,7 @@ module.exports = {
             }
             mclient.close();
         });
+        await moveAllDataToNewDB();
         onHour(bot);
     },
     getUser: async function (userid, guildID) {
