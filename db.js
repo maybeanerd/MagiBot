@@ -55,12 +55,12 @@ async function saltDowntimeDone(userid1, userid2) {
 }
 
 //autmoatic deletion of reports and saltking evaluation: 
-async function onHour(bot) {
+async function onHour(bot, isFirst) {
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
-        setTimeout(onHour.bind(null, bot), e);
+        setTimeout(onHour.bind(null, bot, false), e);
     }
     let nd = new Date();
     nd.setDate(nd.getDate() - 8);
@@ -105,6 +105,10 @@ async function onHour(bot) {
         }
         mclient.close();
     });
+    if (isFirst) {
+        let chann = bot.channels.get("382233880469438465");
+        chann.send("Startup done!");
+    }
 }
 
 async function toggleDBL(userID, add) {
@@ -514,7 +518,7 @@ module.exports = {
             }
             mclient.close();
         });
-        onHour(bot);
+        onHour(bot, true);
     },
     getUser: async function (userid, guildID) {
         let result = await getuser(userid, guildID);

@@ -297,10 +297,7 @@ var checkCommand = async function (msg, isMention) {
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
     bot.user.setActivity("use " + bot.PREFIX + ".help", { type: "WATCHING" });
-    let chann = bot.channels.get("382233880469438465");
-    data.startup(bot).then(() => {
-        chann.send("Done with hourly start!");
-    });
+    data.startup(bot);
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
     }
