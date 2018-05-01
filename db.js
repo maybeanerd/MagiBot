@@ -27,6 +27,7 @@ async function addSalt(userid, reporter, guildID) {
         });
     });
 }
+
 async function updateUser(userid, update, guildID) {
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
@@ -490,7 +491,7 @@ async function joinsound(userid, surl, guildID) {
 module.exports = {
     startup: async function (bot) {
         //create Collection
-        MongoClient.connect(url).then(async function (mclient) {
+        await MongoClient.connect(url).then(async function (mclient) {
             var db = mclient.db('MagiBot');
             if (!(await db.collection("settings"))) {
                 await db.createCollection("settings").then(() => {

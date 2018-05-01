@@ -28,38 +28,6 @@ async function addSalt(userid, reporter, guildID) {
     });
 }
 
-async function moveAllDataToNewDB() {
-    return MongoClient.connect(url).then(async function (mclient) {
-        var newDB = mclient.db("MagiBot");
-        var dbOldSalt = mclient.db("saltrank");
-        var dbOldUsers = mclient.db("users");
-        var newSalts = newDB.collection("saltrank");
-        var newUsers = newDB.collection("users");
-        let oldSaltColls = await dbOldSalt.collections();
-        let oldUserColls = await dbOldUsers.collections();
-        console.log("salt change");
-        for (var coll in oldSaltColls) {
-            var collname = oldSaltColls[coll].s.name;
-            console.log(collname);
-            var salts = await dbOldSalt.collection(collname).find().toArray();
-            for (let s in salts) {
-                newSalts.insertOne({ salter: salts[s].salter, salt: salts[s].salt, guild: collname });
-            }
-        };
-        console.log("user change");
-        for (var coll in oldUserColls) {
-            var collname = oldUserColls[coll].s.name;
-            console.log(collname);
-            var usrs = await dbOldUsers.collection(collname).find().toArray();
-            for (let u in usrs) {
-                console.log("inserting: " + usrs[u]);
-                newUsers.insertOne({ userID: usrs[u]["_id"], guildID: collname, warnings: usrs[u].warnings, kicks: usrs[u].kicks, bans: usrs[u].bans, botusage: usrs[u].botusage, sound: usrs[u].sound });
-            }
-        };
-        mclient.close();
-    });
-}
-
 async function updateUser(userid, update, guildID) {
     MongoClient.connect(url, function (err, mclient) {
         if (err) throw err;
@@ -547,7 +515,6 @@ module.exports = {
             }
             mclient.close();
         });
-        await moveAllDataToNewDB();
         onHour(bot);
     },
     getUser: async function (userid, guildID) {
