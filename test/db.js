@@ -64,11 +64,11 @@ async function onHour(bot) {
     }
     let nd = new Date();
     nd.setDate(nd.getDate() - 8);
-    var guilds = await bot.guilds.array();
-    for (let GN in guilds) {
-        var G = guilds[GN]; //TODO switch mongo connect with loop
-        await MongoClient.connect(url).then(async function (mclient) {
-            let db = mclient.db('MagiBot');
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = mclient.db('MagiBot');
+        var guilds = await bot.guilds.array();
+        for (let GN in guilds) {
+            var G = guilds[GN]; //TODO switch mongo connect with loop
             console.log("Hourly routine in: " + G.name);
             let guildID = await G.id;
             //make sure guilds that were added while bot was offline are in DB:            
@@ -87,10 +87,11 @@ async function onHour(bot) {
                     }
                 }
             }
-            mclient.close();
-        });
-        await updateSaltKing(G);
-    }
+
+            await updateSaltKing(G);
+        }
+        mclient.close();
+    });
     await MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
