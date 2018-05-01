@@ -35,18 +35,27 @@ async function moveAllDataToNewDB() {
         var dbOldUsers = mclient.db("users");
         var newSalts = newDB.collection("saltrank");
         var newUsers = newDB.collection("users");
-        dbOldSalt.getCollectionNames().forEach(function (collname) {
-            var salts = dbOldSalt.collection(collname).find().toArray();
+        let oldSaltColls = await dbOldSalt.collections();
+        let oldUserColls = await dbOldUsers.collections();
+        console.log("salt change");
+        for (var coll in oldSaltColls) {
+            var collname = oldSaltColls[coll].s.name;
+            console.log(collname);
+            var salts = await dbOldSalt.collection(collname).find().toArray();
             for (let s in salts) {
                 newSalts.insertOne({ salter: salts[s].salter, salt: salts[s].salt, guild: collname });
             }
-        });
-        dbOldUsers.getCollectionNames().forEach(function (collname) {
-            var usrs = dbOldUsers.collection(collname).find().toArray();
+        };
+        console.log("user change");
+        for (var coll in oldUserColls) {
+            var collname = oldUserColls[coll].s.name;
+            console.log(collname);
+            var usrs = await dbOldUsers.collection(collname).find().toArray();
             for (let u in usrs) {
-                newUsers.insertOne({ userID: usrs[u].userid, guildID: collname, warnings: usrs[u].warnings, kicks: usrs[u].kicks, bans: usrs[u].bans, botusage: usrs[u].botusage, sound: usrs[u].sound });
+                console.log("inserting: " + usrs[u]);
+                newUsers.insertOne({ userID: usrs[u]["_id"], guildID: collname, warnings: usrs[u].warnings, kicks: usrs[u].kicks, bans: usrs[u].bans, botusage: usrs[u].botusage, sound: usrs[u].sound });
             }
-        });
+        };
         mclient.close();
     });
 }
