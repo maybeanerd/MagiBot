@@ -81,7 +81,7 @@ async function onHour(bot, isFirst) {
                 if (removeData.deletedCount && removeData.deletedCount > 0) {
                     let slt = report.salt - removeData.deletedCount;
                     if (slt <= 0) {
-                        await db.collection("saltrank").deleteOne({ salter: report.salter, guild: guilID });
+                        await db.collection("saltrank").deleteOne({ salter: report.salter, guild: guildID });
                     } else {
                         await db.collection("saltrank").updateOne({ salter: report.salter, guild: guildID }, { $set: { salt: slt } });
                     }

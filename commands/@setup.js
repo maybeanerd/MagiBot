@@ -185,7 +185,7 @@ module.exports = {
                 break;
             case 'notification+':
                 await data.setNotification(await msg.guild.id, await msg.channel.id);
-                msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000); msg.delete(); });
+                msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(()=>{}); msg.delete(); });
                 break;
             case 'notification-':
                 await data.setNotification(await msg.guild.id, false);
