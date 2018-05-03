@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
+
+module.exports = {
     main: function (bot, msg) {
         let authorID = msg.author.id;
         msg.channel.send("What do you want the vote to be about?").then(mess => {
@@ -22,10 +24,10 @@
                                 const args = collected.first().content.split("|");
                                 collected.first().delete();
                                 mess.delete();
-                                if (args[0]) {
+                                if (args[0] && args.length <= 20) {
                                     let str = "";
                                     for (let a in args) {
-                                        str += args[a] + "\n";
+                                        str += reactions[a] + " " + args[a] + "\n";
                                     }
                                     msg.channel.send("Do you want to start the vote **" + topic + "** lasting **" + time + " minutes** with the options\n" + str).then(mess => {
                                         const filter = (reaction, user) => {
@@ -36,15 +38,11 @@
                                         mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                             mess.delete();
                                             if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                                msg.channel.send("**Vote: **\n" + topic + "\n\n**Options:**\n" + str).then(vote => { //TODO add emoji to options
-                                                    let fil = () => { return false; }//TODO add filter
-                                                    time *= 60000;
-                                                    //vote.awaitReactions(fil, { max: 1, time: time }).then(reacts => {
-                                                    //do something with the votes
-
+                                                msg.channel.send("**Vote: **\n" + topic + "\n\n**Options:**\n" + str).then(async function f(vote) {
+                                                    for (var i in args) {
+                                                        await vote.react(reactions[i]);
+                                                    }
                                                     //TODO add vote to DB, it will then be automatically evaluated
-
-                                                    //});
                                                 });
                                             } else if (reacts.first()) {
                                                 msg.channel.send("successfully canceled vote **" + topic + "**");
@@ -52,7 +50,11 @@
                                         });
                                     });
                                 } else {
-                                    msg.channel.send("Please try again and add some options");
+                                    if (!args) {
+                                        msg.channel.send("Please try again and add some options");
+                                    } else {
+                                        msg.channel.send("There are only up to 20 options allowed, please try again with less options");
+                                    }
                                 }
                             });
                         });
@@ -66,6 +68,6 @@
     },
     help: 'Start a vote',
     admin: false,
-    hide: true, //TODO perms
+    hide: false, //TODO perms
     dev: true
 };

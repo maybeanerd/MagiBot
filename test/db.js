@@ -115,6 +115,22 @@ async function onHour(bot, isFirst) {
     }
 }
 
+async function voteCheck(bot) {
+    var d = new Date(),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 30, 0),
+        e = h - d;
+    if (e > 100) { // some arbitrary time period
+        setTimeout(voteCheck.bind(null, bot), e);
+    }
+    let chann = bot.channels.get("382233880469438465");
+    chann.send("starting vote checks...");
+
+    //do vote stuff
+
+    chann.send("done with vote checks.");
+}
+
+
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
