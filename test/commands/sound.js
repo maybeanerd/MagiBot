@@ -7,8 +7,14 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add <Link to audio file>",
-        value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file. An easy way to achieve this is by sending the file via Discord and then using the link that is generated.\nOnly .mp3 and .wav are being supported at the moment.\n An example Link created with Discord would be: `https://cdn.discordapp.com/attachments/395966673900929034/415595902011572235/mpfc-15-the-spanish-inquisition.mp3`",
+        name: "<Link to audio file>",
+        value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
+        inline: true
+    });
+
+    info.push({
+        name: "[upload soundfile]",
+        value: "Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to put the command into the message with which you upload your file.",
         inline: true
     });
 
@@ -35,9 +41,21 @@ module.exports = {
     main: async function f(bot, msg) {
         const args = msg.content.split(/ +/);
         var command = args[0].toLowerCase();
-        var mention = args[1];
-        switch (command) {
-            case 'add':
+        if (command == 'rem') {
+            if (await data.addSound(msg.author.id, false, msg.guild.id)) {
+                msg.reply("you successfully removed your joinsound!");
+            }
+            else {
+                msg.reply("Aaaaaand you failed.");
+            }
+        } else {
+            var mention = args[0];
+            var file = msg.attachments.array()[0];
+            if (mention || file) {
+                if (file) {
+                    mention = file.url;
+                }
+
                 let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
                 if (!sound) {
                     msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
@@ -45,7 +63,7 @@ module.exports = {
                 }
                 sound = sound.streams[0];
                 if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
-                    msg.reply("you need to use a compatible link! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
+                    msg.reply("you need to use a compatible file! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
                     return;
                 }
                 if (sound.duration > 8) {
@@ -58,19 +76,10 @@ module.exports = {
                 else {
                     msg.reply("Something went wrong...");
                 }
-                break;
-            case 'rem':
-                if (await data.addSound(msg.author.id, false, msg.guild.id)) {
-                    msg.reply("you successfully removed your joinsound!");
-                }
-                else {
-                    msg.reply("Aaaaaand you failed.");
-                }
 
-                break;
-            default:
+            } else {
                 msg.reply("This is not a valid command. Use `" + bot.PREFIXES[msg.guild.id] + ".help sound` for more info.");
-                break;
+            }
         }
     },
     help: 'Manage your joinsound',
