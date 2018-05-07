@@ -91,6 +91,19 @@ async function onHour(bot, isFirst) {
         }
         await mclient.close();
     });
+    if (isFirst) {
+        let chann = bot.channels.get("382233880469438465");
+        chann.send("Startup done!");
+    }
+}
+
+async function dblReminder(bot) {
+    var d = new Date(),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes() + 5, 0, 0),
+        e = h - d;
+    if (e > 100) { // some arbitrary time period
+        setTimeout(dblReminder.bind(null, bot), e);
+    }
     await MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
@@ -109,10 +122,6 @@ async function onHour(bot, isFirst) {
         }
         mclient.close();
     });
-    if (isFirst) {
-        let chann = bot.channels.get("382233880469438465");
-        chann.send("Startup done!");
-    }
 }
 
 async function voteCheck(bot) {
@@ -129,7 +138,6 @@ async function voteCheck(bot) {
 
     chann.send("done with vote checks.");
 }
-
 
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
@@ -546,6 +554,7 @@ module.exports = {
             mclient.close();
         });
         onHour(bot, true);
+        dblReminder(bot);
     },
     getUser: async function (userid, guildID) {
         let result = await getuser(userid, guildID);
