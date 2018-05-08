@@ -1,5 +1,9 @@
 ﻿var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
 
+function getTime(a, b, c, d, e) {
+    return { a, b, c, d, e };
+}
+
 module.exports = {
     main: function (bot, msg) {
         let authorID = msg.author.id;
@@ -11,12 +15,13 @@ module.exports = {
                 mess.delete();
                 msg.channel.send("How long is this vote supposed to last? *(in minutes, maximum of 60)*").then(mess => {
                     msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
-                        let time = parseInt(collected.first().content);
-                        if (time > 60) {
-                            time = 60;
-                        } else if (time < 1) {
-                            time = 1;
-                        }
+                        //time as array of values
+                        let time = getTime.apply(this, collected.first().content.match(/^ (?=.* [hmd]$) \d + (?: d\s *) ?\d * (?: h\s *) ?\d * (?: m\s *) ? $/i));
+                        msg.channel.send(time);
+                        //do checks on time validity
+
+
+                        //use time later to create a new date
                         collected.first().delete();
                         mess.delete();
                         msg.channel.send("What do you want the options to be for **" + topic + "**? Use `option1|option2[|etc...]`").then(mess => {
