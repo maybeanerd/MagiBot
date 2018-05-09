@@ -1,27 +1,21 @@
 ﻿var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
 
-function getTime(d, ad, h, ah, m, am) {
-    d = parseInt(d);
+function getTime(content) {
+    let regex = /^(?:(\d+)d\s*?)?(?:(\d+)h\s*?)?(?:(\d+)m\s*?)?$/;
+    let matched = content.match(regex);
+    let d = matched[1];
+    let h = matched[2];
+    let m = matched[3];
     if (isNaN(d)) {
         d = 0;
     }
-    h = parseInt(h);
     if (isNaN(h)) {
         h = 0;
     }
-    m = parseInt(m);
     if (isNaN(m)) {
         m = 0;
     }
     if (d + h + m > 0) {
-        if (!ad) {
-            h = d;
-            d = 0;
-        }
-        if (!ah) {
-            m = h;
-            h = 0;
-        }
         return [d, h, m];
     } else return false;
 }
@@ -40,14 +34,18 @@ module.exports = {
                         msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
                             if (collected.first()) {
                                 //time as array of values
-                                let time = getTime.apply(this, collected.first().content.match(/^(?=.*[hmd]$)(\d*)(d\s*)?(\d*)(h\s*)?(\d*)(m\s*)?$/));
-                                msg.channel.send(time);
-                                //do checks on time validity
-
-
-                                //use time later to create a new date
+                                let time = getTime(collected.first().content);
                                 collected.first().delete();
                                 mess.delete();
+                                //do checks on time validity
+                                if (!time) {
+                                    msg.channel.send("Please use a valid time.");
+                                    return;
+                                }
+                                if (time[0] > 7 || time[0] > 6 && (time[1] > 0 || time[2] > 0)) {
+                                    msg.channel.send("Votes are not allowed to last longer than 7 days, please use a valid time.");
+                                    return;
+                                }
                                 msg.channel.send("What do you want the options to be for **" + topic + "**? Use `option1|option2[|etc...]`").then(mess => {
                                     msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
                                         if (collected.first()) {
@@ -59,7 +57,14 @@ module.exports = {
                                                 for (let a in args) {
                                                     str += reactions[a] + " " + args[a] + "\n";
                                                 }
-                                                msg.channel.send("Do you want to start the vote **" + topic + "** lasting **" + time + " minutes** with the options\n" + str).then(mess => {
+                                                var timestr = "";
+                                                var times = ["days ", "hours ", "minutes "];
+                                                for (var s in time) {
+                                                    if (time[s] > 0) {
+                                                        timestr += time[s] + " " + times[s];
+                                                    }
+                                                }
+                                                msg.channel.send("Do you want to start the vote **" + topic + "** lasting **" + timestr + "**with the options\n" + str).then(mess => {
                                                     const filter = (reaction, user) => {
                                                         return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === authorID);
                                                     };
