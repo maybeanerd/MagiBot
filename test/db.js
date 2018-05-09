@@ -107,6 +107,7 @@ async function dblReminder(bot) {
     await MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
         let users = await db.collection("DBLreminder").find().toArray();
+        mclient.close();
         if (users) {
             for (let u in users) {
                 let user = users[u]["_id"];
@@ -120,10 +121,8 @@ async function dblReminder(bot) {
                 }
             }
         }
-        mclient.close();
     });
 }
-
 async function voteCheck(bot) {
     var d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 30, 0),
