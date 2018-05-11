@@ -1,4 +1,4 @@
-var MongoClient = require('mongodb').MongoClient;
+﻿var MongoClient = require('mongodb').MongoClient;
 var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
 var url = config.dburl;
@@ -132,11 +132,38 @@ async function voteCheck(bot) {
     }
     let chann = bot.channels.get("382233880469438465");
     chann.send("starting vote checks...");
-
     //do vote stuff
-
+    MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        votes = await db.collection("votes").find({ date: { $gte: new Date() } }).toArray();
+        mclient.close();
+        for (var i in votes) {
+            var vote = votes[i];
+            await endVote(vote, bot);
+        }
+    });
+    //endof vote stuff
     chann.send("done with vote checks.");
 }
+
+var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
+//this should take care of everything that needs to be done when a vote ends
+async function endVote(vote, bot) {
+    //structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
+    var chann = await bot.channels.get(vote.channelID);
+    var msg = await chann.fetchMessage(messageID);
+    var reacts = msg.reactions;
+    var finalReact = false;
+    for (var x in reactions) {
+        var react = await reacts.get(reactions[x]);
+        if (!finalReact || finalReact.count < react.count) {
+            finalReact = { reaction: x, count: react.count };
+        }
+    }
+    await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n" + vote.options[finalReact.reaction] + " with **" + finalReact.count + "** votes.");
+}
+
+
 
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
@@ -550,6 +577,11 @@ module.exports = {
                     if (err) throw err;
                 });
             }
+            if (!db.collection("votes")) {
+                db.createCollection("votes", function (err, res) {
+                    if (err) throw err;
+                });
+            }
             mclient.close();
         });
         onHour(bot, true);
@@ -713,5 +745,12 @@ module.exports = {
     },
     getDBLE: async function (userID) {
         return isInDBL(userID);
+    },
+    addVote: async function (vote) {
+        MongoClient.connect(url).then(async function (mclient) {
+            let db = await mclient.db('MagiBot');
+            db.collection("votes").insertOne(vote);
+            mclient.close();
+        });
     }
 };

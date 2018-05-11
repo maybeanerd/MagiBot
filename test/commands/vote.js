@@ -1,4 +1,5 @@
 ﻿var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
+var data = require(__dirname + '/../db.js');
 
 function getTime(content) {
     let regex = /^(?:(\d+)d\s*?)?(?:(\d+)h\s*?)?(?:(\d+)m\s*?)?$/;
@@ -73,11 +74,15 @@ module.exports = {
                                                     mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                                         mess.delete();
                                                         if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                                            msg.channel.send("**Vote: **\n" + topic + "\n\n**Options:**\n" + str).then(async function f(vote) {
+                                                            msg.channel.send("**" + topic + "**\n\n" + str).then(async function f(ms) {
                                                                 for (var i in args) {
-                                                                    await vote.react(reactions[i]);
+                                                                    await ms.react(reactions[i]);
                                                                 }
-                                                                //TODO add vote to DB, it will then be automatically evaluated
+                                                                var date = new Date();
+                                                                date = new Date(date.getFullYear, date.getMonth, date.getDate + time[0], date.getHours + time[1], date.getMinutes + time[2]);
+                                                                //vote structure
+                                                                var vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date };
+                                                                data.addVote(vote);
                                                             });
                                                         } else if (reacts.first()) {
                                                             msg.channel.send("successfully canceled vote **" + topic + "**");
