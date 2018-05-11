@@ -130,20 +130,18 @@ async function voteCheck(bot) {
     if (e > 100) { // some arbitrary time period
         setTimeout(voteCheck.bind(null, bot), e);
     }
-    let chann = bot.channels.get("382233880469438465");
-    chann.send("starting vote checks...");
     //do vote stuff
     MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
-        votes = await db.collection("votes").find({ date: { $gte: new Date() } }).toArray();
-        mclient.close();
+        votes = await db.collection("votes").find({ date: { $lte: new Date() } }).toArray();
         for (var i in votes) {
             var vote = votes[i];
             await endVote(vote, bot);
+            await db.collection("votes").deleteOne(vote);
         }
+        mclient.close();
     });
     //endof vote stuff
-    chann.send("done with vote checks.");
 }
 
 var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
@@ -151,16 +149,30 @@ var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭",
 async function endVote(vote, bot) {
     //structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
     var chann = await bot.channels.get(vote.channelID);
-    var msg = await chann.fetchMessage(messageID);
-    var reacts = msg.reactions;
-    var finalReact = false;
-    for (var x in reactions) {
-        var react = await reacts.get(reactions[x]);
-        if (!finalReact || finalReact.count < react.count) {
-            finalReact = { reaction: x, count: react.count };
+    if (chann) {
+        var msg = await chann.fetchMessage(vote.messageID);
+        if (msg) {
+            var reacts = msg.reactions;
+            var finalReact = false;
+            for (var x in reactions) {
+                if (x >= vote.options.length) {
+                    break;
+                }
+                var react = await reacts.get(reactions[x]);
+                if (react) {
+                    if (!finalReact || finalReact.count < react.count) {
+                        finalReact = { reaction: x, count: react.count };
+                    }
+                }
+            }
+            if (finalReact) {
+                await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + finalReact.count - 1 + "** votes.");
+            } else {
+                await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
+            }
+            await msg.clearReactions();
         }
     }
-    await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n" + vote.options[finalReact.reaction] + " with **" + finalReact.count + "** votes.");
 }
 
 
@@ -586,6 +598,7 @@ module.exports = {
         });
         onHour(bot, true);
         dblReminder(bot);
+        voteCheck(bot);
     },
     getUser: async function (userid, guildID) {
         let result = await getuser(userid, guildID);

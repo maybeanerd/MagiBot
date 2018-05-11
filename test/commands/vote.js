@@ -79,7 +79,7 @@ module.exports = {
                                                                     await ms.react(reactions[i]);
                                                                 }
                                                                 var date = new Date();
-                                                                date = new Date(date.getFullYear, date.getMonth, date.getDate + time[0], date.getHours + time[1], date.getMinutes + time[2]);
+                                                                date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + time[0], date.getHours() + time[1], date.getMinutes() + time[2]);
                                                                 //vote structure
                                                                 var vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date };
                                                                 data.addVote(vote);
