@@ -14,7 +14,7 @@ module.exports = {
             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                 mess.delete();
                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                    let chann = bot.channels.get("414809410448261132");
+                    let chann = bot.channels.get("444529194949672972");
                     chann.send("**Bugreport** by " + msg.author.username + " (<@" + msg.author.id + ">) on server " + msg.guild.name + "( " + msg.guild.id + " ) :\n" + msg.content).then(mes => {
                         msg.channel.send("Succesfully sent bugreport.");
                     });

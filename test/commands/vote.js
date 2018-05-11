@@ -74,12 +74,13 @@ module.exports = {
                                                     mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
                                                         mess.delete();
                                                         if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                                            msg.channel.send("**" + topic + "**\n\n" + str).then(async function f(ms) {
+                                                            var dat = new Date();
+                                                            msg.channel.send("current time should be: " + dat);
+                                                            var date = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + time[0], dat.getHours() + time[1], dat.getMinutes() + time[2], 0, 0);
+                                                            msg.channel.send("**" + topic + "** *ends on " + date + "*\n\n" + str).then(async function f(ms) {
                                                                 for (var i in args) {
                                                                     await ms.react(reactions[i]);
                                                                 }
-                                                                var date = new Date();
-                                                                date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + time[0], date.getHours() + time[1], date.getMinutes() + time[2]);
                                                                 //vote structure
                                                                 var vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date };
                                                                 data.addVote(vote);

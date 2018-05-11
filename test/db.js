@@ -133,7 +133,8 @@ async function voteCheck(bot) {
     //do vote stuff
     MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
-        votes = await db.collection("votes").find({ date: { $lte: new Date() } }).toArray();
+        let nd = new Date();
+        votes = await db.collection("votes").find({ date: { $lte: nd } }).toArray();
         for (var i in votes) {
             var vote = votes[i];
             await endVote(vote, bot);
@@ -166,7 +167,7 @@ async function endVote(vote, bot) {
                 }
             }
             if (finalReact) {
-                await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + finalReact.count - 1 + "** votes.");
+                await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
             } else {
                 await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
             }
