@@ -4,9 +4,9 @@ var data = require(__dirname + '/../db.js');
 function getTime(content) {
     let regex = /^(?:(\d+)d\s*?)?(?:(\d+)h\s*?)?(?:(\d+)m\s*?)?$/;
     let matched = content.match(regex);
-    let d = matched[1];
-    let h = matched[2];
-    let m = matched[3];
+    let d = parseInt(matched[1]);
+    let h = parseInt(matched[2]);
+    let m = parseInt(matched[3]);
     if (isNaN(d)) {
         d = 0;
     }
