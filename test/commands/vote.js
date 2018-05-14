@@ -75,9 +75,8 @@ module.exports = {
                                                         mess.delete();
                                                         if (reacts.first() && reacts.first().emoji.name == '☑') {
                                                             let dat = new Date();
-                                                            msg.channel.send("current time should be: " + dat);
                                                             let date = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + time[0], dat.getHours() + time[1], dat.getMinutes() + time[2], 0, 0);
-                                                            msg.channel.send("**" + topic + "** *ends on " + date + "*\n\n" + str).then(async function f(ms) {
+                                                            msg.channel.send("**" + topic + "**\n*ends on " + date + "*\n\n" + str).then(async function f(ms) {
                                                                 for (var i in args) {
                                                                     await ms.react(reactions[i]);
                                                                 }
