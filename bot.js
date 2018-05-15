@@ -282,10 +282,10 @@ var checkCommand = async function (msg, isMention) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
                     //4 sec cooldown for command usage
-                    if (!userCooldowns[msg.user.id] || userCooldowns[msg.user.id] > new Date()) {
+                    if (!userCooldowns[msg.author.id] || userCooldowns[msg.author.id] > new Date()) {
                         var dt = new Date();
                         dt.setSeconds(dt.getSeconds() + 4);
-                        userCooldowns[msg.user.id] = dt;
+                        userCooldowns[msg.author.id] = dt;
                         commands[command].main(bot, msg);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
