@@ -119,6 +119,6 @@ module.exports = {
     },
     help: 'Start a vote',
     admin: false,
-    hide: false, //TODO perms
-    dev: true
+    hide: false,
+    perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"]
 };
