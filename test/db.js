@@ -149,9 +149,9 @@ var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭",
 //this should take care of everything that needs to be done when a vote ends
 async function endVote(vote, bot) {
     //structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
-    var chann = await bot.channels.get(vote.channelID);
+    var chann = await bot.channels.get(vote.channelID).catch();
     if (chann) {
-        var msg = await chann.fetchMessage(vote.messageID);
+        var msg = await chann.fetchMessage(vote.messageID).catch();
         if (msg) {
             var reacts = msg.reactions;
             var finalReact = [];
