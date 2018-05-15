@@ -7,6 +7,8 @@ var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
+var userCooldowns = {};
+
 //Posting stats to Discord Bot List:
 //const DBL = require("dblapi.js");
 //const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
@@ -279,7 +281,18 @@ var checkCommand = async function (msg, isMention) {
             if (pre == ':' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
-                    commands[command].main(bot, msg);
+                    //4 sec cooldown for command usage
+                    if (!userCooldowns[msg.user.id] || userCooldowns[msg.user.id] > new Date()) {
+                        var dt = new Date();
+                        dt.setSeconds(dt.getSeconds() + 4);
+                        userCooldowns[msg.user.id] = dt;
+                        commands[command].main(bot, msg);
+                    } else {
+                        if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
+                            msg.reply("whoa cool down, you're using commands too quick!");
+                        }
+                    }
+                    //endof cooldown management
                 } else {
                     if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
                         msg.channel.send("I don't have the permissions needed for this command. (" + perms + ") ");
