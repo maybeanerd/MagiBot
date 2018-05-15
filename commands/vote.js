@@ -33,7 +33,7 @@ module.exports = {
                     mess.delete();
                     msg.channel.send("How long is this vote supposed to last? *(use d h m format)*").then(mess => {
                         msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
-                            if (collected.first()) {
+                            if (collected.first() && collected.first().content) {
                                 //time as array of values
                                 let time = getTime(collected.first().content);
                                 collected.first().delete();
