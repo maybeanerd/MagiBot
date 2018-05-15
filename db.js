@@ -1,4 +1,4 @@
-var MongoClient = require('mongodb').MongoClient;
+﻿var MongoClient = require('mongodb').MongoClient;
 var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 
 var url = config.dburl;
@@ -123,6 +123,79 @@ async function dblReminder(bot) {
         }
     });
 }
+async function voteCheck(bot) {
+    var d = new Date(),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 10, 0),
+        e = h - d;
+    if (e > 100) { // some arbitrary time period
+        setTimeout(voteCheck.bind(null, bot), e);
+    }
+    //do vote stuff
+    MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        let nd = new Date();
+        votes = await db.collection("votes").find({ date: { $lte: nd } }).toArray();
+        for (var i in votes) {
+            var vote = votes[i];
+            await endVote(vote, bot);
+            await db.collection("votes").deleteOne(vote);
+        }
+        mclient.close();
+    });
+    //endof vote stuff
+}
+
+var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"];
+//this should take care of everything that needs to be done when a vote ends
+async function endVote(vote, bot) {
+    //structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
+    var chann = await bot.channels.get(vote.channelID);
+    if (chann) {
+        var msg = await chann.fetchMessage(vote.messageID).catch(() => { });
+        if (msg) {
+            var reacts = msg.reactions;
+            var finalReact = [];
+            for (var x in reactions) {
+                if (x >= vote.options.length) {
+                    break;
+                }
+                var react = await reacts.get(reactions[x]);
+                if (react) {
+                    if (!finalReact[0] || finalReact[0].count <= react.count) {
+                        if (!finalReact[0] || finalReact[0].count < react.count) {
+                            finalReact = [{ reaction: x, count: react.count }];
+                        } else {
+                            finalReact.push({ reaction: x, count: react.count });
+                        }
+                    }
+                }
+            }
+            if (finalReact[0]) {
+                if (finalReact.length > 1) {
+                    var str = "** " + vote.topic + " ** ended.\n\nThere was a tie between ";
+                    for (var i in finalReact) {
+                        str += "**" + vote.options[finalReact[i].reaction] + "**";
+                        if (i < finalReact.length - 2) {
+                            str += ", ";
+                        } else {
+                            if (i == finalReact.length - 2)
+                                str += " and ";
+                        }
+                    }
+                    str += " with each having ** " + (finalReact[0].count - 1) + " ** votes.";
+                    await msg.edit(str);
+                } else {
+                    await msg.edit("**" + vote.topic + "** ended.\n\nThe result is **" + vote.options[finalReact[0].reaction] + "** with **" + (finalReact[0].count - 1) + "** votes.");
+                }
+            } else {
+                await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
+            }
+            await msg.clearReactions();
+        }
+    }
+}
+
+
 
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
@@ -536,10 +609,16 @@ module.exports = {
                     if (err) throw err;
                 });
             }
+            if (!db.collection("votes")) {
+                db.createCollection("votes", function (err, res) {
+                    if (err) throw err;
+                });
+            }
             mclient.close();
         });
         onHour(bot, true);
         dblReminder(bot);
+        voteCheck(bot);
     },
     getUser: async function (userid, guildID) {
         let result = await getuser(userid, guildID);
@@ -699,5 +778,12 @@ module.exports = {
     },
     getDBLE: async function (userID) {
         return isInDBL(userID);
+    },
+    addVote: async function (vote) {
+        MongoClient.connect(url).then(async function (mclient) {
+            let db = await mclient.db('MagiBot');
+            db.collection("votes").insertOne(vote);
+            mclient.close();
+        });
     }
 };
