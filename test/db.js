@@ -154,20 +154,39 @@ async function endVote(vote, bot) {
         var msg = await chann.fetchMessage(vote.messageID);
         if (msg) {
             var reacts = msg.reactions;
-            var finalReact = false;
+            var finalReact = [];
             for (var x in reactions) {
                 if (x >= vote.options.length) {
                     break;
                 }
                 var react = await reacts.get(reactions[x]);
                 if (react) {
-                    if (!finalReact || finalReact.count < react.count) {
-                        finalReact = { reaction: x, count: react.count };
+                    if (!finalReact[0] || finalReact[0].count <= react.count) {
+                        if (finalReact[0].count < react.count) {
+                            finalReact = [{ reaction: x, count: react.count }];
+                        } else {
+                            finalReact.push({ reaction: x, count: react.count });
+                        }
                     }
                 }
             }
-            if (finalReact) {
-                await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
+            if (finalReact[0]) {
+                if (finalReact.length > 1) {
+                    var str = " ** " + vote.topic + " ** ended.\n\nResult: \nThere was a tie between ";
+                    for (var i in finalReact) {
+                        str += "**" + vote.options[finalReact[i].reaction] + "**";
+                        if (i < finalReact.length - 2) {
+                            str += ", ";
+                        } else {
+                            if (i == finalReact.length - 1)
+                                str += " and ";
+                        }
+                    }
+                    str += " with ** " + (finalReact[0].count - 1) + " ** votes.";
+                    await msg.edit(str);
+                } else {
+                    await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
+                }
             } else {
                 await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
             }
