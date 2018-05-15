@@ -125,7 +125,7 @@ async function dblReminder(bot) {
 }
 async function voteCheck(bot) {
     var d = new Date(),
-        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 30, 0),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 10, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
         setTimeout(voteCheck.bind(null, bot), e);
