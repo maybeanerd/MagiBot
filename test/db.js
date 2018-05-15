@@ -172,7 +172,7 @@ async function endVote(vote, bot) {
             }
             if (finalReact[0]) {
                 if (finalReact.length > 1) {
-                    var str = " ** " + vote.topic + " ** ended.\n\nResult: \nThere was a tie between ";
+                    var str = " ** " + vote.topic + " ** ended.\n\nThere was a tie between ";
                     for (var i in finalReact) {
                         str += "**" + vote.options[finalReact[i].reaction] + "**";
                         if (i < finalReact.length - 2) {
@@ -185,7 +185,7 @@ async function endVote(vote, bot) {
                     str += " with each having ** " + (finalReact[0].count - 1) + " ** votes.";
                     await msg.edit(str);
                 } else {
-                    await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
+                    await msg.edit("**" + vote.topic + "** ended.\n\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
                 }
             } else {
                 await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
