@@ -149,9 +149,9 @@ var reactions = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭",
 //this should take care of everything that needs to be done when a vote ends
 async function endVote(vote, bot) {
     //structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
-    var chann = await bot.channels.get(vote.channelID).catch();
+    var chann = await bot.channels.get(vote.channelID);
     if (chann) {
-        var msg = await chann.fetchMessage(vote.messageID).catch();
+        var msg = await chann.fetchMessage(vote.messageID).catch(() => { });
         if (msg) {
             var reacts = msg.reactions;
             var finalReact = [];
@@ -185,7 +185,7 @@ async function endVote(vote, bot) {
                     str += " with each having ** " + (finalReact[0].count - 1) + " ** votes.";
                     await msg.edit(str);
                 } else {
-                    await msg.edit("**" + vote.topic + "** ended.\n\nThe result is **" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
+                    await msg.edit("**" + vote.topic + "** ended.\n\nThe result is **" + vote.options[finalReact[0].reaction] + "** with **" + (finalReact[0].count - 1) + "** votes.");
                 }
             } else {
                 await msg.edit("**" + vote.topic + "** ended.\n\nCould not compute a result.");
