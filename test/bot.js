@@ -267,6 +267,10 @@ var checkCommand = async function (msg, isMention) {
                     return;
                 }
                 command = "@" + command.slice(1);
+                //check if its an admin command, if not you're allowed to use the normal version as admin (in any channel)
+                if (!commands[command]) {
+                    command = command.slice(1);
+                }
                 break;
             default:
                 return;
