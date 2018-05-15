@@ -182,7 +182,7 @@ async function endVote(vote, bot) {
                                 str += " and ";
                         }
                     }
-                    str += " with ** " + (finalReact[0].count - 1) + " ** votes.";
+                    str += " with each having ** " + (finalReact[0].count - 1) + " ** votes.";
                     await msg.edit(str);
                 } else {
                     await msg.edit("**" + vote.topic + "** ended.\n\nResult:\n**" + vote.options[finalReact.reaction] + "** with **" + (finalReact.count - 1) + "** votes.");
