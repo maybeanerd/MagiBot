@@ -162,7 +162,7 @@ async function endVote(vote, bot) {
                 var react = await reacts.get(reactions[x]);
                 if (react) {
                     if (!finalReact[0] || finalReact[0].count <= react.count) {
-                        if (finalReact[0].count < react.count) {
+                        if (!finalReact[0] || finalReact[0].count < react.count) {
                             finalReact = [{ reaction: x, count: react.count }];
                         } else {
                             finalReact.push({ reaction: x, count: react.count });
