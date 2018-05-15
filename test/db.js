@@ -178,7 +178,7 @@ async function endVote(vote, bot) {
                         if (i < finalReact.length - 2) {
                             str += ", ";
                         } else {
-                            if (i == finalReact.length - 1)
+                            if (i == finalReact.length - 2)
                                 str += " and ";
                         }
                     }
