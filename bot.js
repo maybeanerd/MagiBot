@@ -281,10 +281,10 @@ var checkCommand = async function (msg, isMention) {
             if (pre == ':' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
-                    //2 sec cooldown for command usage
+                    //cooldown for command usage
                     if (!userCooldowns[msg.author.id] || userCooldowns[msg.author.id] < new Date()) {
                         var dt = new Date();
-                        dt.setSeconds(dt.getSeconds() + 2);
+                        dt.setSeconds(dt.getSeconds() + 5);
                         userCooldowns[msg.author.id] = dt;
                         commands[command].main(bot, msg);
                     } else {

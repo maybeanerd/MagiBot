@@ -281,10 +281,10 @@ var checkCommand = async function (msg, isMention) {
             if (pre == ':' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
-                    //2 sec cooldown for command usage
+                    //cooldown for command usage
                     if (!userCooldowns[msg.author.id] || userCooldowns[msg.author.id] < new Date()) {
                         var dt = new Date();
-                        dt.setSeconds(dt.getSeconds() + 2);
+                        dt.setSeconds(dt.getSeconds() + 5);
                         userCooldowns[msg.author.id] = dt;
                         commands[command].main(bot, msg);
                     } else {
@@ -326,6 +326,7 @@ bot.on("ready", () => {
 });
 
 var isInvLink = /(?:discord(?:(?:\.|.?dot.?)gg|app(?:\.|.?dot.?)com\/invite)\/(([\w]{10,16}|[a-z0-9]{4,8})))/i;
+
 bot.on("message", msg => {
     if (!msg.author.bot && msg.guild) {
         if (isInvLink.test(msg.content)) {
