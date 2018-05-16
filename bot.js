@@ -7,7 +7,7 @@ var data = require(__dirname + '/db.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
-var userCooldowns = {};
+var userCooldowns = new Set();
 
 //Posting stats to Discord Bot List:
 const DBL = require("dblapi.js");
@@ -282,10 +282,9 @@ var checkCommand = async function (msg, isMention) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
                     //cooldown for command usage
-                    if (!userCooldowns[msg.author.id] || userCooldowns[msg.author.id] < new Date()) {
-                        var dt = new Date();
-                        dt.setSeconds(dt.getSeconds() + 5);
-                        userCooldowns[msg.author.id] = dt;
+                    if (!userCooldowns.has(msg.author.id) ) {
+                        userCooldowns.add(msg.author.id);
+        setTimeout(()=>{userCooldowns.delete(msg.author.id}, 5000);
                         commands[command].main(bot, msg);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
