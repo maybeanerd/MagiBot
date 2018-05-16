@@ -284,7 +284,7 @@ var checkCommand = async function (msg, isMention) {
                     //cooldown for command usage
                     if (!userCooldowns.has(msg.author.id) ) {
                         userCooldowns.add(msg.author.id);
-        setTimeout(()=>{userCooldowns.delete(msg.author.id}, 5000);
+        setTimeout(()=>{userCooldowns.delete(msg.author.id);}, 4000);
                         commands[command].main(bot, msg);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
