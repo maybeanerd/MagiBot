@@ -137,8 +137,8 @@ async function voteCheck(bot) {
         votes = await db.collection("votes").find({ date: { $lte: nd } }).toArray();
         for (var i in votes) {
             var vote = votes[i];
-            await endVote(vote, bot);
-            await db.collection("votes").deleteOne(vote);
+            endVote(vote, bot);
+            db.collection("votes").deleteOne(vote);
         }
         mclient.close();
     });
