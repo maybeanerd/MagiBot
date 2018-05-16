@@ -4,20 +4,22 @@ var data = require(__dirname + '/../db.js');
 function getTime(content) {
     let regex = /^(?:(\d+)d\s*?)?(?:(\d+)h\s*?)?(?:(\d+)m\s*?)?$/;
     let matched = content.match(regex);
-    let d = parseInt(matched[1]);
-    let h = parseInt(matched[2]);
-    let m = parseInt(matched[3]);
-    if (isNaN(d)) {
-        d = 0;
-    }
-    if (isNaN(h)) {
-        h = 0;
-    }
-    if (isNaN(m)) {
-        m = 0;
-    }
-    if (d + h + m > 0) {
-        return [d, h, m];
+    if (matched) {
+        let d = parseInt(matched[1]);
+        let h = parseInt(matched[2]);
+        let m = parseInt(matched[3]);
+        if (isNaN(d)) {
+            d = 0;
+        }
+        if (isNaN(h)) {
+            h = 0;
+        }
+        if (isNaN(m)) {
+            m = 0;
+        }
+        if (d + h + m > 0) {
+            return [d, h, m];
+        } else return false;
     } else return false;
 }
 
