@@ -6,7 +6,7 @@ function printHelp(msg, bot) {
     var info = [];
     info.push({
         name: "add <@User|userid|nickname>",
-        value: "Report a user being salty. If you use nickname it has to be at least three characters long and unique",
+        value: "Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.",
     });
     info.push({
         name: "top",

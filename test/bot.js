@@ -90,14 +90,14 @@ commands.help.main = async function (bot, msg) {
                     if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
                         if (commands[acommand] && commands[acommand].ehelp) {
                             info.push({
-                                name: "- - - - - - - - - -",
-                                value: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`",
+                                name: "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -",
+                                value: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
                                 inline: false
                             });
                             var ehelps = commands[acommand].ehelp(msg, bot);
                             for (var i in ehelps) {
                                 info.push({
-                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand + " " + ehelps[i].name,
+                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand.slice(1) + " " + ehelps[i].name,
                                     value: ehelps[i].value,
                                     inline: false
                                 });
@@ -111,7 +111,7 @@ commands.help.main = async function (bot, msg) {
                         fields: info,
                         footer: {
                             icon_url: bot.user.avatarURL,
-                            text: "<requiredInput> , [optionalInput] , choose|one|of|these , (comment on the command)"
+                            text: "<required input> , [optional input] , choose|one|of|these , (comment on the command)"
                         }
                     }
 
@@ -127,7 +127,7 @@ commands.help.main = async function (bot, msg) {
                     var ehelps = commands[command].ehelp(msg, bot);
                     for (var i in ehelps) {
                         info.push({
-                            name: bot.PREFIXES[msg.guild.id] + ":" + command + " " + ehelps[i].name,
+                            name: bot.PREFIXES[msg.guild.id] + ":" + command.slice(1) + " " + ehelps[i].name,
                             value: ehelps[i].value,
                             inline: false
                         });
@@ -135,11 +135,11 @@ commands.help.main = async function (bot, msg) {
                     }
                     let embed = {
                         color: bot.COLOR,
-                        description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
+                        description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command.slice(1) + "`:",
                         fields: info,
                         footer: {
                             icon_url: bot.user.avatarURL,
-                            text: "<requiredInput> , [optionalInput] , choose|one|of|these , (comment on the command)"
+                            text: "<required input> , [optional input] , choose|one|of|these , (comment on the command)"
                         }
                     }
 
