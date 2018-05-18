@@ -5,17 +5,17 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add <@User>",
+        name: "add <@user|userid|nickname>",
         value: "Report a user for being salty",
     });
 
     info.push({
-        name: "rem <@User>",
+        name: "rem <@user|userid|nickname>",
         value: "Remove the oldest salt report of a user",
     });
 
     info.push({
-        name: "clr <@User>",
+        name: "clr <@user|userid|nickname>",
         value: "Clear all salt of a user",
     });
 
