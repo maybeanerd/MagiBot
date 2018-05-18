@@ -74,5 +74,5 @@ module.exports = {
     admin: false,
     perm: "SEND_MESSAGES",
     hide: false,
-    category: "Utility"
+    category: "Fun"
 };
