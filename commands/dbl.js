@@ -37,10 +37,10 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Use `" + bot.PREFIXES[msg.guild.id] + ".dbl` to [un]subscribe from the Discord Bot List vote reminder.");
+        return [{ name: "", value: "[un]subscribe from the Discord Bot List vote reminder." }];
     },
-    help: '[Un]subscribe from the Discord Bot List vote reminder',
     admin: false,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
-    dev: false
+    dev: false,
+    category: "Support the bot"
 };

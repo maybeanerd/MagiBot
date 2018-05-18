@@ -9,32 +9,19 @@ function printHelp(msg, bot) {
     info.push({
         name: "<Link to audio file>",
         value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
-        inline: true
     });
 
     info.push({
-        name: "[upload soundfile]",
+        name: "(and upload soundfile)",
         value: "Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to put the command into the message with which you upload your file.",
-        inline: true
     });
 
     info.push({
         name: "rem",
         value: "Remove your joinsound",
-        inline: true
     });
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".sound` :",
-        fields: info,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
-        }
-    }
-
-    msg.channel.send('', { embed });
+    return info;
 }
 
 module.exports = {
@@ -83,8 +70,9 @@ module.exports = {
         }
     },
     help: 'Manage your joinsound',
-    ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    ehelp: function (msg, bot) { return printHelp(msg, bot); },
     admin: false,
     perm: "SEND_MESSAGES",
-    hide: false
+    hide: false,
+    category: "Utility"
 };

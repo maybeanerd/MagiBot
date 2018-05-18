@@ -5,57 +5,39 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "ban @User",
+        name: "ban <@User>",
         value: "Deactivate all functions of the bot for a user",
-        inline: true
     });
     info.push({
-        name: "unban @User",
+        name: "unban <@User>",
         value: "Reactivate all functions of the bot for a user",
-        inline: true
     });
     info.push({
-        name: "join[-/+]",
+        name: "join[-|+]",
         value: "(De)activate joinsounds for the voicechannel you're connected to",
-        inline: true
     });
     info.push({
-        name: "admin[-/+] @Role",
+        name: "admin[-|+] <@Role>",
         value: "(Un)set a role to be considered admin by the bot",
-        inline: true
     });
     info.push({
-        name: "command[-/+]",
+        name: "command[-|+]",
         value: "(De)activate bot commands for the text channel you're sending this in",
-        inline: true
     });
     info.push({
-        name: "notification[-/+]",
+        name: "notification[-|+]",
         value: "(Un)set a textchannel to be notification channel",
-        inline: true
     });
     info.push({
         name: "info",
         value: "Displays current settings",
-        inline: true
     });
     info.push({
         name: "prefix <prefix>",
         value: "Set a custom character or string as prefix",
-        inline: true
     });
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":setup` :",
-        fields: info,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
-        }
-    }
-
-    msg.channel.send('', { embed });
+    return info;
 }
 
 
@@ -185,7 +167,7 @@ module.exports = {
                 break;
             case 'notification+':
                 await data.setNotification(await msg.guild.id, await msg.channel.id);
-                msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(()=>{}); msg.delete(); });
+                msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(() => { }); msg.delete(); });
                 break;
             case 'notification-':
                 await data.setNotification(await msg.guild.id, false);
@@ -344,8 +326,9 @@ module.exports = {
         }
     },
     help: 'Modify the settings for the bot',
-    ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    ehelp: function (msg, bot) { return printHelp(msg, bot); },
     perm: "SEND_MESSAGES",
     admin: true,
-    hide: false
+    hide: false,
+    category: "Utility"
 };

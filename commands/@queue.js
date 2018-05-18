@@ -150,10 +150,10 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Type `" + bot.PREFIXES[msg.guild.id] + ":queue` and follow the instructions to start a queue where people can enlist in.");
+        return [{ name: "", value: "Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou get instructions when using the command." }];
     },
-    help: 'Start a queue',
     admin: true,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
-    dev: false
+    dev: false,
+    category: "Utility"
 };

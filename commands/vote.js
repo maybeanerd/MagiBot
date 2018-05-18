@@ -117,10 +117,11 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        msg.channel.send("Just type `" + bot.PREFIXES[msg.guild.id] + ".vote` and follow the instructions.");
+        return [{ name: "", value: "Start a vote with up to 20 different options. The maximum duration is 7 days.\nThe setup includes multiple steps which will be axplained when you use the command." }]
     },
     help: 'Start a vote',
     admin: false,
     hide: false,
-    perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"]
+    perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
+    category: "Utility"
 };

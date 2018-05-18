@@ -61,9 +61,11 @@ module.exports = {
 
         msg.channel.send({ embed });
     },
-    help: 'Get some info about the bot',
-    ehelp: async function (msg, bot) { msg.channel.send("Use `" + bot.PREFIXES[msg.guild.id] + ".info` to get some information about the bot."); },
+    ehelp: function (msg, bot) {
+        return [{ name: "", value: "Get some info about the bot as well as links to official MagiBot stuff." }];
+    },
     perm: "SEND_MESSAGES",
     admin: false,
-    hide: false
+    hide: false,
+    category: "Utility"
 };

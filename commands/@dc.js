@@ -8,8 +8,8 @@ module.exports = {
 
     },
     admin: true,
-    help: 'Shuts the bot down',
     perm: ["SEND_MESSAGES", "MANAGE_GUILD"],
     hide: true,
-    dev: true
+    dev: true,
+    category: "Utility"
 };

@@ -8,7 +8,10 @@ module.exports = {
             newMsg.edit("Pong! \nReactiontime: `(" + diff + "ms)`");
         });
     },
-    help: 'Ping the bot',
+    ehelp: function (msg, bot) {
+        return [{ name: "", value: "Ping the bot and get the response time." }];
+    },
     perm: "SEND_MESSAGES",
     admin: false,
+    category: "Utility"
 };
