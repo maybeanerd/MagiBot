@@ -57,101 +57,148 @@ bot.sendNotification = function (info, type, msg) {
 }
 
 var commands = {}
+//TODO actually use
+var commandCategories = ["Utility", "Fun", "Support the bot"];
 
 commands.help = {};
 commands.help.args = '';
 commands.help.help = "Shows all available commands";
 commands.help.admin = false;
 commands.help.perm = "SEND_MESSAGES";
-commands.help.main = function (bot, msg) {
+commands.help.main = async function (bot, msg) {
     const args = msg.content.split(/ +/);
     var command = args[0].toLowerCase();
+    //extended help
     if (command) {
-        if (!commands[command]) {
+        var acommand = "@" + command;
+        if (!(commands[command] || commands[acommand])) {
             msg.reply("this command does not exist. Use `" + bot.PREFIXES[msg.guild.id] + ".help` to get a full list of the commands available.");
         } else {
-            if (commands[command].ehelp) {
-                commands[command].ehelp(msg, bot);
-            } else {
-                msg.reply("there is no extended help available for this command.");
+            if (commands[command]) {
+                if (commands[command].ehelp) {
+                    var info = [];
+                    var ehelps = commands[command].ehelp(msg, bot);
+                    for (var i in ehelps) {
+                        info.push({
+                            name: bot.PREFIXES[msg.guild.id] + "." + command + " " + ehelps[i].name,
+                            value: ehelps[i].value,
+                            inline: false
+                        });
+
+                    }
+                    //admin variant?
+                    if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+                        if (commands[acommand] && commands[acommand].ehelp) {
+                            info.push({
+                                name: "- - - - - - - - - -",
+                                value: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`",
+                                inline: false
+                            });
+                            var ehelps = commands[acommand].ehelp(msg, bot);
+                            for (var i in ehelps) {
+                                info.push({
+                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand + " " + ehelps[i].name,
+                                    value: ehelps[i].value,
+                                    inline: false
+                                });
+
+                            }
+                        }
+                    }
+                    let embed = {
+                        color: bot.COLOR,
+                        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + "." + command + "`:",
+                        fields: info,
+                        footer: {
+                            icon_url: bot.user.avatarURL,
+                            text: "<requiredInput> , [optionalInput] , choose|one|of|these , (comment on the command)"
+                        }
+                    }
+
+                    msg.channel.send('', { embed });
+                } else {
+                    msg.reply("there is no extended help available for this command.");
+                }
+            } else if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+                //Only Admin command
+                command = acommand;
+                if (commands[command].ehelp) {
+                    var info = [];
+                    var ehelps = commands[command].ehelp(msg, bot);
+                    for (var i in ehelps) {
+                        info.push({
+                            name: bot.PREFIXES[msg.guild.id] + ":" + command + " " + ehelps[i].name,
+                            value: ehelps[i].value,
+                            inline: false
+                        });
+
+                    }
+                    let embed = {
+                        color: bot.COLOR,
+                        description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
+                        fields: info,
+                        footer: {
+                            icon_url: bot.user.avatarURL,
+                            text: "<requiredInput> , [optionalInput] , choose|one|of|these , (comment on the command)"
+                        }
+                    }
+
+                    msg.channel.send('', { embed });
+                } else {
+                    msg.reply("there is no extended help available for this command.");
+                }
+
             }
         }
     } else {
+        //normal help, sort by categories
         var cmds = [];
-
-        for (let command in commands) {
-            if (!(commands[command].hide || commands[command].admin)) {
-                let nm = command;
-                if (commands[command].dev) {
-                    nm = "Under construction: " + nm;
+        for (var i in commandCategories) {
+            var cat = commandCategories[i];
+            var coms = "";
+            for (let command in commands) {
+                if (commands[command].category == cat && (!(commands[command].hide || commands[command].admin))) {
+                    let nm = command;
+                    if (commands[command].dev) {
+                        nm = nm + " (dev only)";
+                    }
+                    coms += nm + " ";
                 }
+            }
+            if (coms != "") {
                 cmds.push({
-                    name: nm,
-                    value: commands[command].help,
-                    inline: true
+                    name: cat + " commands",
+                    value: coms,
+                    inline: false
                 });
             }
         }
-
+        if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+            var coms = "";
+            for (let command in commands) {
+                if (commands[command].admin && !commands[command].hide) {
+                    let nm = command.substr(1, command.length);
+                    if (commands[command].dev) {
+                        nm = nm + " (dev only)";
+                    }
+                    coms += nm + " ";
+                }
+            }
+            if (coms != "") {
+                cmds.push({
+                    name: "Admin commands",
+                    value: coms,
+                    inline: false
+                });
+            }
+        }
         let embed = {
             color: bot.COLOR,
             description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
-                text: "to get admin commands use " + bot.PREFIXES[msg.guild.id] + ":help"
-            }
-        }
-
-        msg.channel.send('', { embed });
-    }
-}
-
-commands['@help'] = {};
-commands['@help'].args = '';
-commands['@help'].help = "Shows all available admin commands";
-commands['@help'].hide = false;
-commands['@help'].admin = true;
-commands['@help'].perm = "SEND_MESSAGES";
-commands['@help'].main = function (bot, msg) {
-    const args = msg.content.split(/ +/);
-    var command = args[0].toLowerCase();
-    if (command) {
-        command = "@" + command;
-        if (!commands[command]) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help` to get a full list of the admin commands available.");
-        } else {
-            if (commands[command].ehelp) {
-                commands[command].ehelp(msg, bot);
-            } else {
-                msg.reply("there is no extended help available for this command.");
-            }
-        }
-    } else {
-        var cmds = [];
-
-        for (let command in commands) {
-            if (commands[command].admin && !commands[command].hide) {
-                let nm = command.substr(1, command.length);
-                if (commands[command].dev) {
-                    nm = "Under construction: " + nm;
-                }
-                cmds.push({
-                    name: nm,
-                    value: commands[command].help,
-                    inline: true
-                });
-            }
-
-        }
-
-        let embed = {
-            color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ":help <command>`",
-            fields: cmds,
-            footer: {
-                icon_url: bot.user.avatarURL,
-                text: "to get standard commands use " + bot.PREFIXES[msg.guild.id] + ".help"
+                text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
             }
         }
 
@@ -216,7 +263,7 @@ commands.reload.main = function (bot, msg) {
             bot.sendNotification("Reloaded " + msg.content + ".js successfully.", "success", msg);
         }
         catch (err) {
-            msg.channel.sen("Command not found");
+            msg.channel.send("Command not found");
         }
     } else {
         bot.sendNotification("You're not allowed to use this..", "error", msg);
@@ -282,9 +329,9 @@ var checkCommand = async function (msg, isMention) {
                 let perms = commands[command].perm;
                 if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
                     //cooldown for command usage
-                    if (!userCooldowns.has(msg.author.id) ) {
+                    if (!userCooldowns.has(msg.author.id)) {
                         userCooldowns.add(msg.author.id);
-        setTimeout(()=>{userCooldowns.delete(msg.author.id);}, 4000);
+                        setTimeout(() => { userCooldowns.delete(msg.author.id); }, 4000);
                         commands[command].main(bot, msg);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {

@@ -25,9 +25,11 @@ module.exports = {
         });
     },
     admin: false,
-    help: 'Report a bug concerning MagiBot',
-    ehelp: async function (msg, bot) { msg.channel.send("To report a bug use `" + bot.PREFIXES[msg.guild.id] + ".bug <bugreport with information about what you did, what was expected, and what went wrong>`."); },
+    ehelp: function (msg, bot) {
+        return [{ name: "<bugreport with information about what you did, what was expected, and what went wrong>", value: "Report a bug concerning MagiBot" }];
+    },
     perm: "SEND_MESSAGES",
     hide: false,
-    dev: false
+    dev: false,
+    category: "Support the bot"
 };

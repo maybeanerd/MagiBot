@@ -20,7 +20,7 @@ module.exports = {
         });
     },
     admin: true,
-    help: 'Send an update to all notification channels',
     hide: true,
-    dev: true
+    dev: true,
+    category: "Utility"
 };

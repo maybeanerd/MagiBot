@@ -4,29 +4,15 @@ var cmds = require(__dirname + '/../bamands.js');
 
 function printHelp(msg, bot) {
     var info = [];
-
     info.push({
-        name: "add @User/userid/nickname",
-        value: "Report a user being salty. If you use nickname it has to be at least three characters long",
-        inline: true
+        name: "add <@User|userid|nickname>",
+        value: "Report a user being salty. If you use nickname it has to be at least three characters long and unique",
     });
     info.push({
         name: "top",
-        value: "Displays the top 5 salter of " + msg.guild.name,
-        inline: true
+        value: "Displays the top 5 salter in " + msg.guild.name,
     });
-
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".salt`:",
-        fields: info,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
-        }
-    }
-
-    msg.channel.send('', { embed });
+    return info;
 }
 
 module.exports = {
@@ -95,8 +81,9 @@ module.exports = {
 
     },
     help: "Salt commands",
-    ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    ehelp: function (msg, bot) { return printHelp(msg, bot); },
     perm: "SEND_MESSAGES",
     admin: false,
-    hide: false
+    hide: false,
+    category: "Fun"
 };

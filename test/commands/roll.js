@@ -81,8 +81,14 @@ module.exports = {
     },
     help: "Roll dice",
     ehelp: function (msg, bot) {
-        msg.channel.send("Let me roll some dice for you.\nUsage: `" + bot.PREFIXES[msg.guild.id] + ".roll [multiplier]*[number of rolls]d<die number>+[modifier]`\nExamples:\n`3d6 + 12`, `4*d12 + 3`, `d100`");
+        var ret = [];
+        ret.push({
+            name: "[multiplier]*[number of rolls]d<die number>[+ <modifier>]",
+            value: "Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`"
+        });
+        return ret;
     },
     perm: "SEND_MESSAGES",
-    admin: false
+    admin: false,
+    category: "Fun"
 };

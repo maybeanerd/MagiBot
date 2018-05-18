@@ -5,40 +5,26 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "add @User",
+        name: "add <@User>",
         value: "Report a user for being salty",
-        inline: true
     });
 
     info.push({
-        name: "rem @User",
+        name: "rem <@User>",
         value: "Remove the oldest salt report of a user",
-        inline: true
     });
 
     info.push({
-        name: "clr @User",
+        name: "clr <@User>",
         value: "Clear all salt of a user",
-        inline: true
     });
 
     info.push({
         name: "reset",
         value: "Reset all salt of this guild. Use with caution",
-        inline: true
     });
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":salt` :",
-        fields: info,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
-        }
-    }
-
-    msg.channel.send('', { embed });
+    return info;
 }
 
 module.exports = {
@@ -100,8 +86,9 @@ module.exports = {
         }
     },
     help: 'Salt commands for admins',
-    ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    ehelp: function (msg, bot) { return printHelp(msg, bot); },
     perm: "SEND_MESSAGES",
     admin: true,
-    hide: false
+    hide: false,
+    category: "Utility"
 };

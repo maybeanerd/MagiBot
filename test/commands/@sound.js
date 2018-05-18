@@ -5,22 +5,11 @@ function printHelp(msg, bot) {
     var info = [];
 
     info.push({
-        name: "rem @User/userid/nickname",
+        name: "rem <@User|userid|nickname>",
         value: "Remove the joinsound of a user. If you use nickname it has to be at least three characters long",
-        inline: true
     });
 
-    let embed = {
-        color: bot.COLOR,
-        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":sound` :",
-        fields: info,
-        footer: {
-            icon_url: bot.user.avatarURL,
-            text: bot.user.username
-        }
-    }
-
-    msg.channel.send('', { embed });
+    return info;
 }
 
 
@@ -51,8 +40,9 @@ module.exports = {
 
     },
     help: 'Modify the joinsounds of other users',
-    ehelp: async function (msg, bot) { printHelp(msg, bot); },
+    ehelp: function (msg, bot) { return printHelp(msg, bot); },
     perm: "SEND_MESSAGES",
     admin: true,
-    hide: false
+    hide: false,
+    category: "Utility"
 };
