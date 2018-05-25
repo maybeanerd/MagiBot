@@ -128,10 +128,10 @@ module.exports = {
                                             }
                                         });
                                         collector.on('end', () => {
-                                            mess.edit("**" + topic + "** ended.").catch(() => { });
-                                            mess.clearReactions().catch(() => { });
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
+                                            mess.edit("**" + topic + "** ended.").catch(() => { });
+                                            mess.clearReactions().catch(() => { });
                                             return;
                                         });
                                     });
