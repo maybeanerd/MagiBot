@@ -53,7 +53,6 @@ module.exports = {
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                                     msg.channel.send("Queue: **" + topic + ":**\n\nUse ☑ to join the queue!").then(async function f(mess) {
                                         let chann = bot.channels.get("433357857937948672");
-                                        let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         await mess.react('➡');
                                         await mess.react('☑');
                                         await mess.react('❌');
@@ -65,6 +64,7 @@ module.exports = {
                                         var queuedUsers = [];
                                         var activeUser = false;
                                         const collector = mess.createReactionCollector(fil, { time: time });
+                                        let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
 
                                         collector.on('collect', r => {
