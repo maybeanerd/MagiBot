@@ -33,7 +33,7 @@ module.exports = {
                     let topic = collected.first().content;
                     collected.first().delete();
                     mess.delete();
-                    msg.channel.send("How long is this vote supposed to last? *(use d h m format)*").then(mess => {
+                    msg.channel.send("How long is this vote supposed to last? (use d h m format, e.g.: `2d 3h 5m`)").then(mess => {
                         msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
                             if (collected.first() && collected.first().content) {
                                 //time as array of values

@@ -4,12 +4,12 @@ module.exports = {
     main: async function (bot, msg) {
         if (used[msg.guild.id]) {
             var d = new Date();
-            if ((d - used[msg.guild.id]) <= 3600000) { //check if its already 2hours old
+            if ((d - used[msg.guild.id]) <= 0) { //check if its already 2hours old
                 msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
                 return;
             }
         }
-        used[msg.guild.id] = new Date();
+        used[msg.guild.id] = new Date() + 3600000;
         let authorID = msg.author.id;
         msg.channel.send("What do you want the queue to be about?").then(mess => { //fix when no messages TODO
             msg.delete();
@@ -65,6 +65,7 @@ module.exports = {
                                         var queuedUsers = [];
                                         var activeUser = false;
                                         const collector = mess.createReactionCollector(fil, { time: time });
+                                        used[msg.guild.id] = new Date() + time;
 
                                         collector.on('collect', r => {
                                             switch (r.emoji.name) {
