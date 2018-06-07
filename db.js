@@ -672,9 +672,13 @@ module.exports = {
         let channels = await getJoinChannel(guildID);
         return channels.includes(cid);
     },
-    isAdmin: async function (guildID, user) {
+    isAdmin: async function (guildID, user, bot) {
         //checks for admin and Owner, they can always use
         if (user.hasPermission("ADMINISTRATOR", false, true, true)) {
+            return true;
+        }
+        //Owner is always admin hehe
+        if (user.id == bot.OWNERID) {
             return true;
         }
         var roles = await getAdminRole(guildID);

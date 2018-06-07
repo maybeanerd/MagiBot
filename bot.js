@@ -87,7 +87,7 @@ commands.help.main = async function (bot, msg) {
 
                     }
                     //admin variant?
-                    if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+                    if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
                         if (commands[acommand] && commands[acommand].ehelp) {
                             info.push({
                                 name: "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -",
@@ -119,7 +119,7 @@ commands.help.main = async function (bot, msg) {
                 } else {
                     msg.reply("there is no extended help available for this command.");
                 }
-            } else if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+            } else if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
                 //Only Admin command
                 command = acommand;
                 if (commands[command].ehelp) {
@@ -173,7 +173,7 @@ commands.help.main = async function (bot, msg) {
                 });
             }
         }
-        if (msg.member && await data.isAdmin(msg.guild.id, msg.member)) {
+        if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
             var coms = "";
             for (let command in commands) {
                 if (commands[command].admin && !commands[command].hide) {
@@ -306,7 +306,7 @@ var checkCommand = async function (msg, isMention) {
                 command = command.slice(1);
                 break;
             case ':':
-                if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member))) {
+                if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member, bot))) {
                     if (await msg.channel.permissionsFor(msg.guild.me).has("MANAGE_MESSAGES")) {
                         msg.delete();
                     }
