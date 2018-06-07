@@ -117,7 +117,7 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        return [{ name: "", value: "Start a vote with up to 20 different options. The maximum duration is 7 days.\nThe setup includes multiple steps which will be axplained when you use the command." }]
+        return [{ name: "", value: "Start a vote with up to 20 different options. The maximum duration is 7 days.\nThe setup includes multiple steps which will be explained when you use the command." }]
     },
     help: 'Start a vote',
     admin: false,
