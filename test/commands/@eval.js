@@ -2,7 +2,7 @@
 module.exports = {
     main: function (bot, msg) {
         var expression = new String(msg.content);
-        msg.channel.send("```js" + eval(expression.toString()) + "```");
+        msg.channel.send("```js\n" + eval(expression.toString()) + "```");
     },
     help: 'eval something',
     admin: true,
