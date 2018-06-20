@@ -114,7 +114,7 @@ async function dblReminder(bot) {
                 let usr = users[u];
                 user = await bot.fetchUser(user);
                 if (!(await dbl.hasVoted(user.id)) && !(usr.voted)) {
-                    await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
+                    await user.send("Hey there " + user + " you can now vote for me again! (<https://discordbots.org/bot/384820232583249921> and <https://bots.ondiscord.xyz/bots/384820232583249921>)\nIf you don't want these reminders anymore use `k.dbl` in a server im on.").catch((err) => { });
                     toggleDBLvoted(user.id, true);
                 } else if (await dbl.hasVoted(user.id) && usr.voted) {
                     toggleDBLvoted(user.id, false);
