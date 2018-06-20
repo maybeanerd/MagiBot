@@ -49,7 +49,7 @@ module.exports = {
                     return;
                 }
                 sound = sound.streams[0];
-                if (sound.codec_name != 'mp3' && sound.codec_name != 'wav') {
+                if (sound.codec_name != 'mp3' && sound.codec_name != 'pcm_s16le' && sound.codec_name != 'pcm_f32le') {
                     msg.reply("you need to use a compatible file! For more info use `" + bot.PREFIXES[msg.guild.id] + ".help sound`");
                     return;
                 }

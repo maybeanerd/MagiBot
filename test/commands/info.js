@@ -45,7 +45,7 @@ module.exports = {
         */
         info.push({
             name: "Links",
-            value: "Support me by voting on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)! (daily reminder via `k.dbl`)\n[Invite me to your guild](https://discordapp.com/oauth2/authorize?client_id=384820232583249921&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot)\n[Official support Discord](https://discord.gg/2Evcf4T)\n[Support me on Patreon](https://www.patreon.com/MagiBot)",
+            value: "Support me by voting on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(vote reminder via `" + bot.PREFIXES[msg.guild.id] + ".dbl`)\n[Invite me to your guild](https://discordapp.com/oauth2/authorize?client_id=384820232583249921&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot)\n[Official support Discord](https://discord.gg/2Evcf4T)\n[Support me on Patreon](https://www.patreon.com/MagiBot)",
             inline: false
         });
 
