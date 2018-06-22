@@ -359,7 +359,7 @@ var checkCommand = async function (msg, isMention) {
 
 bot.on("ready", () => {
     console.log('Ready to begin! Serving in ' + bot.guilds.array().length + ' servers.');
-    bot.user.setActivity("use " + bot.PREFIX + ".help", { type: "WATCHING" });
+    bot.user.setActivity(bot.PREFIX + ".help", { type: "WATCHING" });
     data.startup(bot);
     if (bot.DETAILED_LOGGING) {
         console.log('By name: ' + bot.guilds.array());
