@@ -6,6 +6,8 @@ var url = config.dburl;
 const DBL = require("dblapi.js");
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0');
 
+var botStarted = true;
+
 //Define Methods:
 async function getuser(userid, guildID) {
     return MongoClient.connect(url).then(async function (mclient) {
@@ -616,9 +618,13 @@ module.exports = {
             }
             mclient.close();
         });
-        onHour(bot, true);
-        dblReminder(bot);
-        voteCheck(bot);
+        //repeating functions:
+        if (botStarted) {
+            botStarted = false;
+            onHour(bot, true);
+            dblReminder(bot);
+            voteCheck(bot);
+        }
     },
     getUser: async function (userid, guildID) {
         let result = await getuser(userid, guildID);
