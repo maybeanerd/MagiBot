@@ -13,7 +13,7 @@ module.exports = {
             inline: false
         });
 
-        if (msg.user.id == bot.OWNERID) {
+        if (msg.author.id == bot.OWNERID) {
             //uptime calc
             var u = bot.uptime;
             var uptime = "";
