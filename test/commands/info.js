@@ -46,8 +46,8 @@ module.exports = {
         }
 
         info.push({
-            name: "Support MagiBot",
-            value: "Vote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(vote reminder via " + bot.PREFIXES[msg.guild.id] + ".dbl)\nSupport me on [Patreon](https://www.patreon.com/MagiBot)",
+            name: "How to support MagiBot",
+            value: "Vote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *" + bot.PREFIXES[msg.guild.id] + ".dbl*)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)",
             inline: false
         });
 
