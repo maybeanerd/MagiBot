@@ -2,6 +2,7 @@
 
 module.exports = {
     main: async function (bot, msg) {
+        var voiceChannel;
         if (used[msg.guild.id]) {
             var d = new Date();
             if ((d - used[msg.guild.id]) <= 0) { //check if its already 2hours old
@@ -23,7 +24,7 @@ module.exports = {
                 collected.first().delete();
                 mess.delete();
                 msg.channel.send("How long is this queue supposed to last? *(in minutes, maximum of 120)*").then(mess => {
-                    msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
+                    msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(async function (collected) {
                         if (!collected.first()) {
                             msg.channel.send("Cancelled queue creation due to timeout.");
                             used[msg.guild.id] = false;
@@ -43,7 +44,18 @@ module.exports = {
                         collected.first().delete();
                         mess.delete();
                         //TODO add optional voice channel 
-
+                        let authorMember = await msg.guild.fetchMember(msg.author);
+                        voiceChannel = authorMember.voiceChannel;
+                        //moreTODO move all of the methods here somehow
+                        if (voiceChannel) {
+                            //moreTODO test for MANAGE_CHANNELS permission
+                            let botMember = await msg.guild.fetchMember(bot.user);
+                            if (!botMember.hasPermission("MANAGE_CHANNELS")) {
+                                voiceChannel = false;
+                            } else {
+                                voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
+                            }
+                        }
                         //endTODO
                         msg.channel.send("Do you want to start the queue **" + topic + "** lasting **" + time + " minutes** ?").then(mess => {
                             const filter = (reaction, user) => {
@@ -70,9 +82,6 @@ module.exports = {
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
 
-                                        //TODO add voice joins->mute
-
-                                        //endTODO
                                         collector.on('collect', r => {
                                             switch (r.emoji.name) {
                                                 case '☑':
@@ -97,9 +106,9 @@ module.exports = {
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
-                                                        //TODO mute current user
-
-                                                        //endTODO
+                                                        if (voiceChannel) {
+                                                            voiceChannel.overwritePermissions(activeUser, { "SPEAK": false }, "muted for the queue command");
+                                                        }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
                                                         mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
@@ -107,9 +116,9 @@ module.exports = {
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
                                                         });
-                                                        //TODO unmute current user
-
-                                                        //endTODO
+                                                        if (voiceChannel) {
+                                                            voiceChannel.overwritePermissions(activeUser, { "SPEAK": true }, "unmuted for the queue command");
+                                                        }
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(2000);
