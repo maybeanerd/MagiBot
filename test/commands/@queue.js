@@ -12,7 +12,7 @@ module.exports = {
         }
         used[msg.guild.id] = new Date(Date.now() + 3600000);
         let authorID = msg.author.id;
-        msg.channel.send("What do you want the queue to be about?").then(mess => { //fix when no messages TODO
+        msg.channel.send("What do you want the queue to be about?").then(mess => {
             msg.delete();
             msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
                 if (!collected.first()) {
@@ -43,20 +43,18 @@ module.exports = {
                         }
                         collected.first().delete();
                         mess.delete();
-                        //TODO add optional voice channel 
                         let authorMember = await msg.guild.fetchMember(msg.author);
                         voiceChannel = authorMember.voiceChannel;
-                        //moreTODO move all of the methods here somehow
                         if (voiceChannel) {
-                            //moreTODO test for MANAGE_CHANNELS permission
                             let botMember = await msg.guild.fetchMember(bot.user);
                             if (!botMember.hasPermission("MANAGE_CHANNELS")) {
+                                msg.channel.send("If i had MANAGE_CHANNELS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
                                 voiceChannel = false;
                             } else {
                                 voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
+                                msg.channel.send("Automatically (un)muting users in " + voiceChannel);
                             }
                         }
-                        //endTODO
                         msg.channel.send("Do you want to start the queue **" + topic + "** lasting **" + time + " minutes** ?").then(mess => {
                             const filter = (reaction, user) => {
                                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id == authorID);
@@ -106,6 +104,7 @@ module.exports = {
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
+                                                        //id like to just delete that override here
                                                         if (voiceChannel) {
                                                             voiceChannel.overwritePermissions(activeUser, { "SPEAK": false }, "muted for the queue command");
                                                         }
