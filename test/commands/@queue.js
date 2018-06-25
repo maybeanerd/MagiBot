@@ -1,6 +1,6 @@
 ﻿var used = {};
 
-function messageEdit(voiceChannel, activeUser, qULength) {
+function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
         msg += " in " + voiceChannel;
@@ -115,7 +115,7 @@ module.exports = {
                                                                     voiceChannel.overwritePermissions(activeUser, { "SPEAK": true }, "unmuted for the queue command");
                                                                 }
                                                             }
-                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length));
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
                                                     }
                                                     break;
@@ -127,7 +127,7 @@ module.exports = {
                                                         }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length));
+                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         mess.reactions.get('☑').remove(activeUser);
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
@@ -152,12 +152,14 @@ module.exports = {
                                                             mess.reactions.get('☑').remove(user);
                                                             let ind = queuedUsers.findIndex(obj => obj.id == user.id);
                                                             queuedUsers.splice(ind, 1);
-                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length));
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
                                                     }
                                                     break;
                                                 case '🔚':
-                                                    msg.channel.send("Successfully ended queue.");
+                                                    msg.channel.send("Successfully ended queue.").then((ms) => {
+                                                        ms.delete(5000);
+                                                    });
                                                     if (voiceChannel && voiceChannel.permissionOverwrites.has(activeUser.id)) {
                                                         voiceChannel.permissionOverwrites.get(activeUser.id).delete("muted for the queue command");
                                                     }
