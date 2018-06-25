@@ -45,15 +45,18 @@ module.exports = {
                         mess.delete();
                         let authorMember = await msg.guild.fetchMember(msg.author);
                         voiceChannel = authorMember.voiceChannel;
+                        let remMessage;
                         if (voiceChannel) {
                             let botMember = await msg.guild.fetchMember(bot.user);
                             if (!botMember.hasPermission("MANAGE_CHANNELS")) {
-                                msg.channel.send("If i had MANAGE_CHANNELS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
+                                remMessage = await msg.channel.send("If i had MANAGE_CHANNELS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
                                 voiceChannel = false;
                             } else {
                                 voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
-                                msg.channel.send("Automatically (un)muting users in " + voiceChannel);
+                                remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone is muted by default, so please use your own roles to override that for admins etc. If this is the first time you're using this command you might need to reconnect users, as voicechannel permission are not applied while in voicechat already.");
                             }
+                        } else {
+                            remMessage = await msg.channel.send("If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.");
                         }
                         msg.channel.send("Do you want to start the queue **" + topic + "** lasting **" + time + " minutes** ?").then(mess => {
                             const filter = (reaction, user) => {
@@ -63,6 +66,7 @@ module.exports = {
                             mess.react('❌');
                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(async function f(reacts) {
                                 mess.delete();
+                                remMessage.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                                     msg.channel.send("Queue: **" + topic + ":**\n\nUse ☑ to join the queue!").then(async function f(mess) {
                                         let chann = bot.channels.get("433357857937948672");
@@ -105,8 +109,8 @@ module.exports = {
                                                 case '➡':
                                                     if (queuedUsers[0]) {
                                                         //id like to just delete that override here
-                                                        if (voiceChannel) {
-                                                            voiceChannel.overwritePermissions(activeUser, { "SPEAK": false }, "muted for the queue command");
+                                                        if (voiceChannel && voiceChannel.permissionOverwrites.has(activeUser.id)) {
+                                                            voiceChannel.voiceChannel.permissionOverwrites.get(activeUser.id).delete("muted for the queue command");
                                                         }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
