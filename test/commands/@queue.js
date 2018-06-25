@@ -42,6 +42,9 @@ module.exports = {
                         }
                         collected.first().delete();
                         mess.delete();
+                        //TODO add optional voice channel 
+
+                        //endTODO
                         msg.channel.send("Do you want to start the queue **" + topic + "** lasting **" + time + " minutes** ?").then(mess => {
                             const filter = (reaction, user) => {
                                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id == authorID);
@@ -67,6 +70,9 @@ module.exports = {
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
 
+                                        //TODO add voice joins->mute
+
+                                        //endTODO
                                         collector.on('collect', r => {
                                             switch (r.emoji.name) {
                                                 case '☑':
@@ -91,6 +97,9 @@ module.exports = {
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
+                                                        //TODO mute current user
+
+                                                        //endTODO
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
                                                         mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
@@ -98,6 +107,9 @@ module.exports = {
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
                                                         });
+                                                        //TODO unmute current user
+
+                                                        //endTODO
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(2000);
