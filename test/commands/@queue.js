@@ -127,7 +127,7 @@ module.exports = {
                                                         }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit(mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length));
+                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length));
                                                         mess.reactions.get('☑').remove(activeUser);
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
