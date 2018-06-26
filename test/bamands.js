@@ -1,9 +1,4 @@
-//global variables:
-var queueVoiceChannels = {};
-
-
 // commands made by Basti for use of the Bot 
-
 module.exports = {
     findMember: async function f(guild, mention) {
         if (!mention) { return false; }
@@ -52,7 +47,6 @@ module.exports = {
             }
             return false;
         }
-    },
-    qvc: queueVoiceChannels
+    }
 
 };
