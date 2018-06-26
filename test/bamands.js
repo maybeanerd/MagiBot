@@ -47,16 +47,5 @@ module.exports = {
             }
             return false;
         }
-    },
-    deleteElem: function f(data, X) {
-        //method to delete certain element of object
-        for (var i = data.length - 1; 0 < i; i--) {
-            if (data[i].id == X) {
-                delete data[i];
-                break;
-            }
-        }
-        return data;
     }
-
 };

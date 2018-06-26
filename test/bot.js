@@ -426,28 +426,31 @@ bot.on('error', (err) => {
 });
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    if (!(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
-            let sound = await data.getSound(n.id, n.guild.id);
-            if (sound) {
-                n.voiceChannel.join().then(connection => {
-                    //TODO use connection.play when discord.js updates, get rid of nested listener
-                    const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-                    dispatcher.on("end", () => {
-                        connection.disconnect();
-                    });
+    //check if voice channel actually changed
+    if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+        if (!(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel) {
+            if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
+                let sound = await data.getSound(n.id, n.guild.id);
+                if (sound) {
+                    n.voiceChannel.join().then(connection => {
+                        //TODO use connection.play when discord.js updates, get rid of nested listener
+                        const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                        dispatcher.on("end", () => {
+                            connection.disconnect();
+                        });
 
-                });
+                    });
+                }
             }
+        };
+        if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
+            //user joined a muted channel
+            n.setMute(true, "joined active queue voice channel");
         }
-    };
-    if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
-        //user joined a muted channel
-        n.setMute(true, "joined active queue voice channel");
-    }
-    if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
-        //user left a muted channel
-        n.setMute(false, "left active queue voice channel");
+        if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
+            //user left a muted channel
+            n.setMute(false, "left active queue voice channel");
+        }
     }
 });
 

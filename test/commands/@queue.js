@@ -1,8 +1,5 @@
 ﻿var used = {};
 
-var cmds = require(__dirname + '/../bamands.js');
-
-
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
@@ -178,12 +175,12 @@ module.exports = {
                                         collector.on('end', () => {
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
+                                            delete bot.queueVoiceChannels[msg.guild.id];
                                             //remove all mutes
                                             var memArray = voiceChannel.members.array();
                                             for (let mem in memArray) {
                                                 voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
                                             }
-                                            bot.queueVoiceChannels = cmds.deleteElem(bot.queueVoiceChannels, voiceChannel.id); //trying to delete the vc
                                             mess.edit("**" + topic + "** ended.").catch(() => { });
                                             mess.clearReactions().catch(() => { });
                                             return;
