@@ -48,5 +48,4 @@ module.exports = {
             return false;
         }
     }
-
 };

@@ -1,4 +1,6 @@
 ﻿var used = {};
+var data = require(__dirname + '/../db.js');
+
 
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
@@ -58,12 +60,12 @@ module.exports = {
                         let remMessage;
                         if (voiceChannel) {
                             let botMember = await msg.guild.fetchMember(bot.user);
-                            if (!botMember.hasPermission("MANAGE_CHANNELS")) {
-                                remMessage = await msg.channel.send("If i had MANAGE_CHANNELS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
+                            if (!botMember.hasPermission("MUTE_MEMBERS")) {
+                                remMessage = await msg.channel.send("If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
                                 voiceChannel = false;
                             } else {
                                 voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
-                                remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone is muted by default, so please use your own roles to override that for admins etc. If this is the first time you're using this command you might need to reconnect users, as voicechannel permission are not applied while in voicechat already.");
+                                remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone except users that are considered admin by MagiBot is muted by default.");
                             }
                         } else {
                             remMessage = await msg.channel.send("If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.");
@@ -98,7 +100,10 @@ module.exports = {
                                         //servermute all users in voiceChannel
                                         var memArray = voiceChannel.members.array();
                                         for (let mem in memArray) {
-                                            voiceChannel.members.get(memArray[mem].id).setMute(true, "queue started in this voice channel");
+                                            mem = voiceChannel.members.get(memArray[mem].id);
+                                            if (!(await data.isAdmin(msg.guild.id, mem, bot))) {
+                                                mem.setMute(true, "queue started in this voice channel");
+                                            }
                                         }
 
                                         collector.on('collect', async function (r) {
