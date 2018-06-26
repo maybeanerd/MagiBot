@@ -99,7 +99,7 @@ module.exports = {
                                         //add the vc to the global variable so joins get muted
                                         bot.queueVoiceChannels[msg.guild.id] = voiceChannel.id;
                                         //servermute all users in voiceChannel
-                                        var memArray = voiceChannel.members.toArray();
+                                        var memArray = voiceChannel.members.array();
                                         for (let mem in memArray) {
                                             voiceChannel.members.get(memArray[mem].id).setMute(true, "queue started in this voice channel");
                                         }
@@ -179,7 +179,7 @@ module.exports = {
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
                                             //remove all mutes
-                                            var memArray = voiceChannel.members.toArray();
+                                            var memArray = voiceChannel.members.array();
                                             for (let mem in memArray) {
                                                 voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
                                             }
