@@ -35,9 +35,11 @@ bot.SUCCESS_COLOR = 0x00ff00;
 bot.ERROR_COLOR = 0x0000ff;
 bot.INFO_COLOR = 0x0000ff;
 
-bot.SIGN = "MagiBot - created by T0TProduction";
+//global variables saved in bot
 
+bot.SIGN = "MagiBot - created by T0TProduction";
 bot.PREFIXES = {};
+bot.queueVoiceChannels = {};
 
 String.prototype.padRight = function (l, c) { return this + Array(l - this.length + 1).join(c || " ") }
 
@@ -439,6 +441,14 @@ bot.on("voiceStateUpdate", async function (o, n) {
             }
         }
     };
+    if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
+        //user joined a muted channel
+        n.setMute(true, "joined active queue voice channel");
+    }
+    if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
+        //user left a muted channel
+        n.setMute(false, "left active queue voice channel");
+    }
 });
 
 bot.on("disconnected", () => {

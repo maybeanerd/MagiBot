@@ -1,5 +1,8 @@
 ﻿var used = {};
 
+var cmds = require(__dirname + '/../bamands.js');
+
+
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
@@ -93,6 +96,13 @@ module.exports = {
                                         const collector = mess.createReactionCollector(fil, { time: time });
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
+                                        //add the vc to the global variable so joins get muted
+                                        bot.queueVoiceChannels[msg.guild.id] = voiceChannel.id;
+                                        //servermute all users in voiceChannel
+                                        var memArray = voiceChannel.members.toArray();
+                                        for (let mem in memArray) {
+                                            voiceChannel.members.get(memArray[mem].id).setMute(true, "queue started in this voice channel");
+                                        }
 
                                         collector.on('collect', r => {
                                             switch (r.emoji.name) {
@@ -111,9 +121,9 @@ module.exports = {
                                                                 msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                                     ms.delete(1000);
                                                                 });
-                                                                if (voiceChannel) {
-                                                                    voiceChannel.overwritePermissions(activeUser, { "SPEAK": true }, "unmuted for the queue command");
-                                                                }
+                                                                //unmute currentUser
+                                                                var currentMember = msg.guild.fetchMember(activeUser);
+                                                                currentMember.setMute(false, "its your turn in the queue");
                                                             }
                                                             mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
@@ -121,10 +131,9 @@ module.exports = {
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
-                                                        //id like to just delete that override here
-                                                        if (voiceChannel && voiceChannel.permissionOverwrites.has(activeUser.id)) {
-                                                            voiceChannel.permissionOverwrites.get(activeUser.id).delete("muted for the queue command");
-                                                        }
+                                                        //mute old current user
+                                                        var currentMember = msg.guild.fetchMember(activeUser);
+                                                        currentMember.setMute(true, "its not your turn in the queue anymore");
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
                                                         mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
@@ -132,9 +141,9 @@ module.exports = {
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
                                                         });
-                                                        if (voiceChannel) {
-                                                            voiceChannel.overwritePermissions(activeUser, { "SPEAK": true }, "unmuted for the queue command");
-                                                        }
+                                                        //unmute currentUser
+                                                        var currentMember = msg.guild.fetchMember(activeUser);
+                                                        currentMember.setMute(false, "its your turn in the queue");
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(2000);
@@ -160,9 +169,6 @@ module.exports = {
                                                     msg.channel.send("Successfully ended queue.").then((ms) => {
                                                         ms.delete(5000);
                                                     });
-                                                    if (voiceChannel && voiceChannel.permissionOverwrites.has(activeUser.id)) {
-                                                        voiceChannel.permissionOverwrites.get(activeUser.id).delete("muted for the queue command");
-                                                    }
                                                     collector.stop();
                                                     break;
                                                 default:
@@ -172,9 +178,12 @@ module.exports = {
                                         collector.on('end', () => {
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
-                                            if (voiceChannel && voiceChannel.permissionOverwrites.has(activeUser.id)) {
-                                                voiceChannel.permissionOverwrites.get(activeUser.id).delete("muted for the queue command");
+                                            //remove all mutes
+                                            var memArray = voiceChannel.members.toArray();
+                                            for (let mem in memArray) {
+                                                voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
                                             }
+                                            bot.queueVoiceChannels = cmds.deleteElem(bot.queueVoiceChannels, voiceChannel.id); //trying to delete the vc
                                             mess.edit("**" + topic + "** ended.").catch(() => { });
                                             mess.clearReactions().catch(() => { });
                                             return;
