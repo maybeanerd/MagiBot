@@ -1,7 +1,18 @@
 ﻿var used = {};
 
+function messageEdit(voiceChannel, activeUser, qULength, topic) {
+    let msg = "Queue: **" + topic + "**";
+    if (voiceChannel) {
+        msg += " in " + voiceChannel;
+    }
+    msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qULength + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!";
+    return msg;
+}
+
+
 module.exports = {
     main: async function (bot, msg) {
+        var voiceChannel;
         if (used[msg.guild.id]) {
             var d = new Date();
             if ((d - used[msg.guild.id]) <= 0) { //check if its already 2hours old
@@ -11,7 +22,7 @@ module.exports = {
         }
         used[msg.guild.id] = new Date(Date.now() + 3600000);
         let authorID = msg.author.id;
-        msg.channel.send("What do you want the queue to be about?").then(mess => { //fix when no messages TODO
+        msg.channel.send("What do you want the queue to be about?").then(mess => {
             msg.delete();
             msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
                 if (!collected.first()) {
@@ -23,7 +34,7 @@ module.exports = {
                 collected.first().delete();
                 mess.delete();
                 msg.channel.send("How long is this queue supposed to last? *(in minutes, maximum of 120)*").then(mess => {
-                    msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
+                    msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(async function (collected) {
                         if (!collected.first()) {
                             msg.channel.send("Cancelled queue creation due to timeout.");
                             used[msg.guild.id] = false;
@@ -42,6 +53,21 @@ module.exports = {
                         }
                         collected.first().delete();
                         mess.delete();
+                        let authorMember = await msg.guild.fetchMember(msg.author);
+                        voiceChannel = authorMember.voiceChannel;
+                        let remMessage;
+                        if (voiceChannel) {
+                            let botMember = await msg.guild.fetchMember(bot.user);
+                            if (!botMember.hasPermission("MANAGE_CHANNELS")) {
+                                remMessage = await msg.channel.send("If i had MANAGE_CHANNELS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
+                                voiceChannel = false;
+                            } else {
+                                voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
+                                remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone is muted by default, so please use your own roles to override that for admins etc. If this is the first time you're using this command you might need to reconnect users, as voicechannel permission are not applied while in voicechat already.");
+                            }
+                        } else {
+                            remMessage = await msg.channel.send("If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.");
+                        }
                         msg.channel.send("Do you want to start the queue **" + topic + "** lasting **" + time + " minutes** ?").then(mess => {
                             const filter = (reaction, user) => {
                                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id == authorID);
@@ -50,6 +76,7 @@ module.exports = {
                             mess.react('❌');
                             mess.awaitReactions(filter, { max: 1, time: 20000 }).then(async function f(reacts) {
                                 mess.delete();
+                                remMessage.delete();
                                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                                     msg.channel.send("Queue: **" + topic + ":**\n\nUse ☑ to join the queue!").then(async function f(mess) {
                                         let chann = bot.channels.get("433357857937948672");
@@ -66,8 +93,15 @@ module.exports = {
                                         const collector = mess.createReactionCollector(fil, { time: time });
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
+                                        //add the vc to the global variable so joins get muted
+                                        bot.queueVoiceChannels[msg.guild.id] = voiceChannel.id;
+                                        //servermute all users in voiceChannel
+                                        var memArray = voiceChannel.members.array();
+                                        for (let mem in memArray) {
+                                            voiceChannel.members.get(memArray[mem].id).setMute(true, "queue started in this voice channel");
+                                        }
 
-                                        collector.on('collect', r => {
+                                        collector.on('collect', async function (r) {
                                             switch (r.emoji.name) {
                                                 case '☑':
                                                     let users = r.users;
@@ -84,20 +118,29 @@ module.exports = {
                                                                 msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                                     ms.delete(1000);
                                                                 });
+                                                                //unmute currentUser
+                                                                var currentMember = await msg.guild.fetchMember(activeUser);
+                                                                currentMember.setMute(false, "its your turn in the queue");
                                                             }
-                                                            mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
                                                     }
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
+                                                        //mute old current user
+                                                        var currentMember = await msg.guild.fetchMember(activeUser);
+                                                        currentMember.setMute(true, "its not your turn in the queue anymore");
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
+                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         mess.reactions.get('☑').remove(activeUser);
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
                                                         });
+                                                        //unmute currentUser
+                                                        var currentMember = await msg.guild.fetchMember(activeUser);
+                                                        currentMember.setMute(false, "its your turn in the queue");
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(2000);
@@ -115,12 +158,14 @@ module.exports = {
                                                             mess.reactions.get('☑').remove(user);
                                                             let ind = queuedUsers.findIndex(obj => obj.id == user.id);
                                                             queuedUsers.splice(ind, 1);
-                                                            mess.edit("Queue: **" + topic + "**\n\nCurrent user: **" + activeUser + "**\n*" + queuedUsers.length + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!");
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
                                                     }
                                                     break;
                                                 case '🔚':
-                                                    msg.channel.send("Successfully ended queue.");
+                                                    msg.channel.send("Successfully ended queue.").then((ms) => {
+                                                        ms.delete(5000);
+                                                    });
                                                     collector.stop();
                                                     break;
                                                 default:
@@ -130,6 +175,12 @@ module.exports = {
                                         collector.on('end', () => {
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
+                                            delete bot.queueVoiceChannels[msg.guild.id];
+                                            //remove all mutes
+                                            var memArray = voiceChannel.members.array();
+                                            for (let mem in memArray) {
+                                                voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
+                                            }
                                             mess.edit("**" + topic + "** ended.").catch(() => { });
                                             mess.clearReactions().catch(() => { });
                                             return;
