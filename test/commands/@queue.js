@@ -5,7 +5,7 @@ var data = require(__dirname + '/../db.js');
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
-        msg += " in " + voiceChannel;
+        msg += "\nwith voicemode activated in " + voiceChannel;
     }
     msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qULength + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
@@ -95,14 +95,17 @@ module.exports = {
                                         const collector = mess.createReactionCollector(fil, { time: time });
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
                                         used[msg.guild.id] = new Date(Date.now() + time);
-                                        //add the vc to the global variable so joins get muted
-                                        bot.queueVoiceChannels[msg.guild.id] = voiceChannel.id;
-                                        //servermute all users in voiceChannel
-                                        var memArray = voiceChannel.members.array();
-                                        for (let mem in memArray) {
-                                            mem = voiceChannel.members.get(memArray[mem].id);
-                                            if (!(await data.isAdmin(msg.guild.id, mem, bot))) {
-                                                mem.setMute(true, "queue started in this voice channel");
+
+                                        if (voiceChannel) {
+                                            //add the vc to the global variable so joins get muted
+                                            bot.queueVoiceChannels[msg.guild.id] = voiceChannel.id;
+                                            //servermute all users in voiceChannel
+                                            var memArray = voiceChannel.members.array();
+                                            for (let mem in memArray) {
+                                                mem = voiceChannel.members.get(memArray[mem].id);
+                                                if (!(await data.isAdmin(msg.guild.id, mem, bot))) {
+                                                    mem.setMute(true, "queue started in this voice channel");
+                                                }
                                             }
                                         }
 
@@ -180,11 +183,13 @@ module.exports = {
                                         collector.on('end', () => {
                                             deleteme.delete();
                                             used[msg.guild.id] = false;
-                                            delete bot.queueVoiceChannels[msg.guild.id];
-                                            //remove all mutes
-                                            var memArray = voiceChannel.members.array();
-                                            for (let mem in memArray) {
-                                                voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
+                                            if (voiceChannel) {
+                                                delete bot.queueVoiceChannels[msg.guild.id];
+                                                //remove all mutes
+                                                var memArray = voiceChannel.members.array();
+                                                for (let mem in memArray) {
+                                                    voiceChannel.members.get(memArray[mem].id).setMute(false, "queue ended");
+                                                }
                                             }
                                             mess.edit("**" + topic + "** ended.").catch(() => { });
                                             mess.clearReactions().catch(() => { });
