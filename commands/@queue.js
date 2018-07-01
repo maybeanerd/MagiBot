@@ -126,9 +126,11 @@ module.exports = {
                                                                 msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                                     ms.delete(1000);
                                                                 });
-                                                                //unmute currentUser
-                                                                var currentMember = await msg.guild.fetchMember(activeUser);
-                                                                currentMember.setMute(false, "its your turn in the queue");
+                                                                if (voiceChannel) {
+                                                                    //unmute currentUser
+                                                                    var currentMember = await msg.guild.fetchMember(activeUser);
+                                                                    currentMember.setMute(false, "its your turn in the queue");
+                                                                }
                                                             }
                                                             mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
                                                         }
@@ -136,9 +138,11 @@ module.exports = {
                                                     break;
                                                 case '➡':
                                                     if (queuedUsers[0]) {
-                                                        //mute old current user
-                                                        var currentMember = await msg.guild.fetchMember(activeUser);
-                                                        currentMember.setMute(true, "its not your turn in the queue anymore");
+                                                        if (voiceChannel) {
+                                                            //mute old current user
+                                                            var currentMember = await msg.guild.fetchMember(activeUser);
+                                                            currentMember.setMute(true, "its not your turn in the queue anymore");
+                                                        }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
                                                         mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
@@ -146,9 +150,11 @@ module.exports = {
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
                                                         });
-                                                        //unmute currentUser
-                                                        var currentMember = await msg.guild.fetchMember(activeUser);
-                                                        currentMember.setMute(false, "its your turn in the queue");
+                                                        if (voiceChannel) {
+                                                            //unmute currentUser
+                                                            var currentMember = await msg.guild.fetchMember(activeUser);
+                                                            currentMember.setMute(false, "its your turn in the queue");
+                                                        }
                                                     } else {
                                                         msg.channel.send("No users left in queue.").then((ms) => {
                                                             ms.delete(2000);
