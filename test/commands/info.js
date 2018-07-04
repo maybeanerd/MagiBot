@@ -3,12 +3,6 @@ module.exports = {
         var info = [];
 
         info.push({
-            name: "a bit of background",
-            value: "MagiBot is being developed by T0TProduction#0001 as a hobby project based in Germany.\nIt was originally a private bot for a Discord guild themed after the Pokémon Magikarp which is the reason it's called MagiBot.",
-            inline: false
-        });
-
-        info.push({
             name: "Links",
             value: "[Invite me to your guild](https://discordapp.com/oauth2/authorize?client_id=384820232583249921&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot)\n[Official support Discord](https://discord.gg/2Evcf4T)",
             inline: false
@@ -20,7 +14,11 @@ module.exports = {
             inline: false
         });
 
-
+        info.push({
+            name: "A bit of background",
+            value: "MagiBot is being developed in Germany by T0TProduction#0001 as a hobby project.\nIt was originally a private bot for a Discord guild themed after the Pokemon Magikarp which is the reason it's called MagiBot.",
+            inline: false
+        });
 
         let embed = {
             color: bot.COLOR,

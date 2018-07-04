@@ -47,7 +47,7 @@ module.exports = {
 
         let embed = {
             color: bot.COLOR,
-            description: "Some information about the bot:",
+            description: "Here are some stats:",
             fields: info,
             footer: {
                 icon_url: bot.user.avatarURL,
