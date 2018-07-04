@@ -42,5 +42,5 @@ module.exports = {
     admin: false,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
     dev: false,
-    category: "Support the bot"
+    category: "Miscellaneous"
 };

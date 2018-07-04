@@ -13,5 +13,5 @@ module.exports = {
     },
     perm: "SEND_MESSAGES",
     admin: false,
-    category: "Utility"
+    category: "Miscellaneous"
 };

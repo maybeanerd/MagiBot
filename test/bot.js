@@ -60,7 +60,7 @@ bot.sendNotification = function (info, type, msg) {
 
 var commands = {}
 //TODO actually use
-var commandCategories = ["Utility", "Fun", "Support the bot"];
+var commandCategories = ["Utility", "Fun", "Miscellaneous"];
 
 commands.help = {};
 commands.help.args = '';
@@ -103,7 +103,6 @@ commands.help.main = async function (bot, msg) {
                                     value: ehelps[i].value,
                                     inline: false
                                 });
-
                             }
                         }
                     }
@@ -188,7 +187,7 @@ commands.help.main = async function (bot, msg) {
             }
             if (coms != "") {
                 cmds.push({
-                    name: "Admin commands",
+                    name: "Admin commands (via `" + bot.PREFIXES[msg.guild.id] + ":`)",
                     value: coms,
                     inline: false
                 });
