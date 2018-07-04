@@ -88,24 +88,6 @@ commands.help.main = async function (bot, msg) {
                         });
 
                     }
-                    //admin variant?
-                    if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
-                        if (commands[acommand] && commands[acommand].ehelp) {
-                            info.push({
-                                name: "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -",
-                                value: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
-                                inline: false
-                            });
-                            var ehelps = commands[acommand].ehelp(msg, bot);
-                            for (var i in ehelps) {
-                                info.push({
-                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand.slice(1) + " " + ehelps[i].name,
-                                    value: ehelps[i].value,
-                                    inline: false
-                                });
-                            }
-                        }
-                    }
                     let embed = {
                         color: bot.COLOR,
                         description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + "." + command + "`:",
@@ -117,6 +99,33 @@ commands.help.main = async function (bot, msg) {
                     }
 
                     msg.channel.send('', { embed });
+                    //admin variant?
+                    if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
+                        if (commands[acommand] && commands[acommand].ehelp) {
+                            info = [];
+                            var ehelps = commands[acommand].ehelp(msg, bot);
+                            for (var i in ehelps) {
+                                info.push({
+                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand.slice(1) + " " + ehelps[i].name,
+                                    value: ehelps[i].value,
+                                    inline: false
+                                });
+                            }
+
+                            embed = {
+                                color: bot.COLOR,
+                                description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
+                                fields: info,
+                                footer: {
+                                    icon_url: bot.user.avatarURL,
+                                    text: "<required input> , [optional input] , choose|one|of|these , (comment on the command)"
+                                }
+                            }
+
+                            msg.channel.send('', { embed });
+                        }
+                    }
+
                 } else {
                     msg.reply("there is no extended help available for this command.");
                 }
@@ -174,7 +183,18 @@ commands.help.main = async function (bot, msg) {
                 });
             }
         }
+        let embed = {
+            color: bot.COLOR,
+            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
+            fields: cmds,
+            footer: {
+                icon_url: bot.user.avatarURL,
+                text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
+            }
+        }
+        msg.channel.send('', { embed });
         if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
+            cmds = [];
             var coms = "";
             for (let command in commands) {
                 if (commands[command].admin && !commands[command].hide) {
@@ -187,23 +207,25 @@ commands.help.main = async function (bot, msg) {
             }
             if (coms != "") {
                 cmds.push({
-                    name: "Admin commands (via `" + bot.PREFIXES[msg.guild.id] + ":`)",
+                    name: "Admin commands",
                     value: coms,
                     inline: false
                 });
             }
-        }
-        let embed = {
-            color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
-            fields: cmds,
-            footer: {
-                icon_url: bot.user.avatarURL,
-                text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
+            embed = {
+                color: bot.COLOR,
+                description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
+                fields: cmds,
+                footer: {
+                    icon_url: bot.user.avatarURL,
+                    text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
+                }
             }
+            msg.channel.send('', { embed });
         }
 
-        msg.channel.send('', { embed });
+
+
     }
 }
 
