@@ -1,53 +1,10 @@
 module.exports = {
     main: (bot, msg) => {
         var info = [];
-        let guilds = bot.guilds.array();
-        info.push({
-            name: "Number of guilds currently being served",
-            value: guilds.length,
-            inline: false
-        });
-        info.push({
-            name: "Number of users currently being served",
-            value: bot.users.size,
-            inline: false
-        });
-
-        if (msg.author.id == bot.OWNERID) {
-            //uptime calc
-            var u = bot.uptime;
-            var uptime = "";
-            //days
-            var x = Math.floor(u / 3600000 / 24);
-            if (x > 0) {
-                uptime += x + "d : ";
-            }
-            //hours
-            x = Math.floor(u / 3600000) % 24;
-            if (x > 0) {
-                uptime += x + "h : ";
-            }
-            //mins
-            x = Math.floor(u / 60000) % 60;
-            if (x > 0) {
-                uptime += x + "m : ";
-            }
-            //secs
-            x = Math.floor(u / 1000) % 60;
-            if (x > 0) {
-                uptime += x + "s";
-            }
-            //enbettung in ausgabe
-            info.push({
-                name: "Uptime",
-                value: uptime,
-                inline: false
-            });
-        }
 
         info.push({
-            name: "How to support MagiBot",
-            value: "Vote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *" + bot.PREFIXES[msg.guild.id] + ".dbl*)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)",
+            name: "a bit of background",
+            value: "MagiBot is being developed by T0TProduction#0001 as a hobby project based in Germany.\nIt was originally a private bot for a Discord guild themed after the Pokémon Magikarp which is the reason it's called MagiBot.",
             inline: false
         });
 
@@ -56,6 +13,14 @@ module.exports = {
             value: "[Invite me to your guild](https://discordapp.com/oauth2/authorize?client_id=384820232583249921&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot)\n[Official support Discord](https://discord.gg/2Evcf4T)",
             inline: false
         });
+
+        info.push({
+            name: "How to support MagiBot",
+            value: "Vote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *" + bot.PREFIXES[msg.guild.id] + ".dbl*)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)",
+            inline: false
+        });
+
+
 
         let embed = {
             color: bot.COLOR,
@@ -75,5 +40,5 @@ module.exports = {
     perm: "SEND_MESSAGES",
     admin: false,
     hide: false,
-    category: "Utility"
+    category: "Miscellaneous"
 };

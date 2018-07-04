@@ -31,5 +31,5 @@ module.exports = {
     perm: "SEND_MESSAGES",
     hide: false,
     dev: false,
-    category: "Support the bot"
+    category: "Miscellaneous"
 };
