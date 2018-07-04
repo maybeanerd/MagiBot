@@ -64,7 +64,6 @@ module.exports = {
                                 remMessage = await msg.channel.send("If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
                                 voiceChannel = false;
                             } else {
-                                voiceChannel.overwritePermissions(msg.guild.id, { "SPEAK": false }, "muted for the queue command");
                                 remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone except users that are considered admin by MagiBot is muted by default.");
                             }
                         } else {
