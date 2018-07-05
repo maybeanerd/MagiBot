@@ -449,7 +449,13 @@ bot.on('error', (err) => {
 bot.on("voiceStateUpdate", async function (o, n) {
     //check if voice channel actually changed
     if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        if (!(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel) {
+        if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
+            //user joined a muted channel
+            n.setMute(true, "joined active queue voice channel");
+        }else if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
+            //user left a muted channel
+            n.setMute(false, "left active queue voice channel");
+        }else if (!(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID) && n.voiceChannel) {
             if (await n.voiceChannel.permissionsFor(n.guild.me).has("CONNECT")) {
                 let sound = await data.getSound(n.id, n.guild.id);
                 if (sound) {
@@ -464,14 +470,7 @@ bot.on("voiceStateUpdate", async function (o, n) {
                 }
             }
         };
-        if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
-            //user joined a muted channel
-            n.setMute(true, "joined active queue voice channel");
-        }
-        if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
-            //user left a muted channel
-            n.setMute(false, "left active queue voice channel");
-        }
+
     }
 });
 
