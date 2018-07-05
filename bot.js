@@ -443,7 +443,7 @@ bot.on('error', (err) => {
 
 bot.on("voiceStateUpdate", async function (o, n) {
     //check if voice channel actually changed
-    if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID || !n.voiceChannel)) {
+    if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
             //user joined a muted channel
             n.setMute(true, "joined active queue voice channel");
