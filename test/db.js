@@ -815,9 +815,9 @@ module.exports = {
         let find;
         await MongoClient.connect(url).then(async function (mclient) {
             let db = await mclient.db('MagiBot');
-            find = await db.collection("stillMuted").findOne({ userid: userID, guildid: guildID }).count();
+            find = await db.collection("stillMuted").findOne({ userid: userID, guildid: guildID });
             mclient.close();
         });
-        return find > 0;
+        return find;
     }
 };
