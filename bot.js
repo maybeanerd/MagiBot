@@ -394,7 +394,6 @@ bot.on("ready", () => {
     chann.send("Im up and ready!");
 });
 
-var isInvLink = /(?:discord(?:(?:\.|.?dot.?)gg|app(?:\.|.?dot.?)com\/invite)\/(([\w]{10,16}|[a-z0-9]{4,8})))/i;
 
 bot.on("message", msg => {
     if (!msg.author.bot && msg.guild) {
