@@ -71,7 +71,7 @@ commands.help.main = async function (bot, msg) {
     if (command) {
         var acommand = "@" + command;
         if (!(commands[command] || commands[acommand])) {
-            msg.reply("this command does not exist. Use `" + bot.PREFIXES[msg.guild.id] + ".help` to get a full list of the commands available.");
+            msg.reply("this command does not exist. Use `" + bot.PREFIX + ".help` to get a full list of the commands available.");
         } else {
             if (commands[command]) {
                 if (commands[command].ehelp) {
@@ -79,7 +79,7 @@ commands.help.main = async function (bot, msg) {
                     var ehelps = commands[command].ehelp(msg, bot);
                     for (var i in ehelps) {
                         info.push({
-                            name: bot.PREFIXES[msg.guild.id] + "." + command + " " + ehelps[i].name,
+                            name: bot.PREFIX + "." + command + " " + ehelps[i].name,
                             value: ehelps[i].value,
                             inline: false
                         });
@@ -87,7 +87,7 @@ commands.help.main = async function (bot, msg) {
                     }
                     let embed = {
                         color: bot.COLOR,
-                        description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + "." + command + "`:",
+                        description: "Commands available via the prefix `" + bot.PREFIX + "." + command + "`:",
                         fields: info,
                         footer: {
                             icon_url: bot.user.avatarURL,
@@ -103,7 +103,7 @@ commands.help.main = async function (bot, msg) {
                             var ehelps = commands[acommand].ehelp(msg, bot);
                             for (var i in ehelps) {
                                 info.push({
-                                    name: bot.PREFIXES[msg.guild.id] + ":" + acommand.slice(1) + " " + ehelps[i].name,
+                                    name: bot.PREFIX + ":" + acommand.slice(1) + " " + ehelps[i].name,
                                     value: ehelps[i].value,
                                     inline: false
                                 });
@@ -111,7 +111,7 @@ commands.help.main = async function (bot, msg) {
 
                             embed = {
                                 color: bot.COLOR,
-                                description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command + "`:",
+                                description: "Admin commands available via the prefix `" + bot.PREFIX + ":" + command + "`:",
                                 fields: info,
                                 footer: {
                                     icon_url: bot.user.avatarURL,
@@ -134,7 +134,7 @@ commands.help.main = async function (bot, msg) {
                     var ehelps = commands[command].ehelp(msg, bot);
                     for (var i in ehelps) {
                         info.push({
-                            name: bot.PREFIXES[msg.guild.id] + ":" + command.slice(1) + " " + ehelps[i].name,
+                            name: bot.PREFIX + ":" + command.slice(1) + " " + ehelps[i].name,
                             value: ehelps[i].value,
                             inline: false
                         });
@@ -142,7 +142,7 @@ commands.help.main = async function (bot, msg) {
                     }
                     let embed = {
                         color: bot.COLOR,
-                        description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":" + command.slice(1) + "`:",
+                        description: "Admin commands available via the prefix `" + bot.PREFIX + ":" + command.slice(1) + "`:",
                         fields: info,
                         footer: {
                             icon_url: bot.user.avatarURL,
@@ -182,11 +182,11 @@ commands.help.main = async function (bot, msg) {
         }
         let embed = {
             color: bot.COLOR,
-            description: "Commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ".` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
+            description: "Commands available via the prefix `" + bot.PREFIX + ".` :\nto get more info on a single command use `" + bot.PREFIX + ".help <command>`",
             fields: cmds,
             footer: {
                 icon_url: bot.user.avatarURL,
-                text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
+                text: "admins can override commands with " + bot.PREFIX + ": instead of " + bot.PREFIX + ". to ignore command channel restrictions"
             }
         }
         msg.channel.send('', { embed });
@@ -211,11 +211,11 @@ commands.help.main = async function (bot, msg) {
             }
             embed = {
                 color: bot.COLOR,
-                description: "Admin commands available via the prefix `" + bot.PREFIXES[msg.guild.id] + ":` :\nto get more info on a single command use `" + bot.PREFIXES[msg.guild.id] + ".help <command>`",
+                description: "Admin commands available via the prefix `" + bot.PREFIX + ":` :\nto get more info on a single command use `" + bot.PREFIX + ".help <command>`",
                 fields: cmds,
                 footer: {
                     icon_url: bot.user.avatarURL,
-                    text: "admins can override commands with " + bot.PREFIXES[msg.guild.id] + ": instead of " + bot.PREFIXES[msg.guild.id] + ". to ignore command channel restrictions"
+                    text: "admins can override commands with " + bot.PREFIX + ": instead of " + bot.PREFIX + ". to ignore command channel restrictions"
                 }
             }
             msg.channel.send('', { embed });
@@ -304,13 +304,17 @@ var loadCommands = function () {
 }
 
 var checkCommand = async function (msg, isMention) {
+    if (msg.channel.id != "402946769190780939" && !isAdmin(msg.member)) {
+        msg.reply("you can only use this bot in #402946769190780939").then(mess => mess.delete(5000));
+        msg.delete();
+    }
     if (isMention) {
         var command = msg.content.split(" ")[1];
         msg.content = msg.content.split(" ").splice(2, msg.content.split(' ').length).join(' ');
         command = "." + command;
     } else {
-        var command = msg.content.substring(bot.PREFIXES[msg.guild.id].length, msg.content.length).split(" ")[0].toLowerCase();
-        msg.content = msg.content.slice(command.length + bot.PREFIXES[msg.guild.id].length); //delete prefix and command
+        var command = msg.content.substring(bot.PREFIX.length, msg.content.length).split(" ")[0].toLowerCase();
+        msg.content = msg.content.slice(command.length + bot.PREFIX.length); //delete prefix and command
         msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
@@ -385,7 +389,7 @@ bot.on("message", msg => {
         if (msg.content.startsWith('<@' + bot.user.id + '>') || msg.content.startsWith('<@!' + bot.user.id + '>')) {
             checkCommand(msg, true);
             if (bot.DELETE_COMMANDS) msg.delete();
-        } else if (msg.content.startsWith(bot.PREFIXES[msg.guild.id])) {
+        } else if (msg.content.startsWith(bot.PREFIX)) {
             checkCommand(msg, false);
             if (bot.DELETE_COMMANDS) msg.delete();
         }
