@@ -819,5 +819,13 @@ module.exports = {
             mclient.close();
         });
         return find;
+    },
+    getDBLSubs: async function () {
+        return MongoClient.connect(url).then(async function (mclient) {
+            let db = await mclient.db('MagiBot');
+            let users = await db.collection("DBLreminder").find().toArray();
+            mclient.close();
+            return users;
+        });
     }
 };
