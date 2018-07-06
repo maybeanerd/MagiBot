@@ -449,14 +449,14 @@ bot.on('error', (err) => {
 bot.on("voiceStateUpdate", async function (o, n) {
     //check if voice channel actually changed
     if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-        if (n.serverMute && await data.isStillMuted(n.id, n.guild.id)) {
+        if (n.serverMute && n.voiceChannel && await data.isStillMuted(n.id, n.guild.id)) {
             n.setMute(false, "was still muted from a queue which user disconnected from");
             data.toggleStillMuted(n.id, n.guild.id, false);
         }
-        if (bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
+        if (!n.serverMute && bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
             //user joined a muted channel
             n.setMute(true, "joined active queue voice channel");
-        } else if (bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
+        } else if (n.serverMute && bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
             //user left a muted channel
             if (n.voiceChannel) {
                 n.setMute(false, "left active queue voice channel");
