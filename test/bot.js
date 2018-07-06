@@ -447,8 +447,8 @@ bot.on('error', (err) => {
 });
 
 bot.on("voiceStateUpdate", async function (o, n) {
-    //check if voice channel actually changed
-    if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+    //check if voice channel actually changed, don't mute bots
+    if (!n.user.bot && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
         //is muted and joined a vc? maybe still muted from queue
         if (n.serverMute && n.voiceChannel && await data.isStillMuted(n.id, n.guild.id)) {
             n.setMute(false, "was still muted from a queue which user disconnected from");
