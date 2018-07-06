@@ -5,8 +5,7 @@ module.exports = {
         let users = await data.getDBLSubs();
         var str = "There are " + users.length + " users currently subscribed to the DBL vote reminder:\n\n";
         for (let i in users) {
-            let num = i + 1;
-            str += num + ". " + bot.users.get(users[i]["_id"]).username + " - voted: " + users[i]["voted"] + ", ";
+            str += i + ". " + bot.users.get(users[i]["_id"]).username + " - voted: " + users[i]["voted"] + "\n";
         }
         msg.channel.send(str);
     },
