@@ -449,18 +449,20 @@ bot.on('error', (err) => {
 bot.on("voiceStateUpdate", async function (o, n) {
     //check if voice channel actually changed
     if ((!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
+        //is muted and joined a vc? maybe still muted from queue
         if (n.serverMute && n.voiceChannel && await data.isStillMuted(n.id, n.guild.id)) {
             n.setMute(false, "was still muted from a queue which user disconnected from");
             data.toggleStillMuted(n.id, n.guild.id, false);
         }
-        if (!n.serverMute && bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
+        if (!n.serverMute && n.voiceChannel && bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
             //user joined a muted channel
             n.setMute(true, "joined active queue voice channel");
-        } else if (n.serverMute && bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
+        } else if (n.serverMute && o.voiceChannel && bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
             //user left a muted channel
             if (n.voiceChannel) {
                 n.setMute(false, "left active queue voice channel");
             } else {
+                //save the unmute for later
                 data.toggleStillMuted(n.id, n.guild.id, true);
             }
         } else if (n.voiceChannel && !(await n.guild.me.voiceChannel) && n.id != bot.user.id && !(await data.isBlacklistedUser(n.id, n.guild.id)) && await data.joinable(n.guild.id, n.voiceChannelID)) {
