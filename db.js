@@ -202,10 +202,22 @@ async function endVote(vote, bot) {
 async function toggleDBL(userID, add) {
     MongoClient.connect(url).then(async function (mclient) {
         let db = await mclient.db('MagiBot');
-        if (add && !(await isInDBL(userID))) { //not sure if this works fine
+        if (add && !(await isInDBL(userID))) {
             await db.collection("DBLreminder").insertOne({ _id: userID, voted: false });
         } else if (!add) {
             await db.collection("DBLreminder").deleteOne({ _id: userID });
+        }
+        mclient.close();
+    });
+}
+
+async function toggleStillMuted(userID, guildID, add) {
+    MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        if (add && !((await db.collection("stillMuted").find({ userid: userID, guildid: guildID }).count()) > 0)) {
+            await db.collection("stillMuted").insertOne({ userid: userID, guildid: guildID });
+        } else if (!add) {
+            await db.collection("stillMuted").deleteMany({ userid: userID, guildid: guildID });
         }
         mclient.close();
     });
@@ -795,5 +807,17 @@ module.exports = {
             db.collection("votes").insertOne(vote);
             mclient.close();
         });
+    },
+    toggleStillMuted: async function (userID, guildID, add) {
+        toggleStillMuted(userID, guildID, add);
+    },
+    isStillMuted: async function (userID, guildID) {
+        let find;
+        await MongoClient.connect(url).then(async function (mclient) {
+            let db = await mclient.db('MagiBot');
+            find = await db.collection("stillMuted").findOne({ userid: userID, guildid: guildID });
+            mclient.close();
+        });
+        return find;
     }
 };
