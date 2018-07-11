@@ -719,6 +719,9 @@ module.exports = {
     commandAllowed: async function (guildID, cid) {
         var channels = await getCommandChannel(guildID);
         return (channels.length == 0 || channels.includes(cid));
+    }, isCommandChannel: async function (guildID, cid) {
+        var channels = await getCommandChannel(guildID);
+        return channels.includes(cid);
     },
     commandChannel: async function (guildID) {
         var channels = await getCommandChannel(guildID);

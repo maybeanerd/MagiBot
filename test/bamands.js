@@ -50,7 +50,7 @@ module.exports = {
     },
     //this is an idea to implement rather reusable confirmation processes. ; abortMessage, timeoutMessage and time are optional parameters
     yesOrNo: async (msg, question, abortMessage, timeoutMessage, time) => {
-        msg.channel.send(question).then(mess => {
+        return msg.channel.send(question).then(async (mess) => {
             const filter = (reaction, user) => {
                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
             };

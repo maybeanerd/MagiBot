@@ -52,7 +52,7 @@ module.exports = {
             case 'ban':
                 var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
-                    if (await cmd.yesOrNo(msg, "Do you really want to ban <@!" + uid + "> from using the bot?", "Successfully canceled ban.")) {
+                    if (await cmds.yesOrNo(msg, "Do you really want to ban <@!" + uid + "> from using the bot?", "Successfully canceled ban.")) {
                         data.setBlacklistedUser(msg.guild.id, uid, true);
                         msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
                     }
@@ -63,7 +63,7 @@ module.exports = {
             case 'unban':
                 var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
-                    if (await cmd.yesOrNo(msg, "Do you really want to reactivate bot usage for <@!" + uid + ">?", "Successfully canceled unban.")) {
+                    if (await cmds.yesOrNo(msg, "Do you really want to reactivate bot usage for <@!" + uid + ">?", "Successfully canceled unban.")) {
                         data.setBlacklistedUser(msg.guild.id, uid, false);
                         msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
                     }
@@ -79,7 +79,7 @@ module.exports = {
                     if (isJoinable) {
                         de = "de";
                     }
-                    if (await cmd.yesOrNo(msg, "Do you want to " + de + "activate joinsounds in**" + voiceChannel.name + "**?", "Cancelled " + de + "activating joinsounds in **" + voiceChannel.name + "**.")) {
+                    if (await cmds.yesOrNo(msg, "Do you want to " + de + "activate joinsounds in **" + voiceChannel.name + "**?", "Cancelled " + de + "activating joinsounds in **" + voiceChannel.name + "**.")) {
                         await data.setJoinable(msg.guild.id, voiceChannel.id, !isJoinable)
                         msg.channel.send("Successfully " + de + "activated joinsounds in **" + voiceChannel.name + "**.");
                     }
@@ -91,12 +91,12 @@ module.exports = {
                 var rid = await cmds.findRole(msg.guild, mention);
                 if (mention && rid) {
                     if (!(await data.isAdminRole(msg.guild.id, rid))) {
-                        if (await cmd.yesOrNo(msg, "Do you want to set <@&" + rid + "> as admin role?", "Cancelled setting <@&" + rid + "> as admin role")) {
+                        if (await cmds.yesOrNo(msg, "Do you want to set <@&" + rid + "> as admin role?", "Cancelled setting <@&" + rid + "> as admin role")) {
                             await data.setAdmin(msg.guild.id, rid, true);
                             msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
                         }
                     } else {
-                        if (await cmd.yesOrNo(msg, "Do you want to remove <@&" + rid + "> from the admin roles?", "Cancelled removing <@&" + rid + "> from the admin roles")) {
+                        if (await cmds.yesOrNo(msg, "Do you want to remove <@&" + rid + "> from the admin roles?", "Cancelled removing <@&" + rid + "> from the admin roles")) {
                             await data.setAdmin(msg.guild.id, rid, false);
                             msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");
                         }
@@ -107,12 +107,12 @@ module.exports = {
                 }
                 break;
             case 'command':
-                var isCommandChannel = await data.commandAllowed(msg.guild.id, msg.channel.id);
+                var isCommandChannel = await data.isCommandChannel(msg.guild.id, msg.channel.id);
                 var de = "";
                 if (isCommandChannel) {
                     de = "de";
                 }
-                if (await cmd.yesOrNo(msg, "Do you want to " + de + "activate commands in <#" + await msg.channel.id + ">?", "Cancelled " + de + "activating commands in <#" + await msg.channel.id + ">")) {
+                if (await cmds.yesOrNo(msg, "Do you want to " + de + "activate commands in <#" + await msg.channel.id + ">?", "Cancelled " + de + "activating commands in <#" + await msg.channel.id + ">")) {
                     await data.setCommandChannel(msg.guild.id, msg.channel.id, !isCommandChannel);
                     msg.channel.send("Successfully " + de + "activated commands in <#" + await msg.channel.id + ">.");
                 }
@@ -120,12 +120,12 @@ module.exports = {
             case 'notification':
                 var isNotChann = await data.isNotChannel(msg.guild.id, msg.channel.id);
                 if (!isNotChann) {
-                    if (await cmd.yesOrNo(msg, "Do you want to activate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled activating notifications in <#" + await msg.channel.id + ">")) {
+                    if (await cmds.yesOrNo(msg, "Do you want to activate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled activating notifications in <#" + await msg.channel.id + ">")) {
                         await data.setNotification(await msg.guild.id, await msg.channel.id);
                         msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(() => { }); msg.delete(); });
                     }
                 } else {
-                    if (await cmd.yesOrNo(msg, "Do you want to deactivate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled deactivating notifications in <#" + await msg.channel.id + ">")) {
+                    if (await cmds.yesOrNo(msg, "Do you want to deactivate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled deactivating notifications in <#" + await msg.channel.id + ">")) {
                         await data.setNotification(await msg.guild.id, false);
                         msg.channel.send("Successfully deactivated notifications.");
                     }
@@ -133,7 +133,7 @@ module.exports = {
                 break;
             case "prefix":
                 if (mention) {
-                    if (await cmd.yesOrNo(msg, "Do you want to change the prefix in " + msg.guild.name + " from `" + bot.PREFIXES[msg.guild.id] + ".` to `" + mention + ".` ?", "Cancelled changing the prefix.")) {
+                    if (await cmds.yesOrNo(msg, "Do you want to change the prefix in " + msg.guild.name + " from `" + bot.PREFIXES[msg.guild.id] + ".` to `" + mention + ".` ?", "Cancelled changing the prefix.")) {
                         let newpref = await data.setPrefixE(msg.guild.id, mention, bot);
                         if (newpref) {
                             msg.channel.send("Successfully changed prefix to `" + newpref + ".` !");
@@ -158,7 +158,7 @@ module.exports = {
                 let str = "";
                 let cmd = set["commandChannels"];
                 if (!cmd.toString()) {
-                    str = "Empty";
+                    str = "no whitelist, so every channel is allowed";
                 } else {
                     for (let s in cmd) {
                         str += "<#" + cmd[s] + "> ";
@@ -215,6 +215,7 @@ module.exports = {
                     for (let s in cmd) {
                         str += "<@!" + cmd[s] + ">, ";
                     }
+                    str = str.substring(0, str.length - 2);
                 }
                 info.push({
                     name: "Blacklisted users",
@@ -230,6 +231,7 @@ module.exports = {
                     for (let s in cmd) {
                         str += "<#" + cmd[s] + ">, ";
                     }
+                    str = str.substring(0, str.length - 2);
                 }
                 info.push({
                     name: "Channel with @everyone blacklist",
