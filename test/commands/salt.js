@@ -29,7 +29,7 @@ module.exports = {
                             msg.reply("you can't report yourself!");
                             return;
                         }
-                        var mem = await msg.guild.fetchMember(uid);
+                        var mem = await msg.guild.fetchMember(uid).catch(() => { });
                         if (!mem) {
                             msg.reply("the user with this ID doesn't exist on this guild.");
                             return;

@@ -36,7 +36,7 @@ module.exports = {
             let uid = await cmds.findMember(msg.guild, mention);
             if (!(mention && uid)) {
                 if (command == "reset") {
-                    if (await yesOrNo(msg, "Do you really want to reset all salt on this server?", "Successfully canceled salt reset.")) {
+                    if (await cmds.yesOrNo(msg, "Do you really want to reset all salt on this server?", "Successfully canceled salt reset.")) {
                         data.resetSalt(msg.guild);
                         msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
                     }
@@ -47,7 +47,7 @@ module.exports = {
             }
             switch (command) {
                 case 'add':
-                    var mem = await msg.guild.fetchMember(uid);
+                    var mem = await msg.guild.fetchMember(uid).catch(() => { });
                     if (!mem) {
                         msg.reply("the user with this ID doesn't exist on this guild.");
                         return;
@@ -60,7 +60,7 @@ module.exports = {
                     msg.channel.send("Successfully reported " + mem + " for being a salty bitch!");
                     break;
                 case 'rem':
-                    var mem = await msg.guild.fetchMember(uid);
+                    var mem = await msg.guild.fetchMember(uid).catch(() => { });
                     if (!mem) {
                         msg.reply("the user with this ID doesn't exist on this guild.");
                         return;
@@ -76,7 +76,7 @@ module.exports = {
                     }
                     break;
                 case 'clr':
-                    var mem = await msg.guild.fetchMember(uid);
+                    var mem = await msg.guild.fetchMember(uid).catch(() => { });
                     if (!mem) {
                         msg.reply("the user with this ID doesn't exist on this guild.");
                         return;
