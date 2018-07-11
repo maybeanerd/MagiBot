@@ -707,15 +707,15 @@ module.exports = {
         }
         return false;
     },
-isAdminRole: async (guildID, adminRole)=>{
-var roles = await getAdminRole(guildID);
+    isAdminRole: async (guildID, adminRole) => {
+        var roles = await getAdminRole(guildID);
         for (var role in roles) {
-            if (adminRole==roles[role]) {
+            if (adminRole == roles[role]) {
                 return true;
             }
         }
         return false;
-},
+    },
     commandAllowed: async function (guildID, cid) {
         var channels = await getCommandChannel(guildID);
         return (channels.length == 0 || channels.includes(cid));
@@ -744,10 +744,10 @@ var roles = await getAdminRole(guildID);
     setJoinable: async function (guildID, channelID, insert) {
         return setJoinChannel(guildID, channelID, insert);
     },
-    isJoinable: async (guildID, channelID)=>{
+    isJoinable: async (guildID, channelID) => {
         var channels = await getJoinChannel(guildID);
-        return channels.includes(channelID) ;
-        },
+        return channels.includes(channelID);
+    },
     setCommandChannel: async function (guildID, channelID, insert) {
         return setCommandChannel(guildID, channelID, insert);
     },
@@ -786,10 +786,10 @@ var roles = await getAdminRole(guildID);
     setNotification: async function (guildID, cid) {
         await setNotChannel(guildID, cid);
     },
-isNotChannel:async (guildID,channID)=>{
-var notChann= await getNotChannel(guildID);
-return channID==notChann;
-},
+    isNotChannel: async (guildID, channID) => {
+        var notChann = await getNotChannel(guildID);
+        return channID == notChann;
+    },
     sendUpdate: async function (update, bot) {
         sendUpdate(update, bot);
     },
