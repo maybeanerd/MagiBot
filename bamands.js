@@ -66,15 +66,15 @@ module.exports = {
                 } else if (reacts.first()) {
                     if (!abortMessage) {
                         abortMessage = "Successfully canceled transaction.";
-                        return false;
                     }
                     msg.channel.send(abortMessage);
+                    return false;
                 } else {
                     if (!timeoutMessage) {
                         timeoutMessage = "Cancelled due to timeout.";
-                        return false;
                     }
                     msg.channel.send(timeoutMessage);
+                    return false;
                 }
             });
         });
