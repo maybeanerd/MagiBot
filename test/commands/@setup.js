@@ -13,19 +13,19 @@ function printHelp(msg, bot) {
         value: "Reactivate all functions of the bot for a user",
     });
     info.push({
-        name: "join[-|+]",
+        name: "join",
         value: "(De)activate joinsounds for the voicechannel you're connected to",
     });
     info.push({
-        name: "admin[-|+] <@Role>",
+        name: "admin <@Role>",
         value: "(Un)set a role to be considered admin by the bot",
     });
     info.push({
-        name: "command[-|+]",
+        name: "command",
         value: "(De)activate bot commands for the text channel you're sending this in",
     });
     info.push({
-        name: "notification[-|+]",
+        name: "notification",
         value: "(Un)set a textchannel to be notification channel",
     });
     info.push({
@@ -103,76 +103,78 @@ module.exports = {
                     return;
                 }
                 break;
-            case 'join+':
-                if (await msg.member.voiceChannelID) {
-                    if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, true)) {
-                        msg.channel.send("Successfully activated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
+                case 'join':
+var voiceChannel=await msg.member.voiceChannel;
+if(voiceChannel){
+                var isJoinable= await data.isJoinable(msg.guild.id,voiceChannel.id);
+if(!isJoinable){
+                
+                    if (await data.setJoinable(msg.guild.id, voiceChannel.id, true)) {
+                        msg.channel.send("Successfully activated joinsounds in **" + voiceChannel.name + "**.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
-                } else {
-                    msg.channel.send("You're in no voice channel!");
-                }
-                break;
-            case 'join-':
-                if (await msg.member.voiceChannelID) {
-                    if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, false)) {
-                        msg.channel.send("Successfully deactivated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
+                   }else{
+if (await data.setJoinable(msg.guild.id, voiceChannel.id, false)) {
+                        msg.channel.send("Successfully deactivated joinsounds in **" + voiceChannel.name + "**.");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
+                   }
+
+
                 } else {
                     msg.channel.send("You're in no voice channel!");
                 }
-                break;
-            case 'admin+':
+
+                break;         
+            case 'admin':
                 var rid = await cmds.findRole(msg.guild, mention);
                 if (mention && rid) {
+if(!(await data.isAdminRole(msg.guild.id,rid))){
                     if (await data.setAdmin(msg.guild.id, rid, true)) {
                         msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
-                } else {
-                    msg.channel.send("You need to mention a role!");
-                    return;
-                }
-                break;
-            case 'admin-':
-                var rid = await cmds.findRole(msg.guild, mention);
-                if (mention && rid) {
-                    if (await data.setAdmin(msg.guild.id, rid, false)) {
+                   }else{
+if (await data.setAdmin(msg.guild.id, rid, false)) {
                         msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");
                     } else {
                         msg.channel.send("Error 404 you failed.");
                     }
+                   }
                 } else {
                     msg.channel.send("You need to mention a role!");
                     return;
                 }
-                break;
-            case 'command+':
+                break;            
+            case 'command':
+var isCommandChannel= await data.commandAllowed(msg.guild.id,msg.channel.id);
+if(!isCommandChannel){
                 if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
                     msg.channel.send("Successfully activated commands in <#" + await msg.channel.id + ">.");
                 } else {
                     msg.channel.send("Error 404 you failed.");
                 }
-                break;
-            case 'command-':
-                if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
+                }else{
+if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
                     msg.channel.send("Successfully deactivated commands in <#" + await msg.channel.id + ">.");
                 } else {
                     msg.channel.send("Error 404 you failed.");
                 }
-                break;
-            case 'notification+':
+                }
+                break;            
+            case 'notification':
+var isNotChann=await data.isNotChannel(msg.guild.id,msg.channel.id);
+if(!isNotChann){
                 await data.setNotification(await msg.guild.id, await msg.channel.id);
                 msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(() => { }); msg.delete(); });
-                break;
-            case 'notification-':
-                await data.setNotification(await msg.guild.id, false);
+                }else{
+await data.setNotification(await msg.guild.id, false);
                 msg.channel.send("Successfully deactivated notifications.");
-                break;
+}
+                break;           
             case "prefix":
                 //TODO bestätigung
                 if (mention) {
