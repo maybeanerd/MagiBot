@@ -313,8 +313,11 @@ async function sendUpdate(update, bot) {
         var guilds = await bot.guilds.array();
         for (let GN in guilds) {
             var G = guilds[GN];
-            if (await G.available) {//TODO change perms to everything i actually need
+            if (await G.available) {
                 let cid = await getNotChannel(G.id);
+                if (G.id == "380669498014957569") {
+                    update = "<@&460218236185739264> " + update;
+                }
                 if (cid) {
                     let channel = await G.channels.get(cid);
                     if (channel) {
