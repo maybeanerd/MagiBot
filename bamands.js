@@ -1,4 +1,4 @@
-// commands made by Basti for use of the Bot 
+﻿// commands made by Basti for use of the Bot 
 module.exports = {
     findMember: async function f(guild, mention) {
         if (!mention) { return false; }
@@ -47,5 +47,31 @@ module.exports = {
             }
             return false;
         }
+    },
+    //this is an idea to implement rather reusable confirmation processes.
+    yesOrNo: async (msg, bot, question, abortMessage, timeoutMessage, time, acceptFunction) => {
+        msg.channel.send(question).then(mess => {
+            const filter = (reaction, user) => {
+                return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
+            };
+            await mess.react('☑');
+            await mess.react('❌');
+            mess.awaitReactions(filter, { max: 1, time: time }).then(reacts => {
+                mess.delete();
+                if (reacts.first() && reacts.first().emoji.name == '☑') {
+                    acceptFunction(msg, bot);
+                } else if (reacts.first()) {
+                    if (!abortMessage) {
+                        abortMessage = "Successfully canceled transaction.";
+                    }
+                    msg.channel.send(abortMessage);
+                } else {
+                    if (!timeoutMessage) {
+                        timeoutMessage = "Cancelled due to timeout.";
+                    }
+                    msg.channel.send(timeoutMessage);
+                }
+            });
+        });
     }
 };
