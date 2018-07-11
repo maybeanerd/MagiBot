@@ -48,26 +48,31 @@ module.exports = {
             return false;
         }
     },
-    //this is an idea to implement rather reusable confirmation processes.
-    yesOrNo: async (msg, bot, question, abortMessage, timeoutMessage, time, acceptFunction) => {
+    //this is an idea to implement rather reusable confirmation processes. ; abortMessage, timeoutMessage and time are optional parameters
+    yesOrNo: async (msg, question, abortMessage, timeoutMessage, time) => {
         msg.channel.send(question).then(mess => {
             const filter = (reaction, user) => {
                 return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
             };
             await mess.react('☑');
             await mess.react('❌');
-            mess.awaitReactions(filter, { max: 1, time: time }).then(reacts => {
+            if (!time) {
+                time = 20000;
+            }
+            return mess.awaitReactions(filter, { max: 1, time: time }).then(reacts => {
                 mess.delete();
                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                    acceptFunction(msg, bot);
+                    return true;
                 } else if (reacts.first()) {
                     if (!abortMessage) {
                         abortMessage = "Successfully canceled transaction.";
+                        return false;
                     }
                     msg.channel.send(abortMessage);
                 } else {
                     if (!timeoutMessage) {
                         timeoutMessage = "Cancelled due to timeout.";
+                        return false;
                     }
                     msg.channel.send(timeoutMessage);
                 }
