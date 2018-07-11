@@ -36,22 +36,10 @@ module.exports = {
             let uid = await cmds.findMember(msg.guild, mention);
             if (!(mention && uid)) {
                 if (command == "reset") {
-                    msg.channel.send("Do you really want to reset all salt on this server?").then(mess => {
-                        const filter = (reaction, user) => {
-                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
-                        };
-                        mess.react('☑');
-                        mess.react('❌');
-                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
-                            mess.delete();
-                            if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                data.resetSalt(msg.guild);
-                                msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
-                            } else if (reacts.first()) {
-                                msg.channel.send("Successfully canceled salt reset.");
-                            }
-                        });
-                    });
+                    if (await yesOrNo(msg, "Do you really want to reset all salt on this server?", "Successfully canceled salt reset.")) {
+                        data.resetSalt(msg.guild);
+                        msg.channel.send("Successfully reset all salt on **" + msg.guild.name + "**!");
+                    }
                     return;
                 }
                 msg.reply("you need to mention a user you want to use this on!");
@@ -59,23 +47,46 @@ module.exports = {
             }
             switch (command) {
                 case 'add':
-                    if (uid == bot.user.id) {
-                        msg.reply("you can't report me!");
+                    var mem = await msg.guild.fetchMember(uid);
+                    if (!mem) {
+                        msg.reply("the user with this ID doesn't exist on this guild.");
+                        return;
+                    }
+                    if (mem.user.bot) {
+                        msg.reply("you can't report bots!");
                         return;
                     }
                     await data.saltUpAdmin(uid, msg.author.id, msg.guild);
-                    msg.channel.send("Successfully reported <@!" + uid + "> for being a salty bitch!");
+                    msg.channel.send("Successfully reported " + mem + " for being a salty bitch!");
                     break;
                 case 'rem':
+                    var mem = await msg.guild.fetchMember(uid);
+                    if (!mem) {
+                        msg.reply("the user with this ID doesn't exist on this guild.");
+                        return;
+                    }
+                    if (mem.user.bot) {
+                        msg.reply("bots are never salty!");
+                        return;
+                    }
                     if (await data.remOldestSalt(uid, msg.guild)) {
-                        msg.channel.send("Successfully removed the oldest salt from <@!" + uid + ">!");
+                        msg.channel.send("Successfully removed the oldest salt from " + mem + "!");
                     } else {
-                        msg.channel.send("<@!" + uid + "> has no salt that could be removed!");
+                        msg.channel.send(mem + " has no salt that could be removed!");
                     }
                     break;
                 case 'clr':
+                    var mem = await msg.guild.fetchMember(uid);
+                    if (!mem) {
+                        msg.reply("the user with this ID doesn't exist on this guild.");
+                        return;
+                    }
+                    if (mem.user.bot) {
+                        msg.reply("bots are never salty!");
+                        return;
+                    }
                     await data.clrSalt(uid, msg.guild);
-                    msg.channel.send("Successfully cleared all salt from <@!" + uid + ">!");
+                    msg.channel.send("Successfully cleared all salt from " + mem + "!");
                     break;
                 default:
                     msg.reply("this command doesn't exist. Use `" + bot.PREFIXES[msg.guild.id] + ":help salt` to get more info.");
