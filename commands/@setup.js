@@ -13,19 +13,19 @@ function printHelp(msg, bot) {
         value: "Reactivate all functions of the bot for a user",
     });
     info.push({
-        name: "join[-|+]",
+        name: "join",
         value: "(De)activate joinsounds for the voicechannel you're connected to",
     });
     info.push({
-        name: "admin[-|+] <@Role>",
+        name: "admin <@Role>",
         value: "(Un)set a role to be considered admin by the bot",
     });
     info.push({
-        name: "command[-|+]",
+        name: "command",
         value: "(De)activate bot commands for the text channel you're sending this in",
     });
     info.push({
-        name: "notification[-|+]",
+        name: "notification",
         value: "(Un)set a textchannel to be notification channel",
     });
     info.push({
@@ -52,135 +52,94 @@ module.exports = {
             case 'ban':
                 var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
-                    msg.channel.send("Do you really want to ban <@!" + uid + "> from using the bot?").then(mess => {
-                        const filter = (reaction, user) => {
-                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
-                        };
-                        mess.react('☑');
-                        mess.react('❌');
-                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
-                            mess.delete();
-                            if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                if (data.setBlacklistedUser(msg.guild.id, uid, true)) {
-                                    msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
-                                } else {
-                                    msg.channel.send("Error 404 you failed.");
-                                }
-                            } else if (reacts.first()) {
-                                msg.channel.send("Successfully canceled ban.");
-                            }
-                        });
-                    });
+                    if (await cmds.yesOrNo(msg, "Do you really want to ban <@!" + uid + "> from using the bot?", "Successfully canceled ban.")) {
+                        data.setBlacklistedUser(msg.guild.id, uid, true);
+                        msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
+                    }
                 } else {
                     msg.reply("you need to mention a user you want to use this on!");
-                    return;
                 }
                 break;
             case 'unban':
                 var uid = await cmds.findMember(msg.guild, mention);
                 if (mention && uid) {
-                    msg.channel.send("Do you really want to reactivate bot usage for <@!" + uid + "> ?").then(mess => {
-                        const filter = (reaction, user) => {
-                            return ((reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id);
-                        };
-                        mess.react('☑');
-                        mess.react('❌');
-                        mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
-                            mess.delete();
-                            if (reacts.first() && reacts.first().emoji.name == '☑') {
-                                if (data.setBlacklistedUser(msg.guild.id, uid, false)) {
-                                    msg.channel.send("Successfully activated the bot for <@!" + uid + "> again.");
-                                } else {
-                                    msg.channel.send("Error 404 you failed.");
-                                }
-                            } else if (reacts.first()) {
-                                msg.channel.send("Successfully canceled unban.");
-                            }
-                        });
-                    });
-                } else {
-                    msg.channel.send("you need to mention a user you want to use this on!");
-                    return;
-                }
-                break;
-            case 'join+':
-                if (await msg.member.voiceChannelID) {
-                    if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, true)) {
-                        msg.channel.send("Successfully activated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
-                    } else {
-                        msg.channel.send("Error 404 you failed.");
+                    if (await cmds.yesOrNo(msg, "Do you really want to reactivate bot usage for <@!" + uid + ">?", "Successfully canceled unban.")) {
+                        data.setBlacklistedUser(msg.guild.id, uid, false);
+                        msg.channel.send("Successfully banned <@!" + uid + "> from using the bot.");
                     }
                 } else {
-                    msg.channel.send("You're in no voice channel!");
+                    msg.reply("you need to mention a user you want to use this on!");
                 }
                 break;
-            case 'join-':
-                if (await msg.member.voiceChannelID) {
-                    if (await data.setJoinable(msg.guild.id, msg.member.voiceChannelID, false)) {
-                        msg.channel.send("Successfully deactivated joinsounds in **" + await msg.member.voiceChannel.name + "**.");
-                    } else {
-                        msg.channel.send("Error 404 you failed.");
+            case 'join':
+                var voiceChannel = await msg.member.voiceChannel;
+                if (voiceChannel) {
+                    var isJoinable = await data.isJoinable(msg.guild.id, voiceChannel.id);
+                    var de = "";
+                    if (isJoinable) {
+                        de = "de";
+                    }
+                    if (await cmds.yesOrNo(msg, "Do you want to " + de + "activate joinsounds in **" + voiceChannel.name + "**?", "Cancelled " + de + "activating joinsounds in **" + voiceChannel.name + "**.")) {
+                        await data.setJoinable(msg.guild.id, voiceChannel.id, !isJoinable)
+                        msg.channel.send("Successfully " + de + "activated joinsounds in **" + voiceChannel.name + "**.");
                     }
                 } else {
-                    msg.channel.send("You're in no voice channel!");
+                    msg.channel.send("You're connected to no voice channel!");
                 }
                 break;
-            case 'admin+':
+            case 'admin':
                 var rid = await cmds.findRole(msg.guild, mention);
                 if (mention && rid) {
-                    if (await data.setAdmin(msg.guild.id, rid, true)) {
-                        msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
+                    if (!(await data.isAdminRole(msg.guild.id, rid))) {
+                        if (await cmds.yesOrNo(msg, "Do you want to set <@&" + rid + "> as admin role?", "Cancelled setting <@&" + rid + "> as admin role")) {
+                            await data.setAdmin(msg.guild.id, rid, true);
+                            msg.channel.send("Successfully set <@&" + rid + "> as admin role!");
+                        }
                     } else {
-                        msg.channel.send("Error 404 you failed.");
+                        if (await cmds.yesOrNo(msg, "Do you want to remove <@&" + rid + "> from the admin roles?", "Cancelled removing <@&" + rid + "> from the admin roles")) {
+                            await data.setAdmin(msg.guild.id, rid, false);
+                            msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");
+                        }
                     }
                 } else {
                     msg.channel.send("You need to mention a role!");
                     return;
                 }
                 break;
-            case 'admin-':
-                var rid = await cmds.findRole(msg.guild, mention);
-                if (mention && rid) {
-                    if (await data.setAdmin(msg.guild.id, rid, false)) {
-                        msg.channel.send("Successfully removed <@&" + rid + "> from the admin roles!");
-                    } else {
-                        msg.channel.send("Error 404 you failed.");
+            case 'command':
+                var isCommandChannel = await data.isCommandChannel(msg.guild.id, msg.channel.id);
+                var de = "";
+                if (isCommandChannel) {
+                    de = "de";
+                }
+                if (await cmds.yesOrNo(msg, "Do you want to " + de + "activate commands in <#" + await msg.channel.id + ">?", "Cancelled " + de + "activating commands in <#" + await msg.channel.id + ">")) {
+                    await data.setCommandChannel(msg.guild.id, msg.channel.id, !isCommandChannel);
+                    msg.channel.send("Successfully " + de + "activated commands in <#" + await msg.channel.id + ">.");
+                }
+                break;
+            case 'notification':
+                var isNotChann = await data.isNotChannel(msg.guild.id, msg.channel.id);
+                if (!isNotChann) {
+                    if (await cmds.yesOrNo(msg, "Do you want to activate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled activating notifications in <#" + await msg.channel.id + ">")) {
+                        await data.setNotification(await msg.guild.id, await msg.channel.id);
+                        msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(() => { }); msg.delete(); });
                     }
                 } else {
-                    msg.channel.send("You need to mention a role!");
-                    return;
+                    if (await cmds.yesOrNo(msg, "Do you want to deactivate MagiBot notifications in <#" + await msg.channel.id + ">?", "Cancelled deactivating notifications in <#" + await msg.channel.id + ">")) {
+                        await data.setNotification(await msg.guild.id, false);
+                        msg.channel.send("Successfully deactivated notifications.");
+                    }
                 }
-                break;
-            case 'command+':
-                if (await data.setCommandChannel(msg.guild.id, msg.channel.id, true)) {
-                    msg.channel.send("Successfully activated commands in <#" + await msg.channel.id + ">.");
-                } else {
-                    msg.channel.send("Error 404 you failed.");
-                }
-                break;
-            case 'command-':
-                if (await data.setCommandChannel(msg.guild.id, msg.channel.id, false)) {
-                    msg.channel.send("Successfully deactivated commands in <#" + await msg.channel.id + ">.");
-                } else {
-                    msg.channel.send("Error 404 you failed.");
-                }
-                break;
-            case 'notification+':
-                await data.setNotification(await msg.guild.id, await msg.channel.id);
-                msg.channel.send("Successfully activated notifications in <#" + await msg.channel.id + ">.").then(mess => { mess.delete(5000).catch(() => { }); msg.delete(); });
-                break;
-            case 'notification-':
-                await data.setNotification(await msg.guild.id, false);
-                msg.channel.send("Successfully deactivated notifications.");
                 break;
             case "prefix":
-                //TODO bestätigung
                 if (mention) {
-                    let newpref = await data.setPrefixE(msg.guild.id, mention, bot);
-                    if (newpref) {
-                        msg.channel.send("Successfully changed prefix to `" + newpref + ".` !");
-                    } else {
-                        msg.channel.send("Something bad happened...");
+                    if (await cmds.yesOrNo(msg, "Do you want to change the prefix in " + msg.guild.name + " from `" + bot.PREFIXES[msg.guild.id] + ".` to `" + mention + ".` ?", "Cancelled changing the prefix.")) {
+                        let newpref = await data.setPrefixE(msg.guild.id, mention, bot);
+                        if (newpref) {
+                            msg.channel.send("Successfully changed prefix to `" + newpref + ".` !");
+                        } else {
+                            msg.channel.send("Something bad happened...");
+                        }
                     }
                 } else {
                     msg.reply("you need to provide a prefix you want to use.");
@@ -199,7 +158,7 @@ module.exports = {
                 let str = "";
                 let cmd = set["commandChannels"];
                 if (!cmd.toString()) {
-                    str = "Empty";
+                    str = "no whitelist, so every channel is allowed";
                 } else {
                     for (let s in cmd) {
                         str += "<#" + cmd[s] + "> ";
@@ -256,6 +215,7 @@ module.exports = {
                     for (let s in cmd) {
                         str += "<@!" + cmd[s] + ">, ";
                     }
+                    str = str.substring(0, str.length - 2);
                 }
                 info.push({
                     name: "Blacklisted users",
@@ -271,6 +231,7 @@ module.exports = {
                     for (let s in cmd) {
                         str += "<#" + cmd[s] + ">, ";
                     }
+                    str = str.substring(0, str.length - 2);
                 }
                 info.push({
                     name: "Channel with @everyone blacklist",
