@@ -21,6 +21,14 @@ module.exports = {
                 if (memberArray.length == 1) {
                     return memberArray[0].id;
                 }
+                if (memberArray.length == 0) {
+                    let memberArray = await guild.members.filterArray((memb) => {
+                        return memb.displayName.toLowerCase().includes(mention);
+                    });
+                    if (memberArray.length == 1) {
+                        return memberArray[0].id;
+                    }
+                }
             }
             return false;
         }
@@ -43,6 +51,14 @@ module.exports = {
                 });
                 if (roleArray.length == 1) {
                     return roleArray[0].id;
+                }
+                if (roleArray.length == 0) {
+                    roleArray = await guild.roles.filterArray((rol) => {
+                        return rol.name.toLowerCase().includes(mention);
+                    });
+                    if (roleArray.length == 1) {
+                        return roleArray[0].id;
+                    }
                 }
             }
             return false;

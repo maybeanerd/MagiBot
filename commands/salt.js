@@ -25,20 +25,25 @@ module.exports = {
                     var mention = args[1];
                     let uid = await cmds.findMember(msg.guild, mention);
                     if (mention && uid) {
-                        if (uid == bot.user.id) {
-                            msg.reply("you can't report me!");
-                            return;
-                        }
                         if (uid == msg.author.id) {
                             msg.reply("you can't report yourself!");
+                            return;
+                        }
+                        var mem = await msg.guild.fetchMember(uid).catch(() => { });
+                        if (!mem) {
+                            msg.reply("the user with this ID doesn't exist on this guild.");
+                            return;
+                        }
+                        if (mem.user.bot) {
+                            msg.reply("you can't report bots!");
                             return;
                         }
                         let time = await data.saltUp(uid, msg.author.id, msg.guild);
                         console.log(time);
                         if (time == 0) {
-                            msg.channel.send("Successfully reported <@!" + uid + "> for being a salty bitch!");
+                            msg.channel.send("Successfully reported " + mem + " for being a salty bitch!");
                         } else {
-                            msg.reply("you can report <@!" + uid + "> again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
+                            msg.reply("you can report " + mem + " again in " + (59 - Math.floor((time * 60) % 60)) + " min and " + (60 - Math.floor((time * 60 * 60) % 60)) + " sec!");
                         }
                     } else {
                         msg.reply("you need to mention a user you want to report!");
