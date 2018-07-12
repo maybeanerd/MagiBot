@@ -1,8 +1,8 @@
 ﻿
 module.exports = {
-    main: async (bot, msg)=> {
+    main: async (bot, msg) => {
         var expression = new String(msg.content);
-let evaluation= await eval(expression.toString()); //is the toString needed?
+        let evaluation = await eval(expression.toString()); //is the toString needed?
         msg.channel.send("input:\n```js\n" + expression + "```");
 
         msg.channel.send("output:\n```js\n" + evaluation + "```");
