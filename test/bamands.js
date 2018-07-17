@@ -80,10 +80,9 @@ module.exports = {
                 if (reacts.first() && reacts.first().emoji.name == '☑') {
                     return true;
                 } else if (reacts.first()) {
-                    if (!abortMessage) {
-                        abortMessage = "Successfully canceled transaction.";
+                    if (abortMessage) {
+                        msg.channel.send(abortMessage);
                     }
-                    msg.channel.send(abortMessage);
                     return false;
                 } else {
                     if (!timeoutMessage) {
