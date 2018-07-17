@@ -1,11 +1,12 @@
 ﻿var used = {};
 var data = require(__dirname + '/../db.js');
+var cmds = require(__dirname + '/../bamands.js');
 
 
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
-        msg += "\nwith voicemode activated in " + voiceChannel;
+        msg += "\n*with voicemode activated in* " + voiceChannel;
     }
     msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qULength + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
@@ -17,12 +18,20 @@ module.exports = {
         var voiceChannel;
         if (used[msg.guild.id]) {
             var d = new Date();
-            if ((d - used[msg.guild.id]) <= 0) { //check if its already 2hours old
-                msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
-                return;
+            if ((d - used[msg.guild.id].date) <= 0) { //check if its already 2hours old
+                if (used[msg.guild.id].msg && used[msg.guild.id].cid) {
+                    var testchann = await msg.guild.channels.get(used[msg.guild.id].cid);
+                    if (testchann && (await testchann.fetchMessage(used[msg.guild.id].msg).catch(() => { }))) {
+                        msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
+                        return;
+                    }
+                } else {
+                    msg.channel.send("There's currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.");
+                    return;
+                }
             }
         }
-        used[msg.guild.id] = new Date(Date.now() + 3600000);
+        used[msg.guild.id] = { date: new Date(Date.now() + 3600000) };
         let authorID = msg.author.id;
         msg.channel.send("What do you want the queue to be about?").then(mess => {
             msg.delete();
@@ -64,7 +73,12 @@ module.exports = {
                                 remMessage = await msg.channel.send("If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.");
                                 voiceChannel = false;
                             } else {
-                                remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone except users that are considered admin by MagiBot is muted by default.");
+                                if (await cmds.yesOrNo(msg, "Do you want to automatically (un)mute users based on their turn in " + voiceChannel + "? ")) {
+                                    remMessage = await msg.channel.send("Automatically (un)muting users in " + voiceChannel + ". This means everyone except users that are considered admin by MagiBot is muted by default.");
+                                } else {
+                                    remMessage = await msg.channel.send("Deactivated automatic (un)muting in " + voiceChannel + ".");
+                                    voiceChannel = false;
+                                }
                             }
                         } else {
                             remMessage = await msg.channel.send("If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.");
@@ -93,7 +107,7 @@ module.exports = {
                                         var activeUser = false;
                                         const collector = mess.createReactionCollector(fil, { time: time });
                                         let deleteme = await chann.send("Started queue **" + topic + "** on server **" + mess.guild + "**");
-                                        used[msg.guild.id] = new Date(Date.now() + time);
+                                        used[msg.guild.id] = { date: new Date(Date.now() + time), cid: mess.channel.id, msg: mess.id };
 
                                         if (voiceChannel) {
                                             //add the vc to the global variable so joins get muted
