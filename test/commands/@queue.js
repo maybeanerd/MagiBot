@@ -6,7 +6,7 @@ var cmds = require(__dirname + '/../bamands.js');
 function messageEdit(voiceChannel, activeUser, qULength, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
-        msg += "\nwith voicemode activated in " + voiceChannel;
+        msg += "\n*with voicemode activated in* " + voiceChannel;
     }
     msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qULength + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
@@ -18,10 +18,10 @@ module.exports = {
         var voiceChannel;
         if (used[msg.guild.id]) {
             var d = new Date();
-            if ((d - used[msg.guild.id]).date <= 0) { //check if its already 2hours old
+            if ((d - used[msg.guild.id].date) <= 0) { //check if its already 2hours old
                 if (used[msg.guild.id].msg && used[msg.guild.id].cid) {
                     var testchann = await msg.guild.channels.get(used[msg.guild.id].cid);
-                    if (testchann && (await testchann.fetchMessage(used[msg.guild.id].msg))) {
+                    if (testchann && (await testchann.fetchMessage(used[msg.guild.id].msg).catch(() => { }))) {
                         msg.channel.send("There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.");
                         return;
                     }
