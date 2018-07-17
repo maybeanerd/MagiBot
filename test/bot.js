@@ -170,12 +170,13 @@ commands.help.main = async function (bot, msg) {
                 if (commands[command].category == cat && (!(commands[command].hide || commands[command].admin))) {
                     let nm = command;
                     if (commands[command].dev) {
-                        nm = nm + " (dev only)";
+                        nm = nm + "(dev only)";
                     }
-                    coms += nm + " ";
+                    coms += nm + ", ";
                 }
             }
             if (coms != "") {
+                coms = coms.slice(0, -2);
                 cmds.push({
                     name: cat + " commands",
                     value: coms,
@@ -200,12 +201,13 @@ commands.help.main = async function (bot, msg) {
                 if (commands[command].admin && !commands[command].hide) {
                     let nm = command.substr(1, command.length);
                     if (commands[command].dev) {
-                        nm = nm + " (dev only)";
+                        nm = nm + "(dev only)";
                     }
-                    coms += nm + " ";
+                    coms += nm + ", ";
                 }
             }
             if (coms != "") {
+                coms = coms.slice(0, -2);
                 cmds.push({
                     name: "Admin commands",
                     value: coms,

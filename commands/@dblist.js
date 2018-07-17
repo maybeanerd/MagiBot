@@ -15,6 +15,6 @@ module.exports = {
     perm: "SEND_MESSAGES",
     dev: true,
     admin: true,
-    hidden: true,
+    hide: true,
     category: "Miscellaneous"
 };
