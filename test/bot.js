@@ -324,7 +324,6 @@ var checkCommand = async function (msg, isMention) {
         msg.content = msg.content.replace(/^\s+/g, ''); //delete leading spaces
     }
     if (command) {
-        await data.usageUp(msg.author.id, msg.guild.id);
         var pre = command.charAt(0);
         switch (pre) {
             case '.':
@@ -358,6 +357,7 @@ var checkCommand = async function (msg, isMention) {
                         userCooldowns.add(msg.author.id);
                         setTimeout(() => { userCooldowns.delete(msg.author.id); }, 4000);
                         commands[command].main(bot, msg);
+                        await data.usageUp(msg.author.id, msg.guild.id);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
                             msg.reply("whoa cool down, you're using commands too quick!");

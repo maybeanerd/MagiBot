@@ -315,14 +315,15 @@ async function sendUpdate(update, bot) {
             var G = guilds[GN];
             if (await G.available) {
                 let cid = await getNotChannel(G.id);
-                if (G.id == "380669498014957569") {
-                    update = "<@&460218236185739264> " + update;
-                }
                 if (cid) {
                     let channel = await G.channels.get(cid);
                     if (channel) {
                         if (await channel.permissionsFor(G.me).has("SEND_MESSAGES")) {
-                            channel.send(update);
+                            if (G.id == "380669498014957569") {
+                                channel.send("<@&460218236185739264> " + update);
+                            } else {
+                                channel.send(update);
+                            }
                         }
                     } else {
                         setNotChannel(G.id, false);
