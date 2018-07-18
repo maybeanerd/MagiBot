@@ -356,8 +356,8 @@ var checkCommand = async function (msg, isMention) {
                     if (!userCooldowns.has(msg.author.id)) {
                         userCooldowns.add(msg.author.id);
                         setTimeout(() => { userCooldowns.delete(msg.author.id); }, 4000);
-                        commands[command].main(bot, msg);
-                        await data.usageUp(msg.author.id, msg.guild.id);
+                        await commands[command].main(bot, msg);
+                        data.usageUp(msg.author.id, msg.guild.id);
                     } else {
                         if (await msg.channel.permissionsFor(msg.guild.me).has("SEND_MESSAGES")) {
                             msg.reply("whoa cool down, you're using commands too quick!");
