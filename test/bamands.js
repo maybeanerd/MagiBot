@@ -4,7 +4,7 @@ module.exports = {
         if (!mention) { return false; }
         mention = mention.toLowerCase();
         if (mention.startsWith('<@') && mention.endsWith('>')) {
-            id = mention.substr(2).slice(0, -1);
+            id = mention.slice(2, -1);
             if (id.startsWith('!')) {
                 id = id.substr(1);
             }
