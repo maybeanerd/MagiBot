@@ -27,7 +27,7 @@ bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
 bot.TOKEN = token.tk;
 
-bot.DETAILED_LOGGING = true;
+bot.DETAILED_LOGGING = false;
 bot.DELETE_COMMANDS = false;
 
 bot.COLOR = 0x351C75;
@@ -393,7 +393,7 @@ bot.on("ready", () => {
     loadCommands();
     data.getPrefixesE(bot);
     let chann = bot.channels.get("382233880469438465");
-    chann.send("Im up and ready!");
+    chann.send("Running startup...");
 });
 
 

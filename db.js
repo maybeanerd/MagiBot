@@ -66,6 +66,7 @@ async function onHour(bot, isFirst) {
     if (e > 100) { // some arbitrary time period
         setTimeout(onHour.bind(null, bot, false), e);
     }
+    var t0 = performance.now();
     let nd = new Date();
     nd.setDate(nd.getDate() - 7);
     var guilds = await bot.guilds.array();
@@ -93,8 +94,21 @@ async function onHour(bot, isFirst) {
         await mclient.close();
     });
     if (isFirst) {
+        var t1 = performance.now();
+        var uptime = "";
+        let u = t1 - t0;
+        //mins
+        x = Math.floor(u / 60000) % 60;
+        if (x > 0) {
+            uptime += x + "m : ";
+        }
+        //secs
+        x = Math.floor(u / 1000) % 60;
+        if (x > 0) {
+            uptime += x + "s";
+        }
         let chann = bot.channels.get("382233880469438465");
-        chann.send("Startup done!");
+        chann.send("Startup done!\nChecked " + guilds.size + " guilds in " + uptime + " milliseconds.");
     }
     //for stable only: still just an idea 
     //axios.post('https://bots.ondiscord.xyz/bot-api/bots/:384820232583249921/guilds', { guildCount: guilds.size }, { headers: { "Authorization": "mytoken" } });
