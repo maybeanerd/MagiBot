@@ -97,7 +97,7 @@ async function onHour(bot, isFirst) {
         var uptime = "";
         let u = process.hrtime(t0);
         //mins
-        x = u[0] / 60;
+        let x = u[0] / 60;
         if (x > 0) {
             uptime += x + "m : ";
         }
@@ -107,10 +107,10 @@ async function onHour(bot, isFirst) {
             uptime += x + "s";
         }
         let chann = bot.channels.get("382233880469438465");
-        chann.send("Startup done!\nChecked " + guilds.size + " guilds in " + uptime);
+        chann.send("Startup done!\nChecked " + guilds.length + " guilds in " + uptime);
     }
     //for stable only: still just an idea 
-    //axios.post('https://bots.ondiscord.xyz/bot-api/bots/:384820232583249921/guilds', { guildCount: guilds.size }, { headers: { "Authorization": "mytoken" } });
+    //axios.post('https://bots.ondiscord.xyz/bot-api/bots/:384820232583249921/guilds', { guildCount: guilds.length }, { headers: { "Authorization": "mytoken" } });
 }
 
 async function dblReminder(bot) {
