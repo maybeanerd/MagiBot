@@ -6,6 +6,8 @@ var url = config.dburl;
 const DBL = require("dblapi.js");
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0');
 
+const axios = require('axios');
+
 var botStarted = true;
 
 //Define Methods:
@@ -56,30 +58,27 @@ async function saltDowntimeDone(userid1, userid2) {
     });
 }
 
-//autmoatic deletion of reports and saltking evaluation: 
+//automatic deletion of reports: 
 async function onHour(bot, isFirst) {
     var d = new Date(),
-        h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1, 0, 0, 0),
+        h = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
         setTimeout(onHour.bind(null, bot, false), e);
     }
     let nd = new Date();
-    nd.setDate(nd.getDate() - 8);
+    nd.setDate(nd.getDate() - 7);
     var guilds = await bot.guilds.array();
     await MongoClient.connect(url).then(async function (mclient) {
+        let db = mclient.db('MagiBot');
         for (let GN in guilds) {
             var G = guilds[GN];
-            console.log("Hourly routine in: " + G.name + "(N. " + GN + ")");
             let guildID = await G.id;
             await checkGuild(guildID);
-            //make sure guilds that were added while bot was offline are in DB:            
-            let db = mclient.db('MagiBot');
             var ranking = await db.collection("saltrank").find({ guild: guildID }).toArray();
             for (var i in ranking) {
                 let report = ranking[i];
                 let removeData = await db.collection("salt").deleteMany({ date: { $lt: nd }, guild: guildID, salter: report.salter });
-                console.log(G.name + ": " + removeData.deletedCount);
                 if (removeData.deletedCount && removeData.deletedCount > 0) {
                     let slt = report.salt - removeData.deletedCount;
                     if (slt <= 0) {
@@ -89,7 +88,7 @@ async function onHour(bot, isFirst) {
                     }
                 }
             }
-            await updateSaltKing(G);
+            //await updateSaltKing(G);
         }
         await mclient.close();
     });
@@ -97,6 +96,8 @@ async function onHour(bot, isFirst) {
         let chann = bot.channels.get("382233880469438465");
         chann.send("Startup done!");
     }
+    //for stable only: still just an idea 
+    //axios.post('https://bots.ondiscord.xyz/bot-api/bots/:384820232583249921/guilds', { guildCount: guilds.size }, { headers: { "Authorization": "mytoken" } });
 }
 
 async function dblReminder(bot) {
