@@ -97,7 +97,7 @@ async function onHour(bot, isFirst) {
         var uptime = "";
         let u = process.hrtime(t0);
         //mins
-        let x = u[0] / 60;
+        let x = Math.floor(u[0] / 60);
         if (x > 0) {
             uptime += x + "m : ";
         }
