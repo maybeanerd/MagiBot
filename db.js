@@ -103,7 +103,7 @@ async function onHour(bot, isFirst) {
         }
         //secs
         x = u[0] % 60;
-        if (x > 0) {
+        if (x >= 0) {
             uptime += x + "s";
         }
         let chann = bot.channels.get("382233880469438465");
