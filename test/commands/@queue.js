@@ -12,15 +12,15 @@ function messageEdit(voiceChannel, activeUser, qU, topic) {
     let count = 0;
     if (qU.length > 0) {
         for (let i in qU) {
-            coun++;
+            count++;
             let u = qU[i];
-            if (!u || count > 9) {
+            if (!u || count > 10) {
                 break;
             }
-            tmpms += u + "\n";
+            tmpms += count + ". " + u + "\n";
         }
     } else {
-        tmpms = "no more queued users\n";
+        tmpms = " no more queued users\n";
     }
     msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qU.length + " queued users left.*\n\nNext up are:" + tmpms + "\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
