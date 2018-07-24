@@ -245,7 +245,7 @@ module.exports = {
         });
     },
     ehelp: function (msg, bot) {
-        return [{ name: "", value: "Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou get instructions when using the command." }];
+        return [{ name: "", value: "Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou can activate an optional voicemode which will automatically (un)mute users if you start the queue while connected to a voicechannel.\nYou get all the setup instructions when using the command." }];
     },
     admin: true,
     perm: ["SEND_MESSAGES", "MANAGE_MESSAGES"],
