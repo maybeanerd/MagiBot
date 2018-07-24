@@ -3,12 +3,26 @@ var data = require(__dirname + '/../db.js');
 var cmds = require(__dirname + '/../bamands.js');
 
 
-function messageEdit(voiceChannel, activeUser, qULength, topic) {
+function messageEdit(voiceChannel, activeUser, qU, topic) {
     let msg = "Queue: **" + topic + "**";
     if (voiceChannel) {
         msg += "\n*with voicemode activated in* " + voiceChannel;
     }
-    msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qULength + " queued users left.*\n\nUse ☑ to join and ❌ to leave the queue!";
+    let tmpms = "";
+    let count = 0;
+    if (qU.length > 0) {
+        for (let i in qU) {
+            coun++;
+            let u = qU[i];
+            if (!u || count > 9) {
+                break;
+            }
+            tmpms += u + "\n";
+        }
+    } else {
+        tmpms = "no more queued users\n";
+    }
+    msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qU.length + " queued users left.*\n\nNext up are:" + tmpms + "\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
 }
 
@@ -145,7 +159,7 @@ module.exports = {
                                                                     currentMember.setMute(false, "its your turn in the queue");
                                                                 }
                                                             }
-                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic));
                                                         }
                                                     }
                                                     break;
@@ -158,7 +172,7 @@ module.exports = {
                                                         }
                                                         activeUser = queuedUsers.shift();
                                                         r.remove(activeUser);
-                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
+                                                        mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic));
                                                         mess.reactions.get('☑').remove(activeUser);
                                                         msg.channel.send("It's your turn " + activeUser + "!").then((ms) => {
                                                             ms.delete(1000);
@@ -185,7 +199,7 @@ module.exports = {
                                                             mess.reactions.get('☑').remove(user);
                                                             let ind = queuedUsers.findIndex(obj => obj.id == user.id);
                                                             queuedUsers.splice(ind, 1);
-                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers.length, topic));
+                                                            mess.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic));
                                                         }
                                                     }
                                                     break;
