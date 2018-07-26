@@ -8,7 +8,7 @@ function messageEdit(voiceChannel, activeUser, qU, topic) {
     if (voiceChannel) {
         msg += "\n*with voicemode activated in* " + voiceChannel;
     }
-    let tmpms = "";
+    let tmpms = "\n";
     let count = 0;
     if (qU.length > 0) {
         for (let i in qU) {
@@ -17,12 +17,12 @@ function messageEdit(voiceChannel, activeUser, qU, topic) {
             if (!u || count > 10) {
                 break;
             }
-            tmpms += count + ". " + u + "\n";
+            tmpms += "- " + u + "\n";
         }
     } else {
         tmpms = " no more queued users\n";
     }
-    msg += "\n\nCurrent user: **" + activeUser + "**\n*" + qU.length + " queued users left.*\n\nNext up are:" + tmpms + "\nUse ☑ to join and ❌ to leave the queue!";
+    msg += "\n*" + qU.length + " queued users left*\n\nCurrent user: **" + activeUser + "**\n\nNext up are:" + tmpms + "\nUse ☑ to join and ❌ to leave the queue!";
     return msg;
 }
 
