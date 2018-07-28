@@ -61,7 +61,7 @@ async function saltDowntimeDone(userid1, userid2) {
 
 //automatic deletion of reports: 
 async function onHour(bot, isFirst) {
-    var d = new Date(),
+    let d = new Date(),
         h = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0, 0),
         e = h - d;
     if (e > 100) { // some arbitrary time period
@@ -77,6 +77,8 @@ async function onHour(bot, isFirst) {
             var G = guilds[GN];
             let guildID = await G.id;
             await checkGuild(guildID);
+            //update the guild settings entry so that it does NOT get deleted
+            setSettings(guildID, { lastConnected: d });
             var ranking = await db.collection("saltrank").find({ guild: guildID }).toArray();
             for (var i in ranking) {
                 let report = ranking[i];
@@ -114,6 +116,7 @@ async function onHour(bot, isFirst) {
     if (token.BonDAPI) {
         axios.post('https://bots.ondiscord.xyz/bot-api/bots/384820232583249921/guilds', { guildCount: guilds.length }, { 'Content-Type': 'application/json', "Authorization": token.BonDAPI }).then((res) => { console.log(res) });
     }
+    //delete every guild where lastConnected < nd from the DB TODO
 }
 
 async function dblReminder(bot) {
