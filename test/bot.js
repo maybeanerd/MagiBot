@@ -10,10 +10,9 @@ var bot = new Discord.Client({ autoReconnect: true });
 var userCooldowns = new Set();
 
 //Posting stats to Discord Bot List:
-const DBL;
-const dbl;
+let DBL = require("dblapi.js");
+let dbl;
 if (token.BonDAPI) {
-    DBL = require("dblapi.js");
     dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
 }
 process.on('uncaughtException', function (err) {
