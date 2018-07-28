@@ -114,7 +114,7 @@ async function onHour(bot, isFirst) {
     }
     //for stable only: still just an idea 
     if (token.BonDAPI) {
-        axios.post('https://bots.ondiscord.xyz/bot-api/bots/384820232583249921/guilds', { guildCount: guilds.length }, { 'Content-Type': 'application/json', "Authorization": token.BonDAPI }).then((res) => { console.log(res) });
+        axios.post('https://bots.ondiscord.xyz/bot-api/bots/384820232583249921/guilds', { "guildCount": guilds.length }, { "Content-Type": "application/json", "Authorization": token.BonDAPI }).then((res) => { console.log(res) });
     }
     //delete every guild where lastConnected < nd from the DB TODO
 }
