@@ -1,12 +1,11 @@
 ﻿var MongoClient = require('mongodb').MongoClient;
-var config = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
+var config = require(__dirname + '/token.js');
 
 var url = config.dburl;
 
 const DBL = require("dblapi.js");
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0');
 
-var token = require(__dirname + '/token.js');
 const axios = require('axios');
 
 var botStarted = true;
@@ -113,8 +112,8 @@ async function onHour(bot, isFirst) {
         chann.send("Startup done!\nChecked " + guilds.length + " guilds in " + uptime);
     }
     //for stable only: still just an idea 
-    if (token.BonDAPI) {
-        axios.post('https://bots.ondiscord.xyz/bot-api/bots/384820232583249921/guilds', { guildCount: guilds.length }, { headers: { "Authorization": token.BonDAPI } });
+    if (config.BonDAPI) {
+        axios.post('https://bots.ondiscord.xyz/bot-api/bots/384820232583249921/guilds', { guildCount: guilds.length }, { headers: { "Authorization": config.BonDAPI } });
     }
     //delete every guild where lastConnected < nd from the DB TODO
 }

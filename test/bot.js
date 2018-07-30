@@ -470,7 +470,7 @@ bot.on("voiceStateUpdate", async function (o, n) {
                     n.voiceChannel.join().then(connection => {
                         //TODO use connection.play when discord.js updates, get rid of nested listener
                         const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-                        dispatcher.on("end", () => {
+                        dispatcher.once("end", () => {
                             connection.disconnect();
                         });
 
