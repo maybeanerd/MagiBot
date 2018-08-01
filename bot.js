@@ -12,7 +12,7 @@ var userCooldowns = new Set();
 
 //post to the APIs every 30 minutes
 if (token.BonDAPI) {
-    blapi.handle(bot, { "bots.ondiscord.xyz": token.BonDAPI, "discordbots.org": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0" }, 1);
+    blapi.handle(bot, { "bots.ondiscord.xyz": token.BonDAPI, "discordbots.org": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0" });
 }
 
 process.on('uncaughtException', function (err) {
