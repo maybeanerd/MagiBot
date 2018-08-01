@@ -16,10 +16,12 @@ if (token.BonDAPI) {
 }
 
 process.on('uncaughtException', function (err) {
+    console.log("Exception:\n" + err.stack + "");
     let chann = bot.channels.get("414809410448261132");
     chann.send("**Exception:**\n```" + err.stack + "```");
 });
 process.on('unhandledRejection', function (err) {
+    console.log("Uncaught promise rejection:\n" + err.stack + "");
     let chann = bot.channels.get("414809410448261132");
     chann.send("**Uncaught promise rejection:**\n```" + err.stack + "```");
 });
