@@ -4,17 +4,17 @@ var Discord = require("discord.js");
 var fs = require('fs');
 var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
 var data = require(__dirname + '/db.js');
+const blapi = require(__dirname + '/blapi.js');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
 var userCooldowns = new Set();
 
-//Posting stats to Discord Bot List:
-let DBL = require("dblapi.js");
-let dbl;
+//post to the APIs every 30 minutes
 if (token.BonDAPI) {
-    dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0', bot);
+    blapi.handle(bot, { "bots.ondiscord.xyz": token.BonDAPI, "discordbots.org": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0" });
 }
+
 process.on('uncaughtException', function (err) {
     let chann = bot.channels.get("414809410448261132");
     chann.send("**Exception:**\n```" + err.stack + "```");
