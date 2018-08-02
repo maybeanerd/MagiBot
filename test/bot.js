@@ -2,9 +2,9 @@
 
 var Discord = require("discord.js");
 var fs = require('fs');
-var token = require(__dirname + '/token.js'); /*use \\ as path on Win and / on Unix*/
+var token = require(__dirname + '/token.js');
 var data = require(__dirname + '/db.js');
-const blapi = require(__dirname + '/blapi.js');
+const blapi = require('blapi');
 
 var bot = new Discord.Client({ autoReconnect: true });
 
