@@ -100,27 +100,25 @@ async function onHour(bot, isFirst) {
             //await updateSaltKing(G); this shouldnt be needed anymore
 
             //update percentage message
-            let percentage = Math.round((++counter / guilds.length) * 100);
-            msg.edit(`${percentage} %`);
+            if (msg) {
+                let uptime = "";
+                let u = process.hrtime(t0);
+                //mins
+                let x = Math.floor(u[0] / 60);
+                if (x > 0) {
+                    uptime += x + "m : ";
+                }
+                //secs
+                x = u[0] % 60;
+                if (x >= 0) {
+                    uptime += x + "s";
+                }
+                let percentage = Math.round((++counter / guilds.length) * 100);
+                msg.edit(`${percentage} % with ${uptime} passed`);
+            }
         }
         await mclient.close();
     });
-    if (isFirst) {
-        var uptime = "";
-        let u = process.hrtime(t0);
-        //mins
-        let x = Math.floor(u[0] / 60);
-        if (x > 0) {
-            uptime += x + "m : ";
-        }
-        //secs
-        x = u[0] % 60;
-        if (x >= 0) {
-            uptime += x + "s";
-        }
-        let chann = bot.channels.get("382233880469438465");
-        chann.send("Startup done!\nChecked " + guilds.length + " guilds in " + uptime);
-    }
     //delete every guild where lastConnected < nd from the DB TODO
 }
 
