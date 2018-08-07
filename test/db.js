@@ -64,18 +64,26 @@ async function onHour(bot, isFirst) {
     if (e > 100) { // some arbitrary time period
         setTimeout(onHour.bind(null, bot, false), e);
     }
+    let msg;
+    if (isFirst) {
+        let chann = bot.channels.get("382233880469438465");
+        msg = await chann.send("0 %");
+    }
+
     var t0 = process.hrtime();
     let nd = new Date();
     nd.setDate(nd.getDate() - 7);
     var guilds = await bot.guilds.array();
     await MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
+        let counter = 0;
         for (let GN in guilds) {
             var G = guilds[GN];
             let guildID = await G.id;
             await checkGuild(guildID);
             //update the guild settings entry so that it does NOT get deleted
-            setSettings(guildID, { lastConnected: d });
+            await db.collection("settings").updateOne({ _id: guildID }, { $set: { lastConnected: d } });
+
             var ranking = await db.collection("saltrank").find({ guild: guildID }).toArray();
             for (var i in ranking) {
                 let report = ranking[i];
@@ -89,7 +97,11 @@ async function onHour(bot, isFirst) {
                     }
                 }
             }
-            //await updateSaltKing(G);
+            //await updateSaltKing(G); this shouldnt be needed anymore
+
+            //update percentage message
+            let percentage = Math.round((++counter / guilds.length) * 100) / 100;
+            msg.edit(`${percentage} %`);
         }
         await mclient.close();
     });
