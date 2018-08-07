@@ -100,7 +100,7 @@ async function onHour(bot, isFirst) {
             //await updateSaltKing(G); this shouldnt be needed anymore
 
             //update percentage message
-            let percentage = Math.round((++counter / guilds.length) * 100) / 100;
+            let percentage = Math.round((++counter / guilds.length) * 100);
             msg.edit(`${percentage} %`);
         }
         await mclient.close();
