@@ -83,7 +83,7 @@ module.exports = {
                                                                     await ms.react(reactions[i]);
                                                                 }
                                                                 //vote structure
-                                                                var vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date };
+                                                                var vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date, guildid: ms.guild.id };
                                                                 data.addVote(vote);
                                                             });
                                                         } else if (reacts.first()) {

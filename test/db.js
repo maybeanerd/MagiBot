@@ -77,6 +77,7 @@ async function onHour(bot, isFirst) {
     await MongoClient.connect(url).then(async function (mclient) {
         let db = mclient.db('MagiBot');
         let counter = 0;
+        let percCounter = 0;
         for (let GN in guilds) {
             var G = guilds[GN];
             let guildID = await G.id;
@@ -101,25 +102,47 @@ async function onHour(bot, isFirst) {
 
             //update percentage message
             if (msg) {
-                let uptime = "";
-                let u = process.hrtime(t0);
-                //mins
-                let x = Math.floor(u[0] / 60);
-                if (x > 0) {
-                    uptime += x + "m : ";
-                }
-                //secs
-                x = u[0] % 60;
-                if (x >= 0) {
-                    uptime += x + "s";
-                }
                 let percentage = Math.round((++counter / guilds.length) * 100);
-                msg.edit(`${percentage} % with ${uptime} passed`);
+                if ((percentage - percCounter) > 0) {
+                    let uptime = "";
+                    let u = process.hrtime(t0);
+                    //mins
+                    let x = Math.floor(u[0] / 60);
+                    if (x > 0) {
+                        uptime += x + "m : ";
+                    }
+                    //secs
+                    x = u[0] % 60;
+                    if (x >= 0) {
+                        uptime += x + "s";
+                    }
+                    percCounter = percentage;
+                    msg.edit(`${percentage} % with ${uptime} passed`);
+                }
             }
         }
         await mclient.close();
     });
+
     //delete every guild where lastConnected < nd from the DB TODO
+    await MongoClient.connect(url).then(async function (mclient) {
+        let db = await mclient.db('MagiBot');
+        //find all guilds that have not connected for a week or dont have the lastConnected attribute at all
+        let guilds = await db.collection("settings").find({ $or: [{ lastConnected: { $lt: nd } }, { lastConnected: { $exists: false } }] }).toArray();
+
+        for (let g in guilds) {
+            let guildID = guilds[g]["_id"];
+            // ignore salt and saltrank, as they are removed after 7 days anyways
+
+            //remove all data saved for those guilds
+            await db.collection("stillmuted").deleteMany({ guildid: guildID });
+            await db.collection("users").deleteMany({ guildID: guildID });
+            await db.collection("votes").deleteMany({ guildid: guildID });
+            await db.collection("settings").deleteOne({ _id: guildID });
+        }
+        mclient.close();
+    });
+
 }
 
 async function dblReminder(bot) {
