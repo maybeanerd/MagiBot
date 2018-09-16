@@ -45,9 +45,11 @@ bot.SIGN = 'MagiBot - created by T0TProduction';
 bot.PREFIXES = {};
 bot.queueVoiceChannels = {};
 
+/* eslint-disable no-extend-native */
 String.prototype.padRight = function padRight(l, c) {
   return this + Array(l - this.length + 1).join(c || ' ');
 };
+/* eslint-enable no-extend-native */
 
 bot.sendNotification = function sendNotification(info, type, msg) {
   let icolor;
@@ -97,7 +99,9 @@ commands.help.main = async function main(bo, msg) {
           description: `Commands available via the prefix \`${bot.PREFIXES[msg.guild.id]}.${command}\`:`,
           fields: info,
           footer: {
+            /* eslint-disable camelcase */
             icon_url: bot.user.avatarURL,
+            /* eslint-enable camelcase */
             text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
           }
         };
@@ -121,7 +125,9 @@ commands.help.main = async function main(bo, msg) {
               description: `Admin commands available via the prefix \`${bot.PREFIXES[msg.guild.id]}:${command}\`:`,
               fields: info,
               footer: {
+                /* eslint-disable camelcase */
                 icon_url: bot.user.avatarURL,
+                /* eslint-enable camelcase */
                 text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
               }
             };
@@ -150,7 +156,9 @@ commands.help.main = async function main(bo, msg) {
           description: `Admin commands available via the prefix \`${bot.PREFIXES[msg.guild.id]}:${command.slice(1)}\`:`,
           fields: info,
           footer: {
+            /* eslint-disable camelcase */
             icon_url: bot.user.avatarURL,
+            /* eslint-enable camelcase */
             text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
           }
         };
@@ -189,7 +197,9 @@ commands.help.main = async function main(bo, msg) {
       description: `Commands available via the prefix \`${bot.PREFIXES[msg.guild.id]}.\` :\nto get more info on a single command use \`${bot.PREFIXES[msg.guild.id]}.help <command>\``,
       fields: cmds,
       footer: {
+        /* eslint-disable camelcase */
         icon_url: bot.user.avatarURL,
+        /* eslint-enable camelcase */
         text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`
       }
     };
@@ -219,7 +229,9 @@ commands.help.main = async function main(bo, msg) {
         description: `Admin commands available via the prefix \`${bot.PREFIXES[msg.guild.id]}:\` :\nto get more info on a single command use \`${bot.PREFIXES[msg.guild.id]}.help <command>\``,
         fields: cmds,
         footer: {
+          /* eslint-disable camelcase */
           icon_url: bot.user.avatarURL,
+          /* eslint-enable camelcase */
           text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`
         }
       };
@@ -410,7 +422,7 @@ bot.on('guildCreate', guild => {
     guildPrefixStartup(guild);
     guild.owner.send(`Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${
       bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to ` +
-            'join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev').catch(() => { });
+      'join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev').catch(() => { });
     const chan = bot.channels.get('408611226998800390');
     if (chan) {
       chan.send(`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`);
