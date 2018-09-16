@@ -1,6 +1,6 @@
 ﻿// commands made by Basti for use of the Bot
 module.exports = {
-  findMember: async function f(guild, mention) {
+  findMember: async function findMember(guild, mention) {
     if (!mention) {
       return false;
     }
@@ -17,12 +17,12 @@ module.exports = {
       return user.id;
     }
     if (mention.length >= 3) {
-      const memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().startsWith(mention));
+      let memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().startsWith(mention));
       if (memberArray.length == 1) {
         return memberArray[0].id;
       }
       if (memberArray.length == 0) {
-        const memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().includes(mention));
+        memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().includes(mention));
         if (memberArray.length == 1) {
           return memberArray[0].id;
         }
@@ -30,8 +30,10 @@ module.exports = {
     }
     return false;
   },
-  findRole: async function f(guild, mention) {
-    if (!mention) { return false; }
+  findRole: async function findRole(guild, mention) {
+    if (!mention) {
+      return false;
+    }
     mention = mention.toLowerCase();
     if (mention.startsWith('<@&') && mention.endsWith('>')) {
       const id = mention.substr(3).slice(0, -1);
@@ -63,7 +65,7 @@ module.exports = {
     if (!time) {
       time = 20000;
     }
-    return mess.awaitReactions(filter, { max: 1, time }).then(reacts => {
+    return mess.awaitReactions(filter, { max: 1, time }).then(async reacts => {
       mess.delete();
       if (reacts.first() && reacts.first().emoji.name == '☑') {
         return true;
@@ -76,7 +78,7 @@ module.exports = {
       if (!timeoutMessage) {
         timeoutMessage = 'Cancelled due to timeout.';
       }
-      msg.channel.send(timeoutMessage);
+      await msg.channel.send(timeoutMessage);
       return false;
     });
   })

@@ -9,7 +9,7 @@ module.exports = {
     }
     msg.channel.send(str);
   },
-  ehelp(msg, bot) {
+  ehelp() {
     return [{ name: '', value: 'get all users that are subscribed to the dbl reminder.' }];
   },
   perm: 'SEND_MESSAGES',

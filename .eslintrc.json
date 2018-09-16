@@ -17,10 +17,6 @@
       "error",
       "as-needed"
     ],
-    "strict": [
-      "error",
-      "global"
-    ],
     "eqeqeq": 0,
     "guard-for-in": 0,
     "no-shadow": [
@@ -29,6 +25,7 @@
         "hoist": "functions"
       }
     ],
-    "prefer-destructuring": 0
+    "prefer-destructuring": 0,
+    "no-negated-condition": 0
   }
 }

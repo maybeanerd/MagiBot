@@ -1,4 +1,6 @@
-﻿'use strict';
+﻿/* eslint-disable strict*/
+'use strict';
+/* eslint-enable strict*/
 
 const Discord = require('discord.js');
 const fs = require('fs');
