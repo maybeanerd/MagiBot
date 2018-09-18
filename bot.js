@@ -18,12 +18,12 @@ if (token.blapis) {
 }
 
 process.on('uncaughtException', err => {
-  console.log(`Exception:\n${err.stack}`);
+  console.error(`Exception:\n${err.stack}`);
   const chann = bot.channels.get('414809410448261132');
   chann.send(`**Exception:**\n\`\`\`${err.stack}\`\`\``);
 });
 process.on('unhandledRejection', err => {
-  console.log(String(`Uncaught promise rejection:\n${err.stack}`));
+  console.error(`Uncaught promise rejection:\n${err.stack}`);
   const chann = bot.channels.get('414809410448261132');
   chann.send(`**Uncaught promise rejection:**\n\`\`\`${err.stack}\`\`\``);
 });

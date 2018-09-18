@@ -30,7 +30,10 @@ module.exports = {
   main: async (bot, msg) => {
     const args = msg.content.split(/ +/);
     const userName = args[0];
-    const region = args[1].toLowerCase();
+    let region;
+    if (args[1]) {
+      region = args[1].toLowerCase();
+    }
     const info = [];
     // TODO check inputs
     if (!checkSummonerName.toLocaleString(userName)) {
