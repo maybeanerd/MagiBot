@@ -4,18 +4,11 @@ const options = { weekday: 'long', month: 'long', day: 'numeric' };
 
 module.exports = {
   main: async (bot, msg) => {
-    const info = [];
     const now = new Date();
     let fact = await axios.get(`http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`);
     fact = fact.data;
 
-    if (fact) {
-      info.push({
-        name: `${now.toLocaleDateString('en-US', options)}`,
-        value: fact,
-        inline: false
-      });
-    } else {
+    if (!fact) {
       msg.channel.send('Something went wrong whilst contacting the API...');
       return;
     }
