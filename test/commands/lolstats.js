@@ -15,11 +15,8 @@ const regions = {
   pbe:	'pbe1'
 };
 const getRiotURL = region => {
-  if (!region) { // By default we use EUW Servers
-    return 'https://euw1.api.riotgames.com';
-  }
-  if (regions.region) {
-    return `https://${regions.region}.api.riotgames.com`;
+  if (regions[region]) {
+    return `https://${regions[region]}.api.riotgames.com`;
   }
   return null;
 };
@@ -29,27 +26,40 @@ const checkSummonerName = /^[0-9\\p{L} _\\.]+$/;
 module.exports = {
   main: async (bot, msg) => {
     const args = msg.content.split(/ +/);
-    const userName = args[0];
+    const userName = args[0]; // Change to allow spaces in Name
     let region;
     if (args[1]) {
       region = args[1].toLowerCase();
+    } else {
+      region = 'euw'; // We use EUW Servers by default
     }
+    console.log(`Username: ${userName}, Region: ${region}`);
     const info = [];
     // TODO check inputs
-    if (!checkSummonerName.toLocaleString(userName)) {
+    /*
+    if (!checkSummonerName.test(userName)) {
       msg.reply('That\'s not a valid summonername.');
       return;
     }
-    let summoner = await axios.get(`${getRiotURL(region)}/lol/summoner/v3/summoners/by-name/${userName}`, header);
-    if (summoner) summoner = summoner.data;
-    if (summoner) {
-      info.push({
-        name: 'Summoner data:',
-        value: summoner,
-        inline: false
-      });
+    */
+    const riotURL = getRiotURL(region);
+    console.log(`contacting ${riotURL} ...`);
+    let summoner = await axios.get(`${riotURL}/lol/summoner/v3/summoners/by-name/${userName}`, { headers: header }).catch(e => console.error(e));
+    if (summoner && summoner.data) {
+      summoner = summoner.data;
+    } else {
+      msg.channel.send('Something went wrong whilst contacting the API...');
+      return;
+    }
+    console.log(`Summoner we got: ${summoner.name}: Lv. ${summoner.summonerLevel}`);
+    info.push({
+      name: 'Summoner data:',
+      value: `${summoner.name}: Lv. ${summoner.summonerLevel}`,
+      inline: false
+    });
+    /*
       // Get ranking
-      let getData = await axios.get(`${getRiotURL(region)}/lol/league/v3/positions/by-summoner/${summoner.id}`, header);
+      let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, header);
       if (getData) getData = getData.data;
       if (getData) {
         info.push({
@@ -59,7 +69,7 @@ module.exports = {
         });
       }
       // Get top 5 champs
-      getData = await axios.get(`${getRiotURL(region)}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, header);
+      getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, header);
       if (getData) getData = getData.data;
       if (getData) {
         info.push({
@@ -69,7 +79,7 @@ module.exports = {
         });
       }
       // Get current match
-      getData = await axios.get(`${getRiotURL(region)}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, header);
+      getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, header);
       if (getData) getData = getData.data;
       if (getData) {
         info.push({
@@ -77,11 +87,8 @@ module.exports = {
           value: getData,
           inline: false
         });
-      }
-    } else {
-      msg.channel.send('Something went wrong whilst contacting the API...');
-      return;
-    }
+        }
+      */
     const embed = {
       color: bot.COLOR,
       fields: info,
