@@ -81,5 +81,8 @@ module.exports = {
       await msg.channel.send(timeoutMessage);
       return false;
     });
-  })
+  }),
+  catchError: error => {
+    console.error(`Errorstatus: ${error.response.status} ${error.response.statusText}`);
+  }
 };

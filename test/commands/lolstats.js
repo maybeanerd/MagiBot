@@ -1,4 +1,5 @@
 const axios = require('axios');
+const bamands = require(`${__dirname}/../bamands.js`);
 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
 const apiKey = 'RGAPI-db5d785b-0e08-4bdc-ac6e-c74b95f2deed'; // For now it's text ( key is only valid 24h anyways), but later we'll read it from token.js
 const regions = {
@@ -21,7 +22,11 @@ const getRiotURL = region => {
   }
   return null;
 };
-const header = { 'X-Riot-Token': apiKey }; // Not sure if this is correct
+const header = {
+  'Accept-Charset': 'application/x-www-form-urlencoded; charset=UTF-8',
+  'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+  'X-Riot-Token': apiKey
+}; // Not sure if this is correct
 const checkSummonerName = /^[0-9\p{L} _.]+$/; // Original in docs: ^[0-9\\p{L} _\\.]+$
 
 module.exports = {
@@ -40,7 +45,7 @@ module.exports = {
     }
     const userName = msg.content.substr(region.length);
     console.log(`Username: ${userName}, Region: ${region}`);
-    const info = [];
+    let info = [];
 
     // TODO check inputs
     /*
@@ -52,7 +57,7 @@ module.exports = {
 
     const riotURL = getRiotURL(region);
     console.log(`contacting ${riotURL} ...`);
-    let summoner = await axios.get(`${riotURL}/lol/summoner/v3/summoners/by-name/${userName}`, { headers: header }).catch(e => console.error(e));
+    let summoner = await axios.get(`${riotURL}/lol/summoner/v3/summoners/by-name/${userName}`, { headers: header }).catch(bamands.catchError);
     if (summoner && summoner.data) {
       summoner = summoner.data;
     } else {
@@ -77,45 +82,19 @@ module.exports = {
     });
 
     // Get ranking
-    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, header);
+    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
-      let i = true;
       for (const leaguePos in getData) {
-        if (i) {
-          i = false;
-          info.push({
-            name: `${leaguePos.queueType}:`,
-            value: `Wins: ${leaguePos.wins}`,
-            inline: false
-          });
-        }
+        info.push({
+          name: `${leaguePos.queueType}: ${leaguePos.tier} ${leaguePos.rank}`,
+          value: `Wins: ${leaguePos.wins}, Losses: ${leaguePos.losses}, ${Math.round((leaguePos.wins / leaguePos.losses) * 100)}% ratio\n${leaguePos.leaguePoints} league points`,
+          inline: false
+        }); // TODO add Tier emojis
       }
     }
-    /*
-    // Get top 5 champs
-    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, header);
-    if (getData && getData.data) {
-      getData = getData.data;
-            info.push({
-        name: 'Champion mastery:',
-        value: getData,
-        inline: false
-      });
-          }
 
-    // Get current match
-    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, header);
-    if (getData && getData.data) {
-      getData = getData.data;
-            info.push({
-        name: 'Current game:',
-        value: getData,
-        inline: false
-      });
-          }
-*/
-    const embed = {
+    let embed = {
       color: bot.COLOR,
       fields: info,
       footer: {
@@ -127,6 +106,46 @@ module.exports = {
     };
 
     msg.channel.send({ embed });
+    info = [];
+
+    // Create a new embed for these stats in the future:
+    /*
+    // Get top 5 champs
+    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
+    if (getData && getData.data) {
+      getData = getData.data;
+            info.push({
+        name: 'Champion mastery:',
+        value: getData,
+        inline: false
+      });
+          }
+
+    // Get current match
+    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
+    if (getData && getData.data) {
+      getData = getData.data;
+            info.push({
+        name: 'Current game:',
+        value: getData,
+        inline: false
+      });
+          }
+*/
+    if (info.length > 0) {
+      embed = {
+        color: bot.COLOR,
+        fields: info,
+        footer: {
+        /* eslint-disable camelcase*/
+          icon_url: 'https://www.riotgames.com/darkroom/original/06fc475276478d31c559355fa475888c:af22b5d4c9014d23b550ea646eb9dcaf/riot-logo-fist-only.png',
+          /* eslint-enable camelcase*/
+          text: 'powered by api.riotgames.com'
+        }
+      };
+
+      msg.channel.send({ embed });
+    }
   },
   ehelp(msg, bot) {
     const ret = [];
