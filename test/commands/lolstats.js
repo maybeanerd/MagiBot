@@ -82,13 +82,14 @@ module.exports = {
     });
 
     // Get ranking
-    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
+    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
-      for (const leaguePos in getData) {
+      for (let leaguePos in getData) {
+        leaguePos = getData[leaguePos];
         info.push({
           name: `${leaguePos.queueType}: ${leaguePos.tier} ${leaguePos.rank}`,
-          value: `Wins: ${leaguePos.wins}, Losses: ${leaguePos.losses}, ${Math.round((leaguePos.wins / leaguePos.losses) * 100)}% ratio\n${leaguePos.leaguePoints} league points`,
+          value: `Wins: ${leaguePos.wins}, Losses: ${leaguePos.losses}, ${Math.round((leaguePos.wins / leaguePos.losses) * 100) / 100} ratio\n${leaguePos.leaguePoints} league points`,
           inline: false
         }); // TODO add Tier emojis
       }
@@ -111,7 +112,7 @@ module.exports = {
     // Create a new embed for these stats in the future:
     /*
     // Get top 5 champs
-    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
+    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
             info.push({
@@ -122,7 +123,7 @@ module.exports = {
           }
 
     // Get current match
-    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, header).catch(bamands.catchError);
+    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
             info.push({
