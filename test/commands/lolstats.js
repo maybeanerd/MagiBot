@@ -96,7 +96,7 @@ module.exports = {
       description: 'description',
       footer: {
         /* eslint-disable camelcase*/
-        icon_url: bot.user.avatarURL,
+        icon_url: 'https://www.riotgames.com/darkroom/original/06fc475276478d31c559355fa475888c:af22b5d4c9014d23b550ea646eb9dcaf/riot-logo-fist-only.png',
         /* eslint-enable camelcase*/
         text: 'powered by api.riotgames.com'
       }
