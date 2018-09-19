@@ -2,7 +2,7 @@ const axios = require('axios');
 const bamands = require(`${__dirname}/../bamands.js`);
 
 const regions = { us: 'us', eu: 'eu', asia: 'asia' };
-const platforms = { pc: 'pc' }; // TODO others
+const platforms = { pc: 'pc', psn: 'psn', xbl: 'xbl' };
 const herolist = 'bastion,dVa,genji,hanzo,junkrat,lúcio,mccree,mei,mercy,orisa,pharah,reaper,reinhardt,roadhog,soldier76,sombra,symmetra,torbjörn,tracer,widowmaker,winston,zarya,zenyatta';
 
 module.exports = {
@@ -112,7 +112,7 @@ module.exports = {
     const ret = [];
     ret.push({
       name: '<region> <platform> <playerName>#<playerTag>',
-      value: `Get the Overwatch stats about a certain user.\nAn example would be: \`${bot.PREFIXES[msg.guild.id]}.owstats eu pc MyUserName#myTag\`\n\n**Possible region parameters:**\neu, us, asia\n**Possible platform parameters:**\npc`
+      value: `Get the Overwatch stats about a certain user.\nAn example would be: \`${bot.PREFIXES[msg.guild.id]}.owstats eu pc MyUserName#myTag\`\n\n**Possible region parameters:**\neu, us, asia\n**Possible platform parameters:**\npc, psn, xbl`
     });
     return ret;
   },
