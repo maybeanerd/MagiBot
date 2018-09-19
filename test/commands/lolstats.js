@@ -1,7 +1,7 @@
 const axios = require('axios');
 const bamands = require(`${__dirname}/../bamands.js`);
 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-const apiKey = 'RGAPI-db5d785b-0e08-4bdc-ac6e-c74b95f2deed'; // For now it's text ( key is only valid 24h anyways), but later we'll read it from token.js
+const apiKey = 'RGAPI-303cc97c-3950-492c-a9c0-dcd849d39c17'; // For now it's text ( key is only valid 24h anyways), but later we'll read it from token.js
 const regions = {
   br:	'br1',
   eune:	'eun1',
