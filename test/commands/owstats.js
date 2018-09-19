@@ -90,7 +90,7 @@ module.exports = {
       objective time: ${qps.objectiveTimeAvg}, solo kills: ${qps.soloKillsAvg}
       Games played: ${qps.games.played}, won: ${qps.games.won} (${Math.round((qps.games.won / qps.games.played) * 100)} %)
       Awards:
-      cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.Bronze} Bronze)`,
+      cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.medalsBronze} Bronze)`,
       inline: false
     });
 
