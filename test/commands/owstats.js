@@ -2,6 +2,7 @@ const axios = require('axios');
 const bamands = require(`${__dirname}/../bamands.js`);
 
 const regions = { us: 'us', eu: 'eu', asia: 'asia' };
+const platforms = { pc: 'pc' }; // TODO others
 
 module.exports = {
   main: async (bot, msg) => {
@@ -20,6 +21,13 @@ module.exports = {
     let platform;
     if (args[1]) {
       platform = args[1].toLowerCase();
+    } else {
+      msg.reply(`You need to specify the platform you want to search. To get a list of them use \`${bot.PREFIXES[msg.guild.id]}.help owstats\``);
+      return;
+    }
+    if (!platforms[platform]) {
+      msg.reply(`You need to specify a correct platform you want to search. To get a list of them use \`${bot.PREFIXES[msg.guild.id]}.help owstats\``);
+      return;
     }
     let userName;
     if (args[2]) {
@@ -65,8 +73,8 @@ module.exports = {
   ehelp(msg, bot) {
     const ret = [];
     ret.push({
-      name: '<region> <platform> <summoner name>',
-      value: `Get the Overwatch stats about a certain user.\nAn example would be: \`${bot.PREFIXES[msg.guild.id]}.owstats eu pc MyUserName#myTag\`\n\n**Possible region parameters:**\neu, us, asia`
+      name: '<region> <platform> <playerName>#<playerTag>',
+      value: `Get the Overwatch stats about a certain user.\nAn example would be: \`${bot.PREFIXES[msg.guild.id]}.owstats eu pc MyUserName#myTag\`\n\n**Possible region parameters:**\neu, us, asia\n**Possible platform parameters:**\npc`
     });
     return ret;
   },
