@@ -120,6 +120,14 @@ module.exports = {
     let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
+      if (getData.length == 0) {
+        tier = 'unranked';
+        info.push({
+          name: 'Ranked Stats:',
+          value: `There are no ranked stats available for ${summoner.name}...`,
+          inline: false
+        });
+      }
       for (let leaguePos in getData) {
         leaguePos = getData[leaguePos];
         // We take the first tier we get, but if we get solo stats we will always prefer those
@@ -145,13 +153,6 @@ module.exports = {
           inline: true
         });
       }
-    } else {
-      tier = 'unranked';
-      info.push({
-        name: 'Ranked Stats:',
-        value: `There are no ranked stats available for ${summoner.name}...`,
-        inline: false
-      });
     }
 
     let embed = {
