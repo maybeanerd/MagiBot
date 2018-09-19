@@ -107,7 +107,7 @@ module.exports = {
     if (summoner && summoner.data) {
       summoner = summoner.data;
     } else {
-      msg.channel.send(`There seems no summoner named ${userName} exists in the ${region} region.`);
+      msg.channel.send(`There seems no summoner named${userName} exists in the ${region} region.`);
       return;
     }
     info.push({
