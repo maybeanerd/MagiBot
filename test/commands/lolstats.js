@@ -16,6 +16,52 @@ const regions = {
   ru:	'ru',
   pbe:	'pbe1'
 };
+/* eslint-disable camelcase*/
+const queueTypes = {
+  RANKED_SOLO_5x5: 'Solo',
+  RANKED_FLEX_TT: 'Flex TT',
+  RANKED_FLEX_SR: 'Flex SR'
+};
+/* eslint-enable camelcase*/
+const rankEmoji = {
+  bronze: '<:bronze:491866610668404736>',
+  silver: '<:silver:491866611163332608>',
+  gold: '<:gold:491866611121389578>',
+  platinum: '<:platinum:491866611662454784>',
+  diamond: '<:diamond:491866610815074317>',
+  master: '<:master:491866611611861002>',
+  challenger: '<:challenger:491866611473711104>'
+};
+const tierURL = {
+  unranked: 'https://cdn.discordapp.com/attachments/386915523524558849/491879562330767360/provisional.png',
+  bronzei: 'https://cdn.discordapp.com/attachments/386915523524558849/491880178843123723/bronze_i.png',
+  bronzeii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880181120761857/bronze_ii.png',
+  bronzeiii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880183658446849/bronze_iii.png',
+  bronzeiv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880186199932938/bronze_iv.png',
+  bronzev: 'https://cdn.discordapp.com/attachments/386915523524558849/491880188141895681/bronze_v.png',
+  silveri: 'https://cdn.discordapp.com/attachments/386915523524558849/491880292181737472/silver_i.png',
+  silverii: 'https://cdn.discordapp.com/attachments/386915523524558849/491882892603949066/silver_ii.png',
+  silveriii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880313102925839/silver_iii.png',
+  silveriv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880316605300737/silver_iv.png',
+  silverv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880318345674752/silver_v.png',
+  goldi: 'https://cdn.discordapp.com/attachments/386915523524558849/491882817618182144/gold_i.png',
+  goldii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880267812962304/gold_ii.png',
+  goldiii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880270056914964/gold_iii.png',
+  goldiv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880272845864971/gold_iv.png',
+  goldv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880275823951883/gold_v.png',
+  platinumi: 'https://cdn.discordapp.com/attachments/386915523524558849/491880279267344394/platinum_i.png',
+  platinumii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880281326747660/platinum_ii.png',
+  platinumiii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880284615213056/platinum_iii.png',
+  platinumiv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880286804770826/platinum_iv.png',
+  platinumv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880289862287360/platinum_v.png',
+  diamondi: 'https://cdn.discordapp.com/attachments/386915523524558849/491880189983195146/diamond_i.png',
+  diamondii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880192072089601/diamond_ii.png',
+  diamondiii: 'https://cdn.discordapp.com/attachments/386915523524558849/491880195037593600/diamond_iii.png',
+  diamondiv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880197252055041/diamond_iv.png',
+  diamondv: 'https://cdn.discordapp.com/attachments/386915523524558849/491880198590038017/diamond_v.png',
+  master: 'https://cdn.discordapp.com/attachments/386915523524558849/491879556068671499/master.png',
+  challenger: 'https://cdn.discordapp.com/attachments/386915523524558849/491879549743792136/challenger.png'
+};
 const getRiotURL = region => {
   if (regions[region]) {
     return `https://${regions[region]}.api.riotgames.com`;
@@ -61,43 +107,57 @@ module.exports = {
     if (summoner && summoner.data) {
       summoner = summoner.data;
     } else {
-      msg.channel.send('Something went wrong whilst contacting the API...');
+      msg.channel.send(`There seems no summoner named ${userName} exists in the ${region} region.`);
       return;
     }
-    console.log(`Summoner we got: ${summoner.name}: Lv. ${summoner.summonerLevel}`);
     info.push({
-      name: 'Summoner:',
-      value: `${summoner.name}, Lv. ${summoner.summonerLevel}`,
+      name: `Summoner: ${summoner.name}, Lv. ${summoner.summonerLevel}`,
+      value: `updated profile on ${(new Date(summoner.revisionDate)).toLocaleDateString('en-US', options)}, id: ${summoner.id}`,
       inline: false
     });
-    info.push({
-      name: 'Profile changed last:',
-      value: `${(new Date(summoner.revisionDate)).toLocaleDateString('en-US', options)}`,
-      inline: true
-    });
-    info.push({
-      name: 'Summoner ID:',
-      value: `${summoner.id}`,
-      inline: true
-    });
-
+    let tier;
     // Get ranking
     let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
     if (getData && getData.data) {
       getData = getData.data;
       for (let leaguePos in getData) {
         leaguePos = getData[leaguePos];
+        // We take the first tier we get, but if we get solo stats we will always prefer those
+        if (!tier || leaguePos.queueType == 'RANKED_SOLO_5x5') {
+          tier = leaguePos.tier.toLowerCase();
+          if (leaguePos.rank) {
+            tier += leaguePos.rank.toLowerCase();
+          }
+        }
+        let additions = '';
+        if (leaguePos.veteran) {
+          additions += ', veteran';
+        }
+        if (leaguePos.inactive) {
+          additions += ', inactive';
+        }
+        if (leaguePos.freshBlood) {
+          additions += ', fresh blood';
+        }
         info.push({
-          name: `${leaguePos.queueType}: ${leaguePos.tier} ${leaguePos.rank}`,
-          value: `Wins: ${leaguePos.wins}, Losses: ${leaguePos.losses}, ${Math.round((leaguePos.wins / leaguePos.losses) * 100) / 100} ratio\n${leaguePos.leaguePoints} league points`,
-          inline: false
-        }); // TODO add Tier emojis
+          name: `${queueTypes[leaguePos.queueType]}: ${leaguePos.tier.charAt(0) + leaguePos.tier.toLowerCase().slice(1)} ${leaguePos.rank} ${rankEmoji[leaguePos.tier.toLowerCase()]}`,
+          value: `Wins: ${leaguePos.wins}, Losses: ${leaguePos.losses} (${Math.round((leaguePos.wins / leaguePos.losses) * 100) / 100})${additions}\n${leaguePos.leagueName}, ${leaguePos.leaguePoints} league points`,
+          inline: true
+        });
       }
+    } else {
+      tier = 'unranked';
+      info.push({
+        name: 'Ranked Stats:',
+        value: `There are no ranked stats available for ${summoner.name}...`,
+        inline: false
+      });
     }
 
     let embed = {
       color: bot.COLOR,
       fields: info,
+      thumbnail: { url: tierURL[tier] },
       footer: {
         /* eslint-disable camelcase*/
         icon_url: 'https://www.riotgames.com/darkroom/original/06fc475276478d31c559355fa475888c:af22b5d4c9014d23b550ea646eb9dcaf/riot-logo-fist-only.png',
