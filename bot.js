@@ -374,9 +374,11 @@ const checkCommand = async function(msg, isMention) {
             setTimeout(() => {
               userCooldowns.delete(msg.author.id);
             }, 4000);
-            await commands[command].main(bot, msg).catch(err => {
+            try {
+              await commands[command].main(bot, msg);
+            } catch (err) {
               bamands.catchError(err, bot, msg, `${bot.PREFIXES[msg.guild.id]}${pre}${command.slice(1)}`);
-            });
+            }
             data.usageUp(msg.author.id, msg.guild.id);
           } else if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
             msg.reply("whoa cool down, you're using commands too quick!");

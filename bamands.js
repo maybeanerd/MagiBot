@@ -91,8 +91,7 @@ module.exports = {
     }
     console.error(`Caught:\n${err}\nin command ${command}`);
     const chann = bot.channels.get('414809410448261132');
-    chann.send(`**Command:**  ${command}\n**Caught Error:**\n\`\`\`${err}\`\`\``);
-    msg.reply(`something went wrong while using ${command}. The bot devs have been notified.
-    If you can reproduce this, consider using \`${bot.PREFIXES[msg.guild.id]}.bug <bugreport>\` to tell us exactly how.`).catch(() => {});
+    chann.send(`**Command:** ${command}${msg.content}\n**Caught Error:**\n\`\`\`${err}\`\`\``);
+    msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.\nIf you can reproduce this, consider using \`${bot.PREFIXES[msg.guild.id]}.bug <bugreport>\` or join the support discord (link via \`${bot.PREFIXES[msg.guild.id]}.info\`) to tell us exactly how.`).catch(() => {});
   }
 };
