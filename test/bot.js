@@ -7,6 +7,7 @@ const fs = require('fs');
 const token = require(`${__dirname}/token.js`);
 const data = require(`${__dirname}/db.js`);
 const blapi = require('blapi');
+const bamands = require(`${__dirname}/bamands.js`);
 
 const bot = new Discord.Client({ autoReconnect: true });
 
@@ -22,7 +23,7 @@ process.on('uncaughtException', err => {
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`**Uncaught Exception:**\n\`\`\`${err}\`\`\``);
+  chann.send(`**old catch: Uncaught Exception:**\n\`\`\`${err}\`\`\``);
   console.error(`Uncaught Exception:\n${err}`);
 });
 process.on('unhandledRejection', err => {
@@ -30,7 +31,7 @@ process.on('unhandledRejection', err => {
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`**Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+  chann.send(`old catch: **Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
   console.error(`Unhandled promise rejection:\n${err}`);
 });
 
@@ -48,7 +49,7 @@ bot.INFO_COLOR = 0x0000ff;
 
 // global variables saved in bot
 
-bot.SIGN = 'MagiBot - created by T0TProduction';
+bot.SIGN = 'MagiBot - created by T0TProduction#0001';
 bot.PREFIXES = {};
 bot.queueVoiceChannels = {};
 
@@ -373,7 +374,9 @@ const checkCommand = async function(msg, isMention) {
             setTimeout(() => {
               userCooldowns.delete(msg.author.id);
             }, 4000);
-            await commands[command].main(bot, msg);
+            await commands[command].main(bot, msg).catch(err => {
+              bamands.catchError(err, bot, msg, `${bot.PREFIXES[msg.guild.id]}${pre}${command}`);
+            });
             data.usageUp(msg.author.id, msg.guild.id);
           } else if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
             msg.reply("whoa cool down, you're using commands too quick!");

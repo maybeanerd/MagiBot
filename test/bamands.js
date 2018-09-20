@@ -82,7 +82,17 @@ module.exports = {
       return false;
     });
   }),
-  catchError: error => {
+  printError: error => {
     console.error(`Errorstatus: ${error.response.status} ${error.response.statusText}`);
+  },
+  catchError: (err, bot, msg, command) => {
+    if (err.stack) {
+      err = err.stack;
+    }
+    console.error(`Caught:\n${err}\nin command ${command}`);
+    const chann = bot.channels.get('414809410448261132');
+    chann.send(`**Command:**  ${command}\n**Caught Error:**\n\`\`\`${err}\`\`\``);
+    msg.reply(`something went wrong while using ${command}. The bot devs have been notified.
+    If you can reproduce this, consider using ${bot.PREFIXES[msg.guild.id]}.bug <bugreport> to tell us exactly how.`).catch(() => {});
   }
 };

@@ -47,7 +47,7 @@ module.exports = {
     userName = userName.substr(0, userName.split(/#/)[0].length);
     const info = [];
 
-    let data = await axios.get(`https://ow-api.com/v1/stats/${platform}/${region}/${userName}-${battletag}/heroes/${herolist}`).catch(bamands.catchError);
+    let data = await axios.get(`https://ow-api.com/v1/stats/${platform}/${region}/${userName}-${battletag}/heroes/${herolist}`).catch(bamands.printError);
     if (data && data.data && data.data.name) {
       data = data.data;
     } else {

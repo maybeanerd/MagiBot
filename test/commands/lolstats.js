@@ -103,7 +103,7 @@ module.exports = {
 
     const riotURL = getRiotURL(region);
     console.log(`contacting ${riotURL} ...`);
-    let summoner = await axios.get(`${riotURL}/lol/summoner/v3/summoners/by-name/${userName}`, { headers: header }).catch(bamands.catchError);
+    let summoner = await axios.get(`${riotURL}/lol/summoner/v3/summoners/by-name/${userName}`, { headers: header }).catch(bamands.printError);
     if (summoner && summoner.data) {
       summoner = summoner.data;
     } else {
@@ -117,7 +117,7 @@ module.exports = {
     });
     let tier;
     // Get ranking
-    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
+    let getData = await axios.get(`${riotURL}/lol/league/v3/positions/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.printError);
     if (getData && getData.data) {
       getData = getData.data;
       if (getData.length == 0) {
@@ -173,7 +173,7 @@ module.exports = {
     // Create a new embed for these stats in the future:
     /*
     // Get top 5 champs
-    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
+    getData = await axios.get(`${riotURL}/lol/champion-mastery/v3/champion-masteries/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.printError);
     if (getData && getData.data) {
       getData = getData.data;
             info.push({
@@ -184,7 +184,7 @@ module.exports = {
           }
 
     // Get current match
-    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.catchError);
+    getData = await axios.get(`${riotURL}/lol/spectator/v3/active-games/by-summoner/${summoner.id}`, { headers: header }).catch(bamands.printError);
     if (getData && getData.data) {
       getData = getData.data;
             info.push({
