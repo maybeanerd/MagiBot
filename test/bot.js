@@ -18,14 +18,28 @@ if (token.blapis) {
 }
 
 process.on('uncaughtException', err => {
-  console.error(`Exception:\n${err.stack}`);
   const chann = bot.channels.get('414809410448261132');
-  chann.send(`**Exception:**\n\`\`\`${err.stack}\`\`\``);
+  if (err.stack) {
+    err = err.stack;
+  }
+  chann.send(`**Uncaught Exception:**\n\`\`\`${err}\`\`\``);
+  console.error(`Uncaught Exception:\n${err}`);
 });
 process.on('unhandledRejection', err => {
-  console.error(`Uncaught promise rejection:\n${err.stack}`);
   const chann = bot.channels.get('414809410448261132');
-  chann.send(`**Uncaught promise rejection:**\n\`\`\`${err.stack}\`\`\``);
+  if (err.stack) {
+    err = err.stack;
+  }
+  chann.send(`**Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+  console.error(`Unhandled promise rejection:\n${err}`);
+});
+process.on('error', err => {
+  const chann = bot.channels.get('414809410448261132');
+  if (err.stack) {
+    err = err.stack;
+  }
+  chann.send(`**Error:**\n\`\`\`${err}\`\`\``);
+  console.error(`Error:\n${err}`);
 });
 
 
