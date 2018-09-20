@@ -33,15 +33,6 @@ process.on('unhandledRejection', err => {
   chann.send(`**Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
   console.error(`Unhandled promise rejection:\n${err}`);
 });
-process.on('error', err => {
-  const chann = bot.channels.get('414809410448261132');
-  if (err.stack) {
-    err = err.stack;
-  }
-  chann.send(`**Error:**\n\`\`\`${err}\`\`\``);
-  console.error(`Error:\n${err}`);
-});
-
 
 bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
