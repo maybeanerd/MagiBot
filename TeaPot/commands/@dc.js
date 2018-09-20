@@ -1,6 +1,6 @@
 module.exports = {
-  main: (bot, msg) => {
-    msg.channel.send('Shutting down...', 'success');
+  main: async (bot, msg) => {
+    await msg.channel.send('Shutting down...');
     setTimeout(() => {
       process.exit();
     }, 2000);
