@@ -17,8 +17,8 @@ const userCooldowns = new Set();
 if (token.blapis) {
   blapi.handle(bot, token.blapis);
 }
-
-process.on('uncaughtException', err => {
+/* eslint-disable prefer-arrow-callback */
+process.on('uncaughtException', function catcher(err) {
   const chann = bot.channels.get('414809410448261132');
   if (err.stack) {
     err = err.stack;
@@ -26,7 +26,7 @@ process.on('uncaughtException', err => {
   chann.send(`**old catch: Uncaught Exception:**\n\`\`\`${err}\`\`\``);
   console.error(`Uncaught Exception:\n${err}`);
 });
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', function catcher(err) {
   const chann = bot.channels.get('414809410448261132');
   if (err.stack) {
     err = err.stack;
@@ -34,6 +34,7 @@ process.on('unhandledRejection', err => {
   chann.send(`old catch: **Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
   console.error(`Unhandled promise rejection:\n${err}`);
 });
+/* eslint-enable prefer-arrow-callback */
 
 bot.OWNERID = token.owner;
 bot.PREFIX = token.prefix;
