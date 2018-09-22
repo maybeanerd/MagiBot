@@ -220,6 +220,6 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Games' // TODO add this to the categories
+  category: 'Game' // TODO add this to the categories
 };
 

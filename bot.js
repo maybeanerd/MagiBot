@@ -77,7 +77,7 @@ bot.sendNotification = function sendNotification(info, type, msg) {
 
 const commands = {};
 // TODO actually use
-const commandCategories = ['Utility', 'Fun', 'Miscellaneous'];
+const commandCategories = ['Utility', 'Fun', 'Game', 'Miscellaneous'];
 
 commands.help = {};
 commands.help.args = '';

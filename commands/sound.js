@@ -46,7 +46,7 @@ module.exports = {
 
         let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
         if (!sound) {
-          msg.reply(`you need to use a compatible link! For more info use \`${bot.PREFIXES[msg.guild.id]}.help sound\``);
+          msg.reply(`you need to use a compatible link or upload the file with the command! For more info use \`${bot.PREFIXES[msg.guild.id]}.help sound\``);
           return;
         }
         sound = sound.streams[0];
@@ -64,7 +64,7 @@ module.exports = {
           msg.reply('Something went wrong...');
         }
       } else {
-        msg.reply(`This is not a valid command. Use \`${bot.PREFIXES[msg.guild.id]}.help sound\` for more info.`);
+        msg.reply(`this is not a valid command. Use \`${bot.PREFIXES[msg.guild.id]}.help sound\` for more info.`);
       }
     }
   },
