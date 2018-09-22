@@ -347,19 +347,24 @@ const checkCommand = async function(msg, isMention) {
       command = command.slice(1);
       break;
     case ':':
-      if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member, bot))) {
-        if (await msg.channel.permissionsFor(msg.guild.me).has('MANAGE_MESSAGES')) {
-          msg.delete();
-        }
-        if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
-          msg.reply("you're not allowed to use this command.").then(mess => mess.delete(5000));
-        }
-        return;
-      }
       command = `@${command.slice(1)}`;
-      // check if its an admin command, if not you're allowed to use the normal version as admin (in any channel)
+      // Check if its an admin command, if not you're allowed to use the normal version as admin (in any channel)
       if (!commands[command]) {
         command = command.slice(1);
+      }
+      // Check if the command exists, to not just spam k: messages
+      if (commands[command]) {
+        if (!(msg.member && await data.isAdmin(msg.guild.id, msg.member, bot))) {
+          if (await msg.channel.permissionsFor(msg.guild.me).has('MANAGE_MESSAGES')) {
+            msg.delete();
+          }
+          if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
+            msg.reply("you're not allowed to use this command.").then(mess => mess.delete(5000));
+          }
+          return;
+        }
+      } else {
+        return;
       }
       break;
     default:
