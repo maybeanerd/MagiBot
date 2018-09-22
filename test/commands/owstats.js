@@ -70,27 +70,32 @@ module.exports = {
 
     // Get ranking TODO top heroes, emoji medals
     let qps = data.quickPlayStats;
+    val = `Games played: ${qps.games.played}, won: ${qps.games.won} (${Math.round((qps.games.won / qps.games.played) * 100)} %)
+     Awards:
+     cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.medalsBronze} Bronze)`;
+    if (!(qps.games.played || qps.games.won)) {
+      val = `No quickplay stats available for ${userName}#${battletag}`;
+    }
     info.push({
       name: 'Quickplay:',
-      value: `Averages:
-      eliminations: ${qps.eliminationsAvg}, damage done: ${qps.damageDoneAvg}, deaths: ${qps.deathsAvg}
-      final blows: ${qps.finalBlowsAvg}, healing done: ${qps.healingDoneAvg}, objective kills: ${qps.objectiveKillsAvg}
-      objective time: ${qps.objectiveTimeAvg}, solo kills: ${qps.soloKillsAvg}
-      Games played: ${qps.games.played}, won: ${qps.games.won} (${Math.round((qps.games.won / qps.games.played) * 100)} %)
-      Awards:
-      cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.medalsBronze} Bronze)`,
+      value: val,
       inline: false
     });
     qps = data.competitiveStats;
+    val = `Games played: ${qps.games.played}, won: ${qps.games.won} (${Math.round((qps.games.won / qps.games.played) * 100)} %)
+    Awards:
+    cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.medalsBronze} Bronze)`;
+    if (!(qps.games.played || qps.games.won)) {
+      val = `No ranking stats available for ${userName}#${battletag}`;
+    }
     info.push({
       name: 'Competitive:',
-      value: `Averages:
-      eliminations: ${qps.eliminationsAvg}, damage done: ${qps.damageDoneAvg}, deaths: ${qps.deathsAvg}
-      final blows: ${qps.finalBlowsAvg}, healing done: ${qps.healingDoneAvg}, objective kills: ${qps.objectiveKillsAvg}
-      objective time: ${qps.objectiveTimeAvg}, solo kills: ${qps.soloKillsAvg}
-      Games played: ${qps.games.played}, won: ${qps.games.won} (${Math.round((qps.games.won / qps.games.played) * 100)} %)
-      Awards:
-      cards: ${qps.awards.cards}, medals: ${qps.awards.medals} (${qps.awards.medalsGold} Gold, ${qps.awards.medalsSilver} Silver, ${qps.awards.medalsBronze} Bronze)`,
+      value: val,
+      inline: false
+    });
+    info.push({
+      name: 'Disclaimer:',
+      value: 'Since Blizzard made Overwatch profiles private the API is not really supported anymore, so values might be empty. We hope that there will be a better alternative in the future.',
       inline: false
     });
 
