@@ -17,6 +17,25 @@ async function getuser(userid, guildID) {
     return result.value;
   });
 }
+async function saltGuild(salter, guildID, add = 1, reset = false) {
+  MongoClient.connect(url).then(async mclient => {
+    const db = mclient.db('MagiBot');
+    const user = await db.collection('saltrank').findOne({ salter, guild: guildID });
+    if (!user) {
+      const myobj = { salter, salt: 1, guild: guildID };
+      await db.collection('saltrank').insertOne(myobj);
+    } else {
+      const slt = user.salt + add;
+      if (slt <= 0 || reset) {
+        await db.collection('saltrank').deleteOne({ salter, guild: guildID });
+      } else {
+        const update = { $set: { salt: slt } };
+        await db.collection('saltrank').updateOne({ salter, guild: guildID }, update);
+      }
+    }
+    mclient.close();
+  });
+}
 async function addSalt(userid, reporter, guildID) {
   return MongoClient.connect(url).then(async mclient => {
     const db = mclient.db('MagiBot');
@@ -29,13 +48,12 @@ async function addSalt(userid, reporter, guildID) {
     });
   });
 }
-
 async function updateUser(userid, update, guildID) {
   MongoClient.connect(url, (err, mclient) => {
     if (err) throw err;
     const db = mclient.db('MagiBot');
-    db.collection('users').updateOne({ userID: userid, guildID }, update, (err, res) => {
-      if (err) throw err;
+    db.collection('users').updateOne({ userID: userid, guildID }, update, err2 => {
+      if (err2) throw err2;
       mclient.close();
     });
   });
@@ -54,6 +72,40 @@ async function saltDowntimeDone(userid1, userid2) {
       return ret;
     }
     return 2;
+  });
+}
+async function firstSettings(guildID) {
+  return MongoClient.connect(url).then(async mclient => {
+    const db = mclient.db('MagiBot');
+    await db.collection('settings').insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix, lastConnected: new Date() });
+    const ret = await db.collection('settings').findOne({ _id: guildID });
+    mclient.close();
+    return ret;
+  });
+}
+async function getSettings(guildID) {
+  return MongoClient.connect(url).then(async mclient => {
+    const db = mclient.db('MagiBot');
+    let result = await db.collection('settings').findOne({ _id: guildID });
+    if (!result) {
+      result = await firstSettings(guildID);
+    }
+    mclient.close();
+    return result;
+  });
+}
+async function checkGuild(id) {
+  // create settings
+  if (await getSettings(id)) {
+    return true;
+  }
+  return false;
+}
+async function toggleDBLvoted(userid, votd) {
+  MongoClient.connect(url).then(async mclient => {
+    const db = await mclient.db('MagiBot');
+    await db.collection('DBLreminder').updateOne({ _id: userid }, { $set: { voted: votd } });
+    mclient.close();
   });
 }
 
@@ -133,10 +185,10 @@ async function onHour(bot, isFirst) {
   await MongoClient.connect(url).then(async mclient => {
     const db = await mclient.db('MagiBot');
     // find all guilds that have not connected for a week or dont have the lastConnected attribute at all
-    const guilds = await db.collection('settings').find({ $or: [{ lastConnected: { $lt: nd } }, { lastConnected: { $exists: false } }] }).toArray();
+    const guilds2 = await db.collection('settings').find({ $or: [{ lastConnected: { $lt: nd } }, { lastConnected: { $exists: false } }] }).toArray();
 
-    for (const g in guilds) {
-      const guildID = guilds[g]._id;
+    for (const g in guilds2) {
+      const guildID = guilds2[g]._id;
       // ignore salt and saltrank, as they are removed after 7 days anyways
 
       // remove all data saved for those guilds
@@ -151,11 +203,7 @@ async function onHour(bot, isFirst) {
 
 async function dblReminder(bot) {
   const d = new Date();
-
-
   const h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes() + 5, 0, 0);
-
-
   const e = h - d;
   if (e > 100) { // some arbitrary time period
     setTimeout(dblReminder.bind(null, bot), e);
@@ -170,7 +218,9 @@ async function dblReminder(bot) {
         const usr = users[u];
         user = await bot.fetchUser(user);
         let dblFailed = false;
-        const hasVoted = await dbl.hasVoted(user.id).catch(() => { dblFailed = true; });
+        const hasVoted = await dbl.hasVoted(user.id).catch(() => {
+          dblFailed = true;
+        });
         if (!dblFailed) {
           if (!hasVoted && !usr.voted) {
             await user.send(`Hey there ${user} you can now vote for me again! (<https://discordbots.org/bot/384820232583249921> and <https://bots.ondiscord.xyz/bots/384820232583249921>)\nIf you don't want these reminders anymore use \`k.dbl\` in a server im on.`).catch(err => { });
@@ -183,32 +233,6 @@ async function dblReminder(bot) {
     }
   });
 }
-async function voteCheck(bot) {
-  const d = new Date();
-
-
-  const h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 10, 0);
-
-
-  const e = h - d;
-  if (e > 100) { // some arbitrary time period
-    setTimeout(voteCheck.bind(null, bot), e);
-  }
-  // do vote stuff
-  MongoClient.connect(url).then(async mclient => {
-    const db = await mclient.db('MagiBot');
-    const nd = new Date();
-    const votes = await db.collection('votes').find({ date: { $lte: nd } }).toArray();
-    for (const i in votes) {
-      const vote = votes[i];
-      endVote(vote, bot);
-      db.collection('votes').deleteOne(vote);
-    }
-    mclient.close();
-  });
-  // endof vote stuff
-}
-
 const reactions = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯', '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹'];
 // this should take care of everything that needs to be done when a vote ends
 async function endVote(vote, bot) {
@@ -257,7 +281,36 @@ async function endVote(vote, bot) {
     }
   }
 }
+async function voteCheck(bot) {
+  const d = new Date();
+  const h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds() + 10, 0);
+  const e = h - d;
+  if (e > 100) { // some arbitrary time period
+    setTimeout(voteCheck.bind(null, bot), e);
+  }
+  // do vote stuff
+  MongoClient.connect(url).then(async mclient => {
+    const db = await mclient.db('MagiBot');
+    const nd = new Date();
+    const votes = await db.collection('votes').find({ date: { $lte: nd } }).toArray();
+    for (const i in votes) {
+      const vote = votes[i];
+      endVote(vote, bot);
+      db.collection('votes').deleteOne(vote);
+    }
+    mclient.close();
+  });
+  // endof vote stuff
+}
 
+async function isInDBL(userID) {
+  return MongoClient.connect(url).then(async mclient => {
+    const db = await mclient.db('MagiBot');
+    const ret = await db.collection('DBLreminder').find({ _id: userID }).count();
+    mclient.close();
+    return ret;
+  });
+}
 
 async function toggleDBL(userID, add) {
   MongoClient.connect(url).then(async mclient => {
@@ -282,24 +335,48 @@ async function toggleStillMuted(userID, guildID, add) {
     mclient.close();
   });
 }
-
-async function toggleDBLvoted(userid, votd) {
-  MongoClient.connect(url).then(async mclient => {
-    const db = await mclient.db('MagiBot');
-    await db.collection('DBLreminder').updateOne({ _id: userid }, { $set: { voted: votd } });
-    mclient.close();
-  });
+async function getSaltKing(guildID) {
+  const settings = await getSettings(guildID);
+  return settings.saltKing;
 }
-
-async function isInDBL(userID) {
+async function getSaltRole(guildID) {
+  const set = await getSettings(guildID);
+  return set.saltRole;
+}
+async function setSettings(guildID, settings) {
   return MongoClient.connect(url).then(async mclient => {
-    const db = await mclient.db('MagiBot');
-    const ret = await db.collection('DBLreminder').find({ _id: userID }).count();
+    const db = mclient.db('MagiBot');
+    if (await getSettings(guildID)) {
+      await db.collection('settings').updateOne({ _id: guildID }, { $set: settings });
+    }
     mclient.close();
-    return ret;
+    return true;
   });
 }
-
+async function setSaltRole(guildID, roleID) {
+  await setSettings(guildID, { saltRole: roleID });
+}
+async function getNotChannel(guildID) {
+  const set = await getSettings(guildID);
+  return set.notChannel;
+}
+// top 5 salty people
+async function topSalt(guildID) {
+  return MongoClient.connect(url).then(async mclient => {
+    const db = mclient.db('MagiBot');
+    const result = await db.collection('saltrank').find({ guild: guildID }).sort({ salt: -1 })
+      .limit(5)
+      .toArray();
+    mclient.close();
+    if (!result) {
+      return [];
+    }
+    return result;
+  });
+}
+async function setSaltKing(guildID, userID) {
+  return setSettings(guildID, { saltKing: userID });
+}
 async function updateSaltKing(G) {
   if (await G.available && G.me) {
     if (await G.me.hasPermission('MANAGE_ROLES', false, true)) {
@@ -366,7 +443,9 @@ async function updateSaltKing(G) {
     }
   }
 }
-
+async function setNotChannel(guildID, channelID) {
+  setSettings(guildID, { notChannel: channelID });
+}
 async function sendUpdate(update, bot) {
   await MongoClient.connect(url).then(async mclient => {
     const db = mclient.db('MagiBot');
@@ -394,31 +473,6 @@ async function sendUpdate(update, bot) {
     mclient.close();
   });
 }
-
-// top 5 salty people
-async function topSalt(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
-    const db = mclient.db('MagiBot');
-    const result = await db.collection('saltrank').find({ guild: guildID }).sort({ salt: -1 })
-      .limit(5)
-      .toArray();
-    mclient.close();
-    if (!result) {
-      return [];
-    }
-    return result;
-  });
-}
-
-async function setNotChannel(guildID, channelID) {
-  setSettings(guildID, { notChannel: channelID });
-}
-
-async function getNotChannel(guildID) {
-  const set = await getSettings(guildID);
-  return set.notChannel;
-}
-
 
 async function getSalt(userid, guildID) {
   return MongoClient.connect(url).then(async mclient => {
@@ -454,52 +508,9 @@ async function checks(userid, guildID) {
   // else
   return false;
 }
-
-async function checkGuild(id) {
-  // create settings
-  if (await getSettings(id)) {
-    return true;
-  }
-  return false;
+async function setPrefix(guildID, pref) {
+  return setSettings(guildID, { prefix: pref });
 }
-
-async function setSaltRole(guildID, roleID) {
-  await setSettings(guildID, { saltRole: roleID });
-}
-
-async function getSaltRole(guildID) {
-  const set = await getSettings(guildID);
-  return set.saltRole;
-}
-
-async function setSettings(guildID, settings) {
-  return MongoClient.connect(url).then(async mclient => {
-    const db = mclient.db('MagiBot');
-    if (await getSettings(guildID)) {
-      await db.collection('settings').updateOne({ _id: guildID }, { $set: settings });
-    }
-    mclient.close();
-    return true;
-  });
-}
-
-async function firstSettings(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
-    const db = mclient.db('MagiBot');
-    await db.collection('settings').insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix, lastConnected: new Date() });
-    const ret = await db.collection('settings').findOne({ _id: guildID });
-    mclient.close();
-    return ret;
-  });
-}
-async function getSaltKing(guildID) {
-  const settings = await getSettings(guildID);
-  return settings.saltKing;
-}
-async function setSaltKing(guildID, userID) {
-  return setSettings(guildID, { saltKing: userID });
-}
-
 async function getPrefix(guildID) {
   let settings = await getSettings(guildID);
   settings = settings.prefix;
@@ -509,43 +520,6 @@ async function getPrefix(guildID) {
   }
   return settings;
 }
-
-async function setPrefix(guildID, pref) {
-  return setSettings(guildID, { prefix: pref });
-}
-
-async function saltGuild(salter, guildID, add = 1, reset = false) {
-  MongoClient.connect(url).then(async mclient => {
-    const db = mclient.db('MagiBot');
-    const user = await db.collection('saltrank').findOne({ salter, guild: guildID });
-    if (!user) {
-      const myobj = { salter, salt: 1, guild: guildID };
-      await db.collection('saltrank').insertOne(myobj);
-    } else {
-      const slt = user.salt + add;
-      if (slt <= 0 || reset) {
-        await db.collection('saltrank').deleteOne({ salter, guild: guildID });
-      } else {
-        const update = { $set: { salt: slt } };
-        await db.collection('saltrank').updateOne({ salter, guild: guildID }, update);
-      }
-    }
-    mclient.close();
-  });
-}
-
-async function getSettings(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
-    const db = mclient.db('MagiBot');
-    let result = await db.collection('settings').findOne({ _id: guildID });
-    if (!result) {
-      result = await firstSettings(guildID);
-    }
-    mclient.close();
-    return result;
-  });
-}
-
 
 async function getAdminRole(guildID) {
   const settings = await getSettings(guildID);
@@ -609,15 +583,13 @@ async function setJoinChannel(guildID, cid, insert) {
   const settings = { joinChannels: channels };
   return setSettings(guildID, settings);
 }
-
-async function isBlacklistedUser(userid, guildID) {
-  const users = await getBlacklistedUser(guildID);
-  return users.includes(userid);
-}
-
 async function getBlacklistedUser(guildID) {
   const settings = await getSettings(guildID);
   return settings.blacklistedUsers;
+}
+async function isBlacklistedUser(userid, guildID) {
+  const users = await getBlacklistedUser(guildID);
+  return users.includes(userid);
 }
 
 async function setBlacklistedUser(userid, guildID, insert) {
@@ -718,7 +690,7 @@ module.exports = {
   },
   async getUsage(userid, guildID) {
     const user = await getuser(userid, guildID);
-    return parseInt(user.botusage);
+    return parseInt(user.botusage, 10);
   },
   async remOldestSalt(userid, G) {
     return MongoClient.connect(url).then(async mclient => {
