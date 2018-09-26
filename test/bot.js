@@ -23,7 +23,7 @@ process.on('uncaughtException', function catcher(err) {
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`**old catch: Uncaught Exception:**\n\`\`\`${err}\`\`\``);
+  chann.send(`**Outer Uncaught Exception:**\n\`\`\`${err}\`\`\``);
   console.error(`Uncaught Exception:\n${err}`);
 });
 process.on('unhandledRejection', function catcher(err) {
@@ -31,7 +31,7 @@ process.on('unhandledRejection', function catcher(err) {
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`old catch: **Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+  chann.send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
   console.error(`Unhandled promise rejection:\n${err}`);
 });
 /* eslint-enable prefer-arrow-callback */
@@ -487,11 +487,13 @@ bot.on('voiceStateUpdate', async (o, n) => {
         const sound = await data.getSound(n.id, n.guild.id);
         if (sound) {
           n.voiceChannel.join().then(connection => {
+            if (connection) {
             // TODO use connection.play when discord.js updates
-            const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
-            dispatcher.once('end', () => {
-              connection.disconnect();
-            });
+              const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+              dispatcher.once('end', () => {
+                connection.disconnect();
+              });
+            }
           });
         }
       }
