@@ -599,6 +599,7 @@ async function setBlacklistedUser(userid, guildID, insert) {
   const settings = { blacklistedUsers: users };
   return setSettings(guildID, settings);
 }
+/* eslint-disable */
 // TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID) {
   const settings = await getSettings(guildID);
@@ -606,9 +607,9 @@ async function getBlacklistedEveryone(guildID) {
 }
 async function setBlacklistedEveryone(guildID, cid, insert) {
 }
+/* eslint-enable */
 
-
-async function joinsound(userid, surl, guildID) {
+function joinsound(userid, surl, guildID) {
   return MongoClient.connect(url).then(async mclient => {
     const db = mclient.db('MagiBot');
     if (await checks(userid, guildID)) {
