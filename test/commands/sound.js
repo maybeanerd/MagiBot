@@ -14,8 +14,8 @@ function printHelp() {
   });
 
   info.push({
-    name: '(and upload soundfile)',
-    value: 'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to put the command into the message with which you upload your file.'
+    name: '(attach soundfile to this command)',
+    value: 'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.'
   });
 
   info.push({
@@ -64,7 +64,7 @@ module.exports = {
           msg.reply('Something went wrong...');
         }
       } else {
-        msg.reply(`this is not a valid command. Use \`${bot.PREFIXES[msg.guild.id]}.help sound\` for more info.`);
+        msg.reply(`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${bot.PREFIXES[msg.guild.id]}.help sound\` for more info.`);
       }
     }
   },
