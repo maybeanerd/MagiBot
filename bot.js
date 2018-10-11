@@ -492,6 +492,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
               const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
               dispatcher.once('end', () => {
                 connection.disconnect();
+                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+              });
+              dispatcher.once('error', () => {
+                connection.disconnect();
+                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
               });
             }
           });
