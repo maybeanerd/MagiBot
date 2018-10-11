@@ -1,5 +1,7 @@
+const si = require('systeminformation');
+
 module.exports = {
-  main: (bot, msg) => {
+  main: async (bot, msg) => {
     const info = [];
     const guilds = bot.guilds.array();
 
@@ -45,14 +47,11 @@ module.exports = {
       inline: false
     });
     if (msg.author.id == bot.OWNERID) {
-      const used = process.memoryUsage();
-      let val = '';
-      for (const key in used) {
-        val += `${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB\n`;
-      }
+      const memInfo = await si.mem();
       info.push({
         name: 'Memory usage:',
-        value: val,
+        value: `Total available memory: ${memInfo.total / 1048576} MB
+        Used memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
         inline: false
       });
     }
