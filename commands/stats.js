@@ -50,8 +50,7 @@ module.exports = {
       const memInfo = await si.mem();
       info.push({
         name: 'Memory usage:',
-        value: `Total available memory: ${memInfo.total / 1048576} MB
-        Used memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
+        value: `Total available memory: ${memInfo.total / 1048576} MB\nUsed memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
         inline: false
       });
     }
