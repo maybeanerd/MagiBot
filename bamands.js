@@ -95,7 +95,11 @@ module.exports = {
     msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.\nIf you can reproduce this, consider using \`${bot.PREFIXES[msg.guild.id]}.bug <bugreport>\` or join the support discord (link via \`${bot.PREFIXES[msg.guild.id]}.info\`) to tell us exactly how.`).catch(() => {});
   },
   catchErrorOnDiscord: (bot, err) => {
-    const chann = bot.channels.get('414809410448261132');
-    chann.send(`Caught error: ${err}`);
+    try {
+      const chann = bot.channels.get('414809410448261132');
+      chann.send(`Caught error: ${err}`);
+    } catch (error) {
+      console.error(error);
+    }
   }
 };
