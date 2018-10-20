@@ -229,6 +229,9 @@ module.exports = {
                 } else if (reacts.first()) {
                   msg.channel.send(`successfully canceled queue **${topic}**`);
                   used[msg.guild.id] = false;
+                } else {
+                  msg.channel.send(`Cancelled queue creation of **${topic}** due to timeout.`);
+                  used[msg.guild.id] = false;
                 }
               });
             });
