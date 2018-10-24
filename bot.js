@@ -473,7 +473,8 @@ bot.on('error', err => {
 
 bot.on('voiceStateUpdate', async (o, n) => {
   try {
-  // check if voice channel actually changed, don't mute bots
+    const newVc = n.voiceChannel;
+    // check if voice channel actually changed, don't mute bots
     if (!n.user.bot && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
     // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && n.voiceChannel && await data.isStillMuted(n.id, n.guild.id)) {
@@ -491,11 +492,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
         // save the unmute for later
           data.toggleStillMuted(n.id, n.guild.id, true);
         }
-      } else if (n.voiceChannel && !await n.guild.me.voiceChannel && n.id != bot.user.id && !await data.isBlacklistedUser(n.id, n.guild.id) && await data.joinable(n.guild.id, n.voiceChannelID)) {
-        if (await n.voiceChannel.permissionsFor(n.guild.me).has('CONNECT')) {
+      } else if (newVc && !n.guild.me.voiceChannel && n.id != bot.user.id && !await data.isBlacklistedUser(n.id, n.guild.id) && await data.joinable(n.guild.id, n.voiceChannelID)) {
+        if (newVc.permissionsFor(n.guild.me).has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
-            n.voiceChannel.join().then(connection => {
+            newVc.join().then(connection => {
               if (connection) {
                 // TODO use connection.play when discord.js updates
                 const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
