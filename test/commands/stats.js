@@ -48,9 +48,12 @@ module.exports = {
     });
     if (msg.author.id == bot.OWNERID) {
       const memInfo = await si.mem();
+      const memUsedByProccess = process.memoryUsage().rss;
       info.push({
         name: 'Memory usage:',
-        value: `Total available memory: ${memInfo.total / 1048576} MB\nUsed memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
+        value: `Total available memory: ${memInfo.total / 1048576} MB\n
+Used memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)\n
+Memory actually used by this bot: ${memUsedByProccess / 1048576} MB (${Math.round((memUsedByProccess / memInfo.used) * 100)}% of used memory)`,
         inline: false
       });
     }
