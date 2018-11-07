@@ -342,13 +342,16 @@ const checkCommand = async function(msg, isMention) {
       msg.content = msg.content.replace(/^\s+/g, ''); // delete leading spaces
     }
     if (command) {
+      let commandVal;
       const pre = command.charAt(0);
       switch (pre) {
       case '.':
         command = command.slice(1);
+        commandVal = command;
         break;
       case ':':
         command = `@${command.slice(1)}`;
+        commandVal = command.sclice(1);
         // Check if its an admin command, if not you're allowed to use the normal version as admin (in any channel)
         if (!commands[command]) {
           command = command.slice(1);
@@ -384,7 +387,7 @@ const checkCommand = async function(msg, isMention) {
               try {
                 await commands[command].main(bot, msg);
               } catch (err) {
-                bamands.catchError(err, bot, msg, `${bot.PREFIXES[msg.guild.id]}${pre}${command.slice(1)}`);
+                bamands.catchError(err, bot, msg, `${bot.PREFIXES[msg.guild.id]}${pre}${commandVal}`);
               }
               data.usageUp(msg.author.id, msg.guild.id);
             } else if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
