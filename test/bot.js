@@ -351,7 +351,7 @@ const checkCommand = async function(msg, isMention) {
         break;
       case ':':
         command = `@${command.slice(1)}`;
-        commandVal = command.sclice(1);
+        commandVal = command.slice(1);
         // Check if its an admin command, if not you're allowed to use the normal version as admin (in any channel)
         if (!commands[command]) {
           command = command.slice(1);
