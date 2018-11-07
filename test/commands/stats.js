@@ -51,9 +51,9 @@ module.exports = {
       const memUsedByProccess = process.memoryUsage().rss;
       info.push({
         name: 'Memory usage:',
-        value: `Total available memory: ${memInfo.total / 1048576} MB\n
-Used memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)\n
-Memory actually used by this bot: ${memUsedByProccess / 1048576} MB (${Math.round((memUsedByProccess / memInfo.used) * 100)}% of used memory)`,
+        value: `Total available memory: ${Match.round(memInfo.total / 1048576)} MB
+Used memory: ${memInfo.used / 1048576} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)
+Memory actually used by this bot: ${Math.round(memUsedByProccess / 1048576)} MB (${Math.round((memUsedByProccess / memInfo.used) * 100)}% of used memory)`,
         inline: false
       });
     }
