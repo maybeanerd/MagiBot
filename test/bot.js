@@ -326,7 +326,7 @@ const loadCommands = function() {
 
 const checkCommand = async function(msg, isMention) {
   try {
-  // ignore blacklisted users
+    // ignore blacklisted users
     if (await data.isBlacklistedUser(await msg.author.id, await msg.guild.id)) {
       msg.delete();
       return;
@@ -378,7 +378,7 @@ const checkCommand = async function(msg, isMention) {
         if (pre == ':' || await data.commandAllowed(msg.guild.id, msg.channel.id)) {
           const perms = commands[command].perm;
           if (!perms || await msg.channel.permissionsFor(msg.guild.me).has(perms)) {
-          // cooldown for command usage
+            // cooldown for command usage
             if (!userCooldowns.has(msg.author.id)) {
               userCooldowns.add(msg.author.id);
               setTimeout(() => {
@@ -393,7 +393,7 @@ const checkCommand = async function(msg, isMention) {
             } else if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
               msg.reply("whoa cool down, you're using commands too quick!");
             }
-          // endof cooldown management
+            // endof cooldown management
           } else if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
             msg.channel.send(`I don't have the permissions needed for this command. (${perms}) `);
           }
@@ -409,19 +409,25 @@ const checkCommand = async function(msg, isMention) {
     bamands.catchErrorOnDiscord(bot, `in check command: ${err}`);
   }
 };
-
+// fires on startup and on reconnect
+let justStartedUp = true;
 bot.on('ready', () => {
-  console.log(`Ready to begin! Serving in ${bot.guilds.array().length} servers.`);
-  bot.user.setActivity(`${bot.PREFIX}.help`, { type: 'WATCHING' });
-  data.startup(bot);
+  if (justStartedUp) {
+    console.log(`Ready to begin! Serving in ${bot.guilds.array().length} servers.`);
+    data.startup(bot);
+    justStartedUp = false;
+  }
+  bot.user.setPresence({ game: { name: `${bot.PREFIX}.help`, type: 'watching', url: 'https://bots.ondiscord.xyz/bots/384820232583249921' }, status: 'online' });
   if (bot.DETAILED_LOGGING) {
     console.log(`By name: ${bot.guilds.array()}`);
   }
-  bot.user.setStatus('online', '');
-  loadCommands();
   data.getPrefixesE(bot);
   const chann = bot.channels.get('382233880469438465');
-  chann.send('Running startup...');
+  if (justStartedUp) {
+    chann.send('Running startup...');
+  } else {
+    chann.send('Just reconnected to Discord...');
+  }
 });
 
 
@@ -469,9 +475,8 @@ bot.on('guildDelete', guild => {
 });
 
 bot.on('error', err => {
-  console.log('————— BIG ERROR —————');
+  bamands.catchErrorOnDiscord(bot, err);
   console.log(err);
-  console.log('——— END BIG ERROR ———');
 });
 
 bot.on('voiceStateUpdate', async (o, n) => {
@@ -479,20 +484,20 @@ bot.on('voiceStateUpdate', async (o, n) => {
     const newVc = n.voiceChannel;
     // check if voice channel actually changed, don't mute bots
     if (!n.user.bot && (!o.voiceChannel || o.voiceChannelID != n.voiceChannelID)) {
-    // is muted and joined a vc? maybe still muted from queue
+      // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && n.voiceChannel && await data.isStillMuted(n.id, n.guild.id)) {
         n.setMute(false, 'was still muted from a queue which user disconnected from');
         data.toggleStillMuted(n.id, n.guild.id, false);
       }
       if (!n.serverMute && n.voiceChannel && bot.queueVoiceChannels[n.guild.id] && bot.queueVoiceChannels[n.guild.id] == n.voiceChannelID) {
-      // user joined a muted channel
+        // user joined a muted channel
         n.setMute(true, 'joined active queue voice channel');
       } else if (n.serverMute && o.voiceChannel && bot.queueVoiceChannels[o.guild.id] && bot.queueVoiceChannels[o.guild.id] == o.voiceChannelID) {
-      // user left a muted channel
+        // user left a muted channel
         if (n.voiceChannel) {
           n.setMute(false, 'left active queue voice channel');
         } else {
-        // save the unmute for later
+          // save the unmute for later
           data.toggleStillMuted(n.id, n.guild.id, true);
         }
       } else if (newVc && !n.guild.me.voiceChannel && n.id != bot.user.id && !await data.isBlacklistedUser(n.id, n.guild.id) && await data.joinable(n.guild.id, n.voiceChannelID)) {
@@ -526,5 +531,5 @@ bot.on('disconnected', () => {
   console.log('Disconnected!');
 });
 
-
-bot.login(bot.TOKEN);
+loadCommands(); // load all commands
+bot.login(bot.TOKEN); // connect to discord
