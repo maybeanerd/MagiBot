@@ -412,22 +412,16 @@ const checkCommand = async function(msg, isMention) {
 // fires on startup and on reconnect
 let justStartedUp = true;
 bot.on('ready', () => {
-  if (justStartedUp) {
-    console.log(`Ready to begin! Serving in ${bot.guilds.array().length} servers.`);
-    data.startup(bot);
-    justStartedUp = false;
-  }
-  bot.user.setPresence({ game: { name: `${bot.PREFIX}.help`, type: 'watching', url: 'https://bots.ondiscord.xyz/bots/384820232583249921' }, status: 'online' });
-  if (bot.DETAILED_LOGGING) {
-    console.log(`By name: ${bot.guilds.array()}`);
-  }
-  data.getPrefixesE(bot);
   const chann = bot.channels.get('382233880469438465');
   if (justStartedUp) {
     chann.send('Running startup...');
+    data.startup(bot);
+    justStartedUp = false;
   } else {
     chann.send('Just reconnected to Discord...');
   }
+  bot.user.setPresence({ game: { name: `${bot.PREFIX}.help`, type: 'watching', url: 'https://bots.ondiscord.xyz/bots/384820232583249921' }, status: 'online' });
+  data.getPrefixesE(bot);
 });
 
 
@@ -456,8 +450,8 @@ bot.on('guildCreate', guild => {
   if (guild.available) {
     guildPrefixStartup(guild);
     guild.owner.send(`Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${
-      bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands\n\t- add some text channels where users can use the bot\n\t- add voice channels in which the bot is allowed to ` +
-      'join to use joinsounds\n\t- add a notification channel where bot updates and information will be posted\n\nTo make sure the bot can do everything he needs to give him a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev').catch(() => { });
+      bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${bot.PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${bot.PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to ` +
+    `join to use joinsounds (\`${bot.PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${bot.PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`).catch(() => { });
     const chan = bot.channels.get('408611226998800390');
     if (chan) {
       chan.send(`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`);
