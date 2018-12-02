@@ -254,7 +254,10 @@ async function endVote(vote, bot) {
       }
       if (finalReact[0]) {
         if (finalReact.length > 1) {
-          let str = `** ${vote.topic} ** ended.\n\nThere was a tie between `;
+          let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
+          if (vote.authorID) {
+            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
+          }
           for (const i in finalReact) {
             str += `**${vote.options[finalReact[i].reaction]}**`;
             if (i < finalReact.length - 2) {
@@ -266,10 +269,18 @@ async function endVote(vote, bot) {
           str += ` with each having ** ${finalReact[0].count - 1} ** votes.`;
           await msg.edit(str);
         } else {
-          await msg.edit(`**${vote.topic}** ended.\n\nThe result is **${vote.options[finalReact[0].reaction]}** with **${finalReact[0].count - 1}** votes.`);
+          let str = `**${vote.topic}** ended.\n\nThe result is **${vote.options[finalReact[0].reaction]}** with **${finalReact[0].count - 1}** votes.`;
+          if (vote.authorID) {
+            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThe result is **${vote.options[finalReact[0].reaction]}** with **${finalReact[0].count - 1}** votes.`;
+          }
+          await msg.edit(str);
         }
       } else {
-        await msg.edit(`**${vote.topic}** ended.\n\nCould not compute a result.`);
+        let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
+        if (vote.authorID) {
+          str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nCould not compute a result.`;
+        }
+        await msg.edit(str);
       }
       await msg.clearReactions();
     }

@@ -78,12 +78,12 @@ module.exports = {
                             if (reacts.first() && reacts.first().emoji.name == '☑') {
                               const dat = new Date();
                               const date = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + time[0], dat.getHours() + time[1], dat.getMinutes() + time[2], dat.getSeconds(), 0);
-                              msg.channel.send(`**${topic}**\n*ends on ${date}*\n\n${str}`).then(async ms => {
+                              msg.channel.send(`**${topic}**\n*by ${msg.author}, ends on ${date}*\n\n${str}`).then(async ms => {
                                 for (const i in args) {
                                   await ms.react(reactions[i]);
                                 }
                                 // vote structure
-                                const vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic, date, guildid: ms.guild.id };
+                                const vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic, date, guildid: ms.guild.id, authorID };
                                 data.addVote(vote);
                               });
                             } else if (reacts.first()) {
