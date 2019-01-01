@@ -15,8 +15,9 @@ function getuser(userid, guildID) {
     return result.value;
   });
 }
-function saltGuild(salter, guildID, add = 1, reset = false) {
-  MongoClient.connect(url).then(async mclient => {
+// eslint-disable-next-line require-await
+async function saltGuild(salter, guildID, add = 1, reset = false) {
+  return MongoClient.connect(url).then(async mclient => {
     const db = mclient.db('MagiBot');
     const user = await db.collection('saltrank').findOne({ salter, guild: guildID });
     if (!user) {
@@ -34,13 +35,14 @@ function saltGuild(salter, guildID, add = 1, reset = false) {
     mclient.close();
   });
 }
-function addSalt(userid, reporter, guildID) {
+// eslint-disable-next-line require-await
+async function addSalt(userid, reporter, guildID) {
   return MongoClient.connect(url).then(mclient => {
     const db = mclient.db('MagiBot');
     const date = new Date();
     const myobj = { salter: userid, reporter, date, guild: guildID };
-    return db.collection('salt').insertOne(myobj).then(() => {
-      saltGuild(userid, guildID, 1);
+    return db.collection('salt').insertOne(myobj).then(async () => {
+      await saltGuild(userid, guildID, 1);
       mclient.close();
       return 0;
     });
