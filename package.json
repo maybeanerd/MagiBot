@@ -11,13 +11,17 @@
     "axios": "^0.18.0",
     "blapi": "^0.4.5",
     "bufferutil": "^3.0.5",
+    "dblapi.js": "^2.3.0",
     "discord.js": "^11.4.2",
     "erlpack": "github:hammerandchisel/erlpack",
     "ffmpeg-binaries": "^3.2.2-3",
+    "ffprobe": "^1.1.0",
+    "ffprobe-static": "^3.0.0",
     "forever": "^0.15.3",
     "mongodb": "^3.1.10",
     "node-opus": "^0.3.1",
     "opusscript": "^0.0.4",
+    "systeminformation": "^3.54.0",
     "uws": "^9.148.0"
   },
   "devDependencies": {

@@ -23,16 +23,16 @@ process.on('uncaughtException', function catcher(err) {
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`**Outer Uncaught Exception:**\n\`\`\`${err}\`\`\``);
   console.error(`Uncaught Exception:\n${err}`);
+  chann.send(`**Outer Uncaught Exception:**\n\`\`\`${err}\`\`\``);
 });
 process.on('unhandledRejection', function catcher(err) {
   const chann = bot.channels.get('414809410448261132');
   if (err.stack) {
     err = err.stack;
   }
-  chann.send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
   console.error(`Unhandled promise rejection:\n${err}`);
+  chann.send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
 });
 /* eslint-enable prefer-arrow-callback */
 
