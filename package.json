@@ -8,6 +8,7 @@
     "test": "test"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "bufferutil": "^3.0.3",
     "discord.js": "^11.2.1",
     "ffmpeg-binaries": "^3.2.2-3",
