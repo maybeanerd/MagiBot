@@ -10,7 +10,7 @@ module.exports = {
 
     info.push({
       name: 'How to support MagiBot',
-      value: `Vote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *${bot.PREFIXES[msg.guild.id]}.dbl*)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)`,
+      value: `Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nVote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *${bot.PREFIXES[msg.guild.id]}.dbl*)`,
       inline: false
     });
 
