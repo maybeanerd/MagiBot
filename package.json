@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "blapi": "^0.4.5",
     "bufferutil": "^3.0.3",
     "discord.js": "^11.2.1",
     "ffmpeg-binaries": "^3.2.2-3",
