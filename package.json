@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "blapi": "^0.4.5",
+    "blapi": "^1.0.0",
     "bufferutil": "^3.0.5",
     "dblapi.js": "^2.3.0",
     "discord.js": "^11.4.2",
