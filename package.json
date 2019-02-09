@@ -29,7 +29,10 @@
     "eslint-config-aqua": "^4.3.4"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "forever start bot.js ; forever start ./test/bot.js ; forever start ./teapot/bot.js",
+    "stop": "forever stop bot.js ; forever stop ./test/bot.js ; forever stop ./teapot/bot.js"
+
   },
   "repository": {
     "type": "git",
