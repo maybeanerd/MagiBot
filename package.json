@@ -8,7 +8,7 @@
     "test": "test"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "blapi": "^1.0.0",
     "bufferutil": "^3.0.5",
     "dblapi.js": "^2.3.0",
