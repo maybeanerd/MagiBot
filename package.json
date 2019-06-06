@@ -8,31 +8,34 @@
     "test": "test"
   },
   "dependencies": {
-    "axios": "^0.18.0",
-    "blapi": "^1.0.0",
-    "bufferutil": "^3.0.5",
+    "@discordjs/uws": "^10.149.0",
+    "axios": "^0.19.0",
+    "babel-eslint": "^9.0.0",
+    "blapi": "^1.1.0",
+    "bufferutil": "^4.0.1",
     "dblapi.js": "^2.3.0",
-    "discord.js": "^11.4.2",
-    "erlpack": "github:hammerandchisel/erlpack",
-    "ffmpeg-binaries": "^3.2.2-3",
+    "discord.js": "^11.5.1",
+    "erlpack": "github:discordapp/erlpack",
+    "eslint-plugin-vue": "^5.2.2",
+    "ffmpeg-binaries": "^3.2.2",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
-    "forever": "^0.15.3",
-    "mongodb": "^3.1.10",
-    "node-opus": "^0.3.1",
-    "opusscript": "^0.0.4",
-    "systeminformation": "^3.54.0",
-    "uws": "^9.148.0"
+    "forever": "^1.0.0",
+    "libsodium-wrappers": "^0.7.4",
+    "mongodb": "^3.2.7",
+    "node-opus": "^0.2.9",
+    "opusscript": "0.0.6",
+    "systeminformation": "^4.9.0",
+    "uws": "^100.0.1"
   },
   "devDependencies": {
-    "eslint": "^5.5.0",
-    "eslint-config-aqua": "^4.3.4"
+    "eslint": "^5.16.0",
+    "eslint-config-aqua": "^6.0.0"
   },
   "scripts": {
     "lint": "eslint .",
     "start": "forever start bot.js ; forever start ./test/bot.js ; forever start ./teapot/bot.js",
     "stop": "forever stop bot.js ; forever stop ./test/bot.js ; forever stop ./teapot/bot.js"
-
   },
   "repository": {
     "type": "git",
