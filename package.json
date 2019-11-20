@@ -25,7 +25,7 @@
     "mongodb": "^3.2.7",
     "node-opus": "^0.2.9",
     "opusscript": "0.0.6",
-    "systeminformation": "^4.9.0",
+    "systeminformation": "^4.15.3",
     "uws": "^100.0.1"
   },
   "devDependencies": {
