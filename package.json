@@ -10,7 +10,7 @@
   "dependencies": {
     "@discordjs/uws": "^10.149.0",
     "axios": "^0.19.0",
-    "babel-eslint": "^9.0.0",
+    "babel-eslint": "^10.0.3",
     "blapi": "^1.1.0",
     "bufferutil": "^4.0.1",
     "dblapi.js": "^2.3.0",
