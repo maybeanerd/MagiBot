@@ -23,7 +23,7 @@
     "forever": "^1.0.0",
     "libsodium-wrappers": "^0.7.4",
     "mongodb": "^3.2.7",
-    "node-opus": "^0.2.9",
+    "node-opus": "^0.3.3",
     "opusscript": "0.0.6",
     "systeminformation": "^4.9.0",
     "uws": "^100.0.1"
