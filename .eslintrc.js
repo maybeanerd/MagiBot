@@ -21,7 +21,6 @@ module.exports = {
       },
     ],
     camelcase: 0, //'warn',
-    'vue/component-name-in-template-casing': ['error', 'PascalCase'],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-plusplus': 0,

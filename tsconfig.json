@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "lib": ["esnext", "esnext.asynciterable", "dom"],
     "allowJs": true,
-    "checkJs": true,
+    // "checkJs": true, maybe deactivating this allows us to have correct CI whilst porting..
     "sourceMap": true,
     "strict": true,
     "noImplicitAny": false,

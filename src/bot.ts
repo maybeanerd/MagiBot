@@ -1,23 +1,19 @@
-﻿/* eslint-disable strict*/
-'use strict';
-/* eslint-enable strict*/
+﻿import Discord from 'discord.js';
+import fs from 'fs';
+import blapi from 'blapi';
+import config from './token';
+import data from './db';
 
-const Discord = require('discord.js');
-const fs = require('fs');
-const token = require(`${__dirname}/token.js`);
-const data = require(`${__dirname}/db.js`);
-const blapi = require('blapi');
-const bamands = require(`${__dirname}/bamands.js`);
+import bamands from './bamands';
 
-const bot = new Discord.Client({ autoReconnect: true });
+const bot = new Discord.Client();
 
 const userCooldowns = new Set();
 
 // post to the APIs every 30 minutes
-if (token.blapis) {
-  blapi.handle(bot, token.blapis);
+if (config.blapis) {
+  blapi.handle(bot as any, config.blapis, 30);
 }
-/* eslint-disable prefer-arrow-callback */
 process.on('uncaughtException', function catcher(err) {
   const chann = bot.channels.get('414809410448261132');
   if (err.stack) {
@@ -34,11 +30,10 @@ process.on('unhandledRejection', function catcher(err) {
   console.error(`Unhandled promise rejection:\n${err}`);
   chann.send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
 });
-/* eslint-enable prefer-arrow-callback */
 
-bot.OWNERID = token.owner;
-bot.PREFIX = token.prefix;
-bot.TOKEN = token.tk;
+bot.OWNERID = config.owner;
+bot.PREFIX = config.prefix;
+bot.TOKEN = config.tk;
 
 bot.DETAILED_LOGGING = false;
 bot.DELETE_COMMANDS = false;
@@ -70,7 +65,7 @@ bot.sendNotification = function sendNotification(info, type, msg) {
 
   const embed = {
     color: icolor,
-    description: info
+    description: info,
   };
   msg.channel.send('', { embed });
 };
@@ -100,7 +95,7 @@ commands.help.main = async function main(bo, msg) {
           info.push({
             name: `${bot.PREFIXES[msg.guild.id]}.${command} ${ehelps[i].name}`,
             value: ehelps[i].value,
-            inline: false
+            inline: false,
           });
         }
         let embed = {
@@ -111,8 +106,8 @@ commands.help.main = async function main(bo, msg) {
             /* eslint-disable camelcase */
             icon_url: bot.user.avatarURL,
             /* eslint-enable camelcase */
-            text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
-          }
+            text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
+          },
         };
 
         msg.channel.send('', { embed });
@@ -125,7 +120,7 @@ commands.help.main = async function main(bo, msg) {
               info.push({
                 name: `${bot.PREFIXES[msg.guild.id]}:${acommand.slice(1)} ${ehelps[i].name}`,
                 value: ehelps[i].value,
-                inline: false
+                inline: false,
               });
             }
 
@@ -137,8 +132,8 @@ commands.help.main = async function main(bo, msg) {
                 /* eslint-disable camelcase */
                 icon_url: bot.user.avatarURL,
                 /* eslint-enable camelcase */
-                text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
-              }
+                text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
+              },
             };
 
             msg.channel.send('', { embed });
@@ -157,7 +152,7 @@ commands.help.main = async function main(bo, msg) {
           info.push({
             name: `${bot.PREFIXES[msg.guild.id]}:${command.slice(1)} ${ehelps[i].name}`,
             value: ehelps[i].value,
-            inline: false
+            inline: false,
           });
         }
         const embed = {
@@ -168,8 +163,8 @@ commands.help.main = async function main(bo, msg) {
             /* eslint-disable camelcase */
             icon_url: bot.user.avatarURL,
             /* eslint-enable camelcase */
-            text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)'
-          }
+            text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
+          },
         };
 
         msg.channel.send('', { embed });
@@ -197,7 +192,7 @@ commands.help.main = async function main(bo, msg) {
         cmds.push({
           name: `${cat} commands`,
           value: coms,
-          inline: false
+          inline: false,
         });
       }
     }
@@ -209,8 +204,8 @@ commands.help.main = async function main(bo, msg) {
         /* eslint-disable camelcase */
         icon_url: bot.user.avatarURL,
         /* eslint-enable camelcase */
-        text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`
-      }
+        text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`,
+      },
     };
     msg.channel.send('', { embed });
     if (msg.member && await data.isAdmin(msg.guild.id, msg.member, bot)) {
@@ -230,7 +225,7 @@ commands.help.main = async function main(bo, msg) {
         cmds.push({
           name: 'Admin commands',
           value: coms,
-          inline: false
+          inline: false,
         });
       }
       embed = {
@@ -241,8 +236,8 @@ commands.help.main = async function main(bo, msg) {
           /* eslint-disable camelcase */
           icon_url: bot.user.avatarURL,
           /* eslint-enable camelcase */
-          text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`
-        }
+          text: `admins can override commands with ${bot.PREFIXES[msg.guild.id]}: instead of ${bot.PREFIXES[msg.guild.id]}. to ignore command channel restrictions`,
+        },
       };
       msg.channel.send('', { embed });
     }
@@ -311,7 +306,7 @@ commands.reload.main = function main(bo, msg) {
   }
 };
 
-const loadCommands = function() {
+const loadCommands = function () {
   const files = fs.readdirSync(`${__dirname}/commands`);
   for (const file of files) {
     if (file.endsWith('.js')) {
@@ -324,7 +319,7 @@ const loadCommands = function() {
   console.log('———— All Commands Loaded! ————');
 };
 
-const checkCommand = async function(msg, isMention) {
+const checkCommand = async function (msg, isMention) {
   try {
     // ignore blacklisted users
     if (await data.isBlacklistedUser(await msg.author.id, await msg.guild.id)) {
@@ -363,7 +358,7 @@ const checkCommand = async function(msg, isMention) {
               msg.delete();
             }
             if (await msg.channel.permissionsFor(msg.guild.me).has('SEND_MESSAGES')) {
-              msg.reply("you're not allowed to use this command.").then(mess => mess.delete(5000));
+              msg.reply("you're not allowed to use this command.").then((mess) => mess.delete(5000));
             }
             return;
           }
@@ -401,7 +396,7 @@ const checkCommand = async function(msg, isMention) {
           if (await msg.channel.permissionsFor(msg.guild.me).has('MANAGE_MESSAGES')) {
             msg.delete();
           }
-          msg.reply(`commands aren't allowed in <#${msg.channel.id}>. Use them in ${await data.commandChannel(msg.guild.id)}. If you're an admin use \`${bot.PREFIX}:help\` to see how you can change that.`).then(mess => mess.delete(15000));
+          msg.reply(`commands aren't allowed in <#${msg.channel.id}>. Use them in ${await data.commandChannel(msg.guild.id)}. If you're an admin use \`${bot.PREFIX}:help\` to see how you can change that.`).then((mess) => mess.delete(15000));
         }
       }
     }
@@ -425,7 +420,7 @@ bot.on('ready', () => {
 });
 
 
-bot.on('message', msg => {
+bot.on('message', (msg) => {
   if (!msg.author.bot && msg.guild) {
     if (msg.content.startsWith(`<@${bot.user.id}>`) || msg.content.startsWith(`<@!${bot.user.id}>`)) {
       checkCommand(msg, true);
@@ -446,12 +441,12 @@ async function guildPrefixStartup(guild) {
   }
 }
 
-bot.on('guildCreate', guild => {
+bot.on('guildCreate', (guild) => {
   if (guild.available) {
     guildPrefixStartup(guild);
     guild.owner.send(`Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${
-      bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${bot.PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${bot.PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to ` +
-    `join to use joinsounds (\`${bot.PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${bot.PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`).catch(() => { });
+      bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${bot.PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${bot.PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
+    + `join to use joinsounds (\`${bot.PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${bot.PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`).catch(() => { });
     const chan = bot.channels.get('408611226998800390');
     if (chan) {
       chan.send(`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`);
@@ -459,7 +454,7 @@ bot.on('guildCreate', guild => {
   }
 });
 
-bot.on('guildDelete', guild => {
+bot.on('guildDelete', (guild) => {
   if (guild.available) {
     const chan = bot.channels.get('408611226998800390');
     if (chan) {
@@ -468,7 +463,7 @@ bot.on('guildDelete', guild => {
   }
 });
 
-bot.on('error', err => {
+bot.on('error', (err) => {
   bamands.catchErrorOnDiscord(bot, err);
   console.log(err);
 });
@@ -498,10 +493,12 @@ bot.on('voiceStateUpdate', async (o, n) => {
         if (newVc.permissionsFor(n.guild.me).has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
-            newVc.join().then(connection => {
+            newVc.join().then((connection) => {
               if (connection) {
                 // TODO use connection.play when discord.js updates
-                const dispatcher = connection.playArbitraryInput(sound, { seek: 0, volume: 0.2, passes: 1, bitrate: 'auto' });
+                const dispatcher = connection.playArbitraryInput(sound, {
+                  seek: 0, volume: 0.2, passes: 1, bitrate: 'auto',
+                });
                 dispatcher.once('end', () => {
                   connection.disconnect();
                   dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
