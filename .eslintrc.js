@@ -24,12 +24,8 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-plusplus': 0,
-    'class-methods-use-this': 0, // Nuxt sometimes needs functions without this , to use them in our html part
     "no-useless-constructor": "off", // TS has some issues with this, so we use their check
     "@typescript-eslint/no-useless-constructor": "error",
-  },
-  globals: {
-    $nuxt: true,
   },
   parserOptions: {
     parser: '@typescript-eslint/parser',
