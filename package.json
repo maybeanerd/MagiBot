@@ -34,6 +34,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "build": "tsc",
     "start": "forever start bot.js ; forever start ./test/bot.js ; forever start ./teapot/bot.js",
     "stop": "forever stop bot.js ; forever stop ./test/bot.js ; forever stop ./teapot/bot.js"
   },
