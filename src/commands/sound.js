@@ -10,17 +10,17 @@ function printHelp() {
 
   info.push({
     name: '<Link to audio file>',
-    value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment."
+    value: "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
   });
 
   info.push({
     name: '(attach soundfile to this command)',
-    value: 'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.'
+    value: 'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
   });
 
   info.push({
     name: 'rem',
-    value: 'Remove your joinsound'
+    value: 'Remove your joinsound',
   });
 
   return info;
@@ -73,5 +73,5 @@ module.exports = {
   admin: false,
   perm: 'SEND_MESSAGES',
   hide: false,
-  category: 'Fun'
+  category: 'Fun',
 };
