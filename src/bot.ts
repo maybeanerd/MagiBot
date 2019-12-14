@@ -6,86 +6,82 @@ import data from './db';
 
 import bamands from './bamands';
 
-export type magibotClient = Discord.Client & {
-  OWNERID?: string;
-  PREFIX?: string;
-  TOKEN?: string;
-  DETAILED_LOGGING?: boolean;
-  DELETE_COMMANDS?: boolean;
-  COLOR?: number;
-  SUCCESS_COLOR?: number;
-  ERROR_COLOR?: number;
-  INFO_COLOR?: number;
-  SIGN ?:string;
-  PREFIXES?: {
+export type magibotClient = {
+  bot:Discord.Client,
+  OWNERID: string;
+  PREFIX: string;
+  TOKEN: string;
+  DETAILED_LOGGING: boolean;
+  DELETE_COMMANDS: boolean;
+  COLOR: number;
+  SUCCESS_COLOR: number;
+  ERROR_COLOR: number;
+  INFO_COLOR: number;
+  SIGN :string;
+  PREFIXES: {
   [k:string]:string,
   },
-  queueVoiceChannels?: any, // TODO
+  queueVoiceChannels: any, // TODO
+  sendNotification: (info:string, type:string, msg:Discord.Message)=> void,
 };
 
-const bot: magibotClient = new Discord.Client();
+const bot = new Discord.Client();
+const magibot: magibotClient = {
+  bot,
+  // global variables saved in bot
+  // TODO maybe we want to have these in their own file and export them
+  OWNERID: config.owner,
+  PREFIX: config.prefix,
+  TOKEN: config.tk,
+  DETAILED_LOGGING: false,
+  DELETE_COMMANDS: false,
+  COLOR: 0x351c75,
+  SUCCESS_COLOR: 0x00ff00,
+  ERROR_COLOR: 0x0000ff,
+  INFO_COLOR: 0x0000ff,
+  SIGN: 'MagiBot - created by T0TProduction#0001',
+  PREFIXES: {},
+  queueVoiceChannels: {},
+  sendNotification: function sendNotification(info:string, type:string, msg:Discord.Message) {
+    let icolor:number|undefined;
+
+    if (type === 'success') icolor = magibot.SUCCESS_COLOR;
+    else if (type === 'error') icolor = magibot.ERROR_COLOR;
+    else if (type === 'info') icolor = magibot.INFO_COLOR;
+    else icolor = magibot.COLOR;
+
+    const embed = {
+      color: icolor,
+      description: info,
+    };
+    msg.channel.send('', { embed });
+  },
+}; // TODO add the rest
 
 const userCooldowns = new Set();
 
 // post to the APIs every 30 minutes
 if (config.blapis) {
   blapi.handle(bot as any, config.blapis, 30);
+  // TODO fix blapi types!
 }
 process.on('uncaughtException', (err) => {
   const chann = bot.channels.get('414809410448261132');
-  if (err.stack) {
-    err = err.stack;
+
+  console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
+  if (chann) {
+    (chann as Discord.TextChannel).send(`**Outer Uncaught Exception:**\n\`\`\`${err.stack ? err.stack : err}\`\`\``);
   }
-  console.error(`Uncaught Exception:\n${err}`);
-  chann.send(`**Outer Uncaught Exception:**\n\`\`\`${err}\`\`\``);
 });
 process.on('unhandledRejection', (err) => {
   const chann = bot.channels.get('414809410448261132');
-  if (err.stack) {
-    err = err.stack;
-  }
+
   console.error(`Unhandled promise rejection:\n${err}`);
-  chann.send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+  if (chann) {
+    (chann as Discord.TextChannel).send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+  }
 });
 
-bot.OWNERID = config.owner;
-bot.PREFIX = config.prefix;
-bot.TOKEN = config.tk;
-
-bot.DETAILED_LOGGING = false;
-bot.DELETE_COMMANDS = false;
-
-bot.COLOR = 0x351c75;
-bot.SUCCESS_COLOR = 0x00ff00;
-bot.ERROR_COLOR = 0x0000ff;
-bot.INFO_COLOR = 0x0000ff;
-
-// global variables saved in bot
-
-bot.SIGN = 'MagiBot - created by T0TProduction#0001';
-bot.PREFIXES = {};
-bot.queueVoiceChannels = {};
-
-/* eslint-disable no-extend-native */
-String.prototype.padRight = function padRight(l, c) {
-  return this + Array(l - this.length + 1).join(c || ' ');
-};
-/* eslint-enable no-extend-native */
-
-bot.sendNotification = function sendNotification(info, type, msg) {
-  let icolor;
-
-  if (type == 'success') icolor = bot.SUCCESS_COLOR;
-  else if (type == 'error') icolor = bot.ERROR_COLOR;
-  else if (type == 'info') icolor = bot.INFO_COLOR;
-  else icolor = bot.COLOR;
-
-  const embed = {
-    color: icolor,
-    description: info,
-  };
-  msg.channel.send('', { embed });
-};
 
 const commands = {};
 // TODO actually use
