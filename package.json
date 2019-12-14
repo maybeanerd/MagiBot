@@ -8,25 +8,24 @@
     "test": "test"
   },
   "dependencies": {
-    "@discordjs/uws": "^10.149.0",
+    "@discordjs/uws": "^11.149.1",
     "axios": "^0.19.0",
     "babel-eslint": "^9.0.0",
-    "blapi": "^1.1.0",
-    "bufferutil": "^4.0.1",
+    "blapi": "^1.2.5",
     "dblapi.js": "^2.3.0",
-    "discord.js": "^11.5.1",
+    "discord.js": "github:discordjs/discord.js",
     "erlpack": "github:discordapp/erlpack",
     "eslint-plugin-vue": "^5.2.2",
     "ffmpeg-binaries": "^3.2.2",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
     "forever": "^1.0.0",
-    "libsodium-wrappers": "^0.7.4",
+    "libsodium-wrappers": "^0.7.6",
     "mongodb": "^3.2.7",
-    "node-opus": "^0.2.9",
-    "opusscript": "0.0.6",
+    "node-opus": "^0.3.3",
     "systeminformation": "^4.9.0",
-    "uws": "^100.0.1"
+    "zlib-sync": "^0.1.6",
+    "zucc": "^0.1.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.7.0",
