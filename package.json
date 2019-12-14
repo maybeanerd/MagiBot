@@ -1,8 +1,8 @@
 {
   "name": "magibot",
-  "version": "2.2.8",
-  "description": "private MagiBot repo for me",
-  "main": "bot.js",
+  "version": "3.0.0",
+  "description": "MagiBot - a Discord bot to build communities",
+  "main": "dist/bot.js",
   "directories": {
     "doc": "docs",
     "test": "test"
@@ -29,8 +29,18 @@
     "uws": "^100.0.1"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-aqua": "^6.0.0"
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.6.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2"
   },
   "scripts": {
     "lint": "eslint .",
@@ -47,5 +57,7 @@
   "bugs": {
     "url": "https://github.com/T0TProduction/MagiBot/issues"
   },
-  "homepage": "https://github.com/T0TProduction/MagiBot#readme"
+  "homepage": "https://github.com/T0TProduction/MagiBot#readme",
+  "heroku-run-build-script": true,
+  "snyk": true
 }
