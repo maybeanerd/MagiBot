@@ -5,4 +5,5 @@ export default {
   owner: 'discordbotownerID',
   prefix: 'a', // has to be single char only, otherwise the assumption is false for a lot of functions
   dburl: 'databaseurl',
+  blapis: [], // botlist access token array (format as in BLAPI)
 };
