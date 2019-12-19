@@ -4,7 +4,8 @@ import blapi from 'blapi';
 import config from './token';
 import data from './db';
 import bamands from './bamands';
-import { PREFIXES } from './shared_assets';
+import { PREFIXES, setUserId } from './shared_assets';
+import { checkCommand } from './commandHandler';
 
 
 const bot = new Discord.Client();
@@ -36,6 +37,7 @@ process.on('unhandledRejection', (err) => {
 // fires on startup and on reconnect
 let justStartedUp = true;
 bot.on('ready', () => {
+  setUserId(bot.user.id); // give user ID to other code
   const chann = bot.channels.get('382233880469438465');
   if (justStartedUp) {
     if (chann && chann.type === 'text') {
@@ -59,18 +61,11 @@ bot.on('ready', () => {
   data.getPrefixesE(bot);
 });
 
-bot.on('message', (msg) => {
-  if (!msg.author.bot && msg.guild) {
-    if (
-      msg.content.startsWith(`<@${bot.user.id}>`)
-      || msg.content.startsWith(`<@!${bot.user.id}>`)
-    ) {
-      checkCommand(msg, true);
-      if (bot.DELETE_COMMANDS) msg.delete();
-    } else if (msg.content.startsWith(bot.PREFIXES[msg.guild.id])) {
-      checkCommand(msg, false);
-      if (bot.DELETE_COMMANDS) msg.delete();
-    }
+bot.on('message', async (msg) => {
+  try {
+    await checkCommand(msg);
+  } catch (err) {
+    bamands.catchErrorOnDiscord(bot, `in check command: ${err}`);
   }
 });
 

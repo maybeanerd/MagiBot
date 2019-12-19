@@ -1,6 +1,10 @@
-﻿const MongoClient = require('mongodb').MongoClient;
+﻿import { OWNERID } from './shared_assets';
+
+const { MongoClient } = require('mongodb');
+
 const config = require(`${__dirname}/token.js`);
 const DBL = require('dblapi.js');
+
 const dbl = new DBL('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0');
 
 const url = config.dburl;
@@ -8,16 +12,20 @@ const url = config.dburl;
 
 // Define Methods:
 function getuser(userid, guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
-    const result = await db.collection('users').findOneAndUpdate({ userID: userid, guildID }, { $setOnInsert: { warnings: 0, kicks: 0, bans: 0, botusage: 0, sound: false } }, { returnOriginal: false, upsert: true });
+    const result = await db.collection('users').findOneAndUpdate({ userID: userid, guildID }, {
+      $setOnInsert: {
+        warnings: 0, kicks: 0, bans: 0, botusage: 0, sound: false,
+      },
+    }, { returnOriginal: false, upsert: true });
     mclient.close();
     return result.value;
   });
 }
 // eslint-disable-next-line require-await
 async function saltGuild(salter, guildID, add = 1, reset = false) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const user = await db.collection('saltrank').findOne({ salter, guild: guildID });
     if (!user) {
@@ -37,10 +45,12 @@ async function saltGuild(salter, guildID, add = 1, reset = false) {
 }
 // eslint-disable-next-line require-await
 async function addSalt(userid, reporter, guildID) {
-  return MongoClient.connect(url).then(mclient => {
+  return MongoClient.connect(url).then((mclient) => {
     const db = mclient.db('MagiBot');
     const date = new Date();
-    const myobj = { salter: userid, reporter, date, guild: guildID };
+    const myobj = {
+      salter: userid, reporter, date, guild: guildID,
+    };
     return db.collection('salt').insertOne(myobj).then(async () => {
       await saltGuild(userid, guildID, 1);
       mclient.close();
@@ -52,7 +62,7 @@ function updateUser(userid, update, guildID) {
   MongoClient.connect(url, (err, mclient) => {
     if (err) throw err;
     const db = mclient.db('MagiBot');
-    db.collection('users').updateOne({ userID: userid, guildID }, update, err2 => {
+    db.collection('users').updateOne({ userID: userid, guildID }, update, (err2) => {
       if (err2) throw err2;
       mclient.close();
     });
@@ -60,7 +70,7 @@ function updateUser(userid, update, guildID) {
 }
 function saltDowntimeDone(userid1, userid2) {
   // get newest entry in salt
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const d2 = await db.collection('salt').find({ salter: userid1, reporter: userid2 }).sort({ date: -1 })
       .limit(1)
@@ -75,16 +85,18 @@ function saltDowntimeDone(userid1, userid2) {
   });
 }
 function firstSettings(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
-    await db.collection('settings').insertOne({ _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix, lastConnected: new Date() });
+    await db.collection('settings').insertOne({
+      _id: guildID, commandChannels: [], adminRoles: [], joinChannels: [], blacklistedUsers: [], blacklistedEveryone: [], saltKing: false, saltRole: false, notChannel: false, prefix: config.prefix, lastConnected: new Date(),
+    });
     const ret = await db.collection('settings').findOne({ _id: guildID });
     mclient.close();
     return ret;
   });
 }
 function getSettings(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     let result = await db.collection('settings').findOne({ _id: guildID });
     if (!result) {
@@ -102,7 +114,7 @@ async function checkGuild(id) {
   return false;
 }
 function toggleDBLvoted(userid, votd) {
-  MongoClient.connect(url).then(async mclient => {
+  MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     await db.collection('DBLreminder').updateOne({ _id: userid }, { $set: { voted: votd } });
     mclient.close();
@@ -127,7 +139,7 @@ async function onHour(bot, isFirst) {
   const nd = new Date();
   nd.setDate(nd.getDate() - 7);
   const guilds = await bot.guilds.array();
-  await MongoClient.connect(url).then(async mclient => {
+  await MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     let counter = 0;
     let percCounter = 0;
@@ -178,7 +190,7 @@ async function onHour(bot, isFirst) {
   });
 
   // delete every guild where lastConnected < nd from the DB TODO
-  await MongoClient.connect(url).then(async mclient => {
+  await MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     // find all guilds that have not connected for a week or dont have the lastConnected attribute at all
     const guilds2 = await db.collection('settings').find({ $or: [{ lastConnected: { $lt: nd } }, { lastConnected: { $exists: false } }] }).toArray();
@@ -204,7 +216,7 @@ async function dblReminder(bot) {
   if (e > 100) { // some arbitrary time period
     setTimeout(dblReminder.bind(null, bot), e);
   }
-  await MongoClient.connect(url).then(async mclient => {
+  await MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     const users = await db.collection('DBLreminder').find().toArray();
     mclient.close();
@@ -296,7 +308,7 @@ function voteCheck(bot) {
     setTimeout(voteCheck.bind(null, bot), e);
   }
   // do vote stuff
-  MongoClient.connect(url).then(async mclient => {
+  MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     const nd = new Date();
     const votes = await db.collection('votes').find({ date: { $lte: nd } }).toArray();
@@ -311,7 +323,7 @@ function voteCheck(bot) {
 }
 
 function isInDBL(userID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     const ret = await db.collection('DBLreminder').find({ _id: userID }).count();
     mclient.close();
@@ -320,7 +332,7 @@ function isInDBL(userID) {
 }
 
 function toggleDBL(userID, add) {
-  MongoClient.connect(url).then(async mclient => {
+  MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     if (add && !await isInDBL(userID)) {
       await db.collection('DBLreminder').insertOne({ _id: userID, voted: false });
@@ -332,7 +344,7 @@ function toggleDBL(userID, add) {
 }
 
 function toggleStillMuted(userID, guildID, add) {
-  MongoClient.connect(url).then(async mclient => {
+  MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     if (add && !(await db.collection('stillMuted').find({ userid: userID, guildid: guildID }).count() > 0)) {
       await db.collection('stillMuted').insertOne({ userid: userID, guildid: guildID });
@@ -351,7 +363,7 @@ async function getSaltRole(guildID) {
   return set.saltRole;
 }
 function setSettings(guildID, settings) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     if (await getSettings(guildID)) {
       await db.collection('settings').updateOne({ _id: guildID }, { $set: settings });
@@ -369,7 +381,7 @@ async function getNotChannel(guildID) {
 }
 // top 5 salty people
 function topSalt(guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const result = await db.collection('saltrank').find({ guild: guildID }).sort({ salt: -1 })
       .limit(5)
@@ -392,7 +404,9 @@ async function updateSaltKing(G) {
       const groles = await G.roles;
       if (!SaltRole || !groles.has(SaltRole)) {
         if (G.roles.size < 250) {
-          await G.createRole({ name: 'SaltKing', color: '#FFFFFF', position: 0, permissions: 0, mentionable: true }, 'SaltKing role needed for Saltranking to work. You can change the role if you like.').then(async role => {
+          await G.createRole({
+            name: 'SaltKing', color: '#FFFFFF', position: 0, permissions: 0, mentionable: true,
+          }, 'SaltKing role needed for Saltranking to work. You can change the role if you like.').then(async (role) => {
             await setSaltRole(G.id, role.id);
             SaltRole = role.id;
           });
@@ -478,7 +492,7 @@ async function sendUpdate(update, bot) {
 }
 
 function getSalt(userid, guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const result = await db.collection('saltrank').findOne({ salter: userid, guild: guildID });
     mclient.close();
@@ -621,7 +635,7 @@ async function setBlacklistedEveryone(guildID, cid, insert) {
 /* eslint-enable */
 
 function joinsound(userid, surl, guildID) {
-  return MongoClient.connect(url).then(async mclient => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     if (await checks(userid, guildID)) {
       const update = { $set: { sound: surl } };
@@ -632,10 +646,10 @@ function joinsound(userid, surl, guildID) {
   });
 }
 
-module.exports = {
+export default {
   async startup(bot) {
     // create Collection
-    await MongoClient.connect(url).then(async mclient => {
+    await MongoClient.connect(url).then(async (mclient) => {
       const db = mclient.db('MagiBot');
       if (!await db.collection('settings')) {
         await db.createCollection('settings').then(() => {
@@ -643,22 +657,22 @@ module.exports = {
       }
       // Dataset of salt
       if (!db.collection('salt')) {
-        db.createCollection('salt', err => {
+        db.createCollection('salt', (err) => {
           if (err) throw err;
         });
       }
       if (!db.collection('saltrank')) {
-        db.createCollection('saltrank', err => {
+        db.createCollection('saltrank', (err) => {
           if (err) throw err;
         });
       }
       if (!db.collection('users')) {
-        db.createCollection('users', err => {
+        db.createCollection('users', (err) => {
           if (err) throw err;
         });
       }
       if (!db.collection('votes')) {
-        db.createCollection('votes', err => {
+        db.createCollection('votes', (err) => {
           if (err) throw err;
         });
       }
@@ -694,7 +708,7 @@ module.exports = {
     return parseInt(user.botusage, 10);
   },
   remOldestSalt(userid, G) {
-    return MongoClient.connect(url).then(async mclient => {
+    return MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
       const db = mclient.db('MagiBot');
       const id = await db.collection('salt').find({ salter: userid, guild: guildID }).sort({ date: 1 })
@@ -721,13 +735,13 @@ module.exports = {
     const channels = await getJoinChannel(guildID);
     return channels.includes(cid);
   },
-  async isAdmin(guildID, user, bot) {
+  async isAdmin(guildID, user) {
     // checks for admin and Owner, they can always use
     if (user.hasPermission('ADMINISTRATOR', false, true, true)) {
       return true;
     }
     // Owner is always admin hehe
-    if (user.id == bot.OWNERID) {
+    if (user.id == OWNERID) {
       return true;
     }
     const roles = await getAdminRole(guildID);
@@ -750,7 +764,8 @@ module.exports = {
   async commandAllowed(guildID, cid) {
     const channels = await getCommandChannel(guildID);
     return channels.length == 0 || channels.includes(cid);
-  }, async isCommandChannel(guildID, cid) {
+  },
+  async isCommandChannel(guildID, cid) {
     const channels = await getCommandChannel(guildID);
     return channels.includes(cid);
   },
@@ -798,7 +813,7 @@ module.exports = {
     return getSettings(guildID);
   },
   clrSalt(userid, G) {
-    return MongoClient.connect(url).then(async mclient => {
+    return MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
       const db = mclient.db('MagiBot');
       await db.collection('salt').deleteMany({ guild: guildID, salter: userid });
@@ -808,7 +823,7 @@ module.exports = {
     });
   },
   async resetSalt(G) {
-    await MongoClient.connect(url).then(async mclient => {
+    await MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
       const db = await mclient.db('MagiBot');
       await db.collection('saltrank').deleteMany({ guild: guildID });
@@ -849,7 +864,7 @@ module.exports = {
     return isInDBL(userID);
   },
   addVote(vote) {
-    MongoClient.connect(url).then(async mclient => {
+    MongoClient.connect(url).then(async (mclient) => {
       const db = await mclient.db('MagiBot');
       db.collection('votes').insertOne(vote);
       mclient.close();
@@ -860,7 +875,7 @@ module.exports = {
   },
   async isStillMuted(userID, guildID) {
     let find;
-    await MongoClient.connect(url).then(async mclient => {
+    await MongoClient.connect(url).then(async (mclient) => {
       const db = await mclient.db('MagiBot');
       find = await db.collection('stillMuted').findOne({ userid: userID, guildid: guildID });
       mclient.close();
@@ -868,11 +883,11 @@ module.exports = {
     return find;
   },
   getDBLSubs() {
-    return MongoClient.connect(url).then(async mclient => {
+    return MongoClient.connect(url).then(async (mclient) => {
       const db = await mclient.db('MagiBot');
       const users = await db.collection('DBLreminder').find().toArray();
       mclient.close();
       return users;
     });
-  }
+  },
 };

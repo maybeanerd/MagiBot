@@ -30,3 +30,11 @@ export function sendNotification(info:string, type:string, msg:Discord.Message) 
   };
   msg.channel.send('', { embed });
 }
+
+let bot_user_id :string;
+export function setUserId(uid:string) {
+  bot_user_id = uid;
+}
+export function userID() {
+  return bot_user_id;
+}

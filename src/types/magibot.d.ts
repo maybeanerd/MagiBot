@@ -8,7 +8,7 @@ declare global {
     admin: boolean;
     hide:boolean;
     dev:boolean;
-    perm: string;
+    perm: Discord.PermissionResolvable | Discord.PermissionResolvable[];
     category: commandCategories;
     main:
       | ((bot: Discord.Client, msg: Discord.Message) => Promise<any>)
