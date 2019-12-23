@@ -11,7 +11,7 @@ declare global {
     perm: Discord.PermissionResolvable | Discord.PermissionResolvable[];
     category: commandCategories;
     main:
-      | ((bot: Discord.Client, msg: Discord.Message) => Promise<any>)
-      | ((bot: Discord.Client, msg: Discord.Message) => any);
+      | ((content:string, msg: Discord.Message) => Promise<any>)
+      | ((content:string, msg: Discord.Message) => any);
   };
 }
