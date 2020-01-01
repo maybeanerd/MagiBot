@@ -7,12 +7,14 @@ import {
   PREFIXES, OWNERID, DELETE_COMMANDS, userID,
 } from './shared_assets';
 
+import bamands from './bamands';
+
 
 export const commands:{[k:string]:magibotCommand} = {
   help,
 };
 
-const userCooldowns = new Set();
+const userCooldowns = new Set<string>();
 
 // TODO check why the bot also gives us Discord.PartialMessage, as thats not what we want
 export async function checkCommand(msg:Discord.Message) {
@@ -63,6 +65,7 @@ export async function checkCommand(msg:Discord.Message) {
   if (command) {
     let commandVal:string;
     const pre = command.charAt(0);
+    const myPerms = (msg.channel as Discord.TextChannel).permissionsFor(msg.guild.me);
     if (pre === '.') {
       command = command.slice(1);
       commandVal = command;
@@ -79,12 +82,11 @@ export async function checkCommand(msg:Discord.Message) {
         return;
       }
       if (!(msg.member && (await data.isAdmin(msg.guild.id, msg.member)))) {
-        const perms = (msg.channel as Discord.TextChannel).permissionsFor(msg.guild.me);
-        if (perms) {
-          if (perms.has('MANAGE_MESSAGES')) {
+        if (myPerms) {
+          if (myPerms.has('MANAGE_MESSAGES')) {
             msg.delete();
           }
-          if (perms.has('SEND_MESSAGES')) {
+          if (myPerms.has('SEND_MESSAGES')) {
             msg.reply("you're not allowed to use this command.")
               .then((mess) => (mess as Discord.Message).delete({ timeout: 5000 }));
           }
@@ -106,7 +108,7 @@ export async function checkCommand(msg:Discord.Message) {
         const perms = commands[command].perm;
         if (
           !perms
-            || (msg.channel as Discord.TextChannel).permissionsFor(msg.guild.me).has(perms)
+            || (myPerms && myPerms.has(perms))
         ) {
           // cooldown for command usage
           if (!userCooldowns.has(msg.author.id)) {
@@ -119,34 +121,28 @@ export async function checkCommand(msg:Discord.Message) {
             } catch (err) {
               bamands.catchError(
                 err,
-                bot,
                 msg,
-                `${bot.PREFIXES[msg.guild.id]}${pre}${commandVal}`,
+                `${PREFIXES[msg.guild.id]}${pre}${commandVal}`,
               );
             }
             data.usageUp(msg.author.id, msg.guild.id);
-          } else if (
-            await msg.channel
-              .permissionsFor(msg.guild.me)
-              .has('SEND_msgS')
+          } else if (myPerms && myPerms.has('SEND_MESSAGES')
           ) {
             msg.reply("whoa cool down, you're using commands too quick!");
           }
           // endof cooldown management
         } else if (
-          await msg.channel.permissionsFor(msg.guild.me).has('SEND_msgS')
+          myPerms && myPerms.has('SEND_MESSAGES')
         ) {
           msg.channel.send(
             `I don't have the permissions needed for this command. (${perms}) `,
           );
         }
       } else if (
-        await msg.channel.permissionsFor(msg.guild.me).has('SEND_msgS')
+        myPerms && myPerms.has('SEND_MESSAGES')
       ) {
         if (
-          await msg.channel
-            .permissionsFor(msg.guild.me)
-            .has('MANAGE_msgS')
+          myPerms && myPerms.has('MANAGE_MESSAGES')
         ) {
           msg.delete();
         }
@@ -157,10 +153,10 @@ export async function checkCommand(msg:Discord.Message) {
             }>. Use them in ${await data.commandChannel(
               msg.guild.id,
             )}. If you're an admin use \`${
-              bot.PREFIX
+              PREFIXES[msg.guild.id]
             }:help\` to see how you can change that.`,
           )
-          .then((mess) => mess.delete(15000));
+          .then((mess) => mess.delete({ timeout: 15000 }));
       }
     }
   }

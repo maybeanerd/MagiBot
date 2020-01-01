@@ -1,14 +1,13 @@
 ﻿import Discord from 'discord.js';
-import fs from 'fs';
 import blapi from 'blapi';
 import config from './token';
 import data from './db';
 import bamands from './bamands';
-import { PREFIXES, setUserId } from './shared_assets';
+import { setUserId } from './shared_assets';
 import { checkCommand } from './commandHandler';
 
 
-const bot = new Discord.Client();
+export const bot = new Discord.Client();
 
 
 // post to the APIs every 30 minutes

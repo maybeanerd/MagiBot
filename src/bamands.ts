@@ -1,5 +1,8 @@
 ﻿// commands made by Basti for use of the Bot
-module.exports = {
+// we need this in here to get channels, so dependency cycle isnt a problem
+import { bot } from './bot'; // eslint-disable-line import/no-cycle
+
+export default {
   findMember: async function findMember(guild, mention) {
     if (!mention) {
       return false;
@@ -17,12 +20,12 @@ module.exports = {
       return user.id;
     }
     if (mention.length >= 3) {
-      let memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().startsWith(mention));
+      let memberArray = await guild.members.filterArray((memb) => memb.displayName.toLowerCase().startsWith(mention));
       if (memberArray.length == 1) {
         return memberArray[0].id;
       }
       if (memberArray.length == 0) {
-        memberArray = await guild.members.filterArray(memb => memb.displayName.toLowerCase().includes(mention));
+        memberArray = await guild.members.filterArray((memb) => memb.displayName.toLowerCase().includes(mention));
         if (memberArray.length == 1) {
           return memberArray[0].id;
         }
@@ -44,12 +47,12 @@ module.exports = {
       return role.id;
     }
     if (mention.length >= 3) {
-      let roleArray = await guild.roles.filterArray(rol => rol.name.toLowerCase().startsWith(mention));
+      let roleArray = await guild.roles.filterArray((rol) => rol.name.toLowerCase().startsWith(mention));
       if (roleArray.length == 1) {
         return roleArray[0].id;
       }
       if (roleArray.length == 0) {
-        roleArray = await guild.roles.filterArray(rol => rol.name.toLowerCase().includes(mention));
+        roleArray = await guild.roles.filterArray((rol) => rol.name.toLowerCase().includes(mention));
         if (roleArray.length == 1) {
           return roleArray[0].id;
         }
@@ -58,18 +61,18 @@ module.exports = {
     return false;
   },
   // this is an idea to implement rather reusable confirmation processes. ; abortMessage, timeoutMessage and time are optional parameters
-  yesOrNo: async (msg, question, abortMessage, timeoutMessage, time) => msg.channel.send(question).then(async mess => {
+  yesOrNo: async (msg, question, abortMessage, timeoutMessage, time) => msg.channel.send(question).then(async (mess) => {
     const filter = (reaction, user) => (reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id;
     await mess.react('☑');
     await mess.react('❌');
     if (!time) {
       time = 20000;
     }
-    return mess.awaitReactions(filter, { max: 1, time }).then(async reacts => {
+    return mess.awaitReactions(filter, { max: 1, time }).then(async (reacts) => {
       mess.delete();
       if (reacts.first() && reacts.first().emoji.name == '☑') {
         return true;
-      } else if (reacts.first()) {
+      } if (reacts.first()) {
         if (abortMessage) {
           msg.channel.send(abortMessage);
         }
@@ -82,10 +85,10 @@ module.exports = {
       return false;
     });
   }),
-  printError: error => {
+  printError: (error) => {
     console.error(`Errorstatus: ${error.response.status} ${error.response.statusText}`);
   },
-  catchError: (err, bot, msg, command) => {
+  catchError: (err, msg, command) => {
     if (err.stack) {
       err = err.stack;
     }
@@ -101,5 +104,5 @@ module.exports = {
     } catch (error) {
       console.error(error);
     }
-  }
+  },
 };
