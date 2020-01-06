@@ -14,7 +14,6 @@
     "dblapi.js": "^2.3.0",
     "discord.js": "github:discordjs/discord.js",
     "erlpack": "github:discordapp/erlpack",
-    "eslint-plugin-vue": "^5.2.2",
     "ffmpeg-binaries": "^3.2.2",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",

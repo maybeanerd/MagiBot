@@ -3,7 +3,7 @@ import blapi from 'blapi';
 import config from './token';
 import data from './db';
 import bamands from './bamands';
-import { setUserId } from './shared_assets';
+import { setUserId, PREFIX, PREFIXES } from './shared_assets';
 import { checkCommand } from './commandHandler';
 
 
@@ -36,23 +36,24 @@ process.on('unhandledRejection', (err) => {
 // fires on startup and on reconnect
 let justStartedUp = true;
 bot.on('ready', () => {
+  if (!bot.user) { throw new Error('FATAL Bot has no user.'); }
   setUserId(bot.user.id); // give user ID to other code
   const chann = bot.channels.get('382233880469438465');
+  if (!chann || chann.type !== 'text') {
+    console.error('Tebots Server Channel not found.');
+  }
   if (justStartedUp) {
-    if (chann && chann.type === 'text') {
-      (chann as Discord.TextChannel).send('Running startup...');
-    } else {
-      console.error('Tebots Server Channel not found.');
-    }
+    (chann as Discord.TextChannel).send('Running startup...');
+
     data.startup(bot);
     justStartedUp = false;
   } else {
-    chann.send('Just reconnected to Discord...');
+    (chann as Discord.TextChannel).send('Just reconnected to Discord...');
   }
   bot.user.setPresence({
-    game: {
-      name: `${bot.PREFIX}.help`,
-      type: 'watching',
+    activity: {
+      name: `${PREFIX}.help`,
+      type: 'WATCHING',
       url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
     },
     status: 'online',
@@ -62,18 +63,18 @@ bot.on('ready', () => {
 
 bot.on('message', async (msg) => {
   try {
-    await checkCommand(msg);
+    await checkCommand(msg as Discord.Message);
   } catch (err) {
-    bamands.catchErrorOnDiscord(bot, `in check command: ${err}`);
+    bamands.catchErrorOnDiscord(`in check command: ${err}`);
   }
 });
 
 async function guildPrefixStartup(guild) {
   try {
     await data.addGuild(guild.id);
-    bot.PREFIXES[guild.id] = await data.getPrefixE(guild.id);
+    PREFIXES[guild.id] = await data.getPrefixE(guild.id);
   } catch (err) {
-    bamands.catchErrorOnDiscord(bot, `in guildPrefixStartup: ${err}`);
+    bamands.catchErrorOnDiscord(`in guildPrefixStartup: ${err}`);
   }
 }
 
