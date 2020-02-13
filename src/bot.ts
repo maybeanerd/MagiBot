@@ -2,13 +2,12 @@
 import blapi from 'blapi';
 import config from './token';
 import data from './db';
-import bamands from './bamands';
-import { setUserId, PREFIX, PREFIXES } from './shared_assets';
+import {
+  setUserId, PREFIX, PREFIXES, TOKEN,
+} from './shared_assets';
 import { checkCommand } from './commandHandler';
 
-
 export const bot = new Discord.Client();
-
 
 // post to the APIs every 30 minutes
 if (config.blapis) {
@@ -20,7 +19,11 @@ process.on('uncaughtException', (err) => {
 
   console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
   if (chann) {
-    (chann as Discord.TextChannel).send(`**Outer Uncaught Exception:**\n\`\`\`${err.stack ? err.stack : err}\`\`\``);
+    (chann as Discord.TextChannel).send(
+      `**Outer Uncaught Exception:**\n\`\`\`${
+        err.stack ? err.stack : err
+      }\`\`\``,
+    );
   }
 });
 process.on('unhandledRejection', (err) => {
@@ -28,15 +31,18 @@ process.on('unhandledRejection', (err) => {
 
   console.error(`Unhandled promise rejection:\n${err}`);
   if (chann) {
-    (chann as Discord.TextChannel).send(`**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``);
+    (chann as Discord.TextChannel).send(
+      `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
+    );
   }
 });
-
 
 // fires on startup and on reconnect
 let justStartedUp = true;
 bot.on('ready', () => {
-  if (!bot.user) { throw new Error('FATAL Bot has no user.'); }
+  if (!bot.user) {
+    throw new Error('FATAL Bot has no user.');
+  }
   setUserId(bot.user.id); // give user ID to other code
   const chann = bot.channels.get('382233880469438465');
   if (!chann || chann.type !== 'text') {
@@ -63,9 +69,9 @@ bot.on('ready', () => {
 
 bot.on('message', async (msg) => {
   try {
-    await checkCommand(msg as Discord.Message);
+    await checkCommand(msg as Discord.Message, bot);
   } catch (err) {
-    bamands.catchErrorOnDiscord(`in check command: ${err}`);
+    console.error(err);
   }
 });
 
@@ -74,22 +80,24 @@ async function guildPrefixStartup(guild) {
     await data.addGuild(guild.id);
     PREFIXES[guild.id] = await data.getPrefixE(guild.id);
   } catch (err) {
-    bamands.catchErrorOnDiscord(`in guildPrefixStartup: ${err}`);
+    console.error(err);
   }
 }
 
-bot.on('guildCreate', (guild) => {
+bot.on('guildCreate', async (guild) => {
   if (guild.available) {
-    guildPrefixStartup(guild);
-    guild.owner
-      .send(
-        `Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${bot.PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${bot.PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
-          + `join to use joinsounds (\`${bot.PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${bot.PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
-      )
-      .catch(() => {});
+    await guildPrefixStartup(guild);
+    if (guild.owner) {
+      guild.owner
+        .send(
+          `Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${bot.PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${bot.PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${bot.PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
+            + `join to use joinsounds (\`${PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
+        )
+        .catch(() => {});
+    }
     const chan = bot.channels.get('408611226998800390');
-    if (chan) {
-      chan.send(
+    if (chan && chan.type === 'text') {
+      (chan as Discord.TextChannel).send(
         `:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`,
       );
     }
@@ -99,8 +107,8 @@ bot.on('guildCreate', (guild) => {
 bot.on('guildDelete', (guild) => {
   if (guild.available) {
     const chan = bot.channels.get('408611226998800390');
-    if (chan) {
-      chan.send(
+    if (chan && chan.type === 'text') {
+      (chan as Discord.TextChannel).send(
         `:x: left ${guild.name} (${guild.memberCount} users, ID: ${guild.id})`,
       );
     }
@@ -108,8 +116,7 @@ bot.on('guildDelete', (guild) => {
 });
 
 bot.on('error', (err) => {
-  bamands.catchErrorOnDiscord(bot, err);
-  console.log(err);
+  console.error(err);
 });
 
 bot.on('voiceStateUpdate', async (o, n) => {
@@ -187,7 +194,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
       }
     }
   } catch (err) {
-    bamands.catchErrorOnDiscord(bot, `in voice update: ${err}`);
+    console.error(err);
   }
 });
 
@@ -195,5 +202,4 @@ bot.on('disconnected', () => {
   console.log('Disconnected!');
 });
 
-loadCommands(); // load all commands
-bot.login(bot.TOKEN); // connect to discord
+bot.login(TOKEN); // connect to discord

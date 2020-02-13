@@ -1,4 +1,7 @@
+import Discord from 'discord.js';
+
 const data = require(`${__dirname}/../db.js`);
+
 const cmds = require(`${__dirname}/../bamands.js`);
 
 
@@ -6,26 +9,26 @@ function printHelp(msg) {
   const info = [];
   info.push({
     name: 'add <@user|userid|nickname>',
-    value: 'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.'
+    value: 'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.',
   });
   info.push({
     name: 'top',
-    value: `Displays the top 5 salter in ${msg.guild.name}`
+    value: `Displays the top 5 salter in ${msg.guild.name}`,
   });
   return info;
 }
 
 module.exports = {
-  main: async function main(bot, msg) {
+  main: async function main(bot, msg:Discord.Message) {
     const args = msg.content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
       switch (command) {
       case 'add':
-        /* eslint-disable no-case-declarations*/
+        /* eslint-disable no-case-declarations */
         const mention = args[1];
         const uid = await cmds.findMember(msg.guild, mention);
-        /* eslint-enable no-case-declarations*/
+        /* eslint-enable no-case-declarations */
         if (mention && uid) {
           if (uid == msg.author.id) {
             msg.reply("you can't report yourself!");
@@ -52,10 +55,10 @@ module.exports = {
         }
         break;
       case 'top':
-        /* eslint-disable no-case-declarations*/
+        /* eslint-disable no-case-declarations */
         const salters = await data.topSalt(msg.guild.id);
         const info = [];
-        /* eslint-enable no-case-declarations*/
+        /* eslint-enable no-case-declarations */
         for (let i = 0; i < 5; i++) {
           let mname = 'User left guild';
           if (salters[i]) {
@@ -66,23 +69,23 @@ module.exports = {
             info.push({
               name: `${i + 1}. place: ${mname}`,
               value: `${salters[i].salt} salt`,
-              inline: false
+              inline: false,
             });
           } else { break; }
         }
-        /* eslint-disable no-case-declarations*/
+        /* eslint-disable no-case-declarations */
         const embed = {
           color: 0xffffff,
           description: `Top 5 salter in ${msg.guild.name}:`,
           fields: info,
           footer: {
-            /* eslint-disable camelcase*/
+            /* eslint-disable camelcase */
             icon_url: await msg.guild.iconURL,
-            /* eslint-enable camelcase*/
-            text: await msg.guild.name
-          }
+            /* eslint-enable camelcase */
+            text: await msg.guild.name,
+          },
         };
-        /* eslint-enable no-case-declarations*/
+        /* eslint-enable no-case-declarations */
         msg.channel.send('', { embed });
         break;
       default:
@@ -98,5 +101,5 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Fun'
+  category: 'Fun',
 };

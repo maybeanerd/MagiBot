@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@discordjs/uws": "^11.149.1",
+    "@types/mongodb": "^3.3.16",
     "axios": "^0.19.0",
     "blapi": "^1.2.6",
     "dblapi.js": "^2.3.0",
@@ -19,7 +20,7 @@
     "ffprobe-static": "^3.0.0",
     "forever": "^1.0.0",
     "libsodium-wrappers": "^0.7.6",
-    "mongodb": "^3.2.7",
+    "mongodb": "^3.5.3",
     "node-opus": "^0.3.3",
     "systeminformation": "^4.9.0",
     "zlib-sync": "^0.1.6",

@@ -211,4 +211,6 @@ export const help:magibotCommand = {
       }
     }
   },
+  hide: false,
+  dev: false,
 };

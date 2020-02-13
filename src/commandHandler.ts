@@ -7,17 +7,24 @@ import {
   PREFIXES, OWNERID, DELETE_COMMANDS, userID,
 } from './shared_assets';
 
-import bamands from './bamands';
-
-
 export const commands:{[k:string]:magibotCommand} = {
   help,
 };
 
+function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
+  console.error(`Caught:\n${error.stack}\nin command ${command} ${msg.content}`);
+  const chann = bot.channels.get('414809410448261132');
+  if (chann) {
+    (chann as Discord.TextChannel).send(`**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``);
+  }
+  msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
+If you can reproduce this, consider using \`${PREFIXES[msg.guild?.id || 0]}.bug <bugreport>\` or join the support discord (link via \`${PREFIXES[msg.guild?.id || 0]}.info\`) to tell us exactly how.`);
+}
+
 const userCooldowns = new Set<string>();
 
 // TODO check why the bot also gives us Discord.PartialMessage, as thats not what we want
-export async function checkCommand(msg:Discord.Message) {
+export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
   if (!(msg.author && msg.guild && msg.guild.me)) {
     // check for valid message
     console.error('Invalid message received:', msg);
@@ -119,10 +126,11 @@ export async function checkCommand(msg:Discord.Message) {
             try {
               await commands[command].main(content, msg);
             } catch (err) {
-              bamands.catchError(
+              catchError(
                 err,
                 msg,
                 `${PREFIXES[msg.guild.id]}${pre}${commandVal}`,
+                bot,
               );
             }
             data.usageUp(msg.author.id, msg.guild.id);
