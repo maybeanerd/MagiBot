@@ -1,7 +1,5 @@
 ﻿// commands made by Basti for use of the Bot
-// we need this in here to get channels, so dependency cycle isnt a problem
 import Discord from 'discord.js';
-import { bot } from './bot';
 
 export async function findMember(guild:Discord.Guild, ment:string) {
   if (!ment) {
@@ -103,13 +101,11 @@ export function printError(error) {
   console.error(`Errorstatus: ${error.response.status} ${error.response.statusText}`);
 };
 
-export function catchErrorOnDiscord(err) {
-  try {
-    const chann = bot.channels.get('414809410448261132');
-    if (chann) {
-      (chann as Discord.TextChannel).send(`Caught error: ${err}`);
-    }
-  } catch (error) {
-    console.error(error);
-  }
+export async function asyncForEach<T, F, O>(
+  array: Array<T>,
+  callback: (input: T, index: number, optionalParams?: O) => Promise<F>,
+  optionalParams?: O,
+) {
+  const arr = array.map((e, i) => callback(e, i, optionalParams));
+  return Promise.all<F>(arr);
 }

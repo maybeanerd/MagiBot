@@ -1,6 +1,10 @@
 ﻿import DBL from 'dblapi.js';
 import { MongoClient } from 'mongodb';
+import {
+  Client, TextChannel, Message, Guild,
+} from 'discord.js';
 import { OWNERID } from './shared_assets';
+import { asyncForEach } from './bamands';
 
 const config = process.env;
 const dbl = new DBL(
@@ -58,7 +62,7 @@ async function saltGuild(salter, guildID:string, add = 1, reset = false) {
   });
 }
 // eslint-disable-next-line require-await
-async function addSalt(userid, reporter, guildID) {
+async function addSalt(userid:string, reporter:string, guildID:string) {
   return MongoClient.connect(url).then((mclient) => {
     const db = mclient.db('MagiBot');
     const date = new Date();
@@ -78,7 +82,7 @@ async function addSalt(userid, reporter, guildID) {
       });
   });
 }
-function updateUser(userid, update, guildID) {
+function updateUser(userid:string, update, guildID:string) {
   MongoClient.connect(url, (err, mclient) => {
     if (err) throw err;
     const db = mclient.db('MagiBot');
@@ -92,26 +96,26 @@ function updateUser(userid, update, guildID) {
     );
   });
 }
-function saltDowntimeDone(userid1, userid2) {
+function saltDowntimeDone(userid1:string, userid2:string) {
   // get newest entry in salt
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const d2 = await db
       .collection('salt')
-      .find({ salter: userid1, reporter: userid2 })
+      .find<{date:Date}>({ salter: userid1, reporter: userid2 })
       .sort({ date: -1 })
       .limit(1)
       .toArray();
     mclient.close();
     if (d2[0]) {
       const d1 = new Date();
-      const ret = (d1 - d2[0].date) / 1000 / 60 / 60;
+      const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
       return ret;
     }
     return 2;
   });
 }
-function firstSettings(guildID) {
+function firstSettings(guildID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     await db.collection('settings').insertOne({
@@ -132,7 +136,7 @@ function firstSettings(guildID) {
     return ret;
   });
 }
-function getSettings(guildID) {
+function getSettings(guildID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     let result = await db.collection('settings').findOne({ _id: guildID });
@@ -143,14 +147,14 @@ function getSettings(guildID) {
     return result;
   });
 }
-async function checkGuild(id) {
+async function checkGuild(id:string) {
   // create settings
   if (await getSettings(id)) {
     return true;
   }
   return false;
 }
-function toggleDBLvoted(userid, votd) {
+function toggleDBLvoted(userid:string, votd:boolean) {
   MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     await db
@@ -161,7 +165,7 @@ function toggleDBLvoted(userid, votd) {
 }
 
 // automatic deletion of reports:
-async function onHour(bot, isFirst) {
+async function onHour(bot:Client, isFirst:boolean) {
   const d = new Date();
   const h = new Date(
     d.getFullYear(),
@@ -172,7 +176,7 @@ async function onHour(bot, isFirst) {
     0,
     0,
   );
-  const e = h - d;
+  const e = h.getTime() - d.getTime();
   if (e > 100) {
     // some arbitrary time period
     setTimeout(onHour.bind(null, bot, false), e);
@@ -180,7 +184,7 @@ async function onHour(bot, isFirst) {
   let msg;
   if (isFirst) {
     const chann = bot.channels.get('382233880469438465');
-    msg = await chann.send('0 %');
+    msg = await (chann as TextChannel)?.send('0 %');
   }
 
   const t0 = process.hrtime();
@@ -191,9 +195,8 @@ async function onHour(bot, isFirst) {
     const db = mclient.db('MagiBot');
     let counter = 0;
     let percCounter = 0;
-    for (const GN in guilds) {
-      const G = guilds[GN];
-      const guildID = await G.id;
+    await asyncForEach(guilds, async (G) => {
+      const guildID = G.id;
       await checkGuild(guildID);
       // update the guild settings entry so that it does NOT get deleted
       await db
@@ -204,8 +207,8 @@ async function onHour(bot, isFirst) {
         .collection('saltrank')
         .find({ guild: guildID })
         .toArray();
-      for (const i in ranking) {
-        const report = ranking[i];
+
+      asyncForEach(ranking, async (report) => {
         const removeData = await db
           .collection('salt')
           .deleteMany({
@@ -228,28 +231,28 @@ async function onHour(bot, isFirst) {
               );
           }
         }
-      }
-      // await updateSaltKing(G); this shouldnt be needed anymore
+      });
+    });
+    // await updateSaltKing(G); this shouldnt be needed anymore
 
-      // update percentage message
-      if (msg) {
-        const percentage = Math.round((++counter / guilds.length) * 100);
-        if (percentage - percCounter > 0) {
-          let uptime = '';
-          const u = process.hrtime(t0);
-          // mins
-          let x = Math.floor(u[0] / 60);
-          if (x > 0) {
-            uptime += `${x}m : `;
-          }
-          // secs
-          x = u[0] % 60;
-          if (x >= 0) {
-            uptime += `${x}s`;
-          }
-          percCounter = percentage;
-          msg.edit(`${percentage} % with ${uptime} passed`);
+    // update percentage message
+    if (msg) {
+      const percentage = Math.round((++counter / guilds.length) * 100);
+      if (percentage - percCounter > 0) {
+        let uptime = '';
+        const u = process.hrtime(t0);
+        // mins
+        let x = Math.floor(u[0] / 60);
+        if (x > 0) {
+          uptime += `${x}m : `;
         }
+        // secs
+        x = u[0] % 60;
+        if (x >= 0) {
+          uptime += `${x}s`;
+        }
+        percCounter = percentage;
+        msg.edit(`${percentage} % with ${uptime} passed`);
       }
     }
     await mclient.close();
@@ -258,7 +261,8 @@ async function onHour(bot, isFirst) {
   // delete every guild where lastConnected < nd from the DB TODO
   await MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
-    // find all guilds that have not connected for a week or dont have the lastConnected attribute at all
+    // find all guilds that have not connected for a week
+    // or dont have the lastConnected attribute at all
     const guilds2 = await db
       .collection('settings')
       .find({
@@ -269,21 +273,21 @@ async function onHour(bot, isFirst) {
       })
       .toArray();
 
-    for (const g in guilds2) {
-      const guildID = guilds2[g]._id;
+    await asyncForEach(guilds2, async (guild) => {
       // ignore salt and saltrank, as they are removed after 7 days anyways
-
+      // eslint-disable-next-line no-underscore-dangle
+      const guildID = guild._id;
       // remove all data saved for those guilds
       await db.collection('stillmuted').deleteMany({ guildid: guildID });
       await db.collection('users').deleteMany({ guildID });
       await db.collection('votes').deleteMany({ guildid: guildID });
       await db.collection('settings').deleteOne({ _id: guildID });
-    }
+    });
     mclient.close();
   });
 }
 
-async function dblReminder(bot) {
+async function dblReminder(bot:Client) {
   const d = new Date();
   const h = new Date(
     d.getFullYear(),
@@ -294,40 +298,39 @@ async function dblReminder(bot) {
     0,
     0,
   );
-  const e = h - d;
+  const e = h.getTime() - d.getTime();
   if (e > 100) {
     // some arbitrary time period
     setTimeout(dblReminder.bind(null, bot), e);
   }
   await MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
+    const db = mclient.db('MagiBot');
     const users = await db
       .collection('DBLreminder')
       .find()
       .toArray();
     mclient.close();
     if (users) {
-      for (const u in users) {
-        let user = users[u]._id;
-        const usr = users[u];
-        user = await bot.fetchUser(user);
+      await asyncForEach(users, async (u) => {
+        // eslint-disable-next-line no-underscore-dangle
+        const user = await bot.fetchUser(u._id);
         let dblFailed = false;
         const hasVoted = await dbl.hasVoted(user.id).catch(() => {
           dblFailed = true;
         });
         if (!dblFailed) {
-          if (!hasVoted && !usr.voted) {
+          if (!hasVoted && !u.voted) {
             await user
               .send(
                 `Hey there ${user} you can now vote for me again! (<https://discordbots.org/bot/384820232583249921> and <https://bots.ondiscord.xyz/bots/384820232583249921>)\nIf you don't want these reminders anymore use \`k.dbl\` in a server im on.`,
               )
               .catch(() => {});
             toggleDBLvoted(user.id, true);
-          } else if (hasVoted && usr.voted) {
+          } else if (hasVoted && u.voted) {
             toggleDBLvoted(user.id, false);
           }
         }
-      }
+      });
     }
   });
 }
@@ -354,19 +357,18 @@ const reactions = [
   '🇹',
 ];
 // this should take care of everything that needs to be done when a vote ends
-async function endVote(vote, bot) {
-  // structure: vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic: topic, date: date }
-  const chann = await bot.channels.get(vote.channelID);
+async function endVote(vote:{ messageID: Message['id'], channelID: Message['channel']['id'], authorID: string, options: any, topic: string, date: Date }, bot:Client) {
+  const chann = bot.channels.get(vote.channelID) as TextChannel;
   if (chann) {
     const msg = await chann.fetchMessage(vote.messageID).catch(() => {});
     if (msg) {
       const reacts = msg.reactions;
-      let finalReact = [];
-      for (const x in reactions) {
+      let finalReact : Array<{ reaction: string, count: number }> = [];
+      asyncForEach(reactions, async (x) => {
         if (x >= vote.options.length) {
-          break;
+          return;
         }
-        const react = await reacts.get(reactions[x]);
+        const react = reacts.get(reactions[x]);
         if (react) {
           if (!finalReact[0] || finalReact[0].count <= react.count) {
             if (!finalReact[0] || finalReact[0].count < react.count) {
@@ -376,21 +378,21 @@ async function endVote(vote, bot) {
             }
           }
         }
-      }
+      });
       if (finalReact[0]) {
         if (finalReact.length > 1) {
           let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
           if (vote.authorID) {
             str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
           }
-          for (const i in finalReact) {
-            str += `**${vote.options[finalReact[i].reaction]}**`;
+          finalReact.forEach((react, i) => {
+            str += `**${vote.options[react.reaction]}**`;
             if (i < finalReact.length - 2) {
               str += ', ';
-            } else if (i == finalReact.length - 2) {
+            } else if (i === finalReact.length - 2) {
               str += ' and ';
             }
-          }
+          });
           str += ` with each having ** ${finalReact[0].count - 1} ** votes.`;
           await msg.edit(str);
         } else {
@@ -417,7 +419,7 @@ async function endVote(vote, bot) {
     }
   }
 }
-function voteCheck(bot) {
+function voteCheck(bot:Client) {
   const d = new Date();
   const h = new Date(
     d.getFullYear(),
@@ -428,30 +430,29 @@ function voteCheck(bot) {
     d.getSeconds() + 10,
     0,
   );
-  const e = h - d;
+  const e = h.getTime() - d.getTime();
   if (e > 100) {
     // some arbitrary time period
     setTimeout(voteCheck.bind(null, bot), e);
   }
   // do vote stuff
   MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
+    const db = mclient.db('MagiBot');
     const nd = new Date();
     const votes = await db
       .collection('votes')
       .find({ date: { $lte: nd } })
       .toArray();
-    for (const i in votes) {
-      const vote = votes[i];
-      endVote(vote, bot);
-      db.collection('votes').deleteOne(vote);
-    }
+    await asyncForEach(votes, async (vote) => {
+      await endVote(vote, bot);
+      await db.collection('votes').deleteOne(vote);
+    });
     mclient.close();
   });
   // endof vote stuff
 }
 
-function isInDBL(userID) {
+function isInDBL(userID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     const ret = await db
@@ -463,7 +464,7 @@ function isInDBL(userID) {
   });
 }
 
-function toggleDBL(userID, add) {
+function toggleDBL(userID:string, add:boolean) {
   MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     if (add && !(await isInDBL(userID))) {
@@ -477,7 +478,7 @@ function toggleDBL(userID, add) {
   });
 }
 
-function toggleStillMuted(userID, guildID, add) {
+function toggleStillMuted(userID:string, guildID:string, add:boolean) {
   MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     if (
@@ -500,15 +501,15 @@ function toggleStillMuted(userID, guildID, add) {
     mclient.close();
   });
 }
-async function getSaltKing(guildID) {
+async function getSaltKing(guildID:string) {
   const settings = await getSettings(guildID);
   return settings.saltKing;
 }
-async function getSaltRole(guildID) {
+async function getSaltRole(guildID:string) {
   const set = await getSettings(guildID);
   return set.saltRole;
 }
-function setSettings(guildID, settings) {
+function setSettings(guildID:string, settings) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     if (await getSettings(guildID)) {
@@ -520,7 +521,7 @@ function setSettings(guildID, settings) {
     return true;
   });
 }
-async function setSaltRole(guildID, roleID) {
+async function setSaltRole(guildID:string, roleID:string) {
   await setSettings(guildID, { saltRole: roleID });
 }
 async function getNotChannel(guildID) {
@@ -544,10 +545,10 @@ function topSalt(guildID) {
     return result;
   });
 }
-function setSaltKing(guildID, userID) {
+function setSaltKing(guildID:string, userID:string) {
   return setSettings(guildID, { saltKing: userID });
 }
-async function updateSaltKing(G) {
+async function updateSaltKing(G:Guild) {
   if ((await G.available) && G.me) {
     if (await G.me.hasPermission('MANAGE_ROLES', false, true)) {
       const SaltKing = await getSaltKing(G.id);
@@ -560,7 +561,7 @@ async function updateSaltKing(G) {
               name: 'SaltKing',
               color: '#FFFFFF',
               position: 0,
-              permissions: 0,
+              permissions: [],
               mentionable: true,
             },
             'SaltKing role needed for Saltranking to work. You can change the role if you like.',
@@ -571,9 +572,9 @@ async function updateSaltKing(G) {
         } else {
           const channel = await getNotChannel(G.id);
           if (channel) {
-            const chan = await G.channels.get(channel);
-            if (await chan.permissionsFor(G.me).has('SEND_MESSAGES')) {
-              chan.send(
+            const chan = G.channels.get(channel);
+            if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+              (chan as TextChannel).send(
                 `Hey there ${G.owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
               );
             }
@@ -582,12 +583,13 @@ async function updateSaltKing(G) {
         }
       }
       const sltID = await topSalt(G.id);
-      let saltID = false;
+      let saltID:string|undefined;
       if (sltID[0]) {
         saltID = sltID[0].salter;
       }
-      if (groles.get(SaltRole).position < G.me.highestRole.position) {
-        if (SaltKing && saltID != SaltKing) {
+      const role = groles.get(SaltRole);
+      if (role && role.position < G.me.highestRole.position) {
+        if (SaltKing && saltID !== SaltKing) {
           const user = await G.fetchMember(SaltKing).catch(() => {});
           if (user) {
             user.removeRole(SaltRole, 'Is not as salty anymore');
@@ -600,16 +602,16 @@ async function updateSaltKing(G) {
               await nuser.addRole(SaltRole, 'Saltiest user');
             }
           }
-          if (saltID != SaltKing) {
+          if (saltID !== SaltKing) {
             await setSaltKing(G.id, saltID);
           }
         }
       } else {
         const channel = await getNotChannel(G.id);
         if (channel) {
-          const chan = await G.channels.get(channel);
-          if (await chan.permissionsFor(G.me).has('SEND_MESSAGES')) {
-            chan.send(
+          const chan = G.channels.get(channel);
+          if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+            (chan as TextChannel).send(
               `Hey there ${G.owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
             );
           }
@@ -618,9 +620,9 @@ async function updateSaltKing(G) {
     } else {
       const channel = await getNotChannel(G.id);
       if (channel) {
-        const chan = await G.channels.get(channel);
-        if (await chan.permissionsFor(G.me).has('SEND_MESSAGES')) {
-          chan.send(
+        const chan = G.channels.get(channel);
+        if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+          (chan as TextChannel).send(
             `Hey there ${G.owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
           );
         }
