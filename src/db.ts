@@ -1,7 +1,7 @@
 ﻿import DBL from 'dblapi.js';
 import { MongoClient } from 'mongodb';
 import {
-  Client, TextChannel, Message, Guild,
+  Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
 import { OWNERID } from './shared_assets';
 import { asyncForEach } from './bamands';
@@ -360,7 +360,7 @@ const reactions = [
 async function endVote(vote:{ messageID: Message['id'], channelID: Message['channel']['id'], authorID: string, options: any, topic: string, date: Date }, bot:Client) {
   const chann = bot.channels.get(vote.channelID) as TextChannel;
   if (chann) {
-    const msg = await chann.fetchMessage(vote.messageID).catch(() => {});
+    const msg = chann.messages.get(vote.messageID);
     if (msg) {
       const reacts = msg.reactions;
       let finalReact : Array<{ reaction: string, count: number }> = [];
@@ -549,8 +549,8 @@ function setSaltKing(guildID:string, userID:string) {
   return setSettings(guildID, { saltKing: userID });
 }
 async function updateSaltKing(G:Guild) {
-  if ((await G.available) && G.me) {
-    if (await G.me.hasPermission('MANAGE_ROLES', false, true)) {
+  if (G.available && G.me) {
+    if (G.me.hasPermission('MANAGE_ROLES', false, true)) {
       const SaltKing = await getSaltKing(G.id);
       let SaltRole = await getSaltRole(G.id);
       const groles = await G.roles;
@@ -573,7 +573,7 @@ async function updateSaltKing(G:Guild) {
           const channel = await getNotChannel(G.id);
           if (channel) {
             const chan = G.channels.get(channel);
-            if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+            if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
               (chan as TextChannel).send(
                 `Hey there ${G.owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
               );
@@ -610,7 +610,7 @@ async function updateSaltKing(G:Guild) {
         const channel = await getNotChannel(G.id);
         if (channel) {
           const chan = G.channels.get(channel);
-          if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+          if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
             (chan as TextChannel).send(
               `Hey there ${G.owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
             );
@@ -621,7 +621,7 @@ async function updateSaltKing(G:Guild) {
       const channel = await getNotChannel(G.id);
       if (channel) {
         const chan = G.channels.get(channel);
-        if (chan?.permissionsFor(G.me).has('SEND_MESSAGES')) {
+        if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
           (chan as TextChannel).send(
             `Hey there ${G.owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
           );
@@ -630,20 +630,18 @@ async function updateSaltKing(G:Guild) {
     }
   }
 }
-function setNotChannel(guildID, channelID) {
-  setSettings(guildID, { notChannel: channelID });
+function setNotChannel(guildID:string, channelID:String|false) {
+  return setSettings(guildID, { notChannel: channelID });
 }
-async function sendUpdate(update, bot) {
-  const guilds = await bot.guilds.array();
-  for (const GN in guilds) {
-    const G = guilds[GN];
-    if (await G.available) {
+async function sendUpdate(update:string, bot:Client) {
+  await asyncForEach(bot.guilds.array(), async (G) => {
+    if (G.available) {
       const cid = await getNotChannel(G.id);
       if (cid) {
-        const channel = await G.channels.get(cid);
+        const channel = G.channels.get(cid) as TextChannel;
         if (channel) {
-          if (await channel.permissionsFor(G.me).has('SEND_MESSAGES')) {
-            if (G.id == '380669498014957569') {
+          if (channel.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
+            if (G.id === '380669498014957569') {
               channel.send(`<@&460218236185739264> ${update}`);
             } else {
               channel.send(update);
@@ -654,10 +652,10 @@ async function sendUpdate(update, bot) {
         }
       }
     }
-  }
+  });
 }
 
-function getSalt(userid, guildID) {
+async function getSalt(userid:string, guildID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const result = await db
@@ -671,7 +669,7 @@ function getSalt(userid, guildID) {
   });
 }
 
-async function saltUp(userid1, userid2, ad, guildID) {
+async function saltUp(userid1:string, userid2:string, ad:boolean, guildID:string) {
   const time = await saltDowntimeDone(userid1, userid2);
   if (time > 1 || ad) {
     return addSalt(userid1, userid2, guildID);
@@ -679,13 +677,13 @@ async function saltUp(userid1, userid2, ad, guildID) {
   return time;
 }
 
-async function usageUp(userid, guildID) {
+async function usageUp(userid:string, guildID:string) {
   const user = await getuser(userid, guildID);
   const updateval = user.botusage + 1;
   updateUser(userid, { $set: { botusage: updateval } }, guildID);
 }
 
-async function checks(userid, guildID) {
+async function checks(userid:string, guildID:string) {
   // maybe add more checks
   if (await getuser(userid, guildID)) {
     return true;
@@ -693,10 +691,10 @@ async function checks(userid, guildID) {
   // else
   return false;
 }
-function setPrefix(guildID, pref) {
+function setPrefix(guildID:string, pref?:string) {
   return setSettings(guildID, { prefix: pref });
 }
-async function getPrefix(guildID) {
+async function getPrefix(guildID:string) {
   let settings = await getSettings(guildID);
   settings = settings.prefix;
   if (!settings) {
@@ -706,12 +704,12 @@ async function getPrefix(guildID) {
   return settings;
 }
 
-async function getAdminRole(guildID) {
+async function getAdminRole(guildID:string) {
   const settings = await getSettings(guildID);
-  return settings.adminRoles;
+  return settings.adminRoles as Array<string>;
 }
 
-async function setAdminRole(guildID, roleID, insert) {
+async function setAdminRole(guildID:string, roleID:string, insert:boolean) {
   const roles = await getAdminRole(guildID);
   if (insert) {
     if (!roles.includes(roleID)) {
@@ -727,12 +725,12 @@ async function setAdminRole(guildID, roleID, insert) {
   return setSettings(guildID, settings);
 }
 
-async function getCommandChannel(guildID) {
+async function getCommandChannel(guildID:string) {
   const settings = await getSettings(guildID);
   return settings.commandChannels;
 }
 
-async function setCommandChannel(guildID, cid, insert) {
+async function setCommandChannel(guildID:string, cid:string, insert:boolean) {
   const channels = await getCommandChannel(guildID);
   if (insert) {
     if (!channels.includes(cid)) {
@@ -748,12 +746,12 @@ async function setCommandChannel(guildID, cid, insert) {
   return setSettings(guildID, settings);
 }
 
-async function getJoinChannel(guildID) {
+async function getJoinChannel(guildID:string) {
   const settings = await getSettings(guildID);
   return settings.joinChannels;
 }
 
-async function setJoinChannel(guildID, cid, insert) {
+async function setJoinChannel(guildID:string, cid:string, insert:boolean) {
   const channels = await getJoinChannel(guildID);
   if (insert) {
     if (!channels.includes(cid)) {
@@ -768,16 +766,18 @@ async function setJoinChannel(guildID, cid, insert) {
   const settings = { joinChannels: channels };
   return setSettings(guildID, settings);
 }
-async function getBlacklistedUser(guildID) {
+
+async function getBlacklistedUser(guildID:string) {
   const settings = await getSettings(guildID);
   return settings.blacklistedUsers;
 }
-async function isBlacklistedUser(userid, guildID) {
+
+async function isBlacklistedUser(userid:string, guildID:string) {
   const users = await getBlacklistedUser(guildID);
   return users.includes(userid);
 }
 
-async function setBlacklistedUser(userid, guildID, insert) {
+async function setBlacklistedUser(userid:string, guildID:string, insert:boolean) {
   const users = await getBlacklistedUser(guildID);
   if (insert) {
     if (!users.includes(userid)) {
@@ -794,14 +794,15 @@ async function setBlacklistedUser(userid, guildID, insert) {
 }
 /* eslint-disable */
 // TODO some time later , blacklist @everyone in these channels
-async function getBlacklistedEveryone(guildID) {
+async function getBlacklistedEveryone(guildID:string) {
   const settings = await getSettings(guildID);
   return settings.blacklistedEveryone;
 }
-async function setBlacklistedEveryone(guildID, cid, insert) {}
+
+async function setBlacklistedEveryone(guildID:string, cid:string, insert:boolean) {}
 /* eslint-enable */
 
-function joinsound(userid, surl, guildID) {
+async function joinsound(userid:string, surl:string, guildID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     if (await checks(userid, guildID)) {
@@ -816,11 +817,11 @@ function joinsound(userid, surl, guildID) {
 }
 
 export default {
-  async startup(bot) {
+  async startup(bot:Client) {
     // create Collection
     await MongoClient.connect(url).then(async (mclient) => {
       const db = mclient.db('MagiBot');
-      if (!(await db.collection('settings'))) {
+      if (!db.collection('settings')) {
         await db.createCollection('settings').then(() => {});
       }
       // Dataset of salt
@@ -851,31 +852,31 @@ export default {
     dblReminder(bot);
     voteCheck(bot);
   },
-  async getUser(userid, guildID) {
+  async getUser(userid:string, guildID:string) {
     const result = await getuser(userid, guildID);
     return result;
   },
-  usageUp(userid, guildID) {
+  usageUp(userid:string, guildID:string) {
     usageUp(userid, guildID);
   },
-  async saltUp(userid1:string, userid2, G) {
+  async saltUp(userid1:string, userid2:string, G:Guild) {
     const ret = await saltUp(userid1, userid2, false, G.id);
     updateSaltKing(G);
     return ret;
   },
-  async saltUpAdmin(userid1, userid2, G) {
+  async saltUpAdmin(userid1:string, userid2:string, G:Guild) {
     const ret = await saltUp(userid1, userid2, true, G.id);
     updateSaltKing(G);
     return ret;
   },
-  getSalt(userid, guildID) {
+  getSalt(userid:string, guildID:string) {
     return getSalt(userid, guildID);
   },
-  async getUsage(userid, guildID) {
+  async getUsage(userid:string, guildID:string) {
     const user = await getuser(userid, guildID);
     return parseInt(user.botusage, 10);
   },
-  remOldestSalt(userid, G) {
+  async remOldestSalt(userid:string, G:Guild) {
     return MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
       const db = mclient.db('MagiBot');
@@ -886,6 +887,7 @@ export default {
         .limit(1)
         .toArray();
       if (id[0]) {
+        // eslint-disable-next-line no-underscore-dangle
         await db.collection('salt').deleteOne({ _id: id[0]._id });
         saltGuild(userid, guildID, -1);
         mclient.close();
@@ -896,45 +898,47 @@ export default {
       return false;
     });
   },
-  async addGuild(guildID) {
+  async addGuild(guildID:string) {
     await checkGuild(guildID);
   },
-  topSalt(guildID) {
+  topSalt(guildID:string) {
     return topSalt(guildID);
   },
-  async joinable(guildID, cid) {
+  async joinable(guildID:string, cid:string) {
     const channels = await getJoinChannel(guildID);
     return channels.includes(cid);
   },
-  async isAdmin(guildID, user) {
+  async isAdmin(guildID:string, user:GuildMember) {
     // checks for admin and Owner, they can always use
     if (user.hasPermission('ADMINISTRATOR', false, true, true)) {
       return true;
     }
     // Owner is always admin hehe
-    if (user.id == OWNERID) {
+    if (user.id === OWNERID) {
       return true;
     }
     const roles = await getAdminRole(guildID);
-    for (const role in roles) {
-      if (user.roles.has(roles[role])) {
-        return true;
+    let ret = false;
+    roles.forEach((role) => {
+      if (user.roles.has(role)) {
+        ret = true;
       }
-    }
-    return false;
+    });
+    return ret;
   },
-  isAdminRole: async (guildID, adminRole) => {
+  isAdminRole: async (guildID:string, adminRole:string) => {
     const roles = await getAdminRole(guildID);
-    for (const role in roles) {
-      if (adminRole == roles[role]) {
-        return true;
+    let ret = false;
+    roles.forEach((role) => {
+      if (adminRole === role) {
+        ret = true;
       }
-    }
-    return false;
+    });
+    return ret;
   },
-  async commandAllowed(guildID, cid) {
+  async commandAllowed(guildID:string, cid:string) {
     const channels = await getCommandChannel(guildID);
-    return channels.length == 0 || channels.includes(cid);
+    return channels.length === 0 || channels.includes(cid);
   },
   async isCommandChannel(guildID, cid) {
     const channels = await getCommandChannel(guildID);
