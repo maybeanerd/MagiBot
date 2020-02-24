@@ -1,12 +1,11 @@
-import Discord from 'discord.js';
+import { Message } from 'discord.js';
+import * as data from '../db';
+import * as cmds from '../bamands';
+import { commandCategories } from '../types/enums';
 
-const data = require(`${__dirname}/../db.js`);
 
-const cmds = require(`${__dirname}/../bamands.js`);
-
-
-function printHelp(msg) {
-  const info = [];
+function printHelp(msg:Message) {
+  const info:Array<{name:string, value:string}> = [];
   info.push({
     name: 'add <@user|userid|nickname>',
     value: 'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.',
@@ -18,8 +17,8 @@ function printHelp(msg) {
   return info;
 }
 
-module.exports = {
-  main: async function main(bot, msg:Discord.Message) {
+export const salt:magibotCommand = {
+  main: async function main(content:string, msg:Message) {
     const args = msg.content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
@@ -101,5 +100,5 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Fun',
+  category: commandCategories.fun,
 };

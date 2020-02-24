@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 import {
   Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
-import { OWNERID } from './shared_assets';
+import { OWNERID, PREFIXES, resetPrefixes } from './shared_assets';
 import { asyncForEach } from './bamands';
 
 const config = process.env;
@@ -940,130 +940,129 @@ export default {
     const channels = await getCommandChannel(guildID);
     return channels.length === 0 || channels.includes(cid);
   },
-  async isCommandChannel(guildID, cid) {
+  async isCommandChannel(guildID:string, cid:string) {
     const channels = await getCommandChannel(guildID);
     return channels.includes(cid);
   },
-  async commandChannel(guildID) {
+  async commandChannel(guildID:string) {
     const channels = await getCommandChannel(guildID);
     let out = '';
-    for (const channel in channels) {
-      out += ` <#${channels[channel]}>`;
-    }
+    channels.forEach((channel:string) => {
+      out += ` <#${channel}>`;
+    });
     return out;
   },
-  async getSound(userid, guildID) {
+  async getSound(userid:string, guildID:string) {
     const user = await getuser(userid, guildID);
     return user.sound;
   },
-  addSound(userid, surl, guildID) {
+  addSound(userid:string, surl:string, guildID:string) {
     return joinsound(userid, surl, guildID);
   },
-  async isBlacklistedUser(userID, guildID) {
+  async isBlacklistedUser(userID:string, guildID:string) {
     if (await checks(userID, guildID)) {
       return isBlacklistedUser(userID, guildID);
     }
     return false;
   },
-  setJoinable(guildID, channelID, insert) {
+  setJoinable(guildID:string, channelID:string, insert:boolean) {
     return setJoinChannel(guildID, channelID, insert);
   },
-  isJoinable: async (guildID, channelID) => {
+  isJoinable: async (guildID:string, channelID:string) => {
     const channels = await getJoinChannel(guildID);
     return channels.includes(channelID);
   },
-  setCommandChannel(guildID, channelID, insert) {
+  setCommandChannel(guildID:string, channelID:string, insert:boolean) {
     return setCommandChannel(guildID, channelID, insert);
   },
-  setAdmin(guildID, roleID, insert) {
+  setAdmin(guildID:string, roleID:string, insert:boolean) {
     return setAdminRole(guildID, roleID, insert);
   },
-  async setBlacklistedUser(guildID, userID, insert) {
+  async setBlacklistedUser(guildID:string, userID:string, insert:boolean) {
     if (await checks(userID, guildID)) {
       return setBlacklistedUser(userID, guildID, insert);
     }
     return false;
   },
-  getSettings(guildID) {
+  getSettings(guildID:string) {
     return getSettings(guildID);
   },
-  clrSalt(userid, G) {
+  async clrSalt(userid:string, G:Guild) {
     return MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
       const db = mclient.db('MagiBot');
       await db
         .collection('salt')
         .deleteMany({ guild: guildID, salter: userid });
-      saltGuild(userid, guildID, 1, true);
+      await saltGuild(userid, guildID, 1, true);
       mclient.close();
-      updateSaltKing(G);
+      await updateSaltKing(G);
     });
   },
-  async resetSalt(G) {
+  async resetSalt(G:Guild) {
     await MongoClient.connect(url).then(async (mclient) => {
       const guildID = G.id;
-      const db = await mclient.db('MagiBot');
+      const db = mclient.db('MagiBot');
       await db.collection('saltrank').deleteMany({ guild: guildID });
       await db.collection('salt').deleteMany({ guild: guildID });
-      updateSaltKing(G);
+      await updateSaltKing(G);
       mclient.close();
     });
   },
-  async setNotification(guildID, cid) {
+  async setNotification(guildID:string, cid:string| false) {
     await setNotChannel(guildID, cid);
   },
-  isNotChannel: async (guildID, channID) => {
+  isNotChannel: async (guildID:string, channID:string) => {
     const notChann = await getNotChannel(guildID);
-    return channID == notChann;
+    return channID === notChann;
   },
-  sendUpdate(update, bot) {
+  sendUpdate(update:string, bot:Client) {
     sendUpdate(update, bot);
   },
-  getPrefixE(guildID) {
+  getPrefixE(guildID:string) {
     return getPrefix(guildID);
   },
-  async setPrefixE(guildID, pref, bot) {
+  async setPrefixE(guildID:string, pref:string) {
     await setPrefix(guildID, pref);
-    bot.PREFIXES[guildID] = pref;
+    PREFIXES[guildID] = pref;
     return pref;
   },
-  async getPrefixesE(bot) {
-    bot.PREFIXES = {};
+  async getPrefixesE(bot:Client) {
+    resetPrefixes();
     const guilds = bot.guilds.array();
-    for (const G in guilds) {
-      bot.PREFIXES[guilds[G].id] = await getPrefix(guilds[G].id);
-    }
+    asyncForEach(guilds, async (G) => {
+      PREFIXES[G.id] = await getPrefix(G.id);
+    });
   },
-  toggleDBLE(userID, add) {
+  toggleDBLE(userID:string, add:boolean) {
     toggleDBL(userID, add);
   },
-  getDBLE(userID) {
+  getDBLE(userID:string) {
     return isInDBL(userID);
   },
   addVote(vote) {
     MongoClient.connect(url).then(async (mclient) => {
-      const db = await mclient.db('MagiBot');
+      const db = mclient.db('MagiBot');
       db.collection('votes').insertOne(vote);
       mclient.close();
     });
   },
-  toggleStillMuted(userID, guildID, add) {
+  toggleStillMuted(userID:string, guildID:string, add:boolean) {
     toggleStillMuted(userID, guildID, add);
   },
-  async isStillMuted(userID, guildID) {
-    let find;
-    await MongoClient.connect(url).then(async (mclient) => {
-      const db = await mclient.db('MagiBot');
-      find = await db
+  async isStillMuted(userID:string, guildID:string) {
+    return MongoClient.connect(url).then(async (mclient) => {
+      const db = mclient.db('MagiBot');
+      const find = await db
         .collection('stillMuted')
         .findOne({ userid: userID, guildid: guildID });
       mclient.close();
+      return find;
     });
-    return find;
   },
-  getDBLSubs() {
+  async getDBLSubs() {
     return MongoClient.connect(url).then(async (mclient) => {
-      const db = await mclient.db('MagiBot');
+      const db = mclient.db('MagiBot');
       const users = await db
         .collection('DBLreminder')
         .find()

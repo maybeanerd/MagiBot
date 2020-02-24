@@ -1,6 +1,6 @@
 
 // we allow this cycle once, as the help command also needs to list itself
-import Discord from 'discord.js';
+import Discord, { Message } from 'discord.js';
 import { help } from './commands/help'; // eslint-disable-line import/no-cycle
 import data from './db';
 import {
@@ -95,7 +95,7 @@ export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
           }
           if (myPerms.has('SEND_MESSAGES')) {
             msg.reply("you're not allowed to use this command.")
-              .then((mess) => (mess as Discord.Message).delete({ timeout: 5000 }));
+              .then((mess) => (mess as Discord.Message).delete(5000));
           }
         }
         return;
@@ -164,7 +164,7 @@ export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
               PREFIXES[msg.guild.id]
             }:help\` to see how you can change that.`,
           )
-          .then((mess) => mess.delete({ timeout: 15000 }));
+          .then((mess) => (mess as Message).delete(15000));
       }
     }
   }

@@ -11,7 +11,8 @@ export const SUCCESS_COLOR = 0x00ff00;
 export const ERROR_COLOR = 0x0000ff;
 export const INFO_COLOR = 0x0000ff;
 export const SIGN = 'MagiBot - created by T0TProduction#0001';
-export const PREFIXES: {
+// eslint-disable-next-line import/no-mutable-exports
+export let PREFIXES: {
   [k:string]:string,
   } = {};
 export const queueVoiceChannels:any = {};
@@ -37,4 +38,7 @@ export function setUserId(uid:string) {
 }
 export function userID() {
   return bot_user_id;
+}
+export function resetPrefixes() {
+  PREFIXES = {};
 }

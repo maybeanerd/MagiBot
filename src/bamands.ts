@@ -1,5 +1,5 @@
 ﻿// commands made by Basti for use of the Bot
-import Discord from 'discord.js';
+import Discord, { Message } from 'discord.js';
 
 export async function findMember(guild:Discord.Guild, ment:string) {
   if (!ment) {
@@ -70,14 +70,14 @@ export async function yesOrNo(
 ) {
   return msg.channel.send(question).then(async (mess) => {
     const filter = (reaction:Discord.MessageReaction, user:Discord.User) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌') && user.id === msg.author.id;
-    await mess.react('☑');
-    await mess.react('❌');
+    await (mess as Message).react('☑');
+    await (mess as Message).react('❌');
     let time = tim;
     if (!time) {
       time = 20000;
     }
-    return mess.awaitReactions(filter, { max: 1, time }).then(async (reacts) => {
-      mess.delete();
+    return (mess as Message).awaitReactions(filter, { max: 1, time }).then(async (reacts) => {
+      (mess as Message).delete();
       const firstReacts = reacts.first();
       if (firstReacts && firstReacts.emoji.name === '☑') {
         return true;
