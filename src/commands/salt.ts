@@ -1,7 +1,8 @@
 import { Message } from 'discord.js';
-import * as data from '../db';
+import data from '../db';
 import * as cmds from '../bamands';
 import { commandCategories } from '../types/enums';
+import { PREFIXES } from '../shared_assets';
 
 
 function printHelp(msg:Message) {
@@ -29,7 +30,7 @@ export const salt:magibotCommand = {
         const uid = await cmds.findMember(msg.guild, mention);
         /* eslint-enable no-case-declarations */
         if (mention && uid) {
-          if (uid == msg.author.id) {
+          if (uid === msg.author.id) {
             msg.reply("you can't report yourself!");
             return;
           }
@@ -43,8 +44,7 @@ export const salt:magibotCommand = {
             return;
           }
           const time = await data.saltUp(uid, msg.author.id, msg.guild);
-          console.log(time);
-          if (time == 0) {
+          if (time === 0) {
             msg.channel.send(`Successfully reported ${mem} for being a salty bitch!`);
           } else {
             msg.reply(`you can report ${mem} again in ${59 - Math.floor((time * 60) % 60)} min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`);
@@ -56,11 +56,12 @@ export const salt:magibotCommand = {
       case 'top':
         /* eslint-disable no-case-declarations */
         const salters = await data.topSalt(msg.guild.id);
-        const info = [];
+        const info:Array<{name:string, value:string, inline:boolean}> = [];
         /* eslint-enable no-case-declarations */
         for (let i = 0; i < 5; i++) {
           let mname = 'User left guild';
           if (salters[i]) {
+            // eslint-disable-next-line no-await-in-loop
             const member = await msg.guild.fetchMember(salters[i].salter).catch(() => { });
             if (member) {
               mname = member.displayName;
@@ -88,17 +89,19 @@ export const salt:magibotCommand = {
         msg.channel.send('', { embed });
         break;
       default:
-        msg.reply(`this command doesn't exist. Use \`${bot.PREFIXES[msg.guild.id]}.help salt\` for more info.`);
+        msg.reply(`this command doesn't exist. Use \`${PREFIXES[msg.guild.id]}.help salt\` for more info.`);
         break;
       }
     } else {
       msg.reply('commands are only functional when used in a guild.');
     }
   },
+  name: 'salt',
   help: 'Salt commands',
-  ehelp(msg, bot) { return printHelp(msg, bot); },
+  ehelp(msg:Message) { return printHelp(msg); },
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
   category: commandCategories.fun,
+  dev: false,
 };

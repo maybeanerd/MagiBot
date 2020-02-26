@@ -3,7 +3,7 @@ import blapi from 'blapi';
 import config from './token';
 import data from './db';
 import {
-  setUserId, PREFIX, PREFIXES, TOKEN, queueVoiceChannels,
+  PREFIX, PREFIXES, TOKEN, queueVoiceChannels, setUser,
 } from './shared_assets';
 import { checkCommand } from './commandHandler';
 
@@ -43,7 +43,7 @@ bot.on('ready', () => {
   if (!bot.user) {
     throw new Error('FATAL Bot has no user.');
   }
-  setUserId(bot.user.id); // give user ID to other code
+  setUser(bot.user); // give user ID to other code
   const chann = bot.channels.get('382233880469438465');
   if (!chann || chann.type !== 'text') {
     console.error('Tebots Server Channel not found.');
@@ -166,7 +166,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
         && !(await data.isBlacklistedUser(n.id, n.guild.id))
         && (await data.joinable(n.guild.id, n.voiceChannelID))
       ) {
-        if (newVc.permissionsFor(n.guild.me).has('CONNECT')) {
+        if (newVc?.permissionsFor(n.guild.me)?.has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
             newVc.join().then((connection) => {

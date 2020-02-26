@@ -1,14 +1,15 @@
-
-// we allow this cycle once, as the help command also needs to list itself
 import Discord, { Message } from 'discord.js';
+import { salt } from './commands/salt';
+// we allow this cycle once, as the help command also needs to list itself
 import { help } from './commands/help'; // eslint-disable-line import/no-cycle
+
 import data from './db';
 import {
-  PREFIXES, OWNERID, DELETE_COMMANDS, userID,
+  PREFIXES, OWNERID, DELETE_COMMANDS, user,
 } from './shared_assets';
 
 export const commands:{[k:string]:magibotCommand} = {
-  help,
+  help, salt,
 };
 
 function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
@@ -36,8 +37,8 @@ export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
   }
   let isMention:boolean;
   if (
-    msg.content.startsWith(`<@${userID()}>`)
-      || msg.content.startsWith(`<@!${userID()}>`)
+    msg.content.startsWith(`<@${user().id}>`)
+      || msg.content.startsWith(`<@!${user().id}>`)
   ) {
     isMention = true;
   } else if (msg.content.startsWith(PREFIXES[msg.guild.id])) {

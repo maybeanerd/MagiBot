@@ -1,10 +1,11 @@
-import Discord from 'discord.js';
+import Discord, { Message } from 'discord.js';
 import { commandCategories } from './enums';
 
 declare global {
   type magibotCommand = {
-    args: string;
+    name:string;
     help: string;
+    ehelp: (msg:Message)=>Array<{name:string, value:string}>;
     admin: boolean;
     hide:boolean;
     dev:boolean;

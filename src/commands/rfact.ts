@@ -1,11 +1,12 @@
-import { magibotClient } from '../bot';
+import axios from 'axios';
+import { commandCategories } from '../types/enums';
+import { COLOR, user } from '../shared_assets';
 
-const axios = require('axios');
 
 const options = { weekday: 'long', month: 'long', day: 'numeric' };
 
-module.exports = {
-  main: async (bot:magibotClient, msg) => {
+export const rfact: magibotCommand = {
+  main: async (content, msg) => {
     const now = new Date();
     let fact = await axios.get(`http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`);
     fact = fact.data;
@@ -16,13 +17,13 @@ module.exports = {
       return;
     }
     const embed = {
-      color: bot.COLOR,
+      color: COLOR,
       // fields: info,
       title: `Random fact about: \`${now.toLocaleDateString('en-US', options)}\``,
       description: fact,
       footer: {
         /* eslint-disable camelcase */
-        icon_url: bot.user!.avatarURL,
+        icon_url: user().avatarURL,
         /* eslint-enable camelcase */
         text: 'powered by numbersapi.com',
       },
@@ -33,8 +34,11 @@ module.exports = {
   ehelp() {
     return [{ name: '', value: 'Get a random fact about the current date.' }];
   },
+  help: 'Get a random fact about the current date.',
+  name: 'rfact',
+  dev: false,
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Fun',
+  category: commandCategories.fun,
 };
