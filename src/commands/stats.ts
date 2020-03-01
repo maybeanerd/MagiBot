@@ -1,19 +1,23 @@
-const si = require('systeminformation');
+import si from 'systeminformation';
+import { commandCategories } from '../types/enums';
+import { OWNERID, COLOR, SIGN } from '../shared_assets';
+import { bot } from '../bot';
 
-module.exports = {
-  main: async (bot, msg) => {
-    const info = [];
+export const stats: magibotCommand = {
+  name: 'stats',
+  main: async (content, msg) => {
+    const info:Array<{name:string, value:string|number, inline:boolean}> = [];
     const guilds = bot.guilds.array();
 
     info.push({
       name: 'Number of guilds currently being served',
       value: guilds.length,
-      inline: false
+      inline: false,
     });
     info.push({
       name: 'Number of users currently being served',
       value: bot.users.size,
-      inline: false
+      inline: false,
     });
 
 
@@ -44,9 +48,9 @@ module.exports = {
     info.push({
       name: 'Time since last restart',
       value: uptime,
-      inline: false
+      inline: false,
     });
-    if (msg.author.id == bot.OWNERID) {
+    if (msg.author.id === OWNERID) {
       const memInfo = await si.mem();
       const memUsedByProccess = process.memoryUsage().rss;
       info.push({
@@ -54,20 +58,20 @@ module.exports = {
         value: `Memory used by this: ${Math.round(memUsedByProccess / 1048576)} MB (${Math.round((memUsedByProccess / memInfo.used) * 100)}% of used memory)
         Total available memory: ${Math.round(memInfo.total / 1048576)} MB
         Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
-        inline: false
+        inline: false,
       });
     }
 
     const embed = {
-      color: bot.COLOR,
+      color: COLOR,
       description: 'Here are some stats:',
       fields: info,
       footer: {
-        /* eslint-disable camelcase*/
+        /* eslint-disable camelcase */
         icon_url: bot.user.avatarURL,
-        /* eslint-enable camelcase*/
-        text: bot.SIGN
-      }
+        /* eslint-enable camelcase */
+        text: SIGN,
+      },
     };
 
     msg.channel.send({ embed });
@@ -78,5 +82,6 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Miscellaneous'
+  category: commandCategories.misc,
+  dev: false,
 };

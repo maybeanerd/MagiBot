@@ -4,10 +4,9 @@ import { commandCategories } from '../types/enums';
 import { commands } from '../commandHandler'; // eslint-disable-line import/no-cycle
 import data from '../db';
 
-export const help:magibotCommand = {
+export const help: magibotCommand = {
   name: 'help',
   category: commandCategories.misc,
-  help: 'Shows all available commands',
   admin: false,
   perm: 'SEND_MESSAGES',
   main: async function main(content, msg) {

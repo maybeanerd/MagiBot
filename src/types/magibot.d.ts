@@ -4,7 +4,6 @@ import { commandCategories } from './enums';
 declare global {
   type magibotCommand = {
     name:string;
-    help: string;
     ehelp: (msg:Message)=>Array<{name:string, value:string}>;
     admin: boolean;
     hide:boolean;

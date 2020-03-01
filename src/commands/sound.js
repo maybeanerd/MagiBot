@@ -68,7 +68,6 @@ module.exports = {
       }
     }
   },
-  help: 'Manage your joinsound',
   ehelp(msg, bot) { return printHelp(msg, bot); },
   admin: false,
   perm: 'SEND_MESSAGES',

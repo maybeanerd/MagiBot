@@ -97,7 +97,6 @@ export const salt:magibotCommand = {
     }
   },
   name: 'salt',
-  help: 'Salt commands',
   ehelp(msg:Message) { return printHelp(msg); },
   perm: 'SEND_MESSAGES',
   admin: false,

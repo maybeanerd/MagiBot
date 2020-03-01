@@ -6,7 +6,7 @@ function printHelp() {
 
   info.push({
     name: 'rem <@User|userid|nickname>',
-    value: 'Remove the joinsound of a user. If you use nickname it has to be at least three characters long'
+    value: 'Remove the joinsound of a user. If you use nickname it has to be at least three characters long',
   });
 
   return info;
@@ -20,9 +20,9 @@ module.exports = {
     const mention = args[1];
     switch (command) {
     case 'rem':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const uid = await cmds.findMember(msg.guild, mention);
-      /* eslint-enable no-case-declarations*/
+      /* eslint-enable no-case-declarations */
       if (mention && uid) {
         if (await data.addSound(uid, false, msg.guild.id)) {
           msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
@@ -38,10 +38,9 @@ module.exports = {
       break;
     }
   },
-  help: 'Modify the joinsounds of other users',
   ehelp(msg, bot) { return printHelp(msg, bot); },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
-  category: 'Utility'
+  category: 'Utility',
 };

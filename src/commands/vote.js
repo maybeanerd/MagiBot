@@ -28,15 +28,15 @@ function getTime(content) {
 module.exports = {
   main(bot, msg) {
     const authorID = msg.author.id;
-    msg.channel.send('What do you want the vote to be about?').then(mess => {
+    msg.channel.send('What do you want the vote to be about?').then((mess) => {
       msg.delete();
-      msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
+      msg.channel.awaitMessages((m) => m.author.id == authorID, { max: 1, time: 60000 }).then((collected) => {
         if (collected.first()) {
           const topic = collected.first().content;
           collected.first().delete();
           mess.delete();
-          msg.channel.send('How long is this vote supposed to last? (use d h m format, e.g.: `2d 3h 5m`)').then(mess1 => {
-            msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected2 => {
+          msg.channel.send('How long is this vote supposed to last? (use d h m format, e.g.: `2d 3h 5m`)').then((mess1) => {
+            msg.channel.awaitMessages((m) => m.author.id == authorID, { max: 1, time: 60000 }).then((collected2) => {
               if (collected2.first() && collected2.first().content) {
                 // time as array of values
                 const time = getTime(collected2.first().content);
@@ -51,8 +51,8 @@ module.exports = {
                   msg.channel.send('Votes are not allowed to last longer than 7 days, please use a valid time.');
                   return;
                 }
-                msg.channel.send(`What do you want the options to be for **${topic}**? Use \`option1|option2[|etc...]\``).then(mess2 => {
-                  msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected3 => {
+                msg.channel.send(`What do you want the options to be for **${topic}**? Use \`option1|option2[|etc...]\``).then((mess2) => {
+                  msg.channel.awaitMessages((m) => m.author.id == authorID, { max: 1, time: 60000 }).then((collected3) => {
                     if (collected3.first()) {
                       const args = collected3.first().content.split('|');
                       collected3.first().delete();
@@ -69,21 +69,23 @@ module.exports = {
                             timestr += `${time[s]} ${times[s]}`;
                           }
                         }
-                        msg.channel.send(`Do you want to start the vote **${topic}** lasting **${timestr}**with the options\n${str}`).then(mess3 => {
+                        msg.channel.send(`Do you want to start the vote **${topic}** lasting **${timestr}**with the options\n${str}`).then((mess3) => {
                           const filter = (reaction, user) => (reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === authorID;
                           mess3.react('☑');
                           mess3.react('❌');
-                          mess3.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+                          mess3.awaitReactions(filter, { max: 1, time: 20000 }).then((reacts) => {
                             mess3.delete();
                             if (reacts.first() && reacts.first().emoji.name == '☑') {
                               const dat = new Date();
                               const date = new Date(dat.getFullYear(), dat.getMonth(), dat.getDate() + time[0], dat.getHours() + time[1], dat.getMinutes() + time[2], dat.getSeconds(), 0);
-                              msg.channel.send(`**${topic}**\n*by ${msg.author}, ends on ${date}*\n\n${str}`).then(async ms => {
+                              msg.channel.send(`**${topic}**\n*by ${msg.author}, ends on ${date}*\n\n${str}`).then(async (ms) => {
                                 for (const i in args) {
                                   await ms.react(reactions[i]);
                                 }
                                 // vote structure
-                                const vote = { messageID: ms.id, channelID: ms.channel.id, options: args, topic, date, guildid: ms.guild.id, authorID };
+                                const vote = {
+                                  messageID: ms.id, channelID: ms.channel.id, options: args, topic, date, guildid: ms.guild.id, authorID,
+                                };
                                 data.addVote(vote);
                               });
                             } else if (reacts.first()) {
@@ -117,9 +119,8 @@ module.exports = {
   ehelp() {
     return [{ name: '', value: 'Start a vote with up to 20 different options. The maximum duration is 7 days.\nThe setup includes multiple steps which will be explained when you use the command.' }];
   },
-  help: 'Start a vote',
   admin: false,
   hide: false,
   perm: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
-  category: 'Utility'
+  category: 'Utility',
 };

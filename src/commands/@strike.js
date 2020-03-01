@@ -6,12 +6,12 @@ function printHelp() {
 
   info.push({
     name: '<@user|userid|nickname>',
-    value: 'Strike a user for breaking your server rules. The third strike will lead to a temporary ban.'
+    value: 'Strike a user for breaking your server rules. The third strike will lead to a temporary ban.',
   });
 
   info.push({
     name: 'undo <@user|userid|nickname>',
-    value: 'Remove a strike from a user.'
+    value: 'Remove a strike from a user.',
   });
 
   return info;
@@ -27,11 +27,11 @@ module.exports = {
       const uid = await cmds.findMember(msg.guild, mention);
       if (!(mention && uid)) {
         if (command == 'reset') {
-          msg.channel.send('Do you really want to reset all salt on this server?').then(mess => {
+          msg.channel.send('Do you really want to reset all salt on this server?').then((mess) => {
             const filter = (reaction, user) => (reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id;
             mess.react('☑');
             mess.react('❌');
-            mess.awaitReactions(filter, { max: 1, time: 20000 }).then(reacts => {
+            mess.awaitReactions(filter, { max: 1, time: 20000 }).then((reacts) => {
               mess.delete();
               if (reacts.first() && reacts.first().emoji.name == '☑') {
                 data.resetSalt(msg.guild);
@@ -74,10 +74,9 @@ module.exports = {
       msg.reply('Commands are only available on guilds.');
     }
   },
-  help: 'Strike commands for admins',
   ehelp(msg, bot) { return printHelp(msg, bot); },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
-  category: 'Utility'
+  category: 'Utility',
 };

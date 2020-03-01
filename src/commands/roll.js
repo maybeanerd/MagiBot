@@ -9,7 +9,7 @@ function comp(s, m, n, f, a) {
   if (isNaN(f)) {
     return false;
   }
-  a = typeof a == 'string' ? parseInt(a.replace(/\s/g, ''), 10) : 0;
+  a = typeof a === 'string' ? parseInt(a.replace(/\s/g, ''), 10) : 0;
   if (isNaN(a)) a = 0;
   // ab hier selber ändern, array von würfen als ausgabe?
   const ret = [];
@@ -59,13 +59,13 @@ module.exports = {
     info.push({
       name: `Sum of ${throws[size - 5]} * ${thro}d${throws[size - 3]} + ${throws[size - 2]}`,
       value: throws[size - 1],
-      inline: false
+      inline: false,
     });
     for (let i = 0; i < size - 6; i++) {
       info.push({
         name: `${i + 1}. roll`,
         value: throws[i],
-        inline: true
+        inline: true,
       });
     }
     const embed = {
@@ -73,24 +73,23 @@ module.exports = {
       description: `:game_die: <@!${msg.author.id}>s dice have been rolled:`,
       fields: info,
       footer: {
-        /* eslint-disable camelcase*/
+        /* eslint-disable camelcase */
         icon_url: 'https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png',
-        /* eslint-enable camelcase*/
-        text: 'The real dungeon master'
-      }
+        /* eslint-enable camelcase */
+        text: 'The real dungeon master',
+      },
     };
     msg.channel.send('', { embed });
   },
-  help: 'Roll dice',
   ehelp() {
     const ret = [];
     ret.push({
       name: '[multiplier]*[number of rolls]d<die number>[+ <modifier>]',
-      value: 'Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`'
+      value: 'Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`',
     });
     return ret;
   },
   perm: 'SEND_MESSAGES',
   admin: false,
-  category: 'Fun'
+  category: 'Fun',
 };

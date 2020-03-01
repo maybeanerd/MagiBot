@@ -6,22 +6,22 @@ function printHelp() {
 
   info.push({
     name: 'add <@user|userid|nickname>',
-    value: 'Report a user for being salty'
+    value: 'Report a user for being salty',
   });
 
   info.push({
     name: 'rem <@user|userid|nickname>',
-    value: 'Remove the oldest salt report of a user'
+    value: 'Remove the oldest salt report of a user',
   });
 
   info.push({
     name: 'clr <@user|userid|nickname>',
-    value: 'Clear all salt of a user'
+    value: 'Clear all salt of a user',
   });
 
   info.push({
     name: 'reset',
-    value: 'Reset all salt of this guild. Use with caution'
+    value: 'Reset all salt of this guild. Use with caution',
   });
 
   return info;
@@ -97,10 +97,9 @@ module.exports = {
       msg.reply('Commands are only available on guilds.');
     }
   },
-  help: 'Salt commands for admins',
   ehelp(msg, bot) { return printHelp(msg, bot); },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
-  category: 'Utility'
+  category: 'Utility',
 };

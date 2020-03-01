@@ -6,35 +6,35 @@ function printHelp() {
 
   info.push({
     name: 'ban <@User>',
-    value: 'Deactivate all functions of the bot for a user'
+    value: 'Deactivate all functions of the bot for a user',
   });
   info.push({
     name: 'unban <@User>',
-    value: 'Reactivate all functions of the bot for a user'
+    value: 'Reactivate all functions of the bot for a user',
   });
   info.push({
     name: 'join',
-    value: "(De)activate joinsounds for the voicechannel you're connected to"
+    value: "(De)activate joinsounds for the voicechannel you're connected to",
   });
   info.push({
     name: 'admin <@Role>',
-    value: '(Un)set a role to be considered admin by the bot'
+    value: '(Un)set a role to be considered admin by the bot',
   });
   info.push({
     name: 'command',
-    value: "(De)activate bot commands for the text channel you're sending this in"
+    value: "(De)activate bot commands for the text channel you're sending this in",
   });
   info.push({
     name: 'notification',
-    value: '(Un)set a textchannel to be notification channel'
+    value: '(Un)set a textchannel to be notification channel',
   });
   info.push({
     name: 'info',
-    value: 'Displays current settings'
+    value: 'Displays current settings',
   });
   info.push({
     name: 'prefix <prefix>',
-    value: 'Set a custom character or string as prefix'
+    value: 'Set a custom character or string as prefix',
   });
 
   return info;
@@ -75,9 +75,9 @@ module.exports = {
       }
       break;
     case 'join':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const voiceChannel = await msg.member.voiceChannel;
-      /* eslint-enable no-case-declarations*/
+      /* eslint-enable no-case-declarations */
 
       if (voiceChannel) {
         const isJoinable = await data.isJoinable(msg.guild.id, voiceChannel.id);
@@ -94,9 +94,9 @@ module.exports = {
       }
       break;
     case 'admin':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const rid = await cmds.findRole(msg.guild, mention);
-      /* eslint-enable no-case-declarations*/
+      /* eslint-enable no-case-declarations */
       if (mention && rid) {
         if (!await data.isAdminRole(msg.guild.id, rid)) {
           if (await cmds.yesOrNo(msg, `Do you want to set <@&${rid}> as admin role?`, `Cancelled setting <@&${rid}> as admin role`)) {
@@ -112,9 +112,9 @@ module.exports = {
       }
       break;
     case 'command':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const isCommandChannel = await data.isCommandChannel(msg.guild.id, msg.channel.id);
-      /* eslint-enable no-case-declarations*/
+      /* eslint-enable no-case-declarations */
       de = '';
       if (isCommandChannel) {
         de = 'de';
@@ -125,13 +125,13 @@ module.exports = {
       }
       break;
     case 'notification':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const isNotChann = await data.isNotChannel(msg.guild.id, msg.channel.id);
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       if (!isNotChann) {
         if (await cmds.yesOrNo(msg, `Do you want to activate MagiBot notifications in <#${await msg.channel.id}>?`, `Cancelled activating notifications in <#${await msg.channel.id}>`)) {
           await data.setNotification(await msg.guild.id, await msg.channel.id);
-          msg.channel.send(`Successfully activated notifications in <#${await msg.channel.id}>.`).then(mess => {
+          msg.channel.send(`Successfully activated notifications in <#${await msg.channel.id}>.`).then((mess) => {
             mess.delete(5000).catch(() => { });
             msg.delete();
           });
@@ -156,19 +156,19 @@ module.exports = {
       }
       break;
     case 'info':
-      /* eslint-disable no-case-declarations*/
+      /* eslint-disable no-case-declarations */
       const info = [];
       const set = await data.getSettings(msg.guild.id);
 
       info.push({
         name: 'Prefix',
         value: `${await data.getPrefixE(msg.guild.id)}.`,
-        inline: false
+        inline: false,
       });
 
       let str = '';
       let cmd = set.commandChannels;
-      /* eslint-enable no-case-declarations*/
+      /* eslint-enable no-case-declarations */
 
       if (!cmd.toString()) {
         str = 'no whitelist, so every channel is allowed';
@@ -180,7 +180,7 @@ module.exports = {
       info.push({
         name: 'Command channels',
         value: str,
-        inline: false
+        inline: false,
       });
 
       str = '';
@@ -195,7 +195,7 @@ module.exports = {
       info.push({
         name: 'Admin roles',
         value: str,
-        inline: false
+        inline: false,
       });
 
       str = '';
@@ -203,7 +203,7 @@ module.exports = {
       if (!cmd.toString()) {
         str = 'Empty';
       } else {
-        const guild = msg.guild;
+        const { guild } = msg;
         for (const s in cmd) {
           const chann = await guild.channels.get(cmd[s]);
           if (chann) {
@@ -217,7 +217,7 @@ module.exports = {
       info.push({
         name: 'Joinsound channels',
         value: str,
-        inline: false
+        inline: false,
       });
 
       str = '';
@@ -233,7 +233,7 @@ module.exports = {
       info.push({
         name: 'Blacklisted users',
         value: str,
-        inline: false
+        inline: false,
       });
 
       str = '';
@@ -249,7 +249,7 @@ module.exports = {
       info.push({
         name: 'Channel with @everyone blacklist',
         value: str,
-        inline: false
+        inline: false,
       });
 
       if (!set.saltKing) {
@@ -260,7 +260,7 @@ module.exports = {
       info.push({
         name: 'SaltKing',
         value: str,
-        inline: false
+        inline: false,
       });
       if (!set.saltRole) {
         str = 'None';
@@ -270,7 +270,7 @@ module.exports = {
       info.push({
         name: 'SaltKing role',
         value: str,
-        inline: false
+        inline: false,
       });
       if (!set.notChannel) {
         str = 'None';
@@ -280,21 +280,21 @@ module.exports = {
       info.push({
         name: 'Notification channel',
         value: str,
-        inline: false
+        inline: false,
       });
-      /* eslint-disable no-case-declarations*/
-      /* eslint-disable camelcase*/
+      /* eslint-disable no-case-declarations */
+      /* eslint-disable camelcase */
       const embed = {
         color: bot.COLOR,
         description: `Guild settings of ${msg.guild.name}:`,
         fields: info,
         footer: {
           icon_url: await msg.guild.iconURL,
-          text: await msg.guild.name
-        }
+          text: await msg.guild.name,
+        },
       };
-      /* eslint-enable no-case-declarations*/
-      /* eslint-enable camelcase*/
+      /* eslint-enable no-case-declarations */
+      /* eslint-enable camelcase */
       msg.channel.send('', { embed });
       break;
     default:
@@ -302,10 +302,9 @@ module.exports = {
       break;
     }
   },
-  help: 'Modify the settings for the bot',
   ehelp(msg, bot) { return printHelp(msg, bot); },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
-  category: 'Utility'
+  category: 'Utility',
 };

@@ -34,7 +34,6 @@ export const rfact: magibotCommand = {
   ehelp() {
     return [{ name: '', value: 'Get a random fact about the current date.' }];
   },
-  help: 'Get a random fact about the current date.',
   name: 'rfact',
   dev: false,
   perm: 'SEND_MESSAGES',

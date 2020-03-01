@@ -7,10 +7,9 @@ module.exports = {
 
     msg.channel.send(`output:\n\`\`\`js\n${evaluation}\`\`\``);
   },
-  help: 'eval something',
   admin: true,
   dev: true,
   hide: true,
   perm: 'SEND_MESSAGES',
-  category: 'Admin Command'
+  category: 'Admin Command',
 };

@@ -19,18 +19,18 @@ module.exports = {
       info.push({
         name: 'Saltlevel',
         value: salt,
-        inline: false
+        inline: false,
       });
       info.push({
         name: 'Bot usage',
         value: usage,
-        inline: false
+        inline: false,
       });
       const link = await data.getSound(id, msg.guild.id);
       info.push({
         name: 'Joinsound',
         value: link,
-        inline: false
+        inline: false,
       });
       const user = await msg.guild.fetchMember(id);
       const embed = {
@@ -39,23 +39,22 @@ module.exports = {
         fields: info,
         thumbnail: { url: user.user.avatarURL },
         footer: {
-          /* eslint-disable camelcase*/
+          /* eslint-disable camelcase */
           icon_url: user.user.avatarURL,
-          /* eslint-enable camelcase*/
-          text: user.user.tag
-        }
+          /* eslint-enable camelcase */
+          text: user.user.tag,
+        },
       };
       msg.channel.send('', { embed });
     } else {
       msg.reply('This command is only available in guilds.');
     }
   },
-  help: 'Get some info on yourself or a user you mention',
   ehelp() {
     return [{ name: '', value: 'Get info about yourself.' }, { name: '<@user|userid|nickname>', value: 'Get info about a certain user. If you use the nickname you need to at least define three characters.' }];
   },
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Utility'
+  category: 'Utility',
 };
