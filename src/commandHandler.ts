@@ -1,4 +1,6 @@
 import Discord, { Message } from 'discord.js';
+// eslint-disable-next-line import/no-cycle
+import { stats } from './commands/stats';
 import { salt } from './commands/salt';
 // we allow this cycle once, as the help command also needs to list itself
 import { help } from './commands/help'; // eslint-disable-line import/no-cycle
@@ -9,7 +11,7 @@ import {
 } from './shared_assets';
 
 export const commands:{[k:string]:magibotCommand} = {
-  help, salt,
+  help, salt, stats,
 };
 
 function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
