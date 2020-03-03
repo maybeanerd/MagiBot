@@ -1,4 +1,7 @@
 import Discord, { Message } from 'discord.js';
+import { vote } from './commands/vote';
+import { sound } from './commands/sound';
+import { rfact } from './commands/rfact';
 // eslint-disable-next-line import/no-cycle
 import { stats } from './commands/stats';
 import { salt } from './commands/salt';
@@ -11,7 +14,7 @@ import {
 } from './shared_assets';
 
 export const commands:{[k:string]:magibotCommand} = {
-  help, salt, stats,
+  help, salt, stats, rfact, sound, vote,
 };
 
 function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
