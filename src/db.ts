@@ -802,7 +802,7 @@ async function getBlacklistedEveryone(guildID:string) {
 async function setBlacklistedEveryone(guildID:string, cid:string, insert:boolean) {}
 /* eslint-enable */
 
-async function joinsound(userid:string, surl:string, guildID:string) {
+async function joinsound(userid:string, surl:string|false, guildID:string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     if (await checks(userid, guildID)) {
@@ -956,7 +956,7 @@ export default {
     const user = await getuser(userid, guildID);
     return user.sound;
   },
-  addSound(userid:string, surl:string, guildID:string) {
+  addSound(userid:string, surl:string|false, guildID:string) {
     return joinsound(userid, surl, guildID);
   },
   async isBlacklistedUser(userID:string, guildID:string) {

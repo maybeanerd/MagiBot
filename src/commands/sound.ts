@@ -1,12 +1,12 @@
-const data = require(`${__dirname}/../db.js`);
-const ffprobe = require('ffprobe');
-
-
-const ffprobeStatic = require('ffprobe-static');
+import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
+import { PREFIXES } from '../shared_assets';
+import data from '../db';
+import { commandCategories } from '../types/enums';
 
 
 function printHelp() {
-  const info = [];
+  const info:Array<{name:string, value:string}> = [];
 
   info.push({
     name: '<Link to audio file>',
@@ -26,11 +26,12 @@ function printHelp() {
   return info;
 }
 
-module.exports = {
+export const sound: magibotCommand = {
+  name: 'sound',
   main: async function main(bot, msg) {
     const args = msg.content.split(/ +/);
     const command = args[0].toLowerCase();
-    if (command == 'rem') {
+    if (command === 'rem') {
       if (await data.addSound(msg.author.id, false, msg.guild.id)) {
         msg.reply('you successfully removed your joinsound!');
       } else {
@@ -44,17 +45,18 @@ module.exports = {
           mention = file.url;
         }
 
-        let sound = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
-        if (!sound) {
-          msg.reply(`you need to use a compatible link or upload the file with the command! For more info use \`${bot.PREFIXES[msg.guild.id]}.help sound\``);
+        let snd = await ffprobe(mention, { path: ffprobeStatic.path }).catch(() => { });
+        if (!snd) {
+          msg.reply(`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES[msg.guild.id]}.help sound\``);
           return;
         }
-        sound = sound.streams[0];
-        if (sound.codec_name != 'mp3' && sound.codec_name != 'pcm_s16le' && sound.codec_name != 'pcm_f32le') {
-          msg.reply(`you need to use a compatible file! For more info use \`${bot.PREFIXES[msg.guild.id]}.help sound\``);
+        // eslint-disable-next-line prefer-destructuring
+        snd = snd.streams[0];
+        if (snd.codec_name !== 'mp3' && snd.codec_name !== 'pcm_s16le' && snd.codec_name !== 'pcm_f32le') {
+          msg.reply(`you need to use a compatible file! For more info use \`${PREFIXES[msg.guild.id]}.help sound\``);
           return;
         }
-        if (sound.duration > 8) {
+        if (snd.duration > 8) {
           msg.reply("the joinsound you're trying to add is longer than 8 seconds.");
           return;
         }
@@ -64,13 +66,14 @@ module.exports = {
           msg.reply('Something went wrong...');
         }
       } else {
-        msg.reply(`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${bot.PREFIXES[msg.guild.id]}.help sound\` for more info.`);
+        msg.reply(`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES[msg.guild.id]}.help sound\` for more info.`);
       }
     }
   },
-  ehelp(msg, bot) { return printHelp(msg, bot); },
+  ehelp() { return printHelp(); },
   admin: false,
   perm: 'SEND_MESSAGES',
   hide: false,
-  category: 'Fun',
+  category: commandCategories.fun,
+  dev: false,
 };
