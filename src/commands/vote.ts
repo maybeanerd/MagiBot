@@ -25,8 +25,8 @@ function getTime(content) {
   return false;
 }
 
-module.exports = {
-  main(bot, msg) {
+export const vote:magibotCommand = {
+  main(content, msg) {
     const authorID = msg.author.id;
     msg.channel.send('What do you want the vote to be about?').then((mess) => {
       msg.delete();

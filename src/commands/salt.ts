@@ -20,7 +20,7 @@ function printHelp(msg:Message) {
 
 export const salt:magibotCommand = {
   main: async function main(content:string, msg:Message) {
-    const args = msg.content.split(/ +/);
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
       switch (command) {

@@ -10,7 +10,7 @@ export const help: magibotCommand = {
   admin: false,
   perm: 'SEND_MESSAGES',
   main: async function main(content, msg) {
-    const args = msg.content.split(/ +/);
+    const args = content.split(/ +/);
     let command = args[0].toLowerCase();
     // extended help
     if (command) {

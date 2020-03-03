@@ -28,8 +28,8 @@ function printHelp() {
 
 export const sound: magibotCommand = {
   name: 'sound',
-  main: async function main(bot, msg) {
-    const args = msg.content.split(/ +/);
+  main: async function main(content, msg) {
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (command === 'rem') {
       if (await data.addSound(msg.author.id, false, msg.guild.id)) {
