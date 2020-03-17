@@ -181,16 +181,16 @@ async function onHour(bot:Client, isFirst:boolean) {
     // some arbitrary time period
     setTimeout(onHour.bind(null, bot, false), e);
   }
-  let msg;
+  let msg:Message;
   if (isFirst) {
-    const chann = bot.channels.get('382233880469438465');
-    msg = await (chann as TextChannel)?.send('0 %');
+    const chann = bot.channels.fetch('382233880469438465');
+    msg = await (await chann as TextChannel)?.send('0 %');
   }
 
   const t0 = process.hrtime();
   const nd = new Date();
   nd.setDate(nd.getDate() - 7);
-  const guilds = await bot.guilds.array();
+  const guilds = bot.guilds.cache.array();
   await MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     let counter = 0;
@@ -313,7 +313,7 @@ async function dblReminder(bot:Client) {
     if (users) {
       await asyncForEach(users, async (u) => {
         // eslint-disable-next-line no-underscore-dangle
-        const user = await bot.fetchUser(u._id);
+        const user = await bot.users.fetch(u._id);
         let dblFailed = false;
         const hasVoted = await dbl.hasVoted(user.id).catch(() => {
           dblFailed = true;
@@ -358,9 +358,9 @@ const reactions = [
 ];
 // this should take care of everything that needs to be done when a vote ends
 async function endVote(vote:{ messageID: Message['id'], channelID: Message['channel']['id'], authorID: string, options: any, topic: string, date: Date }, bot:Client) {
-  const chann = bot.channels.get(vote.channelID) as TextChannel;
+  const chann = await bot.channels.fetch(vote.channelID) as TextChannel;
   if (chann) {
-    const msg = chann.messages.get(vote.messageID);
+    const msg = await chann.messages.fetch(vote.messageID);
     if (msg) {
       const reacts = msg.reactions;
       let finalReact : Array<{ reaction: string, count: number }> = [];
@@ -368,8 +368,8 @@ async function endVote(vote:{ messageID: Message['id'], channelID: Message['chan
         if (x >= vote.options.length) {
           return;
         }
-        const react = reacts.get(reactions[x]);
-        if (react) {
+        const react = reacts.cache.get(reactions[x]);
+        if (react && react.count) {
           if (!finalReact[0] || finalReact[0].count <= react.count) {
             if (!finalReact[0] || finalReact[0].count < react.count) {
               finalReact = [{ reaction: x, count: react.count }];

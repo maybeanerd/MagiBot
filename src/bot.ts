@@ -3,8 +3,13 @@ import blapi from 'blapi';
 import config from './token';
 import data from './db';
 import {
-  PREFIX, PREFIXES, TOKEN, queueVoiceChannels, setUser,
+  PREFIX,
+  PREFIXES,
+  TOKEN,
+  queueVoiceChannels,
+  setUser,
 } from './shared_assets';
+// eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
 
 export const bot = new Discord.Client();
@@ -14,8 +19,8 @@ if (config.blapis) {
   blapi.handle(bot, config.blapis, 30);
   // TODO fix blapi types!
 }
-process.on('uncaughtException', (err) => {
-  const chann = bot.channels.get('414809410448261132');
+process.on('uncaughtException', async (err) => {
+  const chann = await bot.channels.fetch('414809410448261132');
 
   console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
   if (chann) {
@@ -26,8 +31,8 @@ process.on('uncaughtException', (err) => {
     );
   }
 });
-process.on('unhandledRejection', (err) => {
-  const chann = bot.channels.get('414809410448261132');
+process.on('unhandledRejection', async (err) => {
+  const chann = await bot.channels.fetch('414809410448261132');
 
   console.error(`Unhandled promise rejection:\n${err}`);
   if (chann) {
@@ -39,12 +44,12 @@ process.on('unhandledRejection', (err) => {
 
 // fires on startup and on reconnect
 let justStartedUp = true;
-bot.on('ready', () => {
+bot.on('ready', async () => {
   if (!bot.user) {
     throw new Error('FATAL Bot has no user.');
   }
   setUser(bot.user); // give user ID to other code
-  const chann = bot.channels.get('382233880469438465');
+  const chann = await bot.channels.fetch('382233880469438465');
   if (!chann || chann.type !== 'text') {
     console.error('Tebots Server Channel not found.');
   }
@@ -56,9 +61,10 @@ bot.on('ready', () => {
   } else {
     (chann as Discord.TextChannel).send('Just reconnected to Discord...');
   }
-  bot.user.setPresence({
-    game: {
+  await bot.user.setPresence({
+    activity: {
       name: `${PREFIX}.help`,
+      type: 'WATCHING',
       url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
     },
     status: 'online',
@@ -94,7 +100,7 @@ bot.on('guildCreate', async (guild) => {
         )
         .catch(() => {});
     }
-    const chan = bot.channels.get('408611226998800390');
+    const chan = await bot.channels.fetch('408611226998800390');
     if (chan && chan.type === 'text') {
       (chan as Discord.TextChannel).send(
         `:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`,
@@ -103,9 +109,9 @@ bot.on('guildCreate', async (guild) => {
   }
 });
 
-bot.on('guildDelete', (guild) => {
+bot.on('guildDelete', async (guild) => {
   if (guild.available) {
-    const chan = bot.channels.get('408611226998800390');
+    const chan = await bot.channels.fetch('408611226998800390');
     if (chan && chan.type === 'text') {
       (chan as Discord.TextChannel).send(
         `:x: left ${guild.name} (${guild.memberCount} users, ID: ${guild.id})`,
@@ -120,18 +126,11 @@ bot.on('error', (err) => {
 
 bot.on('voiceStateUpdate', async (o, n) => {
   try {
-    const newVc = n.voiceChannel;
+    const newVc = n.channel;
     // check if voice channel actually changed, don't mute bots
-    if (
-      !n.user.bot
-      && (!o.voiceChannel || o.voiceChannelID !== n.voiceChannelID)
-    ) {
+    if (!n.member?.user.bot && o.channel?.id !== newVc?.id) {
       // is muted and joined a vc? maybe still muted from queue
-      if (
-        n.serverMute
-        && n.voiceChannel
-        && (await data.isStillMuted(n.id, n.guild.id))
-      ) {
+      if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
         n.setMute(
           false,
           'was still muted from a queue which user disconnected from',
@@ -140,20 +139,18 @@ bot.on('voiceStateUpdate', async (o, n) => {
       }
       if (
         !n.serverMute
-        && n.voiceChannel
         && queueVoiceChannels[n.guild.id]
-        && queueVoiceChannels[n.guild.id] === n.voiceChannelID
+        && queueVoiceChannels[n.guild.id] === newVc?.id
       ) {
         // user joined a muted channel
         n.setMute(true, 'joined active queue voice channel');
       } else if (
         n.serverMute
-        && o.voiceChannel
         && queueVoiceChannels[o.guild.id]
-        && queueVoiceChannels[o.guild.id] === o.voiceChannelID
+        && queueVoiceChannels[o.guild.id] === o.channel?.id
       ) {
         // user left a muted channel
-        if (n.voiceChannel) {
+        if (newVc) {
           n.setMute(false, 'left active queue voice channel');
         } else {
           // save the unmute for later
@@ -161,21 +158,20 @@ bot.on('voiceStateUpdate', async (o, n) => {
         }
       } else if (
         newVc
-        && !n.guild.me.voiceChannel
-        && n.id !== bot.user.id
+        && !n.guild?.me?.voice.channel
+        && n.id !== bot.user?.id
         && !(await data.isBlacklistedUser(n.id, n.guild.id))
-        && (await data.joinable(n.guild.id, n.voiceChannelID))
+        && (await data.joinable(n.guild.id, newVc.id))
       ) {
-        if (newVc?.permissionsFor(n.guild.me)?.has('CONNECT')) {
+        if (n.guild.me && newVc?.permissionsFor(n.guild.me)?.has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
             newVc.join().then((connection) => {
               if (connection) {
                 // TODO use connection.play when discord.js updates
-                const dispatcher = connection.playArbitraryInput(sound, {
+                const dispatcher = connection.play(sound, {
                   seek: 0,
                   volume: 0.2,
-                  passes: 1,
                   bitrate: 'auto',
                 });
                 dispatcher.once('end', () => {
