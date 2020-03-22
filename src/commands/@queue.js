@@ -47,9 +47,9 @@ module.exports = {
     }
     used[msg.guild.id] = { date: new Date(Date.now() + 3600000) };
     const authorID = msg.author.id;
-    msg.channel.send('What do you want the queue to be about?').then(mess => {
+    msg.channel.send('What do you want the queue to be about?').then((mess) => {
       msg.delete();
-      msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(collected => {
+      msg.channel.awaitMessages((m) => m.author.id == authorID, { max: 1, time: 60000 }).then((collected) => {
         if (!collected.first()) {
           msg.channel.send('Cancelled queue creation due to timeout.');
           used[msg.guild.id] = false;
@@ -58,8 +58,8 @@ module.exports = {
         const topic = collected.first().content;
         collected.first().delete();
         mess.delete();
-        msg.channel.send('How long is this queue supposed to last? *(in minutes, maximum of 120)*').then(mess2 => {
-          msg.channel.awaitMessages(m => m.author.id == authorID, { max: 1, time: 60000 }).then(async collected2 => {
+        msg.channel.send('How long is this queue supposed to last? *(in minutes, maximum of 120)*').then((mess2) => {
+          msg.channel.awaitMessages((m) => m.author.id == authorID, { max: 1, time: 60000 }).then(async (collected2) => {
             if (!collected2.first()) {
               msg.channel.send('Cancelled queue creation due to timeout.');
               used[msg.guild.id] = false;
@@ -95,15 +95,15 @@ module.exports = {
             } else {
               remMessage = await msg.channel.send('If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.');
             }
-            msg.channel.send(`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`).then(async mess3 => {
+            msg.channel.send(`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`).then(async (mess3) => {
               const filter = (reaction, user) => (reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id == authorID;
               await mess3.react('☑');
               await mess3.react('❌');
-              mess3.awaitReactions(filter, { max: 1, time: 20000 }).then(async reacts => {
+              mess3.awaitReactions(filter, { max: 1, time: 20000 }).then(async (reacts) => {
                 await mess3.delete();
                 await remMessage.delete();
                 if (reacts.first() && reacts.first().emoji.name == '☑') {
-                  msg.channel.send(`Queue: **${topic}:**\n\nUse ☑ to join the queue!`).then(async mess4 => {
+                  msg.channel.send(`Queue: **${topic}:**\n\nUse ☑ to join the queue!`).then(async (mess4) => {
                     const chann = bot.channels.get('433357857937948672');
                     await mess4.react('➡');
                     await mess4.react('☑');
@@ -130,12 +130,12 @@ module.exports = {
                       }
                     }
 
-                    collector.on('collect', async r => {
+                    collector.on('collect', async (r) => {
                       switch (r.emoji.name) {
                       case '☑':
-                        /* eslint-disable no-case-declarations*/
-                        let users = r.users;
-                        /* eslint-enable no-case-declarations*/
+                        /* eslint-disable no-case-declarations */
+                        let { users } = r;
+                        /* eslint-enable no-case-declarations */
                         users = users.array();
                         for (const u in users) {
                           const user = users[u];
@@ -146,7 +146,7 @@ module.exports = {
                             } else {
                               activeUser = user;
                               r.remove(activeUser);
-                              msg.channel.send(`It's your turn ${activeUser}!`).then(ms => {
+                              msg.channel.send(`It's your turn ${activeUser}!`).then((ms) => {
                                 ms.delete(1000);
                               });
                               if (voiceChannel) {
@@ -170,7 +170,7 @@ module.exports = {
                           r.remove(activeUser);
                           mess4.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic));
                           mess4.reactions.get('☑').remove(activeUser);
-                          msg.channel.send(`It's your turn ${activeUser}!`).then(ms => {
+                          msg.channel.send(`It's your turn ${activeUser}!`).then((ms) => {
                             ms.delete(1000);
                           });
                           if (voiceChannel) {
@@ -179,30 +179,30 @@ module.exports = {
                             currentMember.setMute(false, 'its your turn in the queue');
                           }
                         } else {
-                          msg.channel.send('No users left in queue.').then(ms => {
+                          msg.channel.send('No users left in queue.').then((ms) => {
                             ms.delete(2000);
                           });
                         }
                         r.remove(authorID);
                         break;
                       case '❌':
-                        /* eslint-disable no-case-declarations*/
+                        /* eslint-disable no-case-declarations */
                         let sers = r.users;
-                        /* eslint-enable no-case-declarations*/
+                        /* eslint-enable no-case-declarations */
                         sers = sers.array();
                         for (const u in sers) {
                           const user = sers[u];
                           if (queuedUsers.includes(user) && user.id != bot.user.id) {
                             r.remove(user);
                             mess4.reactions.get('☑').remove(user);
-                            const ind = queuedUsers.findIndex(obj => obj.id == user.id);
+                            const ind = queuedUsers.findIndex((obj) => obj.id == user.id);
                             queuedUsers.splice(ind, 1);
                             mess4.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic));
                           }
                         }
                         break;
                       case '🔚':
-                        msg.channel.send('Successfully ended queue.').then(ms => {
+                        msg.channel.send('Successfully ended queue.').then((ms) => {
                           ms.delete(5000);
                         });
                         collector.stop();
@@ -223,7 +223,7 @@ module.exports = {
                         }
                       }
                       mess4.edit(`**${topic}** ended.`).catch(() => { });
-                      mess4.clearReactions().catch(() => { });
+                      mess4.reactions.removeAll().catch(() => { });
                     });
                   });
                 } else if (reacts.first()) {
@@ -246,5 +246,5 @@ module.exports = {
   admin: true,
   perm: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
   dev: false,
-  category: 'Utility'
+  category: 'Utility',
 };

@@ -29,6 +29,9 @@ function printHelp() {
 export const sound: magibotCommand = {
   name: 'sound',
   main: async function main(content, msg) {
+    if (!msg.guild) {
+      return;
+    }
     const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (command === 'rem') {

@@ -17,9 +17,9 @@ export const commands:{[k:string]:magibotCommand} = {
   help, salt, stats, rfact, sound, vote,
 };
 
-function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
+async function catchError(error:Error, msg:Discord.Message, command:string, bot:Discord.Client) {
   console.error(`Caught:\n${error.stack}\nin command ${command} ${msg.content}`);
-  const chann = bot.channels.get('414809410448261132');
+  const chann = await bot.channels.fetch('414809410448261132');
   if (chann) {
     (chann as Discord.TextChannel).send(`**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``);
   }
@@ -101,7 +101,7 @@ export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
           }
           if (myPerms.has('SEND_MESSAGES')) {
             msg.reply("you're not allowed to use this command.")
-              .then((mess) => (mess as Discord.Message).delete(5000));
+              .then((mess) => (mess as Discord.Message).delete({ timeout: 5000 }));
           }
         }
         return;
@@ -170,7 +170,7 @@ export async function checkCommand(msg:Discord.Message, bot:Discord.Client) {
               PREFIXES[msg.guild.id]
             }:help\` to see how you can change that.`,
           )
-          .then((mess) => (mess as Message).delete(15000));
+          .then((mess) => (mess as Message).delete({ timeout: 15000 }));
       }
     }
   }
