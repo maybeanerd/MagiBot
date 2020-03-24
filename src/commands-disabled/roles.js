@@ -1,4 +1,4 @@
-const avroles = { Switch: 'Switch' };
+// const avroles = { Switch: 'Switch' };
 module.exports = {
   main(bot, msg) {
     /* var role=(msg.content.split(" "))[0];
