@@ -13,12 +13,16 @@ export const INFO_COLOR = 0x0000ff;
 export const SIGN = 'MagiBot - created by T0TProduction#0001';
 // eslint-disable-next-line import/no-mutable-exports
 export let PREFIXES: {
-  [k:string]:string,
-  } = {};
-export const queueVoiceChannels:any = {};
+  [k: string]: string;
+} = {};
+export const queueVoiceChannels: { [key: string]: string } = {};
 
-export function sendNotification(info:string, type:string, msg:Discord.Message) {
-  let icolor:number|undefined;
+export function sendNotification(
+  info: string,
+  type: string,
+  msg: Discord.Message,
+) {
+  let icolor: number | undefined;
 
   if (type === 'success') icolor = SUCCESS_COLOR;
   else if (type === 'error') icolor = ERROR_COLOR;
@@ -31,8 +35,8 @@ export function sendNotification(info:string, type:string, msg:Discord.Message) 
   };
   msg.channel.send('', { embed });
 }
-let bot_user :ClientUser;
-export function setUser(usr:ClientUser) {
+let bot_user: ClientUser;
+export function setUser(usr: ClientUser) {
   bot_user = usr;
 }
 export function user() {

@@ -3,12 +3,13 @@ import { bot } from '../bot';
 import data from '../db';
 import { yesOrNo } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
+import { commandCategories } from '../types/enums';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
 function messageEdit(
   voiceChannel: VoiceChannel | null | undefined,
-  activeUser: User,
+  activeUser: User | undefined,
   qU: Array<User>,
   topic: string,
 ) {
@@ -17,15 +18,9 @@ function messageEdit(
     msg += `\n*with voicemode activated in* ${voiceChannel}`;
   }
   let tmpms = '\n';
-  let count = 0;
   if (qU.length > 0) {
-    for (const i in qU) {
-      count++;
-      const u = qU[i];
-      if (!u || count > 10) {
-        break;
-      }
-      tmpms += `- ${u}\n`;
+    for (let i = 0; i < 10 && i < qU.length; i++) {
+      tmpms += `- ${qU[i]}\n`;
     }
   } else {
     tmpms = ' no more queued users\n';
@@ -35,6 +30,8 @@ function messageEdit(
 }
 
 export const queue: magibotCommand = {
+  hide: false,
+  name: 'queue',
   async main(content, msg) {
     if (!msg.guild) {
       return;
@@ -232,30 +229,31 @@ export const queue: magibotCommand = {
                                   });
                                 }
 
-                                collector.on('collect', async (r) => {
-                                  switch (r.emoji.name) {
-                                  case '☑':
-                                    /* eslint-disable no-case-declarations */
-                                    const { users: usrs } = r;
-                                    const users = usrs.cache.array();
-                                    /* eslint-enable no-case-declarations */
-                                    users.forEach(async (u) => {
+                                collector.on(
+                                  'collect',
+                                  async (r, userThatReacted) => {
+                                    switch (r.emoji.name) {
+                                    case '☑':
                                       if (
-                                        !queuedUsers.includes(u)
-                                          && u !== activeUser
-                                          && u.id !== user().id
+                                        !queuedUsers.includes(
+                                          userThatReacted,
+                                        )
+                                          && userThatReacted !== activeUser
+                                          && userThatReacted.id !== user().id
                                       ) {
                                         if (activeUser) {
-                                          queuedUsers.push(u);
+                                          queuedUsers.push(userThatReacted);
                                           const reactn = mess4.reactions.cache.get(
                                             '❌',
                                           );
                                           if (reactn) {
-                                            reactn.users.remove(u);
+                                            reactn.users.remove(
+                                              userThatReacted,
+                                            );
                                           }
                                         } else {
-                                          activeUser = u;
-                                          r.remove();
+                                          activeUser = userThatReacted;
+                                          r.users.remove(activeUser);
                                           msg.channel
                                             .send(
                                               `It's your turn ${activeUser}!`,
@@ -285,79 +283,81 @@ export const queue: magibotCommand = {
                                           ),
                                         );
                                       }
-                                    });
-                                    break;
-                                  case '➡':
-                                    if (queuedUsers[0]) {
-                                      if (voiceChannel) {
-                                        // mute old current user
-                                        if (activeUser) {
-                                          const currentMember = await msg.guild!.members.fetch(
+                                      break;
+                                    case '➡':
+                                      if (queuedUsers[0]) {
+                                        if (voiceChannel) {
+                                          // mute old current user
+                                          if (activeUser) {
+                                            const currentMember = await msg.guild!.members.fetch(
+                                              activeUser,
+                                            );
+                                            currentMember.voice.setMute(
+                                              true,
+                                              'its not your turn in the queue anymore',
+                                            );
+                                          }
+                                        }
+                                        activeUser = queuedUsers.shift()!;
+                                        r.users.remove(userThatReacted);
+                                        mess4.edit(
+                                          messageEdit(
+                                            voiceChannel,
                                             activeUser,
-                                          );
-                                          currentMember.voice.setMute(
-                                            true,
-                                            'its not your turn in the queue anymore',
-                                          );
-                                        }
-                                      }
-                                      activeUser = queuedUsers.shift()!;
-                                      r.remove();
-                                      mess4.edit(
-                                        messageEdit(
-                                          voiceChannel,
-                                          activeUser,
-                                          queuedUsers,
-                                          topic,
-                                        ),
-                                      );
-                                      const reactn = mess4.reactions.cache.get(
-                                        '☑',
-                                      );
-                                      if (reactn) {
-                                        reactn.users.remove(activeUser);
-                                      }
-                                      msg.channel
-                                        .send(`It's your turn ${activeUser}!`)
-                                        .then((ms) => {
-                                          ms.delete({ timeout: 1000 });
-                                        });
-                                      if (voiceChannel) {
-                                        // unmute currentUser
-                                        const currentMember = await msg.guild?.members.fetch(
-                                          activeUser,
+                                            queuedUsers,
+                                            topic,
+                                          ),
                                         );
-                                        if (currentMember) {
-                                          currentMember.voice.setMute(
-                                            false,
-                                            'Its their turn in the queue',
-                                          );
+                                        const reactn = mess4.reactions.cache.get(
+                                          '☑',
+                                        );
+                                        if (reactn) {
+                                          reactn.users.remove(activeUser);
                                         }
+                                        msg.channel
+                                          .send(
+                                            `It's your turn ${activeUser}!`,
+                                          )
+                                          .then((ms) => {
+                                            ms.delete({ timeout: 1000 });
+                                          });
+                                        if (voiceChannel) {
+                                          // unmute currentUser
+                                          const currentMember = await msg.guild?.members.fetch(
+                                              activeUser
+                                            );
+                                          if (currentMember) {
+                                            currentMember.voice.setMute(
+                                              false,
+                                              'Its their turn in the queue',
+                                            );
+                                          }
+                                        }
+                                      } else {
+                                        msg.channel
+                                          .send('No users left in queue.')
+                                          .then((ms) => {
+                                            ms.delete({ timeout: 2000 });
+                                          });
                                       }
-                                    } else {
-                                      msg.channel
-                                        .send('No users left in queue.')
-                                        .then((ms) => {
-                                          ms.delete({ timeout: 2000 });
-                                        });
-                                    }
-                                    r.remove(authorID);
-                                    break;
-                                  case '❌':
-                                    /* eslint-disable no-case-declarations */
-                                    let sers = r.users;
-                                    /* eslint-enable no-case-declarations */
-                                    sers = sers.array();
-                                    for (const u in sers) {
-                                      const user = sers[u];
+                                      r.users.remove(authorID);
+                                      break;
+                                    case '❌':
                                       if (
-                                        queuedUsers.includes(user)
-                                          && user.id != bot.user.id
+                                        queuedUsers.includes(
+                                          userThatReacted,
+                                        )
+                                          && userThatReacted.id !== user().id
                                       ) {
-                                        r.remove(user);
-                                        mess4.reactions.get('☑').remove(user);
+                                        r.users.remove(userThatReacted);
+                                        const rctn = mess4.reactions.cache.get(
+                                          '☑',
+                                        );
+                                        if (rctn) {
+                                          rctn.users.remove(userThatReacted);
+                                        }
                                         const ind = queuedUsers.findIndex(
-                                          (obj) => obj.id == user.id,
+                                          (obj) => obj.id === userThatReacted.id,
                                         );
                                         queuedUsers.splice(ind, 1);
                                         mess4.edit(
@@ -369,32 +369,31 @@ export const queue: magibotCommand = {
                                           ),
                                         );
                                       }
+                                      break;
+                                    case '🔚':
+                                      msg.channel
+                                        .send('Successfully ended queue.')
+                                        .then((ms) => {
+                                          ms.delete({ timeout: 5000 });
+                                        });
+                                      collector.stop();
+                                      break;
+                                    default:
+                                      break;
                                     }
-                                    break;
-                                  case '🔚':
-                                    msg.channel
-                                      .send('Successfully ended queue.')
-                                      .then((ms) => {
-                                        ms.delete(5000);
-                                      });
-                                    collector.stop();
-                                    break;
-                                  default:
-                                    break;
-                                  }
-                                });
+                                  },
+                                );
                                 collector.on('end', () => {
                                   deleteme.delete();
-                                  used[msg.guild.id] = false;
+                                  delete used[msg.guild!.id];
                                   if (voiceChannel) {
-                                    delete bot.queueVoiceChannels[msg.guild.id];
+                                    delete queueVoiceChannels[msg.guild!.id];
                                     // remove all mutes
-                                    const memArray = voiceChannel.members.array();
-                                    for (const mem in memArray) {
-                                      voiceChannel.members
-                                        .get(memArray[mem].id)
-                                        .setMute(false, 'queue ended');
-                                    }
+                                    voiceChannel.members
+                                      .array()
+                                      .forEach((mem) => {
+                                        mem.voice.setMute(false, 'queue ended');
+                                      });
                                   }
                                   mess4
                                     .edit(`**${topic}** ended.`)
@@ -406,12 +405,12 @@ export const queue: magibotCommand = {
                             msg.channel.send(
                               `successfully canceled queue **${topic}**`,
                             );
-                            used[msg.guild.id] = false;
+                            delete used[msg.guild!.id];
                           } else {
                             msg.channel.send(
                               `Cancelled queue creation of **${topic}** due to timeout.`,
                             );
-                            used[msg.guild.id] = false;
+                            delete used[msg.guild!.id];
                           }
                         });
                     });
@@ -432,5 +431,5 @@ export const queue: magibotCommand = {
   admin: true,
   perm: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
   dev: false,
-  category: 'Utility',
+  category: commandCategories.util,
 };
