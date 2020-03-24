@@ -2,7 +2,7 @@
 const cmds = require(`${__dirname}/../bamands.js`);
 
 function printHelp() {
-  const info = [];
+  const info: Array<{ name: string; value: string }> = [];
 
   info.push({
     name: '<@user|userid|nickname>',

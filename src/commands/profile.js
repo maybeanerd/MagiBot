@@ -13,7 +13,11 @@ module.exports = {
         msg.reply(` you need to define the user uniquely or not mention any user. For more help use \`${bot.PREFIXES[msg.guild.id]}.help profile\``);
         return;
       }
-      const info = [];
+      const info: Array<{
+        name: string;
+        value: string;
+        inline: boolean;
+      }> = [];
       const salt = await data.getSalt(id, msg.guild.id);
       const usage = await data.getUsage(id, msg.guild.id);
       info.push({

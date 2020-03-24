@@ -1,8 +1,11 @@
-﻿const data = require(`${__dirname}/../db.js`);
-const cmds = require(`${__dirname}/../bamands.js`);
+﻿import { GuildMember } from 'discord.js';
+import { commandCategories } from '../types/enums';
+import { PREFIXES } from '../shared_assets';
+import data from '../db';
+import { findMember, yesOrNo } from '../bamands';
 
 function printHelp() {
-  const info = [];
+  const info: Array<{ name: string; value: string }> = [];
 
   info.push({
     name: 'add <@user|userid|nickname>',
@@ -27,28 +30,38 @@ function printHelp() {
   return info;
 }
 
-module.exports = {
+export const salt: magibotCommand = {
+  dev: false,
+  name: 'salt',
   main: async function main(bot, msg) {
     const args = msg.content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
       const mention = args[1];
-      const uid = await cmds.findMember(msg.guild, mention);
+      const uid = await findMember(msg.guild, mention);
       if (!(mention && uid)) {
-        if (command == 'reset') {
-          if (await cmds.yesOrNo(msg, 'Do you really want to reset all salt on this server?', 'Successfully canceled salt reset.')) {
+        if (command === 'reset') {
+          if (
+            await yesOrNo(
+              msg,
+              'Do you really want to reset all salt on this server?',
+              'Successfully canceled salt reset.',
+            )
+          ) {
             data.resetSalt(msg.guild);
-            msg.channel.send(`Successfully reset all salt on **${msg.guild.name}**!`);
+            msg.channel.send(
+              `Successfully reset all salt on **${msg.guild.name}**!`,
+            );
           }
           return;
         }
         msg.reply('you need to mention a user you want to use this on!');
         return;
       }
-      let mem;
+      let mem: GuildMember;
       switch (command) {
       case 'add':
-        mem = await msg.guild.fetchMember(uid).catch(() => { });
+        mem = await msg.guild.members.fetch(uid);
         if (!mem) {
           msg.reply("the user with this ID doesn't exist on this guild.");
           return;
@@ -58,10 +71,12 @@ module.exports = {
           return;
         }
         await data.saltUpAdmin(uid, msg.author.id, msg.guild);
-        msg.channel.send(`Successfully reported ${mem} for being a salty bitch!`);
+        msg.channel.send(
+          `Successfully reported ${mem} for being a salty bitch!`,
+        );
         break;
       case 'rem':
-        mem = await msg.guild.fetchMember(uid).catch(() => { });
+        mem = await msg.guild.members.fetch(uid);
         if (!mem) {
           msg.reply("the user with this ID doesn't exist on this guild.");
           return;
@@ -71,13 +86,15 @@ module.exports = {
           return;
         }
         if (await data.remOldestSalt(uid, msg.guild)) {
-          msg.channel.send(`Successfully removed the oldest salt from ${mem}!`);
+          msg.channel.send(
+            `Successfully removed the oldest salt from ${mem}!`,
+          );
         } else {
           msg.channel.send(`${mem} has no salt that could be removed!`);
         }
         break;
       case 'clr':
-        mem = await msg.guild.fetchMember(uid).catch(() => { });
+        mem = await msg.guild.members.fetch(uid);
         if (!mem) {
           msg.reply("the user with this ID doesn't exist on this guild.");
           return;
@@ -90,16 +107,22 @@ module.exports = {
         msg.channel.send(`Successfully cleared all salt from ${mem}!`);
         break;
       default:
-        msg.reply(`this command doesn't exist. Use \`${bot.PREFIXES[msg.guild.id]}:help salt\` to get more info.`);
+        msg.reply(
+          `this command doesn't exist. Use \`${
+            PREFIXES[msg.guild.id]
+          }:help salt\` to get more info.`,
+        );
         break;
       }
     } else {
       msg.reply('Commands are only available on guilds.');
     }
   },
-  ehelp(msg, bot) { return printHelp(msg, bot); },
+  ehelp() {
+    return printHelp();
+  },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
-  category: 'Utility',
+  category: commandCategories.util,
 };

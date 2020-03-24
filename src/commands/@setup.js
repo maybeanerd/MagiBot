@@ -2,7 +2,7 @@
 const cmds = require(`${__dirname}/../bamands.js`);
 
 function printHelp() {
-  const info = [];
+  const info: Array<{ name: string; value: string }> = [];
 
   info.push({
     name: 'ban <@User>',
@@ -157,7 +157,11 @@ module.exports = {
       break;
     case 'info':
       /* eslint-disable no-case-declarations */
-      const info = [];
+      const info: Array<{
+        name: string;
+        value: string;
+        inline: boolean;
+      }> = [];
       const set = await data.getSettings(msg.guild.id);
 
       info.push({

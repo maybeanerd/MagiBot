@@ -47,7 +47,11 @@ module.exports = {
       msg.channel.send(`Your inputs could not be interpreted. Use \`${bot.PREFIXES[msg.guild.id]}.help roll\` for more info.`);
       return;
     }
-    const info = [];
+    const info: Array<{
+      name: string;
+      value: string;
+      inline: boolean;
+    }> = [];
     const size = throws.length;
     if (throws[size - 6]) {
       msg.reply('the dungeon master can only roll 24 dice at a time!');
