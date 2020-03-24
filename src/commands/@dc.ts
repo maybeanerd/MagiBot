@@ -1,5 +1,9 @@
-module.exports = {
-  main: async (bot, msg) => {
+import { commandCategories } from '../types/enums';
+
+export const dc: magibotCommand = {
+  name: 'dc',
+  ehelp: () => ([]),
+  main: async (content, msg) => {
     await msg.channel.send('Shutting down...');
     setTimeout(() => {
       process.exit();
@@ -9,5 +13,5 @@ module.exports = {
   perm: ['SEND_MESSAGES', 'MANAGE_GUILD'],
   hide: true,
   dev: true,
-  category: 'Utility'
+  category: commandCategories.util,
 };
