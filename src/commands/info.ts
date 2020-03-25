@@ -1,5 +1,14 @@
-module.exports = {
-  main: (bot, msg) => {
+import { MessageEmbedOptions } from 'discord.js';
+import {
+  PREFIXES, COLOR, user, SIGN,
+} from '../shared_assets';
+
+import { commandCategories } from '../types/enums';
+
+export const inf: magibotCommand = {
+  dev: false,
+  name: 'info',
+  main: (content, msg) => {
     const info: Array<{
       name: string;
       value: string;
@@ -14,7 +23,7 @@ module.exports = {
 
     info.push({
       name: 'How to support MagiBot',
-      value: `Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nVote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *${bot.PREFIXES[msg.guild.id]}.dbl*)`,
+      value: `Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nVote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *${PREFIXES[msg.guild!.id]}.dbl*)`,
       inline: false,
     });
 
@@ -24,15 +33,13 @@ module.exports = {
       inline: false,
     });
 
-    const embed = {
-      color: bot.COLOR,
+    const embed:MessageEmbedOptions = {
+      color: COLOR,
       description: 'Some information about the bot:',
       fields: info,
       footer: {
-        /* eslint-disable camelcase */
-        icon_url: bot.user.avatarURL,
-        /* eslint-enable camelcase */
-        text: bot.SIGN,
+        iconURL: user().avatarURL() || '',
+        text: SIGN,
       },
     };
 
@@ -44,5 +51,5 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Miscellaneous',
+  category: commandCategories.misc,
 };

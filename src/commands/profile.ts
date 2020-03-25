@@ -1,16 +1,21 @@
-const data = require(`${__dirname}/../db.js`);
-const cmds = require(`${__dirname}/../bamands.js`);
+import { MessageEmbedOptions } from 'discord.js';
+import { commandCategories } from '../types/enums';
+import { PREFIXES } from '../shared_assets';
+import data from '../db';
+import { findMember } from '../bamands';
 
-module.exports = {
+export const profile: magibotCommand = {
+  name: 'profile',
+  dev: false,
   main: async function main(bot, msg) {
     if (msg.guild) {
       const args = msg.content.split(/ +/);
       const mention = args[0];
-      let id = await cmds.findMember(msg.guild, mention);
+      let id = await findMember(msg.guild, mention);
       if (!id && !mention) {
         id = msg.author.id;
       } else if (!id) {
-        msg.reply(` you need to define the user uniquely or not mention any user. For more help use \`${bot.PREFIXES[msg.guild.id]}.help profile\``);
+        msg.reply(` you need to define the user uniquely or not mention any user. For more help use \`${PREFIXES[msg.guild.id]}.help profile\``);
         return;
       }
       const info: Array<{
@@ -27,7 +32,7 @@ module.exports = {
       });
       info.push({
         name: 'Bot usage',
-        value: usage,
+        value: String(usage),
         inline: false,
       });
       const link = await data.getSound(id, msg.guild.id);
@@ -36,16 +41,14 @@ module.exports = {
         value: link,
         inline: false,
       });
-      const user = await msg.guild.fetchMember(id);
-      const embed = {
+      const user = await msg.guild.members.fetch(id);
+      const embed:MessageEmbedOptions = {
         color: user.displayColor,
         description: `Here's some info on ${user.displayName}`,
         fields: info,
-        thumbnail: { url: user.user.avatarURL },
+        thumbnail: { url: user.user.avatarURL() || '' },
         footer: {
-          /* eslint-disable camelcase */
-          icon_url: user.user.avatarURL,
-          /* eslint-enable camelcase */
+          iconURL: user.user.avatarURL() || '',
           text: user.user.tag,
         },
       };
@@ -60,5 +63,5 @@ module.exports = {
   perm: 'SEND_MESSAGES',
   admin: false,
   hide: false,
-  category: 'Utility',
+  category: commandCategories.util,
 };

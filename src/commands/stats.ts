@@ -1,13 +1,17 @@
+import { MessageEmbedOptions } from 'discord.js';
 import si from 'systeminformation';
 import { commandCategories } from '../types/enums';
-import { OWNERID, COLOR, SIGN } from '../shared_assets';
+import {
+  OWNERID, COLOR, SIGN, user,
+} from '../shared_assets';
+// eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
 
 export const stats: magibotCommand = {
   name: 'stats',
   main: async (content, msg) => {
     const info:Array<{name:string, value:string|number, inline:boolean}> = [];
-    const guilds = bot.guilds.array();
+    const guilds = bot.guilds.cache.array();
 
     info.push({
       name: 'Number of guilds currently being served',
@@ -16,13 +20,13 @@ export const stats: magibotCommand = {
     });
     info.push({
       name: 'Number of users currently being served',
-      value: bot.users.size,
+      value: bot.users.cache.size,
       inline: false,
     });
 
 
     // uptime calc
-    const u = bot.uptime;
+    const u = bot.uptime || 0;
     let uptime = '';
     // days
     let x = Math.floor(u / 3600000 / 24);
@@ -62,14 +66,12 @@ export const stats: magibotCommand = {
       });
     }
 
-    const embed = {
+    const embed :MessageEmbedOptions = {
       color: COLOR,
       description: 'Here are some stats:',
       fields: info,
       footer: {
-        /* eslint-disable camelcase */
-        icon_url: bot.user.avatarURL,
-        /* eslint-enable camelcase */
+        iconURL: user().avatarURL() || '',
         text: SIGN,
       },
     };
