@@ -17,7 +17,6 @@ export const bot = new Discord.Client();
 // post to the APIs every 30 minutes
 if (config.blapis) {
   blapi.handle(bot, config.blapis, 30);
-  // TODO fix blapi types!
 }
 process.on('uncaughtException', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');

@@ -1,8 +1,8 @@
-﻿const data = require(`${__dirname}/../db.js`);
-const cmds = require(`${__dirname}/../bamands.js`);
+﻿import data from '../db';
+import { findMember } from '../bamands';
 
 function printHelp() {
-  const info: Array<{ name: string; value: string }> = [];
+  const info/* : Array<{ name: string; value: string }> */ = [];
 
   info.push({
     name: '<@user|userid|nickname>',
@@ -24,16 +24,16 @@ module.exports = {
     const command = args[0].toLowerCase();
     if (msg.guild) {
       const mention = args[1];
-      const uid = await cmds.findMember(msg.guild, mention);
+      const uid = await findMember(msg.guild, mention);
       if (!(mention && uid)) {
-        if (command == 'reset') {
+        if (command === 'reset') {
           msg.channel.send('Do you really want to reset all salt on this server?').then((mess) => {
-            const filter = (reaction, user) => (reaction.emoji.name == '☑' || reaction.emoji.name == '❌') && user.id === msg.author.id;
+            const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌') && user.id === msg.author.id;
             mess.react('☑');
             mess.react('❌');
             mess.awaitReactions(filter, { max: 1, time: 20000 }).then((reacts) => {
               mess.delete();
-              if (reacts.first() && reacts.first().emoji.name == '☑') {
+              if (reacts.first() && reacts.first().emoji.name === '☑') {
                 data.resetSalt(msg.guild);
                 msg.channel.send(`Successfully reset all salt on **${msg.guild.name}**!`);
               } else if (reacts.first()) {
@@ -48,7 +48,7 @@ module.exports = {
       }
       switch (command) {
       case 'add':
-        if (uid == bot.user.id) {
+        if (uid === bot.user.id) {
           msg.reply("you can't report me!");
           return;
         }
