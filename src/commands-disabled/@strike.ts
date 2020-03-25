@@ -4,7 +4,7 @@ import {
 } from '../bamands';
 
 function printHelp() {
-  const info /* : Array<{ name: string; value: string }> */ = [];
+  const info : Array<{ name: string; value: string }> = [];
 
   info.push({
     name: '<@user|userid|nickname>',
@@ -79,8 +79,8 @@ module.exports = {
       msg.reply('Commands are only available on guilds.');
     }
   },
-  ehelp(msg, bot) {
-    return printHelp(msg, bot);
+  ehelp() {
+    return printHelp();
   },
   perm: 'SEND_MESSAGES',
   admin: true,
