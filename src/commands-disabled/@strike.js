@@ -1,8 +1,10 @@
 ﻿import data from '../db';
-import { findMember } from '../bamands';
+import {
+  findMember,
+} from '../bamands';
 
 function printHelp() {
-  const info/* : Array<{ name: string; value: string }> */ = [];
+  const info /* : Array<{ name: string; value: string }> */ = [];
 
   info.push({
     name: '<@user|userid|nickname>',
@@ -31,7 +33,10 @@ module.exports = {
             const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌') && user.id === msg.author.id;
             mess.react('☑');
             mess.react('❌');
-            mess.awaitReactions(filter, { max: 1, time: 20000 }).then((reacts) => {
+            mess.awaitReactions(filter, {
+              max: 1,
+              time: 20000,
+            }).then((reacts) => {
               mess.delete();
               if (reacts.first() && reacts.first().emoji.name === '☑') {
                 data.resetSalt(msg.guild);
@@ -74,7 +79,9 @@ module.exports = {
       msg.reply('Commands are only available on guilds.');
     }
   },
-  ehelp(msg, bot) { return printHelp(msg, bot); },
+  ehelp(msg, bot) {
+    return printHelp(msg, bot);
+  },
   perm: 'SEND_MESSAGES',
   admin: true,
   hide: false,
