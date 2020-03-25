@@ -8,7 +8,6 @@
     "test": "test"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.1.0",
     "@types/ffprobe-static": "^2.0.0",
     "@types/mongodb": "^3.5.2",
     "axios": "^0.19.2",
@@ -16,7 +15,6 @@
     "bufferutil": "^4.0.1",
     "dblapi.js": "^2.4.0",
     "discord.js": "^12.0.2",
-    "erlpack": "github:discordapp/erlpack",
     "ffmpeg-binaries": "^3.2.2",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
@@ -24,10 +22,15 @@
     "libsodium-wrappers": "^0.7.6",
     "mongodb": "^3.5.5",
     "node-opus": "^0.3.3",
+    "opusscript": "0.0.7",
     "systeminformation": "^4.23.1",
     "utf-8-validate": "^5.0.2",
     "zlib-sync": "^0.1.6",
     "zucc": "^0.1.2"
+  },
+  "optionalDependencies": {
+    "erlpack": "github:discordapp/erlpack",
+    "@discordjs/opus": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^12.12.17",
@@ -48,6 +51,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
+    "install-dev": "npm i --no-optional",
     "lint": "eslint .",
     "build": "tsc",
     "start": "forever start bot.js ; forever start ./test/bot.js ; forever start ./teapot/bot.js",
