@@ -288,4 +288,4 @@ __pycache__/
 *.xsd.cs
 startForLinAMI.txt
 startForWin.txt
-src/token.ts
+# src/token.ts
