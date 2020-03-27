@@ -55,8 +55,9 @@
     "dev": "tsc && node dist/bot.js",
     "lint": "eslint .",
     "build": "tsc",
-    "start": "forever start dist/bot.js",
-    "stop": "forever stop dist/bot.js"
+    "start":"node dist/bot.js",
+    "startforever": "forever start dist/bot.js",
+    "stopforever": "forever stop dist/bot.js"
   },
   "repository": {
     "type": "git",
