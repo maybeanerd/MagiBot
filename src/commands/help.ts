@@ -18,7 +18,7 @@ export const help: magibotCommand = {
     let command = args[0].toLowerCase();
     // extended help
     if (command) {
-      const acommand = `@${command}`;
+      const acommand = `_${command}`;
       if (!(commands[command] || commands[acommand])) {
         msg.reply(
           `this command does not exist. Use \`${
