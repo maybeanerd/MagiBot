@@ -48,12 +48,11 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
     "prettier": "^1.19.1",
-    "ts-node": "^8.8.1",
     "typescript": "^3.8.3"
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
-    "dev": "ts-node src/bot.ts",
+    "dev": "tsc && node dist/bot.js",
     "lint": "eslint .",
     "build": "tsc",
     "start": "forever start dist/bot.js",
