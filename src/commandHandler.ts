@@ -117,8 +117,10 @@ export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
       .substring(PREFIXES[msg.guild.id].length, msg.content.length)
       .split(' ')[0]
       .toLowerCase();
-    content = msg.content.slice(command.length + PREFIXES[msg.guild.id].length); // delete prefix and command
-    content = msg.content.replace(/^\s+/g, ''); // delete leading spaces
+    content = msg.content.slice(
+      command.length + PREFIXES[msg.guild.id].length,
+    ); // delete prefix and command
+    content = content.replace(/^\s+/g, ''); // delete leading spaces
   }
   if (command) {
     let commandVal: string;
