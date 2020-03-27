@@ -1,5 +1,5 @@
 ﻿import Discord from 'discord.js';
-import blapi from 'blapi';
+import { handle } from 'blapi';
 import config from './token';
 import data from './db';
 import {
@@ -16,7 +16,7 @@ export const bot = new Discord.Client();
 
 // post to the APIs every 30 minutes
 if (config.blapis) {
-  blapi.handle(bot, config.blapis, 30);
+  handle(bot, config.blapis, 30);
 }
 process.on('uncaughtException', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');
