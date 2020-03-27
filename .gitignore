@@ -289,4 +289,4 @@ __pycache__/
 startForLinAMI.txt
 startForWin.txt
 # src/token.ts
-.dist/
+dist/
