@@ -1,15 +1,11 @@
-﻿import DBL from 'dblapi.js';
-import { MongoClient } from 'mongodb';
+﻿import { MongoClient } from 'mongodb';
 import {
   Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
 import { OWNERID, PREFIXES, resetPrefixes } from './shared_assets';
 import { asyncForEach } from './bamands';
+import config from './token';
 
-const config = process.env;
-const dbl = new DBL(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4NDgyMDIzMjU4MzI0OTkyMSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTE5NTgyMjYyfQ.df01BPWTU8O711eB_hive_T6RUjgzpBtXEcVSj63RW0',
-);
 
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
@@ -19,7 +15,7 @@ const url = config.dburl;
 // Define Methods:
 function getuser(userid: string, guildID: string) {
   return MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
+    const db = mclient.db('MagiBot');
     const result = await db.collection('users').findOneAndUpdate(
       { userID: userid, guildID },
       {
@@ -154,15 +150,6 @@ async function checkGuild(id: string) {
   }
   return false;
 }
-function toggleDBLvoted(userid: string, votd: boolean) {
-  MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
-    await db
-      .collection('DBLreminder')
-      .updateOne({ _id: userid }, { $set: { voted: votd } });
-    mclient.close();
-  });
-}
 
 // automatic deletion of reports:
 async function onHour(bot: Client, isFirst: boolean) {
@@ -184,7 +171,7 @@ async function onHour(bot: Client, isFirst: boolean) {
   let msg: Message;
   if (isFirst) {
     const chann = bot.channels.fetch('382233880469438465');
-    msg = await ((await chann) as TextChannel)?.send('0 %');
+    msg = await ((await chann) as TextChannel).send('0 %');
   }
 
   const t0 = process.hrtime();
@@ -285,53 +272,7 @@ async function onHour(bot: Client, isFirst: boolean) {
   });
 }
 
-async function dblReminder(bot: Client) {
-  const d = new Date();
-  const h = new Date(
-    d.getFullYear(),
-    d.getMonth(),
-    d.getDate(),
-    d.getHours(),
-    d.getMinutes() + 5,
-    0,
-    0,
-  );
-  const e = h.getTime() - d.getTime();
-  if (e > 100) {
-    // some arbitrary time period
-    setTimeout(dblReminder.bind(null, bot), e);
-  }
-  await MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const users = await db
-      .collection('DBLreminder')
-      .find()
-      .toArray();
-    mclient.close();
-    if (users) {
-      await asyncForEach(users, async (u) => {
-        // eslint-disable-next-line no-underscore-dangle
-        const user = await bot.users.fetch(u._id);
-        let dblFailed = false;
-        const hasVoted = await dbl.hasVoted(user.id).catch(() => {
-          dblFailed = true;
-        });
-        if (!dblFailed) {
-          if (!hasVoted && !u.voted) {
-            await user
-              .send(
-                `Hey there ${user} you can now vote for me again! (<https://discordbots.org/bot/384820232583249921> and <https://bots.ondiscord.xyz/bots/384820232583249921>)\nIf you don't want these reminders anymore use \`k.dbl\` in a server im on.`,
-              )
-              .catch(() => {});
-            toggleDBLvoted(user.id, true);
-          } else if (hasVoted && u.voted) {
-            toggleDBLvoted(user.id, false);
-          }
-        }
-      });
-    }
-  });
-}
+
 const reactions = [
   '🇦',
   '🇧',
@@ -532,12 +473,12 @@ function setSettings(guildID: string, settings) {
 async function setSaltRole(guildID: string, roleID: string) {
   await setSettings(guildID, { saltRole: roleID });
 }
-async function getNotChannel(guildID:string) {
+async function getNotChannel(guildID: string) {
   const set = await getSettings(guildID);
   return set.notChannel;
 }
 // top 5 salty people
-function topSalt(guildID:string) {
+function topSalt(guildID: string) {
   return MongoClient.connect(url).then(async (mclient) => {
     const db = mclient.db('MagiBot');
     const result = await db
@@ -589,10 +530,13 @@ async function updateSaltKing(G: Guild) {
           const channel = await getNotChannel(G.id);
           if (channel) {
             const chan = G.channels.cache.get(channel);
-            if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
-              (chan as TextChannel).send(
-                `Hey there ${G.owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
-              );
+            if (chan) {
+              const perms = chan.permissionsFor(G.me);
+              if (perms && perms.has('SEND_MESSAGES')) {
+                (chan as TextChannel).send(
+                  `Hey there ${G.owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
+                );
+              }
             }
           }
           return;
@@ -626,10 +570,13 @@ async function updateSaltKing(G: Guild) {
         const channel = await getNotChannel(G.id);
         if (channel) {
           const chan = G.channels.cache.get(channel);
-          if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
-            (chan as TextChannel).send(
-              `Hey there ${G.owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
-            );
+          if (chan) {
+            const perms = chan.permissionsFor(G.me);
+            if (perms && perms.has('SEND_MESSAGES')) {
+              (chan as TextChannel).send(
+                `Hey there ${G.owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
+              );
+            }
           }
         }
       }
@@ -637,10 +584,13 @@ async function updateSaltKing(G: Guild) {
       const channel = await getNotChannel(G.id);
       if (channel) {
         const chan = G.channels.cache.get(channel);
-        if (chan?.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
-          (chan as TextChannel).send(
-            `Hey there ${G.owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
-          );
+        if (chan) {
+          const perms = chan.permissionsFor(G.me);
+          if (perms && perms.has('SEND_MESSAGES')) {
+            (chan as TextChannel).send(
+              `Hey there ${G.owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
+            );
+          }
         }
       }
     }
@@ -656,7 +606,8 @@ async function sendUpdate(update: string, bot: Client) {
       if (cid) {
         const channel = G.channels.cache.get(cid) as TextChannel;
         if (channel && G.me) {
-          if (channel.permissionsFor(G.me)?.has('SEND_MESSAGES')) {
+          const perms = channel.permissionsFor(G.me);
+          if (perms && perms.has('SEND_MESSAGES')) {
             if (G.id === '380669498014957569') {
               channel.send(`<@&460218236185739264> ${update}`);
             } else {
@@ -886,7 +837,6 @@ export default {
     });
     // repeating functions:
     onHour(bot, true);
-    dblReminder(bot);
     voteCheck(bot);
   },
   async getUser(userid: string, guildID: string) {
@@ -947,7 +897,12 @@ export default {
   },
   async isAdmin(guildID: string, user: GuildMember) {
     // checks for admin and Owner, they can always use
-    if (user.hasPermission('ADMINISTRATOR', { checkAdmin: true, checkOwner: true })) {
+    if (
+      user.hasPermission('ADMINISTRATOR', {
+        checkAdmin: true,
+        checkOwner: true,
+      })
+    ) {
       return true;
     }
     // Owner is always admin hehe

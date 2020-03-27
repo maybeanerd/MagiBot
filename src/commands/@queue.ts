@@ -119,14 +119,17 @@ export const queue: magibotCommand = {
                   }
                   collected2.first()!.delete();
                   mess2.delete();
-                  const authorMember = await msg.guild?.members.fetch(
-                    msg.author
+                  const authorMember = await msg.guild!.members.fetch(
+                    msg.author,
                   );
-                  voiceChannel = authorMember?.voice.channel;
+                  if (!authorMember) {
+                    throw new Error('Author not found.');
+                  }
+                  voiceChannel = authorMember.voice.channel;
                   let remMessage;
                   if (voiceChannel) {
-                    const botMember = await msg.guild?.members.fetch(user());
-                    if (!botMember?.hasPermission('MUTE_MEMBERS')) {
+                    const botMember = await msg.guild!.members.fetch(user());
+                    if (!botMember.hasPermission('MUTE_MEMBERS')) {
                       remMessage = await msg.channel.send(
                         'If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.',
                       );
@@ -263,9 +266,9 @@ export const queue: magibotCommand = {
                                             });
                                           if (voiceChannel) {
                                             // unmute currentUser
-                                            const currentMember = await msg.guild?.members.fetch(
-                                                activeUser
-                                              );
+                                            const currentMember = await msg.guild!.members.fetch(
+                                              activeUser,
+                                            );
                                             if (currentMember) {
                                               currentMember.voice.setMute(
                                                 false,
@@ -323,9 +326,9 @@ export const queue: magibotCommand = {
                                           });
                                         if (voiceChannel) {
                                           // unmute currentUser
-                                          const currentMember = await msg.guild?.members.fetch(
-                                              activeUser
-                                            );
+                                          const currentMember = await msg.guild!.members.fetch(
+                                            activeUser,
+                                          );
                                           if (currentMember) {
                                             currentMember.voice.setMute(
                                               false,

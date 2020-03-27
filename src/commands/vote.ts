@@ -164,7 +164,7 @@ export const vote: magibotCommand = {
                                                   options: args,
                                                   topic,
                                                   date,
-                                                  guildid: ms.guild?.id,
+                                                  guildid: ms.guild!.id,
                                                   authorID,
                                                 };
                                                 data.addVote(vt);

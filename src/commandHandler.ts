@@ -24,7 +24,7 @@ async function catchError(error:Error, msg:Discord.Message, command:string, bot:
     (chann as Discord.TextChannel).send(`**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``);
   }
   msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
-If you can reproduce this, consider using \`${PREFIXES[msg.guild?.id || 0]}.bug <bugreport>\` or join the support discord (link via \`${PREFIXES[msg.guild?.id || 0]}.info\`) to tell us exactly how.`);
+If you can reproduce this, consider using \`${PREFIXES[msg.guild ? msg.guild.id : 0]}.bug <bugreport>\` or join the support discord (link via \`${PREFIXES[msg.guild ? msg.guild.id : 0]}.info\`) to tell us exactly how.`);
 }
 
 const userCooldowns = new Set<string>();
