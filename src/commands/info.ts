@@ -1,6 +1,6 @@
 import { MessageEmbedOptions } from 'discord.js';
 import {
-  PREFIXES, COLOR, user, SIGN,
+  COLOR, user, SIGN,
 } from '../shared_assets';
 
 import { commandCategories } from '../types/enums';
@@ -23,7 +23,7 @@ export const inf: magibotCommand = {
 
     info.push({
       name: 'How to support MagiBot',
-      value: `Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nVote on [discordbots.org](https://discordbots.org/bot/384820232583249921) and [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!\n(daily vote reminder via *${PREFIXES[msg.guild!.id]}.dbl*)`,
+      value: 'Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nLeave a review on [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!',
       inline: false,
     });
 
