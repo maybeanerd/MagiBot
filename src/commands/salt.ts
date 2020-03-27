@@ -13,7 +13,7 @@ function printHelp(msg: Message) {
   });
   info.push({
     name: 'top',
-    value: `Displays the top 5 salter in ${msg.guild?.name}`,
+    value: `Displays the top 5 salter in ${msg.guild!.name}`,
   });
   return info;
 }

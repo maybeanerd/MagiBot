@@ -13,7 +13,6 @@
     "axios": "^0.19.2",
     "blapi": "^1.3.1",
     "bufferutil": "^4.0.1",
-    "dblapi.js": "^2.4.0",
     "discord.js": "^12.0.2",
     "dotenv": "^8.2.0",
     "ffmpeg-binaries": "^3.2.2",
@@ -49,14 +48,16 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
     "prettier": "^1.19.1",
+    "ts-node": "^8.8.1",
     "typescript": "^3.8.3"
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
+    "dev": "ts-node src/bot.ts",
     "lint": "eslint .",
     "build": "tsc",
-    "start": "forever start bot.js ; forever start ./test/bot.js ; forever start ./teapot/bot.js",
-    "stop": "forever stop bot.js ; forever stop ./test/bot.js ; forever stop ./teapot/bot.js"
+    "start": "forever start dist/bot.js",
+    "stop": "forever stop dist/bot.js"
   },
   "repository": {
     "type": "git",

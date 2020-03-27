@@ -16,7 +16,8 @@ export const update: magibotCommand = {
         mess.react('❌');
         mess.awaitReactions(filter, { max: 1, time: 60000 }).then((reacts) => {
           mess.delete();
-          if (reacts.first() && reacts.first()?.emoji.name === '☑') {
+          const frst = reacts.first();
+          if (frst && frst.emoji.name === '☑') {
             data.sendUpdate(msg.content, bot);
             msg.channel.send(`Successfully sent:\n${msg.content}`);
           } else if (reacts.first()) {

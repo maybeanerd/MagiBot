@@ -98,31 +98,32 @@ export const setup: magibotCommand = {
       break;
     case 'join':
       // eslint-disable-next-line no-case-declarations
-      const voiceChannel = msg.member?.voice.channel;
-
-      if (voiceChannel) {
-        const isJoinable = await data.isJoinable(
+      if (msg.member) {
+        const voiceChannel = msg.member.voice.channel;
+        if (voiceChannel) {
+          const isJoinable = await data.isJoinable(
             msg.guild!.id,
             voiceChannel.id,
-        );
-        de = '';
-        if (isJoinable) {
-          de = 'de';
-        }
-        if (
-          await yesOrNo(
-            msg,
-            `Do you want to ${de}activate joinsounds in **${voiceChannel.name}**?`,
-            `Cancelled ${de}activating joinsounds in **${voiceChannel.name}**.`,
-          )
-        ) {
-          await data.setJoinable(msg.guild!.id, voiceChannel.id, !isJoinable);
-          msg.channel.send(
-            `Successfully ${de}activated joinsounds in **${voiceChannel.name}**.`,
           );
+          de = '';
+          if (isJoinable) {
+            de = 'de';
+          }
+          if (
+            await yesOrNo(
+              msg,
+              `Do you want to ${de}activate joinsounds in **${voiceChannel.name}**?`,
+              `Cancelled ${de}activating joinsounds in **${voiceChannel.name}**.`,
+            )
+          ) {
+            await data.setJoinable(msg.guild!.id, voiceChannel.id, !isJoinable);
+            msg.channel.send(
+              `Successfully ${de}activated joinsounds in **${voiceChannel.name}**.`,
+            );
+          }
+        } else {
+          msg.channel.send("You're connected to no voice channel!");
         }
-      } else {
-        msg.channel.send("You're connected to no voice channel!");
       }
       break;
     case 'admin':

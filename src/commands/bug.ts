@@ -25,7 +25,8 @@ export const bug: magibotCommand = {
           .awaitReactions(filter, { max: 1, time: 20000 })
           .then(async (reacts) => {
             mess.delete();
-            if (reacts.first() && reacts.first()?.emoji.name === '☑') {
+            const frst = reacts.first();
+            if (frst && frst.emoji.name === '☑') {
               const chann = await bot.channels.fetch('444529194949672972');
               (chann as TextChannel)
                 .send(

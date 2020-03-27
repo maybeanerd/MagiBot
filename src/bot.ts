@@ -127,7 +127,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
   try {
     const newVc = n.channel;
     // check if voice channel actually changed, don't mute bots
-    if (!n.member?.user.bot && o.channel?.id !== newVc?.id) {
+    if (newVc && n.member && !n.member.user.bot && o.channel && o.channel.id !== newVc.id) {
       // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
         n.setMute(
@@ -139,14 +139,14 @@ bot.on('voiceStateUpdate', async (o, n) => {
       if (
         !n.serverMute
         && queueVoiceChannels[n.guild.id]
-        && queueVoiceChannels[n.guild.id] === newVc?.id
+        && queueVoiceChannels[n.guild.id] === newVc.id
       ) {
         // user joined a muted channel
         n.setMute(true, 'joined active queue voice channel');
       } else if (
         n.serverMute
         && queueVoiceChannels[o.guild.id]
-        && queueVoiceChannels[o.guild.id] === o.channel?.id
+        && queueVoiceChannels[o.guild.id] === o.channel.id
       ) {
         // user left a muted channel
         if (newVc) {
@@ -157,12 +157,14 @@ bot.on('voiceStateUpdate', async (o, n) => {
         }
       } else if (
         newVc
-        && !n.guild?.me?.voice.channel
-        && n.id !== bot.user?.id
+        && n.guild.me
+        && !n.guild.me.voice.channel
+        && n.id !== bot.user!.id
         && !(await data.isBlacklistedUser(n.id, n.guild.id))
         && (await data.joinable(n.guild.id, newVc.id))
       ) {
-        if (n.guild.me && newVc?.permissionsFor(n.guild.me)?.has('CONNECT')) {
+        const perms = newVc.permissionsFor(n.guild.me);
+        if (perms && perms.has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
             newVc.join().then((connection) => {
