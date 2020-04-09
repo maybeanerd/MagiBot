@@ -18,7 +18,7 @@ function comp(s, mI, nI, fI, aI) {
   let r = 0;
   let overload = false;
   for (let i = 0; i < n; i++) {
-    if (i > 23) {
+    if (i > 21) {
       overload = true;
       break;
     }
@@ -35,7 +35,7 @@ function comp(s, mI, nI, fI, aI) {
 
   return ret;
 }
-function parse(de:string) {
+function parse(de: string) {
   // eslint-disable-next-line prefer-spread
   return comp.apply(
     null,
@@ -67,17 +67,32 @@ export const roll: magibotCommand = {
     }> = [];
     const size = throws.length;
     if (throws[size - 6]) {
-      msg.reply('the dungeon master can only roll 24 dice at a time!');
+      msg.reply('the dungeon master can only roll 22 dice at a time!');
     }
-    let thro = throws[size - 4];
-    if (thro > 24) {
-      thro = 24;
+    let thro = throws[size - 4] as number;
+    if (thro > 22) {
+      thro = 22;
     }
     info.push({
       name: `Sum of ${throws[size - 5]} * ${thro}d${throws[size - 3]} + ${
         throws[size - 2]
       }`,
       value: String(throws[size - 1]),
+      inline: false,
+    });
+    info.push({
+      name: 'Average roll',
+      value: String(Math.floor((throws[size - 1] as number) / thro)),
+      inline: false,
+    });
+    info.push({
+      name: 'Luckyness ( -50 to 50 % )',
+      value: `${String(
+        Math.floor(
+          ((throws[size - 1] as number) / thro / (throws[size - 3] as number))
+            * 100,
+        ) - 50,
+      )}%`,
       inline: false,
     });
     for (let i = 0; i < size - 6; i++) {
