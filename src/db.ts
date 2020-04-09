@@ -302,7 +302,7 @@ async function endVote(
     messageID: Message['id'];
     channelID: Message['channel']['id'];
     authorID: string;
-    options: any;
+    options: Array<string>;
     topic: string;
     date: Date;
   },
@@ -313,18 +313,18 @@ async function endVote(
     const msg = await chann.messages.fetch(vote.messageID);
     if (msg) {
       const reacts = msg.reactions;
-      let finalReact: Array<{ reaction: string; count: number }> = [];
-      asyncForEach(reactions, async (x) => {
-        if (x >= vote.options.length) {
+      let finalReact: Array<{ reaction: number; count: number }> = [];
+      reactions.forEach((x, i) => {
+        if (i >= vote.options.length) {
           return;
         }
-        const react = reacts.cache.get(reactions[x]);
+        const react = reacts.resolve(x);
         if (react && react.count) {
           if (!finalReact[0] || finalReact[0].count <= react.count) {
             if (!finalReact[0] || finalReact[0].count < react.count) {
-              finalReact = [{ reaction: x, count: react.count }];
+              finalReact = [{ reaction: i, count: react.count }];
             } else {
-              finalReact.push({ reaction: x, count: react.count });
+              finalReact.push({ reaction: i, count: react.count });
             }
           }
         }
