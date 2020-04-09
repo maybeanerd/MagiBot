@@ -1,4 +1,5 @@
-﻿import data from '../db';
+﻿import { PREFIXES, user } from '../shared_assets';
+import data from '../db';
 import {
   findMember,
 } from '../bamands';
@@ -20,9 +21,9 @@ function printHelp() {
 }
 
 module.exports = {
-  main: async function main(bot, msg) {
+  main: async function main(content, msg) {
     // TODO change all of this
-    const args = msg.content.split(/ +/);
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
       const mention = args[1];
@@ -30,7 +31,7 @@ module.exports = {
       if (!(mention && uid)) {
         if (command === 'reset') {
           msg.channel.send('Do you really want to reset all salt on this server?').then((mess) => {
-            const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌') && user.id === msg.author.id;
+            const filter = (reaction, usr) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌') && usr.id === msg.author.id;
             mess.react('☑');
             mess.react('❌');
             mess.awaitReactions(filter, {
@@ -53,7 +54,7 @@ module.exports = {
       }
       switch (command) {
       case 'add':
-        if (uid === bot.user.id) {
+        if (uid === user().id) {
           msg.reply("you can't report me!");
           return;
         }
@@ -72,7 +73,7 @@ module.exports = {
         msg.channel.send(`Successfully cleared all salt from <@!${uid}>!`);
         break;
       default:
-        msg.reply(`this command doesn't exist. Use \`${bot.PREFIXES[msg.guild.id]}:help salt\` to get more info.`);
+        msg.reply(`this command doesn't exist. Use \`${PREFIXES[msg.guild.id]}:help salt\` to get more info.`);
         break;
       }
     } else {

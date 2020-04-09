@@ -49,7 +49,7 @@ export const setup: magibotCommand = {
   dev: false,
   name: 'setup',
   main: async function main(content, msg) {
-    const args = msg.content.split(/ +/);
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
 
     const mention = args[1];

@@ -6,7 +6,7 @@ import { commandCategories } from '../types/enums';
 export const bug: magibotCommand = {
   name: 'bug',
   async main(content, msg) {
-    if (!(msg.content.length > 0)) {
+    if (!(content.length > 0)) {
       msg.reply(
         `you need to add info about the report after the command. Use \`${
           PREFIXES[msg.guild!.id]
@@ -15,7 +15,7 @@ export const bug: magibotCommand = {
       return;
     }
     msg.channel
-      .send(`Do you want to send this bugreport?\n${msg.content}`)
+      .send(`Do you want to send this bugreport?\n${content}`)
       .then((mess) => {
         const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
           && user.id === msg.author.id;
@@ -33,7 +33,7 @@ export const bug: magibotCommand = {
                   `**Bugreport** by ${msg.author.username} (<@${
                     msg.author.id
                   }>) on server ${msg.guild!.name}( ${msg.guild!.id} ) :\n${
-                    msg.content
+                    content
                   }`,
                 )
                 .then(() => {

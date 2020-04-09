@@ -33,8 +33,8 @@ function printHelp() {
 export const salt: magibotCommand = {
   dev: false,
   name: 'salt',
-  main: async function main(bot, msg) {
-    const args = msg.content.split(/ +/);
+  main: async function main(content, msg) {
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (msg.guild) {
       const mention = args[1];

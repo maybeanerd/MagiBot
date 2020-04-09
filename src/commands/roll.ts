@@ -47,8 +47,8 @@ export const roll: magibotCommand = {
   name: 'roll',
   hide: false,
   dev: false,
-  main(bot, msg) {
-    const args = msg.content.split(/ +/);
+  main(content, msg) {
+    const args = content.split(/ +/);
     const input = args[0];
 
     const throws = parse(input);
