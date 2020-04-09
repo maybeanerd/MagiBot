@@ -1,7 +1,7 @@
 // const avroles = { Switch: 'Switch' };
 module.exports = {
-  main(bot, msg) {
-    /* var role=(msg.content.split(" "))[0];
+  main(content, msg) {
+    /* var role=(content.split(" "))[0];
     if(avroles[role]){
     msg.member.addRole(avroles[role]);
     msg.reply("dir wurde erfolgreich die Rolle "+role+" zugewiesen.");

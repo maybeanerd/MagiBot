@@ -19,7 +19,7 @@ export const sound: magibotCommand = {
   name: 'sound',
   dev: false,
   main: async function main(content, msg) {
-    const args = msg.content.split(/ +/);
+    const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     const mention = args[1];
     switch (command) {

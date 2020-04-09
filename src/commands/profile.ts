@@ -7,9 +7,9 @@ import { findMember } from '../bamands';
 export const profile: magibotCommand = {
   name: 'profile',
   dev: false,
-  main: async function main(bot, msg) {
+  main: async function main(content, msg) {
     if (msg.guild) {
-      const args = msg.content.split(/ +/);
+      const args = content.split(/ +/);
       const mention = args[0];
       let id = await findMember(msg.guild, mention);
       if (!id && !mention) {

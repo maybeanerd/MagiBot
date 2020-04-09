@@ -25,14 +25,14 @@ export async function findMember(
       (memb) => memb.displayName.toLowerCase().startsWith(mention),
     );
     if (memberArray.size === 1) {
-      return memberArray[0].id;
+      return memberArray.first()!.id;
     }
     if (memberArray.size === 0) {
       memberArray = guild.members.cache.filter(
         (memb) => memb.displayName.toLowerCase().includes(mention),
       );
       if (memberArray.size === 1) {
-        return memberArray[0].id;
+        return memberArray.first()!.id;
       }
     }
   }

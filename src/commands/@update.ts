@@ -8,7 +8,7 @@ export const update: magibotCommand = {
   name: 'update',
   main: async function main(content, msg) {
     await msg.channel
-      .send(`Do you want to send the update\n${msg.content}`)
+      .send(`Do you want to send the update\n${content}`)
       .then((mess) => {
         const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
           && user.id === msg.author.id;
@@ -18,8 +18,8 @@ export const update: magibotCommand = {
           mess.delete();
           const frst = reacts.first();
           if (frst && frst.emoji.name === '☑') {
-            data.sendUpdate(msg.content, bot);
-            msg.channel.send(`Successfully sent:\n${msg.content}`);
+            data.sendUpdate(content, bot);
+            msg.channel.send(`Successfully sent:\n${content}`);
           } else if (reacts.first()) {
             msg.channel.send('successfully canceled update');
           }
