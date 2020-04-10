@@ -21,19 +21,11 @@ if (config.blapis) {
 process.on('uncaughtException', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(
-    `Uncaught Exception:\n${
-      err.stack
-        ? JSON.stringify(err.stack, null, 2)
-        : JSON.stringify(err, null, 2)
-    }`,
-  );
+  console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
   if (chann) {
     (chann as Discord.TextChannel).send(
       `**Outer Uncaught Exception:**\n\`\`\`${
-        err.stack
-          ? JSON.stringify(err.stack, null, 2)
-          : JSON.stringify(err, null, 2)
+        err.stack ? err.stack : err
       }\`\`\``,
     );
   }
@@ -41,16 +33,10 @@ process.on('uncaughtException', async (err) => {
 process.on('unhandledRejection', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(
-    `Unhandled promise rejection:\n${JSON.stringify(err, null, 2)}`,
-  );
+  console.error(`Unhandled promise rejection:\n${err}`);
   if (chann) {
     (chann as Discord.TextChannel).send(
-      `**Outer Unhandled promise rejection:**\n\`\`\`${JSON.stringify(
-        err,
-        null,
-        2,
-      )}\`\`\``,
+      `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
     );
   }
 });
