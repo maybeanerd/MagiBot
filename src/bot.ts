@@ -21,11 +21,19 @@ if (config.blapis) {
 process.on('uncaughtException', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
+  console.error(
+    `Uncaught Exception:\n${
+      err.stack
+        ? JSON.stringify(err.stack, null, 2)
+        : JSON.stringify(err, null, 2)
+    }`,
+  );
   if (chann) {
     (chann as Discord.TextChannel).send(
       `**Outer Uncaught Exception:**\n\`\`\`${
-        err.stack ? err.stack : err
+        err.stack
+          ? JSON.stringify(err.stack, null, 2)
+          : JSON.stringify(err, null, 2)
       }\`\`\``,
     );
   }
@@ -33,10 +41,16 @@ process.on('uncaughtException', async (err) => {
 process.on('unhandledRejection', async (err) => {
   const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(`Unhandled promise rejection:\n${err}`);
+  console.error(
+    `Unhandled promise rejection:\n${JSON.stringify(err, null, 2)}`,
+  );
   if (chann) {
     (chann as Discord.TextChannel).send(
-      `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
+      `**Outer Unhandled promise rejection:**\n\`\`\`${JSON.stringify(
+        err,
+        null,
+        2,
+      )}\`\`\``,
     );
   }
 });
@@ -127,7 +141,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
   try {
     const newVc = n.channel;
     // check if voice channel actually changed, don't mute bots
-    if (newVc && n.member && !n.member.user.bot && o.channel && o.channel.id !== newVc.id) {
+    if (newVc && n.member && !n.member.user.bot && o.channelID !== newVc.id) {
       // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
         n.setMute(
@@ -146,6 +160,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
       } else if (
         n.serverMute
         && queueVoiceChannels[o.guild.id]
+        && o.channel
         && queueVoiceChannels[o.guild.id] === o.channel.id
       ) {
         // user left a muted channel
@@ -158,7 +173,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
       } else if (
         newVc
         && n.guild.me
-        && !n.guild.me.voice.channel
+        && !n.guild.me.voice.channelID
         && n.id !== bot.user!.id
         && !(await data.isBlacklistedUser(n.id, n.guild.id))
         && (await data.joinable(n.guild.id, newVc.id))
@@ -168,22 +183,24 @@ bot.on('voiceStateUpdate', async (o, n) => {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
             newVc.join().then((connection) => {
-              if (connection) {
-                // TODO use connection.play when discord.js updates
-                const dispatcher = connection.play(sound, {
-                  seek: 0,
-                  volume: 0.2,
-                  bitrate: 'auto',
-                });
-                dispatcher.once('end', () => {
-                  connection.disconnect();
-                  dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-                });
-                dispatcher.once('error', () => {
-                  connection.disconnect();
-                  dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-                });
-              }
+              const dispatcher = connection.play(sound, {
+                seek: 0,
+                volume: 0.5,
+                bitrate: 'auto',
+              });
+              dispatcher.once('finish', () => {
+                connection.disconnect();
+                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+              });
+              dispatcher.once('error', () => {
+                connection.disconnect();
+                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+              });
+              // disconnect after 10 seconds if for some reason we don't get the events
+              setTimeout(() => {
+                connection.disconnect();
+                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+              }, 10 * 1000);
             });
           }
         }
