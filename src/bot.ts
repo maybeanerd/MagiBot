@@ -19,26 +19,30 @@ if (config.blapis) {
   handle(bot, config.blapis, 30);
 }
 process.on('uncaughtException', async (err) => {
-  const chann = await bot.channels.fetch('414809410448261132');
+  try {
+    const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
-  if (chann) {
-    (chann as Discord.TextChannel).send(
-      `**Outer Uncaught Exception:**\n\`\`\`${
-        err.stack ? err.stack : err
-      }\`\`\``,
-    );
-  }
+    console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
+    if (chann) {
+      (chann as Discord.TextChannel).send(
+        `**Outer Uncaught Exception:**\n\`\`\`${
+          err.stack ? err.stack : err
+        }\`\`\``,
+      );
+    }
+  } catch (e) { console.error(e); }
 });
 process.on('unhandledRejection', async (err) => {
-  const chann = await bot.channels.fetch('414809410448261132');
+  try {
+    const chann = await bot.channels.fetch('414809410448261132');
 
-  console.error(`Unhandled promise rejection:\n${err}`);
-  if (chann) {
-    (chann as Discord.TextChannel).send(
-      `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
-    );
-  }
+    console.error(`Unhandled promise rejection:\n${err}`);
+    if (chann) {
+      (chann as Discord.TextChannel).send(
+        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
+      );
+    }
+  } catch (e) { console.error(e); }
 });
 
 // fires on startup and on reconnect
