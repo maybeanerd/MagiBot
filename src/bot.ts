@@ -201,7 +201,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
   }
 });
 
-bot.on('disconnected', () => {
+bot.on('disconnect', () => {
   console.log('Disconnected!');
 });
 
