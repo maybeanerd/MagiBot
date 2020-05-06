@@ -147,9 +147,9 @@ bot.on('voiceStateUpdate', async (o, n) => {
           'was still muted from a queue which user disconnected from',
         );
         data.toggleStillMuted(n.id, n.guild.id, false);
-      }
-      if (
+      } else if (
         !n.serverMute
+        && newVc
         && queueVoiceChannels[n.guild.id]
         && queueVoiceChannels[n.guild.id] === newVc.id
       ) {
