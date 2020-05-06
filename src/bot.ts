@@ -166,11 +166,6 @@ bot.on('voiceStateUpdate', async (o, n) => {
           n.setMute(false, 'left active queue voice channel');
         } else {
           // save the unmute for later
-          console.log(
-            'save that user',
-            n.member.nickname,
-            'needs to be unmuted...',
-          );
           data.toggleStillMuted(n.id, n.guild.id, true);
         }
       } else if (
