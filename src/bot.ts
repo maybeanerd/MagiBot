@@ -139,7 +139,12 @@ bot.on('voiceStateUpdate', async (o, n) => {
     console.log(JSON.stringify(o, null, 2));
     console.log('voice state update: n:');
     console.log(JSON.stringify(n, null, 2));
-    if (newVc && n.member && !n.member.user.bot && o.channelID !== newVc.id) {
+    if (
+      newVc
+      && n.member
+      && !n.member.user.bot
+      && (!o.channel || o.channel.id !== newVc.id)
+    ) {
       // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
         console.log(
@@ -182,7 +187,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
       } else if (
         newVc
         && n.guild.me
-        && !n.guild.me.voice.channelID
+        && !n.guild.me.voice.channel
         && n.id !== bot.user!.id
         && !(await data.isBlacklistedUser(n.id, n.guild.id))
         && (await data.joinable(n.guild.id, newVc.id))
