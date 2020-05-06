@@ -429,7 +429,7 @@ function toggleDBL(userID: string, add: boolean) {
 }
 
 function toggleStillMuted(userID: string, guildID: string, add: boolean) {
-  MongoClient.connect(url).then(async (mclient) => {
+  return MongoClient.connect(url).then(async (mclient) => {
     const db = await mclient.db('MagiBot');
     if (
       add
@@ -1041,7 +1041,7 @@ export default {
     });
   },
   toggleStillMuted(userID: string, guildID: string, add: boolean) {
-    toggleStillMuted(userID, guildID, add);
+    return toggleStillMuted(userID, guildID, add);
   },
   async isStillMuted(userID: string, guildID: string) {
     return MongoClient.connect(url).then(async (mclient) => {
