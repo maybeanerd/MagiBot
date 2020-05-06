@@ -100,7 +100,8 @@ export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
   }
   // ignore blacklisted users
   if (await data.isBlacklistedUser(msg.author.id, msg.guild.id)) {
-    msg.delete();
+    // we dont delete the message because this would delete everything that starts with the prefix
+    /*     msg.delete(); */
     return;
   }
   let command: string;
@@ -117,9 +118,8 @@ export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
       .substring(PREFIXES[msg.guild.id].length, msg.content.length)
       .split(' ')[0]
       .toLowerCase();
-    content = msg.content.slice(
-      command.length + PREFIXES[msg.guild.id].length,
-    ); // delete prefix and command
+    // delete prefix and command
+    content = msg.content.slice(command.length + PREFIXES[msg.guild.id].length);
     content = content.replace(/^\s+/g, ''); // delete leading spaces
   }
   if (command) {
