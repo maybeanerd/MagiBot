@@ -30,7 +30,9 @@ process.on('uncaughtException', async (err) => {
         }\`\`\``,
       );
     }
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+  }
 });
 process.on('unhandledRejection', async (err) => {
   try {
@@ -42,7 +44,9 @@ process.on('unhandledRejection', async (err) => {
         `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
       );
     }
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 // fires on startup and on reconnect
@@ -134,6 +138,12 @@ bot.on('voiceStateUpdate', async (o, n) => {
     if (newVc && n.member && !n.member.user.bot && o.channelID !== newVc.id) {
       // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
+        console.log(
+          'user',
+          n.member.nickname,
+          'was still muted and will be unmuted...',
+        );
+
         n.setMute(
           false,
           'was still muted from a queue which user disconnected from',
@@ -158,6 +168,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
           n.setMute(false, 'left active queue voice channel');
         } else {
           // save the unmute for later
+          console.log(
+            'save that user',
+            n.member.nickname,
+            'needs to be unmuted...',
+          );
           data.toggleStillMuted(n.id, n.guild.id, true);
         }
       } else if (

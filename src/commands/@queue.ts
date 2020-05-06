@@ -394,8 +394,23 @@ export const queue: magibotCommand = {
                                     // remove all mutes
                                     voiceChannel.members
                                       .array()
-                                      .forEach((mem) => {
-                                        mem.voice.setMute(false, 'queue ended');
+                                      .forEach(async (mem) => {
+                                        // make sure users will be unmuted even if this unmute loop
+                                        // fails because they left the voice channel too quickly
+                                        await data.toggleStillMuted(
+                                          mem.id,
+                                          mem.guild.id,
+                                          true,
+                                        );
+                                        await mem.voice.setMute(
+                                          false,
+                                          'queue ended',
+                                        );
+                                        await data.toggleStillMuted(
+                                          mem.id,
+                                          mem.guild.id,
+                                          false,
+                                        );
                                       });
                                   }
                                   mess4
