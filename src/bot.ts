@@ -135,10 +135,6 @@ bot.on('voiceStateUpdate', async (o, n) => {
   try {
     const newVc = n.channel;
     // check if voice channel actually changed, don't mute bots
-    console.log('voice state update: o:');
-    console.log(JSON.stringify(o, null, 2));
-    console.log('voice state update: n:');
-    console.log(JSON.stringify(n, null, 2));
     if (
       newVc
       && n.member
@@ -147,12 +143,6 @@ bot.on('voiceStateUpdate', async (o, n) => {
     ) {
       // is muted and joined a vc? maybe still muted from queue
       if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
-        console.log(
-          'user',
-          n.member.nickname,
-          'was still muted and will be unmuted...',
-        );
-
         n.setMute(
           false,
           'was still muted from a queue which user disconnected from',
@@ -167,7 +157,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
         // user joined a muted channel
         n.setMute(true, 'joined active queue voice channel');
       } else if (
-        n.serverMute
+        o.serverMute
         && queueVoiceChannels[o.guild.id]
         && o.channel
         && queueVoiceChannels[o.guild.id] === o.channel.id
