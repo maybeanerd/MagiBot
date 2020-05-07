@@ -1,4 +1,4 @@
-﻿import { MongoClient } from 'mongodb';
+﻿import { MongoClient, Db } from 'mongodb';
 import {
   Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
@@ -6,142 +6,112 @@ import { OWNERID, PREFIXES, resetPrefixes } from './shared_assets';
 import { asyncForEach } from './bamands';
 import config from './token';
 
-
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
 }
 const url = config.dburl;
 
+const mclient = MongoClient.connect(url, { poolSize: 20, ssl: true });
+let db: Db;
+mclient.then((m) => {
+  db = m.db('MagiBot');
+});
+
 // Define Methods:
-function getuser(userid: string, guildID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const result = await db.collection('users').findOneAndUpdate(
-      { userID: userid, guildID },
-      {
-        $setOnInsert: {
-          warnings: 0,
-          kicks: 0,
-          bans: 0,
-          botusage: 0,
-          sound: false,
-        },
+async function getuser(userid: string, guildID: string) {
+  const result = await db.collection('users').findOneAndUpdate(
+    { userID: userid, guildID },
+    {
+      $setOnInsert: {
+        warnings: 0,
+        kicks: 0,
+        bans: 0,
+        botusage: 0,
+        sound: false,
       },
-      { returnOriginal: false, upsert: true },
-    );
-    mclient.close();
-    return result.value;
-  });
+    },
+    { returnOriginal: false, upsert: true },
+  );
+  return result.value;
 }
 // eslint-disable-next-line require-await
 async function saltGuild(salter, guildID: string, add = 1, reset = false) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const user = await db
-      .collection('saltrank')
-      .findOne({ salter, guild: guildID });
-    if (!user) {
-      const myobj = { salter, salt: 1, guild: guildID };
-      await db.collection('saltrank').insertOne(myobj);
+  const user = await db
+    .collection('saltrank')
+    .findOne({ salter, guild: guildID });
+  if (!user) {
+    const myobj = { salter, salt: 1, guild: guildID };
+    await db.collection('saltrank').insertOne(myobj);
+  } else {
+    const slt = user.salt + add;
+    if (slt <= 0 || reset) {
+      await db.collection('saltrank').deleteOne({ salter, guild: guildID });
     } else {
-      const slt = user.salt + add;
-      if (slt <= 0 || reset) {
-        await db.collection('saltrank').deleteOne({ salter, guild: guildID });
-      } else {
-        const update = { $set: { salt: slt } };
-        await db
-          .collection('saltrank')
-          .updateOne({ salter, guild: guildID }, update);
-      }
+      const update = { $set: { salt: slt } };
+      await db
+        .collection('saltrank')
+        .updateOne({ salter, guild: guildID }, update);
     }
-    mclient.close();
-  });
+  }
 }
 // eslint-disable-next-line require-await
 async function addSalt(userid: string, reporter: string, guildID: string) {
-  return MongoClient.connect(url).then((mclient) => {
-    const db = mclient.db('MagiBot');
-    const date = new Date();
-    const myobj = {
-      salter: userid,
-      reporter,
-      date,
-      guild: guildID,
-    };
-    return db
-      .collection('salt')
-      .insertOne(myobj)
-      .then(async () => {
-        await saltGuild(userid, guildID, 1);
-        mclient.close();
-        return 0;
-      });
-  });
-}
-function updateUser(userid: string, update, guildID: string) {
-  MongoClient.connect(url, (err, mclient) => {
-    if (err) throw err;
-    const db = mclient.db('MagiBot');
-    db.collection('users').updateOne(
-      { userID: userid, guildID },
-      update,
-      (err2) => {
-        if (err2) throw err2;
-        mclient.close();
-      },
-    );
-  });
-}
-function saltDowntimeDone(userid1: string, userid2: string) {
-  // get newest entry in salt
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const d2 = await db
-      .collection('salt')
-      .find<{ date: Date }>({ salter: userid1, reporter: userid2 })
-      .sort({ date: -1 })
-      .limit(1)
-      .toArray();
-    mclient.close();
-    if (d2[0]) {
-      const d1 = new Date();
-      const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
-      return ret;
-    }
-    return 2;
-  });
-}
-function firstSettings(guildID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    await db.collection('settings').insertOne({
-      _id: guildID,
-      commandChannels: [],
-      adminRoles: [],
-      joinChannels: [],
-      blacklistedUsers: [],
-      blacklistedEveryone: [],
-      saltKing: false,
-      saltRole: false,
-      notChannel: false,
-      prefix: config.prefix,
-      lastConnected: new Date(),
+  const date = new Date();
+  const myobj = {
+    salter: userid,
+    reporter,
+    date,
+    guild: guildID,
+  };
+  return db
+    .collection('salt')
+    .insertOne(myobj)
+    .then(async () => {
+      await saltGuild(userid, guildID, 1);
+      return 0;
     });
-    const ret = await db.collection('settings').findOne({ _id: guildID });
-    mclient.close();
-    return ret;
-  });
 }
-function getSettings(guildID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    let result = await db.collection('settings').findOne({ _id: guildID });
-    if (!result) {
-      result = await firstSettings(guildID);
-    }
-    mclient.close();
-    return result;
+async function updateUser(userid: string, update, guildID: string) {
+  await db.collection('users').updateOne({ userID: userid, guildID }, update);
+}
+async function saltDowntimeDone(userid1: string, userid2: string) {
+  // get newest entry in salt
+  const d2 = await db
+    .collection('salt')
+    .find<{ date: Date }>({ salter: userid1, reporter: userid2 })
+    .sort({ date: -1 })
+    .limit(1)
+    .toArray();
+  if (d2[0]) {
+    const d1 = new Date();
+    const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
+    return ret;
+  }
+  return 2;
+}
+async function firstSettings(guildID: string) {
+  await db.collection('settings').insertOne({
+    _id: guildID,
+    commandChannels: [],
+    adminRoles: [],
+    joinChannels: [],
+    blacklistedUsers: [],
+    blacklistedEveryone: [],
+    saltKing: false,
+    saltRole: false,
+    notChannel: false,
+    prefix: config.prefix,
+    lastConnected: new Date(),
   });
+  const ret = await db.collection('settings').findOne({ _id: guildID });
+  return ret;
+}
+async function getSettings(guildID: string) {
+  let result = await db.collection('settings').findOne({ _id: guildID });
+  if (!result) {
+    result = await firstSettings(guildID);
+  }
+  return result;
 }
 async function checkGuild(id: string) {
   // create settings
@@ -178,45 +148,42 @@ async function onHour(bot: Client, isFirst: boolean) {
   const nd = new Date();
   nd.setDate(nd.getDate() - 7);
   const guilds = bot.guilds.cache.array();
-  await MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    let counter = 0;
-    let percCounter = 0;
-    await asyncForEach(guilds, async (G) => {
-      const guildID = G.id;
-      await checkGuild(guildID);
-      // update the guild settings entry so that it does NOT get deleted
-      await db
-        .collection('settings')
-        .updateOne({ _id: guildID }, { $set: { lastConnected: d } });
+  let counter = 0;
+  let percCounter = 0;
+  await asyncForEach(guilds, async (G) => {
+    const guildID = G.id;
+    await checkGuild(guildID);
+    // update the guild settings entry so that it does NOT get deleted
+    await db
+      .collection('settings')
+      .updateOne({ _id: guildID }, { $set: { lastConnected: d } });
 
-      const ranking = await db
-        .collection('saltrank')
-        .find({ guild: guildID })
-        .toArray();
+    const ranking = await db
+      .collection('saltrank')
+      .find({ guild: guildID })
+      .toArray();
 
-      asyncForEach(ranking, async (report) => {
-        const removeData = await db.collection('salt').deleteMany({
-          date: { $lt: nd },
-          guild: guildID,
-          salter: report.salter,
-        });
-        if (removeData.deletedCount && removeData.deletedCount > 0) {
-          const slt = report.salt - removeData.deletedCount;
-          if (slt <= 0) {
-            await db
-              .collection('saltrank')
-              .deleteOne({ salter: report.salter, guild: guildID });
-          } else {
-            await db
-              .collection('saltrank')
-              .updateOne(
-                { salter: report.salter, guild: guildID },
-                { $set: { salt: slt } },
-              );
-          }
-        }
+    asyncForEach(ranking, async (report) => {
+      const removeData = await db.collection('salt').deleteMany({
+        date: { $lt: nd },
+        guild: guildID,
+        salter: report.salter,
       });
+      if (removeData.deletedCount && removeData.deletedCount > 0) {
+        const slt = report.salt - removeData.deletedCount;
+        if (slt <= 0) {
+          await db
+            .collection('saltrank')
+            .deleteOne({ salter: report.salter, guild: guildID });
+        } else {
+          await db
+            .collection('saltrank')
+            .updateOne(
+              { salter: report.salter, guild: guildID },
+              { $set: { salt: slt } },
+            );
+        }
+      }
 
       // update percentage message
       if (msg) {
@@ -239,40 +206,32 @@ async function onHour(bot: Client, isFirst: boolean) {
         }
       }
     });
-
-
-    await mclient.close();
   });
 
   // delete every guild where lastConnected < nd from the DB TODO
-  await MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
-    // find all guilds that have not connected for a week
-    // or dont have the lastConnected attribute at all
-    const guilds2 = await db
-      .collection('settings')
-      .find({
-        $or: [
-          { lastConnected: { $lt: nd } },
-          { lastConnected: { $exists: false } },
-        ],
-      })
-      .toArray();
+  // find all guilds that have not connected for a week
+  // or dont have the lastConnected attribute at all
+  const guilds2 = await db
+    .collection('settings')
+    .find({
+      $or: [
+        { lastConnected: { $lt: nd } },
+        { lastConnected: { $exists: false } },
+      ],
+    })
+    .toArray();
 
-    await asyncForEach(guilds2, async (guild) => {
-      // ignore salt and saltrank, as they are removed after 7 days anyways
-      // eslint-disable-next-line no-underscore-dangle
-      const guildID = guild._id;
-      // remove all data saved for those guilds
-      await db.collection('stillmuted').deleteMany({ guildid: guildID });
-      await db.collection('users').deleteMany({ guildID });
-      await db.collection('votes').deleteMany({ guildid: guildID });
-      await db.collection('settings').deleteOne({ _id: guildID });
-    });
-    mclient.close();
+  await asyncForEach(guilds2, async (guild) => {
+    // ignore salt and saltrank, as they are removed after 7 days anyways
+    // eslint-disable-next-line no-underscore-dangle
+    const guildID = guild._id;
+    // remove all data saved for those guilds
+    await db.collection('stillmuted').deleteMany({ guildid: guildID });
+    await db.collection('users').deleteMany({ guildID });
+    await db.collection('votes').deleteMany({ guildid: guildID });
+    await db.collection('settings').deleteOne({ _id: guildID });
   });
 }
-
 
 const reactions = [
   '🇦',
@@ -369,7 +328,7 @@ async function endVote(
     }
   }
 }
-function voteCheck(bot: Client) {
+async function voteCheck(bot: Client) {
   const d = new Date();
   const h = new Date(
     d.getFullYear(),
@@ -386,70 +345,52 @@ function voteCheck(bot: Client) {
     setTimeout(voteCheck.bind(null, bot), e);
   }
   // do vote stuff
-  MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const nd = new Date();
-    const votes = await db
-      .collection('votes')
-      .find({ date: { $lte: nd } })
-      .toArray();
-    await asyncForEach(votes, async (vote) => {
-      await endVote(vote, bot);
-      await db.collection('votes').deleteOne(vote);
-    });
-    mclient.close();
+  const nd = new Date();
+  const votes = await db
+    .collection('votes')
+    .find({ date: { $lte: nd } })
+    .toArray();
+  await asyncForEach(votes, async (vote) => {
+    await endVote(vote, bot);
+    await db.collection('votes').deleteOne(vote);
   });
   // endof vote stuff
 }
 
-function isInDBL(userID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
-    const ret = await db
-      .collection('DBLreminder')
-      .find({ _id: userID })
-      .count();
-    mclient.close();
-    return ret;
-  });
+async function isInDBL(userID: string) {
+  const ret = await db
+    .collection('DBLreminder')
+    .find({ _id: userID })
+    .count();
+  return ret;
 }
 
-function toggleDBL(userID: string, add: boolean) {
-  MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
-    if (add && !(await isInDBL(userID))) {
-      await db
-        .collection('DBLreminder')
-        .insertOne({ _id: userID, voted: false });
-    } else if (!add) {
-      await db.collection('DBLreminder').deleteOne({ _id: userID });
-    }
-    mclient.close();
-  });
+async function toggleDBL(userID: string, add: boolean) {
+  if (add && !(await isInDBL(userID))) {
+    await db.collection('DBLreminder').insertOne({ _id: userID, voted: false });
+  } else if (!add) {
+    await db.collection('DBLreminder').deleteOne({ _id: userID });
+  }
 }
 
-function toggleStillMuted(userID: string, guildID: string, add: boolean) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = await mclient.db('MagiBot');
-    if (
-      add
-      && !(
-        (await db
-          .collection('stillMuted')
-          .find({ userid: userID, guildid: guildID })
-          .count()) > 0
-      )
-    ) {
-      await db
+async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
+  if (
+    add
+    && !(
+      (await db
         .collection('stillMuted')
-        .insertOne({ userid: userID, guildid: guildID });
-    } else if (!add) {
-      await db
-        .collection('stillMuted')
-        .deleteMany({ userid: userID, guildid: guildID });
-    }
-    mclient.close();
-  });
+        .find({ userid: userID, guildid: guildID })
+        .count()) > 0
+    )
+  ) {
+    await db
+      .collection('stillMuted')
+      .insertOne({ userid: userID, guildid: guildID });
+  } else if (!add) {
+    await db
+      .collection('stillMuted')
+      .deleteMany({ userid: userID, guildid: guildID });
+  }
 }
 async function getSaltKing(guildID: string) {
   const settings = await getSettings(guildID);
@@ -459,17 +400,13 @@ async function getSaltRole(guildID: string) {
   const set = await getSettings(guildID);
   return set.saltRole;
 }
-function setSettings(guildID: string, settings) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    if (await getSettings(guildID)) {
-      await db
-        .collection('settings')
-        .updateOne({ _id: guildID }, { $set: settings });
-    }
-    mclient.close();
-    return true;
-  });
+async function setSettings(guildID: string, settings) {
+  if (await getSettings(guildID)) {
+    await db
+      .collection('settings')
+      .updateOne({ _id: guildID }, { $set: settings });
+  }
+  return true;
 }
 async function setSaltRole(guildID: string, roleID: string) {
   await setSettings(guildID, { saltRole: roleID });
@@ -479,21 +416,17 @@ async function getNotChannel(guildID: string) {
   return set.notChannel;
 }
 // top 5 salty people
-function topSalt(guildID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const result = await db
-      .collection('saltrank')
-      .find({ guild: guildID })
-      .sort({ salt: -1 })
-      .limit(5)
-      .toArray();
-    mclient.close();
-    if (!result) {
-      return [];
-    }
-    return result;
-  });
+async function topSalt(guildID: string) {
+  const result = await db
+    .collection('saltrank')
+    .find({ guild: guildID })
+    .sort({ salt: -1 })
+    .limit(5)
+    .toArray();
+  if (!result) {
+    return [];
+  }
+  return result;
 }
 function setSaltKing(guildID: string, userID: string) {
   return setSettings(guildID, { saltKing: userID });
@@ -624,17 +557,13 @@ async function sendUpdate(update: string, bot: Client) {
 }
 
 async function getSalt(userid: string, guildID: string) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    const result = await db
-      .collection('saltrank')
-      .findOne({ salter: userid, guild: guildID });
-    mclient.close();
-    if (!result) {
-      return 0;
-    }
-    return result.salt;
-  });
+  const result = await db
+    .collection('saltrank')
+    .findOne({ salter: userid, guild: guildID });
+  if (!result) {
+    return 0;
+  }
+  return result.salt;
 }
 
 async function saltUp(
@@ -792,50 +721,40 @@ async function joinsound(
   surl: string | false,
   guildID: string,
 ) {
-  return MongoClient.connect(url).then(async (mclient) => {
-    const db = mclient.db('MagiBot');
-    if (await checks(userid, guildID)) {
-      const update = { $set: { sound: surl } };
-      await db
-        .collection('users')
-        .updateOne({ userID: userid, guildID }, update);
-    }
-    mclient.close();
-    return true;
-  });
+  if (await checks(userid, guildID)) {
+    const update = { $set: { sound: surl } };
+    await db.collection('users').updateOne({ userID: userid, guildID }, update);
+  }
+  return true;
 }
 
 export default {
   async startup(bot: Client) {
     // create Collection
-    await MongoClient.connect(url).then(async (mclient) => {
-      const db = mclient.db('MagiBot');
-      if (!db.collection('settings')) {
-        await db.createCollection('settings').then(() => {});
-      }
-      // Dataset of salt
-      if (!db.collection('salt')) {
-        db.createCollection('salt', (err) => {
-          if (err) throw err;
-        });
-      }
-      if (!db.collection('saltrank')) {
-        db.createCollection('saltrank', (err) => {
-          if (err) throw err;
-        });
-      }
-      if (!db.collection('users')) {
-        db.createCollection('users', (err) => {
-          if (err) throw err;
-        });
-      }
-      if (!db.collection('votes')) {
-        db.createCollection('votes', (err) => {
-          if (err) throw err;
-        });
-      }
-      mclient.close();
-    });
+    if (!db.collection('settings')) {
+      await db.createCollection('settings').then(() => {});
+    }
+    // Dataset of salt
+    if (!db.collection('salt')) {
+      db.createCollection('salt', (err) => {
+        if (err) throw err;
+      });
+    }
+    if (!db.collection('saltrank')) {
+      db.createCollection('saltrank', (err) => {
+        if (err) throw err;
+      });
+    }
+    if (!db.collection('users')) {
+      db.createCollection('users', (err) => {
+        if (err) throw err;
+      });
+    }
+    if (!db.collection('votes')) {
+      db.createCollection('votes', (err) => {
+        if (err) throw err;
+      });
+    }
     // repeating functions:
     onHour(bot, true);
     voteCheck(bot);
@@ -865,26 +784,21 @@ export default {
     return parseInt(user.botusage, 10);
   },
   async remOldestSalt(userid: string, G: Guild) {
-    return MongoClient.connect(url).then(async (mclient) => {
-      const guildID = G.id;
-      const db = mclient.db('MagiBot');
-      const id = await db
-        .collection('salt')
-        .find({ salter: userid, guild: guildID })
-        .sort({ date: 1 })
-        .limit(1)
-        .toArray();
-      if (id[0]) {
-        // eslint-disable-next-line no-underscore-dangle
-        await db.collection('salt').deleteOne({ _id: id[0]._id });
-        saltGuild(userid, guildID, -1);
-        mclient.close();
-        updateSaltKing(G);
-        return true;
-      }
-      mclient.close();
-      return false;
-    });
+    const guildID = G.id;
+    const id = await db
+      .collection('salt')
+      .find({ salter: userid, guild: guildID })
+      .sort({ date: 1 })
+      .limit(1)
+      .toArray();
+    if (id[0]) {
+      // eslint-disable-next-line no-underscore-dangle
+      await db.collection('salt').deleteOne({ _id: id[0]._id });
+      saltGuild(userid, guildID, -1);
+      updateSaltKing(G);
+      return true;
+    }
+    return false;
   },
   async addGuild(guildID: string) {
     await checkGuild(guildID);
@@ -981,26 +895,16 @@ export default {
     return getSettings(guildID);
   },
   async clrSalt(userid: string, G: Guild) {
-    return MongoClient.connect(url).then(async (mclient) => {
-      const guildID = G.id;
-      const db = mclient.db('MagiBot');
-      await db
-        .collection('salt')
-        .deleteMany({ guild: guildID, salter: userid });
-      await saltGuild(userid, guildID, 1, true);
-      mclient.close();
-      await updateSaltKing(G);
-    });
+    const guildID = G.id;
+    await db.collection('salt').deleteMany({ guild: guildID, salter: userid });
+    await saltGuild(userid, guildID, 1, true);
+    await updateSaltKing(G);
   },
   async resetSalt(G: Guild) {
-    await MongoClient.connect(url).then(async (mclient) => {
-      const guildID = G.id;
-      const db = mclient.db('MagiBot');
-      await db.collection('saltrank').deleteMany({ guild: guildID });
-      await db.collection('salt').deleteMany({ guild: guildID });
-      await updateSaltKing(G);
-      mclient.close();
-    });
+    const guildID = G.id;
+    await db.collection('saltrank').deleteMany({ guild: guildID });
+    await db.collection('salt').deleteMany({ guild: guildID });
+    await updateSaltKing(G);
   },
   async setNotification(guildID: string, cid: string | false) {
     await setNotChannel(guildID, cid);
@@ -1034,34 +938,22 @@ export default {
     return isInDBL(userID);
   },
   addVote(vote) {
-    MongoClient.connect(url).then(async (mclient) => {
-      const db = mclient.db('MagiBot');
-      db.collection('votes').insertOne(vote);
-      mclient.close();
-    });
+    return db.collection('votes').insertOne(vote);
   },
   toggleStillMuted(userID: string, guildID: string, add: boolean) {
     return toggleStillMuted(userID, guildID, add);
   },
   async isStillMuted(userID: string, guildID: string) {
-    return MongoClient.connect(url).then(async (mclient) => {
-      const db = mclient.db('MagiBot');
-      const find = await db
-        .collection('stillMuted')
-        .findOne({ userid: userID, guildid: guildID });
-      mclient.close();
-      return find;
-    });
+    const find = await db
+      .collection('stillMuted')
+      .findOne({ userid: userID, guildid: guildID });
+    return find;
   },
   async getDBLSubs() {
-    return MongoClient.connect(url).then(async (mclient) => {
-      const db = mclient.db('MagiBot');
-      const users = await db
-        .collection('DBLreminder')
-        .find()
-        .toArray();
-      mclient.close();
-      return users;
-    });
+    const users = await db
+      .collection('DBLreminder')
+      .find()
+      .toArray();
+    return users;
   },
 };
