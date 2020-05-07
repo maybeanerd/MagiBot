@@ -162,8 +162,7 @@ async function onHour(bot: Client, isFirst: boolean) {
       .collection('saltrank')
       .find({ guild: guildID })
       .toArray();
-
-    asyncForEach(ranking, async (report) => {
+    await asyncForEach(ranking, async (report) => {
       const removeData = await db.collection('salt').deleteMany({
         date: { $lt: nd },
         guild: guildID,
@@ -184,28 +183,27 @@ async function onHour(bot: Client, isFirst: boolean) {
             );
         }
       }
-
-      // update percentage message
-      if (msg) {
-        const percentage = Math.round((++counter / guilds.length) * 100);
-        if (percentage - percCounter > 0) {
-          let uptime = '';
-          const u = process.hrtime(t0);
-          // mins
-          let x = Math.floor(u[0] / 60);
-          if (x > 0) {
-            uptime += `${x}m : `;
-          }
-          // secs
-          x = u[0] % 60;
-          if (x >= 0) {
-            uptime += `${x}s`;
-          }
-          percCounter = percentage;
-          msg.edit(`${percentage} % with ${uptime} passed`);
-        }
-      }
     });
+    // update percentage message
+    if (msg) {
+      const percentage = Math.round((++counter / guilds.length) * 100);
+      if (percentage - percCounter > 0) {
+        let uptime = '';
+        const u = process.hrtime(t0);
+        // mins
+        let x = Math.floor(u[0] / 60);
+        if (x > 0) {
+          uptime += `${x}m : `;
+        }
+        // secs
+        x = u[0] % 60;
+        if (x >= 0) {
+          uptime += `${x}s`;
+        }
+        percCounter = percentage;
+        msg.edit(`${percentage} % with ${uptime} passed`);
+      }
+    }
   });
 
   // delete every guild where lastConnected < nd from the DB TODO
