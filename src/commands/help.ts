@@ -26,77 +26,73 @@ export const help: magibotCommand = {
           }.help\` to get a full list of the commands available.`,
         );
       } else if (commands[command]) {
-        if (commands[command].ehelp) {
-          const info: Array<{
-            name: string;
-            value: string;
-            inline: boolean;
-          }> = [];
-          let ehelps = commands[command].ehelp(msg);
-          ehelps.forEach((ehelp) => {
-            if (msg.guild) {
-              info.push({
-                name: `${PREFIXES[msg.guild.id]}.${command} ${ehelp.name}`,
-                value: ehelp.value,
-                inline: false,
-              });
-            }
-          });
-          let embed: MessageEmbedOptions = {
-            color: COLOR,
-            description: `Commands available via the prefix \`${
-              PREFIXES[msg.guild.id]
-            }.${command}\`:`,
-            fields: info,
-            footer: {
-              iconURL: user().avatarURL() || '',
-              text:
-                '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
-            },
-          };
-          msg.channel.send('', { embed });
-          // admin variant?
-          if (msg.member && (await data.isAdmin(msg.guild.id, msg.member))) {
-            if (commands[acommand] && commands[acommand].ehelp) {
-              const inf: Array<{
-                name: string;
-                value: string;
-                inline: boolean;
-              }> = [];
-              ehelps = commands[acommand].ehelp(msg);
-              ehelps.forEach((ehelp) => {
-                if (msg.guild) {
-                  inf.push({
-                    name: `${PREFIXES[msg.guild.id]}:${acommand.slice(1)} ${
-                      ehelp.name
-                    }`,
-                    value: ehelp.value,
-                    inline: false,
-                  });
-                }
-              });
-              embed = {
-                color: COLOR,
-                description: `Admin commands available via the prefix \`${
-                  PREFIXES[msg.guild.id]
-                }:${command}\`:`,
-                fields: inf,
-                footer: {
-                  iconURL: user().avatarURL() || '',
-                  text:
-                    '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
-                },
-              };
-              msg.channel.send('', { embed });
-            }
+        const info: Array<{
+          name: string;
+          value: string;
+          inline: boolean;
+        }> = [];
+        let ehelps = commands[command].ehelp(msg);
+        ehelps.forEach((ehelp) => {
+          if (msg.guild) {
+            info.push({
+              name: `${PREFIXES[msg.guild.id]}.${command} ${ehelp.name}`,
+              value: ehelp.value,
+              inline: false,
+            });
           }
-        } else {
-          msg.reply('there is no extended help available for this command.');
+        });
+        let embed: MessageEmbedOptions = {
+          color: COLOR,
+          description: `Commands available via the prefix \`${
+            PREFIXES[msg.guild.id]
+          }.${command}\`:`,
+          fields: info,
+          footer: {
+            iconURL: user().avatarURL() || '',
+            text:
+              '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
+          },
+        };
+        msg.channel.send('', { embed });
+        // admin variant?
+        if (msg.member && (await data.isAdmin(msg.guild.id, msg.member))) {
+          if (commands[acommand] && commands[acommand].ehelp) {
+            const inf: Array<{
+              name: string;
+              value: string;
+              inline: boolean;
+            }> = [];
+            ehelps = commands[acommand].ehelp(msg);
+            ehelps.forEach((ehelp) => {
+              if (msg.guild) {
+                inf.push({
+                  name: `${PREFIXES[msg.guild.id]}:${acommand.slice(1)} ${
+                    ehelp.name
+                  }`,
+                  value: ehelp.value,
+                  inline: false,
+                });
+              }
+            });
+            embed = {
+              color: COLOR,
+              description: `Admin commands available via the prefix \`${
+                PREFIXES[msg.guild.id]
+              }:${command}\`:`,
+              fields: inf,
+              footer: {
+                iconURL: user().avatarURL() || '',
+                text:
+                  '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
+              },
+            };
+            msg.channel.send('', { embed });
+          }
         }
       } else if (msg.member && (await data.isAdmin(msg.guild.id, msg.member))) {
         // Only Admin command
         command = acommand;
-        if (commands[command].ehelp) {
+        if (commands[command]) {
           const inf: Array<{
             name: string;
             value: string;
@@ -128,8 +124,6 @@ export const help: magibotCommand = {
           };
 
           msg.channel.send('', { embed });
-        } else {
-          msg.reply('there is no extended help available for this command.');
         }
       }
     } else {
