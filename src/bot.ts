@@ -180,26 +180,25 @@ bot.on('voiceStateUpdate', async (o, n) => {
         if (perms && perms.has('CONNECT')) {
           const sound = await data.getSound(n.id, n.guild.id);
           if (sound) {
-            newVc.join().then((connection) => {
-              const dispatcher = connection.play(sound, {
-                seek: 0,
-                volume: 0.5,
-                bitrate: 'auto',
-              });
-              dispatcher.once('finish', () => {
-                connection.disconnect();
-                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-              });
-              dispatcher.once('error', () => {
-                connection.disconnect();
-                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-              });
-              // disconnect after 10 seconds if for some reason we don't get the events
-              setTimeout(() => {
-                connection.disconnect();
-                dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-              }, 10 * 1000);
+            const connection = await newVc.join();
+            const dispatcher = connection.play(sound, {
+              seek: 0,
+              volume: 0.5,
+              bitrate: 'auto',
             });
+            dispatcher.once('finish', () => {
+              connection.disconnect();
+              dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+            });
+            dispatcher.once('error', () => {
+              connection.disconnect();
+              dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+            });
+            // disconnect after 10 seconds if for some reason we don't get the events
+            setTimeout(() => {
+              connection.disconnect();
+              dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+            }, 10 * 1000);
           }
         }
       }
