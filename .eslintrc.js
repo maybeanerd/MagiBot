@@ -23,7 +23,7 @@ module.exports = {
     'no-plusplus': 0,
     'no-useless-constructor': 'off', // TS has some issues with this, so we use their check
     '@typescript-eslint/no-useless-constructor': 'error',
-    'import/extensions':0
+    'import/extensions': 0
   },
   parser: '@typescript-eslint/parser',
   settings: {
