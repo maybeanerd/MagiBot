@@ -265,64 +265,71 @@ async function endVote(
   },
   bot: Client,
 ) {
-  const chann = (await bot.channels.fetch(vote.channelID)) as TextChannel;
-  if (chann) {
-    const msg = await chann.messages.fetch(vote.messageID);
-    if (msg) {
-      const reacts = msg.reactions;
-      let finalReact: Array<{ reaction: number; count: number }> = [];
-      reactions.forEach((x, i) => {
-        if (i >= vote.options.length) {
-          return;
-        }
-        const react = reacts.resolve(x);
-        if (react && react.count) {
-          if (!finalReact[0] || finalReact[0].count <= react.count) {
-            if (!finalReact[0] || finalReact[0].count < react.count) {
-              finalReact = [{ reaction: i, count: react.count }];
-            } else {
-              finalReact.push({ reaction: i, count: react.count });
+  try {
+    const chann = (await bot.channels.fetch(vote.channelID)) as TextChannel;
+    if (chann) {
+      const msg = await chann.messages.fetch(vote.messageID);
+      if (msg) {
+        const reacts = msg.reactions;
+        let finalReact: Array<{ reaction: number; count: number }> = [];
+        reactions.forEach((x, i) => {
+          if (i >= vote.options.length) {
+            return;
+          }
+          const react = reacts.resolve(x);
+          if (react && react.count) {
+            if (!finalReact[0] || finalReact[0].count <= react.count) {
+              if (!finalReact[0] || finalReact[0].count < react.count) {
+                finalReact = [{ reaction: i, count: react.count }];
+              } else {
+                finalReact.push({ reaction: i, count: react.count });
+              }
             }
           }
-        }
-      });
-      if (finalReact[0]) {
-        if (finalReact.length > 1) {
-          let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
-          if (vote.authorID) {
-            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
-          }
-          finalReact.forEach((react, i) => {
-            str += `**${vote.options[react.reaction]}**`;
-            if (i < finalReact.length - 2) {
-              str += ', ';
-            } else if (i === finalReact.length - 2) {
-              str += ' and ';
+        });
+        if (finalReact[0]) {
+          if (finalReact.length > 1) {
+            let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
+            if (vote.authorID) {
+              str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
             }
-          });
-          str += ` with each having ** ${finalReact[0].count - 1} ** votes.`;
-          await msg.edit(str);
-        } else {
-          let str = `**${vote.topic}** ended.\n\nThe result is **${
-            vote.options[finalReact[0].reaction]
-          }** with **${finalReact[0].count - 1}** votes.`;
-          if (vote.authorID) {
-            str = `**${vote.topic}** by <@${
-              vote.authorID
-            }> ended.\n\nThe result is **${
+            finalReact.forEach((react, i) => {
+              str += `**${vote.options[react.reaction]}**`;
+              if (i < finalReact.length - 2) {
+                str += ', ';
+              } else if (i === finalReact.length - 2) {
+                str += ' and ';
+              }
+            });
+            str += ` with each having ** ${finalReact[0].count - 1} ** votes.`;
+            await msg.edit(str);
+          } else {
+            let str = `**${vote.topic}** ended.\n\nThe result is **${
               vote.options[finalReact[0].reaction]
             }** with **${finalReact[0].count - 1}** votes.`;
+            if (vote.authorID) {
+              str = `**${vote.topic}** by <@${
+                vote.authorID
+              }> ended.\n\nThe result is **${
+                vote.options[finalReact[0].reaction]
+              }** with **${finalReact[0].count - 1}** votes.`;
+            }
+            await msg.edit(str);
+          }
+        } else {
+          let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
+          if (vote.authorID) {
+            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nCould not compute a result.`;
           }
           await msg.edit(str);
         }
-      } else {
-        let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
-        if (vote.authorID) {
-          str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nCould not compute a result.`;
-        }
-        await msg.edit(str);
+        await msg.reactions.removeAll();
       }
-      await msg.reactions.removeAll();
+    }
+  } catch (error) {
+    console.error(error);
+    if (error !== 'DiscordAPIError: Unknown Message') {
+      throw new Error(error);
     }
   }
 }
@@ -356,10 +363,7 @@ async function voteCheck(bot: Client) {
 }
 
 async function isInDBL(userID: string) {
-  const ret = await db
-    .collection('DBLreminder')
-    .find({ _id: userID })
-    .count();
+  const ret = await db.collection('DBLreminder').find({ _id: userID }).count();
   return ret;
 }
 
@@ -948,10 +952,7 @@ export default {
     return find;
   },
   async getDBLSubs() {
-    const users = await db
-      .collection('DBLreminder')
-      .find()
-      .toArray();
+    const users = await db.collection('DBLreminder').find().toArray();
     return users;
   },
 };
