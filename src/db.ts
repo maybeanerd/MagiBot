@@ -149,7 +149,7 @@ async function onHour(bot: Client, isFirst: boolean) {
   nd.setDate(nd.getDate() - 7);
   const guilds = bot.guilds.cache.array();
   let counter = 0;
-  let percCounter = 0;
+  let latestTimePassed = 0;
   await asyncForEach(guilds, async (G) => {
     const guildID = G.id;
     await checkGuild(guildID);
@@ -186,10 +186,10 @@ async function onHour(bot: Client, isFirst: boolean) {
     });
     // update percentage message
     if (msg) {
-      const percentage = Math.round((++counter / guilds.length) * 100);
-      if (percentage - percCounter > 0) {
+      const u = process.hrtime(t0);
+      if (u[0] - latestTimePassed > 0) {
+        const percentage = Math.round((++counter / guilds.length) * 100);
         let uptime = '';
-        const u = process.hrtime(t0);
         // mins
         let x = Math.floor(u[0] / 60);
         if (x > 0) {
@@ -200,7 +200,8 @@ async function onHour(bot: Client, isFirst: boolean) {
         if (x >= 0) {
           uptime += `${x}s`;
         }
-        percCounter = percentage;
+        // eslint-disable-next-line prefer-destructuring
+        latestTimePassed = u[0];
         msg.edit(`${percentage} % with ${uptime} passed`);
       }
     }
@@ -327,7 +328,7 @@ async function endVote(
       }
     }
   } catch (error) {
-    console.log(JSON.stringify(error, null, 2));
+    console.error(JSON.stringify(error, null, 2));
     // eslint-disable-next-line eqeqeq
     if (error.httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
       throw new Error(error);
