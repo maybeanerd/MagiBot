@@ -327,8 +327,9 @@ async function endVote(
       }
     }
   } catch (error) {
-    console.error(error);
-    if (error !== 'DiscordAPIError: Unknown Message') {
+    console.log(JSON.stringify(error, null, 2));
+    // eslint-disable-next-line eqeqeq
+    if (error.httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
       throw new Error(error);
     }
   }
