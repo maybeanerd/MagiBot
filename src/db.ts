@@ -185,10 +185,11 @@ async function onHour(bot: Client, isFirst: boolean) {
       }
     });
     // update percentage message
+    counter++;
     if (msg) {
       const u = process.hrtime(t0);
       if (u[0] - latestTimePassed > 0) {
-        const percentage = Math.round((++counter / guilds.length) * 100);
+        const percentage = Math.round((counter / guilds.length) * 100);
         let uptime = '';
         // mins
         let x = Math.floor(u[0] / 60);
