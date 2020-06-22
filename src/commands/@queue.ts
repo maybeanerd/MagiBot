@@ -86,6 +86,13 @@ export const queue: magibotCommand = {
           const topic = collected.first()!.content;
           collected.first()!.delete();
           mess.delete();
+          if (topic.length > 1000) {
+            msg.channel.send(
+              'Oops, your topic seems to be larger than 1000 characters. Discord message sizes are limited, so please shorten your topic.',
+            );
+            delete used[msg.guild!.id];
+            return;
+          }
           msg.channel
             .send(
               'How long is this queue supposed to last? *(in minutes, maximum of 120)*',
