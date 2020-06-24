@@ -149,6 +149,7 @@ async function onHour(bot: Client, isFirst: boolean) {
   nd.setDate(nd.getDate() - 7);
   const guilds = bot.guilds.cache.array();
   let counter = 0;
+  let lastPostedCounter = 0;
   let latestTimePassed = 0;
   await asyncForEach(guilds, async (G) => {
     const guildID = G.id;
@@ -188,9 +189,13 @@ async function onHour(bot: Client, isFirst: boolean) {
     // update percentage message
     if (msg) {
       const u = process.hrtime(t0);
-      if (u[0] - latestTimePassed > 0 || localCounter === guilds.length) {
+      if (
+        (u[0] - latestTimePassed > 0 && localCounter > lastPostedCounter)
+        || localCounter === guilds.length
+      ) {
         // eslint-disable-next-line prefer-destructuring
-        latestTimePassed = u[0]; // add a minimum of 1s delay between message updates
+        latestTimePassed = u[0];
+        lastPostedCounter = localCounter;
         const percentage = Math.round((localCounter / guilds.length) * 100);
         let uptime = '';
         // mins
