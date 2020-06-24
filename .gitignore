@@ -290,3 +290,5 @@ startForLinAMI.txt
 startForWin.txt
 # src/token.ts
 dist/
+.env
+# src/botlistTokens.json
