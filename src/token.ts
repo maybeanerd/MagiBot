@@ -11,8 +11,8 @@ let blapis: {
 };
 
 try {
-  // eslint-disable-next-line global-require
-  blapis = require('./botlistTokens.json');
+  // eslint-disable-next-line import/no-dynamic-require, global-require
+  blapis = require(`${__dirname}/../botlistTokens.json`);
 } catch (e) {
   // eslint-disable-next-line no-console
   console.warn('no bot list tokens found, defaulting to none');
