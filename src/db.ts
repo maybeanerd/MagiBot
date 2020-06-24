@@ -188,7 +188,9 @@ async function onHour(bot: Client, isFirst: boolean) {
     counter++;
     if (msg) {
       const u = process.hrtime(t0);
-      if (u[0] - latestTimePassed > 0) {
+      if (u[0] - latestTimePassed > 0 || counter === guilds.length) {
+        // eslint-disable-next-line prefer-destructuring
+        latestTimePassed = u[0] + 250; // add a minimum of 250ms delay between message updates
         const percentage = Math.round((counter / guilds.length) * 100);
         let uptime = '';
         // mins
@@ -201,9 +203,7 @@ async function onHour(bot: Client, isFirst: boolean) {
         if (x >= 0) {
           uptime += `${x}s`;
         }
-        // eslint-disable-next-line prefer-destructuring
-        latestTimePassed = u[0];
-        msg.edit(`${percentage} % with ${uptime} passed`);
+        await msg.edit(`${percentage} % with ${uptime} passed`);
       }
     }
   });
