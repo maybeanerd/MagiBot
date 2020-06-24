@@ -7,7 +7,7 @@ const owner = process.env.OWNERID;
 const prefix = process.env.PREFIX;
 const dburl = process.env.DATABASE_URL;
 // eslint-disable-next-line global-require
-const blapis = require('./botlistTokens.json') as {
+const blapis = (require('./botlistTokens.json') || {}) as {
   [listname: string]: string;
 };
 
