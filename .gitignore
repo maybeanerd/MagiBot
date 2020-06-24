@@ -291,4 +291,4 @@ startForWin.txt
 # src/token.ts
 dist/
 .env
-# src/botlistTokens.json
+src/botlistTokens.json
