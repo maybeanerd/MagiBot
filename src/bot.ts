@@ -34,14 +34,18 @@ process.on('uncaughtException', async (err) => {
     console.error(e);
   }
 });
-process.on('unhandledRejection', async (err) => {
+process.on('unhandledRejection', async (
+  err: any, /* to fix weird type issues */
+) => {
   try {
     const chann = await bot.channels.fetch('414809410448261132');
 
     console.error(`Unhandled promise rejection:\n${err}`);
-    if (chann) {
+    if (chann && err) {
       (chann as Discord.TextChannel).send(
-        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\``,
+        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
+          err.stack ? err.stack.substring(0, 1200) : ''
+        }\`\`\``,
       );
     }
   } catch (e) {
