@@ -1,4 +1,4 @@
-﻿import Discord from 'discord.js';
+﻿import Discord, { DiscordAPIError } from 'discord.js';
 import { handle } from 'blapi';
 import config from './token';
 import data from './db';
@@ -38,15 +38,22 @@ process.on('unhandledRejection', async (
   err: any, /* to fix weird type issues */
 ) => {
   try {
-    const chann = await bot.channels.fetch('414809410448261132');
-
     console.error(`Unhandled promise rejection:\n${err}`);
+    const chann = await bot.channels.fetch('414809410448261132');
     if (chann && err) {
-      (chann as Discord.TextChannel).send(
-        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
-          err.stack ? err.stack.substring(0, 1200) : ''
-        }\`\`\``,
-      );
+      if (err instanceof DiscordAPIError) {
+        (chann as Discord.TextChannel).send(
+          `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
+            err.message
+          }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
+        );
+      } else {
+        (chann as Discord.TextChannel).send(
+          `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
+            err.stack ? err.stack.substring(0, 1200) : ''
+          }\`\`\``,
+        );
+      }
     }
   } catch (e) {
     console.error(e);
