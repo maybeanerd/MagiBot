@@ -28,6 +28,8 @@ import data from './db';
 import {
   PREFIXES, OWNERID, DELETE_COMMANDS, user,
 } from './shared_assets';
+// eslint-disable-next-line import/no-cycle
+import { catchErrorOnDiscord } from './sendToMyDiscord';
 
 export const commands: { [k: string]: magibotCommand } = {
   _dc,
@@ -51,21 +53,14 @@ export const commands: { [k: string]: magibotCommand } = {
   roll,
 };
 
-async function catchError(
-  error: Error,
-  msg: Discord.Message,
-  command: string,
-  bot: Discord.Client,
-) {
+async function catchError(error: Error, msg: Discord.Message, command: string) {
   console.error(
     `Caught:\n${error.stack}\nin command ${command} ${msg.content}`,
   );
-  const chann = await bot.channels.fetch('414809410448261132');
-  if (chann) {
-    (chann as Discord.TextChannel).send(
-      `**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
-    );
-  }
+  await catchErrorOnDiscord(
+    `**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
+  );
+
   msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
 If you can reproduce this, consider using \`${
   PREFIXES[msg.guild ? msg.guild.id : 0]
@@ -183,7 +178,6 @@ export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
                 err,
                 msg,
                 `${PREFIXES[msg.guild.id]}${pre}${commandVal}`,
-                bot,
               );
             }
             data.usageUp(msg.author.id, msg.guild.id);

@@ -11,6 +11,8 @@ import {
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
+// eslint-disable-next-line import/no-cycle
+import { catchErrorOnDiscord } from './sendToMyDiscord';
 
 export const bot = new Discord.Client();
 
@@ -19,44 +21,29 @@ if (config.blapis) {
   handle(bot, config.blapis, 30);
 }
 process.on('uncaughtException', async (err) => {
-  try {
-    const chann = await bot.channels.fetch('414809410448261132');
-
-    console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
-    if (chann) {
-      (chann as Discord.TextChannel).send(
-        `**Outer Uncaught Exception:**\n\`\`\`${
-          err.stack ? err.stack : err
-        }\`\`\``,
-      );
-    }
-  } catch (e) {
-    console.error(e);
-  }
+  console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
+  await catchErrorOnDiscord(
+    `**Uncaught Exception:**\n\`\`\`${err.stack ? err.stack : err}\`\`\``,
+  );
 });
 process.on('unhandledRejection', async (
   err: any, /* to fix weird type issues */
 ) => {
-  try {
-    console.error(`Unhandled promise rejection:\n${err}`);
-    const chann = await bot.channels.fetch('414809410448261132');
-    if (chann && err) {
-      if (err instanceof DiscordAPIError) {
-        (chann as Discord.TextChannel).send(
-          `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
-            err.message
-          }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
-        );
-      } else {
-        (chann as Discord.TextChannel).send(
-          `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
-            err.stack ? err.stack.substring(0, 1200) : ''
-          }\`\`\``,
-        );
-      }
+  console.error(`Unhandled promise rejection:\n${err}`);
+  if (err) {
+    if (err instanceof DiscordAPIError) {
+      await catchErrorOnDiscord(
+        `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
+          err.message
+        }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
+      );
+    } else {
+      await catchErrorOnDiscord(
+        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
+          err.stack ? err.stack.substring(0, 1200) : ''
+        }\`\`\``,
+      );
     }
-  } catch (e) {
-    console.error(e);
   }
 });
 
