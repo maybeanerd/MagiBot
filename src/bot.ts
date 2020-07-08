@@ -184,19 +184,21 @@ bot.on('voiceStateUpdate', async (o, n) => {
               volume: 0.5,
               bitrate: 'auto',
             });
+            // disconnect after 10 seconds if for some reason we don't get the events
+            const timeoutID = setTimeout(() => {
+              connection.disconnect();
+              dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+            }, 10 * 1000);
             dispatcher.once('finish', () => {
+              clearTimeout(timeoutID);
               connection.disconnect();
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             });
             dispatcher.once('error', () => {
+              clearTimeout(timeoutID);
               connection.disconnect();
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             });
-            // disconnect after 10 seconds if for some reason we don't get the events
-            setTimeout(() => {
-              connection.disconnect();
-              dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-            }, 10 * 1000);
           }
         }
       }
