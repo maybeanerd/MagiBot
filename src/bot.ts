@@ -194,10 +194,15 @@ bot.on('voiceStateUpdate', async (o, n) => {
               connection.disconnect();
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             });
-            dispatcher.once('error', () => {
-              clearTimeout(timeoutID);
-              connection.disconnect();
+            dispatcher.on('error', (err) => {
+              clearTimeout(timeoutID);      
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+              await catchErrorOnDiscord(
+                `**Dispatcher Error (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                ${err.stack || 'NO STACK'}
+                \`\`\``,
+              );
+              connection.disconnect();
             });
           }
         }
