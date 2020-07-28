@@ -201,8 +201,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
                 `**Dispatcher Error (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
-              );
-              connection.disconnect();
+              ).then(() => connection.disconnect());
             });
           }
         }
