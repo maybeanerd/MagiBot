@@ -197,7 +197,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             dispatcher.on('error', (err) => {
               clearTimeout(timeoutID);      
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
-              await catchErrorOnDiscord(
+              catchErrorOnDiscord(
                 `**Dispatcher Error (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
