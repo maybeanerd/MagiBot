@@ -186,12 +186,26 @@ bot.on('voiceStateUpdate', async (o, n) => {
             });
             // disconnect after 10 seconds if for some reason we don't get the events
             const timeoutID = setTimeout(() => {
-              connection.disconnect();
+              try {
+                connection.disconnect();
+              } catch(e) {
+                catchErrorOnDiscord(
+                `**Error in timeout (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                ${err.stack || 'NO STACK'}
+                \`\`\``);
+              }
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             }, 10 * 1000);
             dispatcher.once('finish', () => {
               clearTimeout(timeoutID);
-              connection.disconnect();
+              try {
+                connection.disconnect();
+              } catch(e) {
+                catchErrorOnDiscord(
+                `**Error in once finish (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                ${err.stack || 'NO STACK'}
+                \`\`\``);
+              }
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             });
             dispatcher.on('error', (err) => {
