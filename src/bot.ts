@@ -188,7 +188,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             const timeoutID = setTimeout(() => {
               try {
                 connection.disconnect();
-              } catch(e) {
+              } catch(err) {
                 catchErrorOnDiscord(
                 `**Error in timeout (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
@@ -200,7 +200,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
               clearTimeout(timeoutID);
               try {
                 connection.disconnect();
-              } catch(e) {
+              } catch(err) {
                 catchErrorOnDiscord(
                 `**Error in once finish (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
