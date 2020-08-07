@@ -23,7 +23,7 @@
     "mongodb": "^3.5.9",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
-    "systeminformation": "^4.26.9",
+    "systeminformation": "^4.26.10",
     "utf-8-validate": "^5.0.2",
     "zucc": "^0.1.2"
   },
