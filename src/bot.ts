@@ -1,4 +1,5 @@
 ﻿import Discord, { DiscordAPIError } from 'discord.js';
+import Statcord from 'statcord.js';
 import { handle } from 'blapi';
 import config from './token';
 import data from './db';
@@ -15,6 +16,15 @@ import { checkCommand } from './commandHandler';
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 
 export const bot = new Discord.Client();
+
+if (!process.env.STATCORD_TOKEN) {
+  throw new Error('Statcord token missing!');
+}
+
+export const statcord = new Statcord.Client({
+  client: bot,
+  key: process.env.STATCORD_TOKEN,
+});
 
 // post to the APIs every 30 minutes
 if (config.blapis) {
@@ -75,11 +85,13 @@ bot.on('ready', async () => {
     status: 'online',
   });
   data.getPrefixesE(bot);
+
+  statcord.autopost();
 });
 
 bot.on('message', async (msg) => {
   try {
-    await checkCommand(msg as Discord.Message, bot);
+    await checkCommand(msg as Discord.Message);
   } catch (err) {
     console.error(err);
   }
@@ -188,11 +200,14 @@ bot.on('voiceStateUpdate', async (o, n) => {
             const timeoutID = setTimeout(() => {
               try {
                 connection.disconnect();
-              } catch(err) {
+              } catch (err) {
                 catchErrorOnDiscord(
-                `**Error in timeout (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                  `**Error in timeout (${
+                    (err.toString && err.toString()) || 'NONE'
+                  }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
-                \`\`\``);
+                \`\`\``,
+                );
               }
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             }, 10 * 1000);
@@ -200,19 +215,24 @@ bot.on('voiceStateUpdate', async (o, n) => {
               clearTimeout(timeoutID);
               try {
                 connection.disconnect();
-              } catch(err) {
+              } catch (err) {
                 catchErrorOnDiscord(
-                `**Error in once finish (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                  `**Error in once finish (${
+                    (err.toString && err.toString()) || 'NONE'
+                  }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
-                \`\`\``);
+                \`\`\``,
+                );
               }
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
             });
             dispatcher.on('error', (err) => {
-              clearTimeout(timeoutID);      
+              clearTimeout(timeoutID);
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
               catchErrorOnDiscord(
-                `**Dispatcher Error (${(err.toString && err.toString()) || 'NONE'}):**\n\`\`\`
+                `**Dispatcher Error (${
+                  (err.toString && err.toString()) || 'NONE'
+                }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
               ).then(() => connection.disconnect());
