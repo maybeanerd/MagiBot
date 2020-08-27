@@ -23,7 +23,7 @@
     "mongodb": "^3.6.0",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
-    "statcord.js": "^3.0.5",
+    "statcord.js": "^3.0.3",
     "systeminformation": "^4.26.10",
     "utf-8-validate": "^5.0.2",
     "zucc": "^0.1.2"
