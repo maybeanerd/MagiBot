@@ -1,6 +1,7 @@
 {
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"],
+  "engines": { "node": "14.x" },
   "compilerOptions": {
     //"target": "esnext",
     "target": "ES2020",
