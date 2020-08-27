@@ -19,10 +19,11 @@
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.0",
-    "mongodb": "^3.6.0",
     "libsodium-wrappers": "^0.7.8",
+    "mongodb": "^3.6.0",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
+    "statcord.js": "^3.0.5",
     "systeminformation": "^4.26.10",
     "utf-8-validate": "^5.0.2",
     "zucc": "^0.1.2"

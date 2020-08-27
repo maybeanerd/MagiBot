@@ -1,4 +1,6 @@
 import Discord, { Message } from 'discord.js';
+// eslint-disable-next-line import/no-cycle
+import { statcord } from './bot';
 import { vote } from './commands/vote';
 import { sound } from './commands/sound';
 import { rfact } from './commands/rfact';
@@ -71,8 +73,7 @@ If you can reproduce this, consider using \`${
 
 const userCooldowns = new Set<string>();
 
-// TODO check why the bot also gives us Discord.PartialMessage, as thats not what we want
-export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
+export async function checkCommand(msg: Discord.Message) {
   if (!(msg.author && msg.guild && msg.guild.me)) {
     // check for valid message
     console.error('Invalid message received:', msg);
@@ -172,6 +173,7 @@ export async function checkCommand(msg: Discord.Message, bot: Discord.Client) {
               userCooldowns.delete(msg.author.id);
             }, 4000);
             try {
+              statcord.postCommand(command, msg.author.id);
               await commands[command].main(content, msg);
             } catch (err) {
               catchError(
