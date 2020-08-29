@@ -14,6 +14,11 @@ import {
 import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
+import {
+  sendJoinSoundsPlayed,
+  sendUsersWhoJoinedQueue,
+  playedJoinsound,
+} from './statTracking';
 
 export const bot = new Discord.Client();
 
@@ -25,6 +30,10 @@ export const statcord = new Statcord.Client({
   client: bot,
   key: process.env.STATCORD_TOKEN,
 });
+
+// register custom stats
+statcord.registerCustomFieldHandler(1, sendJoinSoundsPlayed);
+statcord.registerCustomFieldHandler(2, sendUsersWhoJoinedQueue);
 
 // post to the APIs every 30 minutes
 if (config.blapis) {
@@ -66,7 +75,7 @@ bot.on('ready', async () => {
   setUser(bot.user); // give user ID to other code
   const chann = await bot.channels.fetch('382233880469438465');
   if (!chann || chann.type !== 'text') {
-    console.error('Tebots Server Channel not found.');
+    console.error('Teabots Server Channel not found.');
   }
   if (justStartedUp) {
     (chann as Discord.TextChannel).send('Running startup...');
@@ -196,15 +205,15 @@ bot.on('voiceStateUpdate', async (o, n) => {
               volume: 0.5,
               bitrate: 'auto',
             });
+            playedJoinsound();
             // disconnect after 10 seconds if for some reason we don't get the events
             const timeoutID = setTimeout(() => {
               try {
                 connection.disconnect();
               } catch (err) {
                 catchErrorOnDiscord(
-                  `**Error in timeout (${
-                    (err.toString && err.toString()) || 'NONE'
-                  }):**\n\`\`\`
+                  `**Error in timeout (${(err.toString && err.toString())
+                    || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
                 );
@@ -217,9 +226,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
                 connection.disconnect();
               } catch (err) {
                 catchErrorOnDiscord(
-                  `**Error in once finish (${
-                    (err.toString && err.toString()) || 'NONE'
-                  }):**\n\`\`\`
+                  `**Error in once finish (${(err.toString && err.toString())
+                    || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
                 );
@@ -230,9 +238,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
               clearTimeout(timeoutID);
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
               catchErrorOnDiscord(
-                `**Dispatcher Error (${
-                  (err.toString && err.toString()) || 'NONE'
-                }):**\n\`\`\`
+                `**Dispatcher Error (${(err.toString && err.toString())
+                  || 'NONE'}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
               ).then(() => connection.disconnect());

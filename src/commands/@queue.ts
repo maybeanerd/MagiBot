@@ -4,6 +4,7 @@ import data from '../db';
 import { yesOrNo } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
+import { userJoinedQueue } from '../statTracking';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
@@ -251,6 +252,7 @@ export const queue: magibotCommand = {
                                           && userThatReacted !== activeUser
                                           && userThatReacted.id !== user().id
                                       ) {
+                                        userJoinedQueue();
                                         if (activeUser) {
                                           queuedUsers.push(userThatReacted);
                                           const reactn = mess4.reactions.cache.get(
