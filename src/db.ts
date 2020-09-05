@@ -364,8 +364,16 @@ async function voteCheck(bot: Client) {
     .find({ date: { $lte: nd } })
     .toArray();
   await asyncForEach(votes, async (vote) => {
-    await endVote(vote, bot);
-    await db.collection('votes').deleteOne(vote);
+    try {
+      await endVote(vote, bot);
+      await db.collection('votes').deleteOne(vote);
+    } catch (err) {
+      if (err.name === 'DiscordAPIError' && err.message === 'Missing Access') {
+        await db.collection('votes').deleteOne(vote);
+      } else {
+        throw err;
+      }
+    }
   });
   // endof vote stuff
 }
