@@ -15,7 +15,7 @@
     "bufferutil": "^4.0.1",
     "discord.js": "^12.3.0",
     "dotenv": "^8.2.0",
-    "ffmpeg-static": "^4.2.6",
+    "ffmpeg-static": "^4.2.7",
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.0",
