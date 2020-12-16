@@ -2,15 +2,15 @@ import axios from 'axios';
 import { commandCategories } from '../types/enums';
 import { COLOR, user } from '../shared_assets';
 
-
 const options = { weekday: 'long', month: 'long', day: 'numeric' };
 
 export const rfact: magibotCommand = {
   main: async (content, msg) => {
     const now = new Date();
-    let fact = await axios.get(`http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`);
-    fact = fact.data;
-
+    const incomingFact = await axios.get<string>(
+      `http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`,
+    );
+    const fact = incomingFact.data;
 
     if (!fact) {
       msg.channel.send('Something went wrong whilst contacting the API...');
@@ -19,11 +19,14 @@ export const rfact: magibotCommand = {
     const embed = {
       color: COLOR,
       // fields: info,
-      title: `Random fact about: \`${now.toLocaleDateString('en-US', options)}\``,
+      title: `Random fact about: \`${now.toLocaleDateString(
+        'en-US',
+        options,
+      )}\``,
       description: fact,
       footer: {
         /* eslint-disable camelcase */
-        icon_url: user().avatarURL,
+        iconURL: user().avatarURL() || '',
         /* eslint-enable camelcase */
         text: 'powered by numbersapi.com',
       },
