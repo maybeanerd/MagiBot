@@ -18,7 +18,7 @@
     "ffmpeg-static": "^4.2.7",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
-    "forever": "^3.0.2",
+    "forever": "^3.0.4",
     "libsodium-wrappers": "^0.7.8",
     "mongodb": "^3.6.2",
     "node-opus": "^0.3.3",
