@@ -10,7 +10,7 @@
   "dependencies": {
     "@types/ffprobe-static": "^2.0.0",
     "@types/mongodb": "^3.5.32",
-    "axios": "^0.20.0",
+    "axios": "^0.21.0",
     "blapi": "^2.0.1",
     "bufferutil": "^4.0.2",
     "discord.js": "^12.4.0",
