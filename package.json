@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@types/ffprobe-static": "^2.0.0",
-    "@types/mongodb": "^3.5.34",
-    "axios": "^0.21.0",
+    "@types/mongodb": "^3.6.0",
+    "axios": "^0.21.1",
     "blapi": "^2.0.1",
     "bufferutil": "^4.0.2",
     "discord.js": "^12.5.1",
@@ -24,7 +24,7 @@
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
     "statcord.js": "^3.1.4",
-    "systeminformation": "^4.31.1",
+    "systeminformation": "^4.32.0",
     "utf-8-validate": "^5.0.3",
     "zucc": "^0.1.2"
   },
