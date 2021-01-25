@@ -25,7 +25,7 @@
     "opusscript": "0.0.7",
     "statcord.js": "^3.1.4",
     "systeminformation": "^4.32.0",
-    "utf-8-validate": "^5.0.3",
+    "utf-8-validate": "^5.0.4",
     "zucc": "^0.1.2"
   },
   "optionalDependencies": {
