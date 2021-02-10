@@ -127,6 +127,9 @@ export const setup: magibotCommand = {
       }
       break;
     case 'admin':
+      if(mention === "@everyone") {
+        msg.channel.send("You cannot use the everyone role as admin");
+      }        
       // eslint-disable-next-line no-case-declarations
       const rid = await findRole(msg.guild!, mention);
       if (mention && rid) {
