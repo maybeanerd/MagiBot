@@ -102,8 +102,8 @@ export const setup: magibotCommand = {
         const voiceChannel = msg.member.voice.channel;
         if (voiceChannel) {
           const isJoinable = await data.isJoinable(
-            msg.guild!.id,
-            voiceChannel.id,
+              msg.guild!.id,
+              voiceChannel.id,
           );
           de = '';
           if (isJoinable) {
@@ -116,7 +116,11 @@ export const setup: magibotCommand = {
               `Cancelled ${de}activating joinsounds in **${voiceChannel.name}**.`,
             )
           ) {
-            await data.setJoinable(msg.guild!.id, voiceChannel.id, !isJoinable);
+            await data.setJoinable(
+                msg.guild!.id,
+                voiceChannel.id,
+                !isJoinable,
+            );
             msg.channel.send(
               `Successfully ${de}activated joinsounds in **${voiceChannel.name}**.`,
             );
@@ -127,9 +131,10 @@ export const setup: magibotCommand = {
       }
       break;
     case 'admin':
-      if(mention === "@everyone") {
-        msg.channel.send("You cannot use the everyone role as admin");
-      }        
+      if (mention === '@everyone') {
+        msg.channel.send('You cannot use the everyone role as admin');
+        break;
+      }
       // eslint-disable-next-line no-case-declarations
       const rid = await findRole(msg.guild!, mention);
       if (mention && rid) {
