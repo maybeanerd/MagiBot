@@ -24,7 +24,7 @@
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
     "statcord.js": "^3.1.4",
-    "systeminformation": "^4.33.0",
+    "systeminformation": "^4.34.7",
     "utf-8-validate": "^5.0.4",
     "zucc": "^0.1.2"
   },
