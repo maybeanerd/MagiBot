@@ -10,7 +10,11 @@ import { bot } from '../bot';
 export const stats: magibotCommand = {
   name: 'stats',
   main: async (content, msg) => {
-    const info:Array<{name:string, value:string|number, inline:boolean}> = [];
+    const info: Array<{
+      name: string;
+      value: string | number;
+      inline: boolean;
+    }> = [];
     const guilds = bot.guilds.cache.array();
 
     info.push({
@@ -23,7 +27,6 @@ export const stats: magibotCommand = {
       value: bot.users.cache.size,
       inline: false,
     });
-
 
     // uptime calc
     const u = bot.uptime || 0;
@@ -59,14 +62,20 @@ export const stats: magibotCommand = {
       const memUsedByProccess = process.memoryUsage().rss;
       info.push({
         name: 'Memory usage:',
-        value: `Memory used by this: ${Math.round(memUsedByProccess / 1048576)} MB (${Math.round((memUsedByProccess / memInfo.used) * 100)}% of used memory)
-        Total available memory: ${Math.round(memInfo.total / 1048576)} MB
-        Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round((memInfo.used / memInfo.total) * 100)}%)`,
+        value: `Memory used by this: ${Math.round(
+          memUsedByProccess / 1048576,
+        )} MB (${Math.round(
+          (memUsedByProccess / memInfo.used) * 100,
+        )}% of used memory)
+Total available memory: ${Math.round(memInfo.total / 1048576)} MB
+Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
+  (memInfo.used / memInfo.total) * 100,
+)}%)`,
         inline: false,
       });
     }
 
-    const embed :MessageEmbedOptions = {
+    const embed: MessageEmbedOptions = {
       color: COLOR,
       description: 'Here are some stats:',
       fields: info,
