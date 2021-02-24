@@ -20,7 +20,7 @@
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.4",
     "libsodium-wrappers": "^0.7.8",
-    "mongodb": "^3.6.3",
+    "mongodb": "^3.6.4",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
     "statcord.js": "^3.1.4",
