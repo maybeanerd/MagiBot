@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@types/ffprobe-static": "^2.0.0",
-    "@types/mongodb": "^3.6.3",
+    "@types/mongodb": "^3.6.5",
     "axios": "^0.21.1",
     "blapi": "^2.0.1",
     "bufferutil": "^4.0.3",
