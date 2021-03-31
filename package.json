@@ -23,7 +23,7 @@
     "libsodium-wrappers": "^0.7.9",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
-    "statcord.js": "^3.1.6",
+    "statcord.js": "^3.1.7",
     "systeminformation": "^5.3.5",
     "utf-8-validate": "^5.0.4",
     "zucc": "^0.1.2"
