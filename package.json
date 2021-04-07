@@ -22,7 +22,7 @@
     "mongodb": "^3.6.5",
     "libsodium-wrappers": "^0.7.9",
     "node-opus": "^0.3.3",
-    "opusscript": "0.0.7",
+    "opusscript": "0.0.8",
     "statcord.js": "^3.1.7",
     "systeminformation": "^5.6.4",
     "utf-8-validate": "^5.0.4",
