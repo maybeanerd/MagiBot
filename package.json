@@ -19,7 +19,7 @@
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.4",
-    "mongodb": "^3.6.4",
+    "mongodb": "^3.6.5",
     "libsodium-wrappers": "^0.7.9",
     "node-opus": "^0.3.3",
     "opusscript": "0.0.7",
