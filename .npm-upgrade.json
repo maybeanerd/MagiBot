@@ -1,8 +1,8 @@
 {
   "ignore": {
     "@types/node": {
-      "versions": "14.x",
-      "reason": "We are running node v 12"
+      "versions": "15.x",
+      "reason": "We use NodeV14 at most"
     }
   }
 }

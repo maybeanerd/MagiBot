@@ -5,6 +5,7 @@ import { yesOrNo } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { userJoinedQueue } from '../statTracking';
+import { magibotCommand } from '../types/magibot';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 

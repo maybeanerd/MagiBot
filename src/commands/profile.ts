@@ -3,6 +3,7 @@ import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
 import data from '../db';
 import { findMember } from '../bamands';
+import { magibotCommand } from '../types/magibot';
 
 export const profile: magibotCommand = {
   name: 'profile',
