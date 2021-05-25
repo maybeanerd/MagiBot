@@ -1,6 +1,7 @@
 ﻿import data from '../db';
 import { asyncForEach } from '../bamands';
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 const reactions = [
   '🇦',

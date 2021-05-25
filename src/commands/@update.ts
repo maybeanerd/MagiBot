@@ -1,6 +1,7 @@
 ﻿import { commandCategories } from '../types/enums';
 import { bot } from '../bot';
 import data from '../db';
+import { magibotCommand } from '../types/magibot';
 
 export const update: magibotCommand = {
   ehelp: () => [],

@@ -2,6 +2,7 @@ import { PREFIXES } from '../shared_assets';
 import data from '../db';
 import { commandCategories } from '../types/enums';
 import { findMember } from '../bamands';
+import { magibotCommand } from '../types/magibot';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];

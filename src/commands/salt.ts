@@ -3,6 +3,7 @@ import data from '../db';
 import * as cmds from '../bamands';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
+import { magibotCommand } from '../types/magibot';
 
 function printHelp(msg: Message) {
   const info: Array<{ name: string; value: string }> = [];

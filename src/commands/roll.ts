@@ -1,5 +1,6 @@
 ﻿import { COLOR, PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 /**  definition of calculation of dice, use parse(input)
  returns array of throws with last index being sum,

@@ -4,6 +4,7 @@ import { commandCategories } from '../types/enums';
 // we allow this cycle once, as the help command also needs to list itself
 import { commands } from '../commandHandler'; // eslint-disable-line import/no-cycle
 import data from '../db';
+import { magibotCommand } from '../types/magibot';
 
 export const help: magibotCommand = {
   name: 'help',
@@ -56,7 +57,7 @@ export const help: magibotCommand = {
         msg.channel.send('', { embed });
         // admin variant?
         if (msg.member && (await data.isAdmin(msg.guild.id, msg.member))) {
-          if (commands[acommand] && commands[acommand].ehelp) {
+          if (commands[acommand]) {
             const inf: Array<{
               name: string;
               value: string;

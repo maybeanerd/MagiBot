@@ -4,6 +4,7 @@ import { COLOR, PREFIXES } from '../shared_assets';
 import data from '../db';
 import { findMember, yesOrNo, findRole } from '../bamands';
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];
