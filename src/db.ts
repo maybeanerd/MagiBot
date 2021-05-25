@@ -78,7 +78,7 @@ async function saltDowntimeDone(userid1: string, userid2: string) {
   // get newest entry in salt
   const d2 = await db
     .collection('salt')
-    .find<{ date: Date }>({ salter: userid1, reporter: userid2 })
+    .find(/* <{ date: Date }> */ { salter: userid1, reporter: userid2 })
     .sort({ date: -1 })
     .limit(1)
     .toArray();
