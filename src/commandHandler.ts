@@ -32,6 +32,7 @@ import {
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
+import { magibotCommand } from './types/magibot';
 
 export const commands: { [k: string]: magibotCommand } = {
   _dc,

@@ -3,7 +3,7 @@ import ffprobeStatic from 'ffprobe-static';
 import { PREFIXES } from '../shared_assets';
 import data from '../db';
 import { commandCategories } from '../types/enums';
-
+import { magibotCommand } from '../types/magibot';
 
 function printHelp() {
   const info:Array<{name:string, value:string}> = [];

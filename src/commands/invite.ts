@@ -1,5 +1,6 @@
 import { TextChannel } from 'discord.js';
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 export const inv: magibotCommand = {
   name: 'invite',

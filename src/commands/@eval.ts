@@ -1,4 +1,5 @@
 ﻿import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 export const evall: magibotCommand = {
   name: 'eval',

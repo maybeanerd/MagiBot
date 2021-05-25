@@ -4,6 +4,7 @@ import {
 } from '../shared_assets';
 
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 export const inf: magibotCommand = {
   dev: false,

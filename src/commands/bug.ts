@@ -2,6 +2,7 @@
 import { bot } from '../bot';
 import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
+import { magibotCommand } from '../types/magibot';
 
 export const bug: magibotCommand = {
   name: 'bug',

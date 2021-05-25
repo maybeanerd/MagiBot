@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { commandCategories } from '../types/enums';
 import { COLOR, user } from '../shared_assets';
+import { magibotCommand } from '../types/magibot';
 
-const options = { weekday: 'long', month: 'long', day: 'numeric' };
+// we needed to manually type this because the inferred type collided with date type later on
+const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+};
 
 export const rfact: magibotCommand = {
   main: async (content, msg) => {
