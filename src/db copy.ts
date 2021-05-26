@@ -1,7 +1,7 @@
-﻿import {
+﻿import { MongoClient, Db } from 'mongodb';
+import {
   Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
-import mongoose, { Model } from 'mongoose';
 import { OWNERID, PREFIXES, resetPrefixes } from './shared_assets';
 import { asyncForEach } from './bamands';
 import config from './token';
@@ -10,172 +10,16 @@ if (!config.dburl) {
   throw new Error('Missing DB connection URL');
 }
 const url = config.dburl;
-mongoose.connect(`${url}/MagiBot`, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  poolSize: 20,
-  ssl: true,
-});
-const mongooseConnction = mongoose.connection;
 
-// define types and Models of DB. later on we will move them out of here and just import them
-// settings per guild
-type Settings = {
-  _id: string;
-  commandChannels: Array<string>;
-  adminRoles: Array<string>;
-  joinChannels: Array<string>;
-  blacklistedUsers: Array<string>;
-  blacklistedEveryone: Array<string>;
-  saltKing: boolean;
-  saltRole: boolean;
-  notChannel: boolean;
-  prefix: string;
-  lastConnected: Date;
-};
-const settingsSchema = new mongoose.Schema<Settings, Model<Settings>>({
-  _id: {
-    // _id is auto indexed and unique
-    type: String,
-    required: true,
-  },
-  commandChannels: {
-    type: [String],
-    required: true,
-  },
-  adminRoles: {
-    type: [String],
-    required: true,
-  },
-  joinChannels: {
-    type: [String],
-    required: true,
-  },
-  blacklistedUsers: {
-    type: [String],
-    required: true,
-  },
-  blacklistedEveryone: {
-    type: [String],
-    required: true,
-  },
-  saltKing: {
-    type: Boolean,
-    required: true,
-  },
-  saltRole: {
-    type: Boolean,
-    required: true,
-  },
-  notChannel: {
-    type: Boolean,
-    required: true,
-  },
-  prefix: {
-    type: String,
-    required: true,
-  },
-  lastConnected: {
-    type: Date,
-    required: true,
-  },
+const mclient = MongoClient.connect(url, { poolSize: 20, ssl: true });
+let db: Db;
+mclient.then((m) => {
+  db = m.db('MagiBot');
 });
-export const SettingsModel = mongoose.model('settings', settingsSchema);
 
-// saltrank per user
-type Saltrank = { salter: string; salt: number; guild: string };
-const saltrankSchema = new mongoose.Schema<Saltrank, Model<Saltrank>>({
-  salter: {
-    type: String,
-    required: true,
-  },
-  salt: {
-    type: Number,
-    required: true,
-  },
-  guild: {
-    type: String,
-    required: true,
-  },
-});
-saltrankSchema.index({ salter: 1, guild: -1 }, { unique: true });
-export const SaltrankModel = mongoose.model('saltrank', saltrankSchema);
-
-// salt reports per report
-type Salt = {
-  salter: string;
-  reporter: string;
-  date: Date;
-  guild: string;
-};
-const saltSchema = new mongoose.Schema<Salt, Model<Salt>>({
-  salter: {
-    type: String,
-    required: true,
-  },
-  reporter: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  guild: {
-    type: String,
-    required: true,
-    index: true,
-  },
-});
-saltSchema.index({ salter: 1, reporter: -1 });
-export const SaltModel = mongoose.model('salt', saltSchema);
-
-// userdata per user per guild
-type User = {
-  userID: string;
-  guildID: string;
-  warnings: number;
-  kicks: number;
-  bans: number;
-  botusage: number;
-  sound?: string;
-};
-const userSchema = new mongoose.Schema<User, Model<User>>({
-  userID: {
-    type: String,
-    required: true,
-  },
-  guildID: {
-    type: String,
-    required: true,
-  },
-  warnings: {
-    type: Number,
-    required: true,
-  },
-  kicks: {
-    type: Number,
-    required: true,
-  },
-  bans: {
-    type: Number,
-    required: true,
-  },
-  botusage: {
-    type: Number,
-    required: true,
-  },
-  sound: {
-    type: String,
-    required: false,
-  },
-});
-userSchema.index({ userID: 1, guildID: -1 }, { unique: true });
-export const UserModel = mongoose.model('user', userSchema);
-
-// Define Methods, these are reworked versions of the old ones and will stay:
+// Define Methods:
 async function getuser(userid: string, guildID: string) {
-  const result = await UserModel.findOneAndUpdate(
+  const result = await db.collection('users').findOneAndUpdate(
     { userID: userid, guildID },
     {
       $setOnInsert: {
@@ -183,50 +27,61 @@ async function getuser(userid: string, guildID: string) {
         kicks: 0,
         bans: 0,
         botusage: 0,
-        sound: undefined,
+        sound: false,
       },
     },
     { returnOriginal: false, upsert: true },
   );
-  return result;
+  return result.value;
 }
 // eslint-disable-next-line require-await
 async function saltGuild(salter, guildID: string, add = 1, reset = false) {
-  const user = await SaltrankModel.findOne({ salter, guild: guildID });
+  const user = await db
+    .collection('saltrank')
+    .findOne({ salter, guild: guildID });
   if (!user) {
-    const myobj = new SaltrankModel({ salter, salt: 1, guild: guildID });
-    await myobj.save();
+    const myobj = { salter, salt: 1, guild: guildID };
+    await db.collection('saltrank').insertOne(myobj);
   } else {
     const slt = user.salt + add;
     if (slt <= 0 || reset) {
-      await SaltrankModel.deleteOne({ salter, guild: guildID });
+      await db.collection('saltrank').deleteOne({ salter, guild: guildID });
     } else {
       const update = { $set: { salt: slt } };
-      await SaltrankModel.updateOne({ salter, guild: guildID }, update);
+      await db
+        .collection('saltrank')
+        .updateOne({ salter, guild: guildID }, update);
     }
   }
 }
 // eslint-disable-next-line require-await
 async function addSalt(userid: string, reporter: string, guildID: string) {
   const date = new Date();
-  const myobj = new SaltModel({
+  const myobj = {
     salter: userid,
     reporter,
     date,
     guild: guildID,
-  });
-  await myobj.save();
-  await saltGuild(userid, guildID, 1);
-  return 0;
+  };
+  return db
+    .collection('salt')
+    .insertOne(myobj)
+    .then(async () => {
+      await saltGuild(userid, guildID, 1);
+      return 0;
+    });
 }
 async function updateUser(userid: string, update, guildID: string) {
-  await UserModel.updateOne({ userID: userid, guildID }, update);
+  await db.collection('users').updateOne({ userID: userid, guildID }, update);
 }
 async function saltDowntimeDone(userid1: string, userid2: string) {
   // get newest entry in salt
-  const d2 = await SaltModel.find({ salter: userid1, reporter: userid2 })
+  const d2 = await db
+    .collection('salt')
+    .find(/* <{ date: Date }> */ { salter: userid1, reporter: userid2 })
     .sort({ date: -1 })
-    .limit(1);
+    .limit(1)
+    .toArray();
   if (d2[0]) {
     const d1 = new Date();
     const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
@@ -235,7 +90,7 @@ async function saltDowntimeDone(userid1: string, userid2: string) {
   return 2;
 }
 async function firstSettings(guildID: string) {
-  const settings = new SettingsModel({
+  await db.collection('settings').insertOne({
     _id: guildID,
     commandChannels: [],
     adminRoles: [],
@@ -248,11 +103,11 @@ async function firstSettings(guildID: string) {
     prefix: config.prefix,
     lastConnected: new Date(),
   });
-  await settings.save();
-  return settings;
+  const ret = await db.collection('settings').findOne({ _id: guildID });
+  return ret;
 }
 async function getSettings(guildID: string) {
-  let result = await SettingsModel.findById(guildID);
+  let result = await db.collection('settings').findOne({ _id: guildID });
   if (!result) {
     result = await firstSettings(guildID);
   }
@@ -301,14 +156,16 @@ async function onHour(bot: Client, isFirst: boolean) {
     const localCounter = ++counter;
     await checkGuild(guildID);
     // update the guild settings entry so that it does NOT get deleted
-    await SettingsModel.updateOne(
-      { _id: guildID },
-      { $set: { lastConnected: d } },
-    );
+    await db
+      .collection('settings')
+      .updateOne({ _id: guildID }, { $set: { lastConnected: d } });
 
-    const ranking = await SaltrankModel.find({ guild: guildID });
+    const ranking = await db
+      .collection('saltrank')
+      .find({ guild: guildID })
+      .toArray();
     await asyncForEach(ranking, async (report) => {
-      const removeData = await SaltModel.deleteMany({
+      const removeData = await db.collection('salt').deleteMany({
         date: { $lt: nd },
         guild: guildID,
         salter: report.salter,
@@ -316,15 +173,16 @@ async function onHour(bot: Client, isFirst: boolean) {
       if (removeData.deletedCount && removeData.deletedCount > 0) {
         const slt = report.salt - removeData.deletedCount;
         if (slt <= 0) {
-          await SaltrankModel.deleteOne({
-            salter: report.salter,
-            guild: guildID,
-          });
+          await db
+            .collection('saltrank')
+            .deleteOne({ salter: report.salter, guild: guildID });
         } else {
-          await SaltrankModel.updateOne(
-            { salter: report.salter, guild: guildID },
-            { $set: { salt: slt } },
-          );
+          await db
+            .collection('saltrank')
+            .updateOne(
+              { salter: report.salter, guild: guildID },
+              { $set: { salt: slt } },
+            );
         }
       }
     });
@@ -358,12 +216,15 @@ async function onHour(bot: Client, isFirst: boolean) {
   // delete every guild where lastConnected < nd from the DB TODO
   // find all guilds that have not connected for a week
   // or dont have the lastConnected attribute at all
-  const guilds2 = await SettingsModel.find({
-    $or: [
-      { lastConnected: { $lt: nd } },
-      { lastConnected: { $exists: false } },
-    ],
-  });
+  const guilds2 = await db
+    .collection('settings')
+    .find({
+      $or: [
+        { lastConnected: { $lt: nd } },
+        { lastConnected: { $exists: false } },
+      ],
+    })
+    .toArray();
 
   await asyncForEach(guilds2, async (guild) => {
     // ignore salt and saltrank, as they are removed after 7 days anyways
@@ -371,9 +232,9 @@ async function onHour(bot: Client, isFirst: boolean) {
     const guildID = guild._id;
     // remove all data saved for those guilds
     await db.collection('stillmuted').deleteMany({ guildid: guildID });
-    await UserModel.deleteMany({ guildID });
+    await db.collection('users').deleteMany({ guildID });
     await db.collection('votes').deleteMany({ guildid: guildID });
-    await SettingsModel.deleteOne({ _id: guildID });
+    await db.collection('settings').deleteOne({ _id: guildID });
   });
 }
 
@@ -559,7 +420,9 @@ async function getSaltRole(guildID: string) {
 }
 async function setSettings(guildID: string, settings) {
   if (await getSettings(guildID)) {
-    await SettingsModel.updateOne({ _id: guildID }, { $set: settings });
+    await db
+      .collection('settings')
+      .updateOne({ _id: guildID }, { $set: settings });
   }
   return true;
 }
@@ -572,9 +435,12 @@ async function getNotChannel(guildID: string) {
 }
 // top 5 salty people
 async function topSalt(guildID: string) {
-  const result = await SaltrankModel.find({ guild: guildID })
+  const result = await db
+    .collection('saltrank')
+    .find({ guild: guildID })
     .sort({ salt: -1 })
-    .limit(5);
+    .limit(5)
+    .toArray();
   if (!result) {
     return [];
   }
@@ -709,10 +575,9 @@ async function sendUpdate(update: string, bot: Client) {
 }
 
 async function getSalt(userid: string, guildID: string) {
-  const result = await SaltrankModel.findOne({
-    salter: userid,
-    guild: guildID,
-  });
+  const result = await db
+    .collection('saltrank')
+    .findOne({ salter: userid, guild: guildID });
   if (!result) {
     return 0;
   }
@@ -871,28 +736,43 @@ async function setBlacklistedEveryone(
 
 async function joinsound(
   userid: string,
-  surl: string | undefined,
+  surl: string | false,
   guildID: string,
 ) {
   if (await checks(userid, guildID)) {
     const update = { $set: { sound: surl } };
-    await UserModel.updateOne({ userID: userid, guildID }, update);
+    await db.collection('users').updateOne({ userID: userid, guildID }, update);
   }
   return true;
 }
 
 export default {
   async startup(bot: Client) {
-    /* // TODO collections to migrate
-
+    // create Collection
+    if (!db.collection('settings')) {
+      await db.createCollection('settings').then(() => {});
+    }
+    // Dataset of salt
+    if (!db.collection('salt')) {
+      db.createCollection('salt', (err) => {
+        if (err) throw err;
+      });
+    }
+    if (!db.collection('saltrank')) {
+      db.createCollection('saltrank', (err) => {
+        if (err) throw err;
+      });
+    }
+    if (!db.collection('users')) {
+      db.createCollection('users', (err) => {
+        if (err) throw err;
+      });
+    }
     if (!db.collection('votes')) {
       db.createCollection('votes', (err) => {
         if (err) throw err;
       });
     }
-
-    collection stillmuted?!
-    */
     // repeating functions:
     onHour(bot, true);
     voteCheck(bot);
@@ -923,12 +803,15 @@ export default {
   },
   async remOldestSalt(userid: string, G: Guild) {
     const guildID = G.id;
-    const id = await SaltModel.find({ salter: userid, guild: guildID })
+    const id = await db
+      .collection('salt')
+      .find({ salter: userid, guild: guildID })
       .sort({ date: 1 })
-      .limit(1);
+      .limit(1)
+      .toArray();
     if (id[0]) {
       // eslint-disable-next-line no-underscore-dangle
-      await SaltModel.deleteOne({ _id: id[0]._id });
+      await db.collection('salt').deleteOne({ _id: id[0]._id });
       saltGuild(userid, guildID, -1);
       updateSaltKing(G);
       return true;
@@ -998,7 +881,7 @@ export default {
     const user = await getuser(userid, guildID);
     return user.sound;
   },
-  addSound(userid: string, surl: string | undefined, guildID: string) {
+  addSound(userid: string, surl: string | false, guildID: string) {
     return joinsound(userid, surl, guildID);
   },
   async isBlacklistedUser(userID: string, guildID: string) {
@@ -1031,14 +914,14 @@ export default {
   },
   async clrSalt(userid: string, G: Guild) {
     const guildID = G.id;
-    await SaltModel.deleteMany({ guild: guildID, salter: userid });
+    await db.collection('salt').deleteMany({ guild: guildID, salter: userid });
     await saltGuild(userid, guildID, 1, true);
     await updateSaltKing(G);
   },
   async resetSalt(G: Guild) {
     const guildID = G.id;
-    await SaltrankModel.deleteMany({ guild: guildID });
-    await SaltModel.deleteMany({ guild: guildID });
+    await db.collection('saltrank').deleteMany({ guild: guildID });
+    await db.collection('salt').deleteMany({ guild: guildID });
     await updateSaltKing(G);
   },
   async setNotification(guildID: string, cid: string | false) {

@@ -29,7 +29,7 @@ export const sound: magibotCommand = {
       const uid = await findMember(msg.guild!, mention);
       /* eslint-enable no-case-declarations */
       if (mention && uid) {
-        if (await data.addSound(uid, false, msg.guild!.id)) {
+        if (await data.addSound(uid, undefined, msg.guild!.id)) {
           msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
         } else {
           msg.reply('Aaaaaand you failed.');

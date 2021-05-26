@@ -35,7 +35,7 @@ export const sound: magibotCommand = {
     const args = content.split(/ +/);
     const command = args[0].toLowerCase();
     if (command === 'rem') {
-      if (await data.addSound(msg.author.id, false, msg.guild.id)) {
+      if (await data.addSound(msg.author.id, undefined, msg.guild.id)) {
         msg.reply('you successfully removed your joinsound!');
       } else {
         msg.reply('Aaaaaand you failed.');
