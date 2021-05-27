@@ -16,7 +16,8 @@ mongoose.connect(`${url}/MagiBot`, {
   poolSize: 20,
   ssl: true,
 });
-const mongooseConnction = mongoose.connection;
+
+// const mongooseConnction = mongoose.connection;
 
 // define types and Models of DB. later on we will move them out of here and just import them
 // settings per guild
@@ -27,9 +28,9 @@ type Settings = {
   joinChannels: Array<string>;
   blacklistedUsers: Array<string>;
   blacklistedEveryone: Array<string>;
-  saltKing: boolean;
-  saltRole: boolean;
-  notChannel: boolean;
+  saltKing?: string;
+  saltRole?: string;
+  notChannel?: string;
   prefix: string;
   lastConnected: Date;
 };
@@ -60,16 +61,16 @@ const settingsSchema = new mongoose.Schema<Settings, Model<Settings>>({
     required: true,
   },
   saltKing: {
-    type: Boolean,
-    required: true,
+    type: String,
+    required: false,
   },
   saltRole: {
-    type: Boolean,
-    required: true,
+    type: String,
+    required: false,
   },
   notChannel: {
-    type: Boolean,
-    required: true,
+    type: String,
+    required: false,
   },
   prefix: {
     type: String,
@@ -172,6 +173,65 @@ const userSchema = new mongoose.Schema<User, Model<User>>({
 });
 userSchema.index({ userID: 1, guildID: -1 }, { unique: true });
 export const UserModel = mongoose.model('user', userSchema);
+
+// entry per vote
+type Vote = {
+  messageID: string;
+  channelID: string;
+  options: Array<string>;
+  topic: string;
+  date: Date;
+  guildid: string;
+  authorID: string;
+};
+const voteSchema = new mongoose.Schema<Vote, Model<Vote>>({
+  messageID: {
+    type: String,
+    required: true,
+  },
+  channelID: {
+    type: String,
+    required: true,
+  },
+  options: {
+    type: [String],
+    required: true,
+  },
+  topic: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  guildid: {
+    type: String,
+    required: true,
+  },
+  authorID: {
+    type: String,
+    required: true,
+  },
+});
+voteSchema.index({ messageID: 1, channelID: 1 });
+export const VoteModel = mongoose.model('vote', voteSchema);
+
+// one entry per user per guild
+// deprecated, we want to remove this system?
+type StillMuted = { userid: string; guildid: string };
+const stillMutedSchema = new mongoose.Schema<StillMuted, Model<StillMuted>>({
+  userid: {
+    type: String,
+    required: true,
+  },
+  guildid: {
+    type: String,
+    required: true,
+  },
+});
+stillMutedSchema.index({ userid: 1, guildid: 1 });
+export const StillMutedModel = mongoose.model('stillmuted', stillMutedSchema);
 
 // Define Methods, these are reworked versions of the old ones and will stay:
 async function getuser(userid: string, guildID: string) {
@@ -370,9 +430,9 @@ async function onHour(bot: Client, isFirst: boolean) {
     // eslint-disable-next-line no-underscore-dangle
     const guildID = guild._id;
     // remove all data saved for those guilds
-    await db.collection('stillmuted').deleteMany({ guildid: guildID });
+    await StillMutedModel.deleteMany({ guildid: guildID });
     await UserModel.deleteMany({ guildID });
-    await db.collection('votes').deleteMany({ guildid: guildID });
+    await VoteModel.deleteMany({ guildid: guildID });
     await SettingsModel.deleteOne({ _id: guildID });
   });
 }
@@ -400,17 +460,7 @@ const reactions = [
   '🇹',
 ];
 // this should take care of everything that needs to be done when a vote ends
-async function endVote(
-  vote: {
-    messageID: Message['id'];
-    channelID: Message['channel']['id'];
-    authorID: string;
-    options: Array<string>;
-    topic: string;
-    date: Date;
-  },
-  bot: Client,
-) {
+async function endVote(vote: Vote, bot: Client) {
   try {
     const chann = (await bot.channels.fetch(vote.channelID)) as TextChannel;
     if (chann) {
@@ -498,17 +548,14 @@ async function voteCheck(bot: Client) {
   }
   // do vote stuff
   const nd = new Date();
-  const votes = await db
-    .collection('votes')
-    .find({ date: { $lte: nd } })
-    .toArray();
+  const votes = await VoteModel.find({ date: { $lte: nd } });
   await asyncForEach(votes, async (vote) => {
     try {
       await endVote(vote, bot);
-      await db.collection('votes').deleteOne(vote);
+      await vote.delete();
     } catch (err) {
       if (err.name === 'DiscordAPIError' && err.message === 'Missing Access') {
-        await db.collection('votes').deleteOne(vote);
+        await vote.delete();
       } else {
         throw err;
       }
@@ -517,36 +564,20 @@ async function voteCheck(bot: Client) {
   // endof vote stuff
 }
 
-async function isInDBL(userID: string) {
-  const ret = await db.collection('DBLreminder').find({ _id: userID }).count();
-  return ret;
-}
-
-async function toggleDBL(userID: string, add: boolean) {
-  if (add && !(await isInDBL(userID))) {
-    await db.collection('DBLreminder').insertOne({ _id: userID, voted: false });
-  } else if (!add) {
-    await db.collection('DBLreminder').deleteOne({ _id: userID });
-  }
-}
-
 async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
   if (
     add
     && !(
-      (await db
-        .collection('stillMuted')
-        .find({ userid: userID, guildid: guildID })
-        .count()) > 0
+      (await StillMutedModel.find({
+        userid: userID,
+        guildid: guildID,
+      }).count()) > 0
     )
   ) {
-    await db
-      .collection('stillMuted')
-      .insertOne({ userid: userID, guildid: guildID });
+    const newMute = new StillMutedModel({ userid: userID, guildid: guildID });
+    await newMute.save();
   } else if (!add) {
-    await db
-      .collection('stillMuted')
-      .deleteMany({ userid: userID, guildid: guildID });
+    await StillMutedModel.deleteMany({ userid: userID, guildid: guildID });
   }
 }
 async function getSaltKing(guildID: string) {
@@ -593,7 +624,7 @@ async function updateSaltKing(G: Guild) {
     ) {
       const SaltKing = await getSaltKing(G.id);
       let SaltRole = await getSaltRole(G.id);
-      const groles = await G.roles;
+      const groles = G.roles;
       if (!SaltRole || !groles.cache.has(SaltRole)) {
         if (G.roles.cache.size < 250) {
           await G.roles
@@ -632,6 +663,9 @@ async function updateSaltKing(G: Guild) {
       let saltID: string | undefined;
       if (sltID[0]) {
         saltID = sltID[0].salter;
+      }
+      if (!SaltRole) {
+        throw new Error('For some reason, there was no SaltRole.');
       }
       const role = await groles.fetch(SaltRole);
       if (role && role.position < G.me.roles.highest.position) {
@@ -750,13 +784,13 @@ function setPrefix(guildID: string, pref?: string) {
   return setSettings(guildID, { prefix: pref });
 }
 async function getPrefix(guildID: string) {
-  let settings = await getSettings(guildID);
-  settings = settings.prefix;
-  if (!settings) {
+  const settings = await getSettings(guildID);
+  const { prefix } = settings;
+  if (!prefix) {
     await setPrefix(guildID, config.prefix);
     return config.prefix;
   }
-  return settings;
+  return prefix;
 }
 
 async function getAdminRole(guildID: string) {
@@ -883,16 +917,6 @@ async function joinsound(
 
 export default {
   async startup(bot: Client) {
-    /* // TODO collections to migrate
-
-    if (!db.collection('votes')) {
-      db.createCollection('votes', (err) => {
-        if (err) throw err;
-      });
-    }
-
-    collection stillmuted?!
-    */
     // repeating functions:
     onHour(bot, true);
     voteCheck(bot);
@@ -919,7 +943,7 @@ export default {
   },
   async getUsage(userid: string, guildID: string) {
     const user = await getuser(userid, guildID);
-    return parseInt(user.botusage, 10);
+    return user.botusage;
   },
   async remOldestSalt(userid: string, G: Guild) {
     const guildID = G.id;
@@ -1066,26 +1090,19 @@ export default {
       PREFIXES[G.id] = await getPrefix(G.id);
     });
   },
-  toggleDBLE(userID: string, add: boolean) {
-    toggleDBL(userID, add);
-  },
-  getDBLE(userID: string) {
-    return isInDBL(userID);
-  },
-  addVote(vote) {
-    return db.collection('votes').insertOne(vote);
+  async addVote(vote: Vote) {
+    const voteCreated = new VoteModel(vote);
+    await voteCreated.save();
+    return voteCreated.toObject();
   },
   toggleStillMuted(userID: string, guildID: string, add: boolean) {
     return toggleStillMuted(userID, guildID, add);
   },
   async isStillMuted(userID: string, guildID: string) {
-    const find = await db
-      .collection('stillMuted')
-      .findOne({ userid: userID, guildid: guildID });
+    const find = await StillMutedModel.findOne({
+      userid: userID,
+      guildid: guildID,
+    });
     return find;
-  },
-  async getDBLSubs() {
-    const users = await db.collection('DBLreminder').find().toArray();
-    return users;
   },
 };

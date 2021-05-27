@@ -168,7 +168,7 @@ export const vote: magibotCommand = {
                                                   guildid: ms.guild!.id,
                                                   authorID,
                                                 };
-                                                data.addVote(vt);
+                                                await data.addVote(vt);
                                               });
                                           } else if (reacts.first()) {
                                             msg.channel.send(
