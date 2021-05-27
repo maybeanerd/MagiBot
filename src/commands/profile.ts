@@ -28,7 +28,7 @@ export const profile: magibotCommand = {
       const usage = await data.getUsage(id, msg.guild.id);
       info.push({
         name: 'Saltlevel',
-        value: salt,
+        value: String(salt),
         inline: false,
       });
       info.push({
@@ -39,7 +39,7 @@ export const profile: magibotCommand = {
       const link = await data.getSound(id, msg.guild.id);
       info.push({
         name: 'Joinsound',
-        value: link,
+        value: link || '',
         inline: false,
       });
       const user = await msg.guild.members.fetch(id);
