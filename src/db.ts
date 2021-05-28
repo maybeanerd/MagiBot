@@ -10,6 +10,11 @@ if (!config.dburl) {
   throw new Error('Missing DB connection URL');
 }
 const url = config.dburl;
+
+// fix deprecations
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
 mongoose.connect(`${url}/MagiBot`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -302,7 +307,12 @@ async function getuser(userid: string, guildID: string) {
   return result;
 }
 // eslint-disable-next-line require-await
-async function saltGuild(salter, guildID: string, add = 1, reset = false) {
+async function saltGuild(
+  salter: string,
+  guildID: string,
+  add = 1,
+  reset = false,
+) {
   const user = await SaltrankModel.findOne({ salter, guild: guildID });
   if (!user) {
     const myobj = new SaltrankModel({ salter, salt: 1, guild: guildID });
