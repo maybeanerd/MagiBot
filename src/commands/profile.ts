@@ -1,9 +1,20 @@
 import { MessageEmbedOptions } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
-import data from '../db';
 import { findMember } from '../bamands';
 import { magibotCommand } from '../types/magibot';
+import { SaltrankModel, getUser } from '../db';
+
+async function getSalt(userid: string, guildID: string) {
+  const result = await SaltrankModel.findOne({
+    salter: userid,
+    guild: guildID,
+  });
+  if (!result) {
+    return 0;
+  }
+  return result.salt;
+}
 
 export const profile: magibotCommand = {
   name: 'profile',
@@ -16,7 +27,11 @@ export const profile: magibotCommand = {
       if (!id && !mention) {
         id = msg.author.id;
       } else if (!id) {
-        msg.reply(` you need to define the user uniquely or not mention any user. For more help use \`${PREFIXES[msg.guild.id]}.help profile\``);
+        msg.reply(
+          ` you need to define the user uniquely or not mention any user. For more help use \`${
+            PREFIXES[msg.guild.id]
+          }.help profile\``,
+        );
         return;
       }
       const info: Array<{
@@ -24,8 +39,8 @@ export const profile: magibotCommand = {
         value: string;
         inline: boolean;
       }> = [];
-      const salt = await data.getSalt(id, msg.guild.id);
-      const usage = await data.getUsage(id, msg.guild.id);
+      const salt = await getSalt(id, msg.guild.id);
+      const { botusage, sound } = (await getUser(id, msg.guild.id));
       info.push({
         name: 'Saltlevel',
         value: String(salt),
@@ -33,17 +48,16 @@ export const profile: magibotCommand = {
       });
       info.push({
         name: 'Bot usage',
-        value: String(usage),
+        value: String(botusage),
         inline: false,
       });
-      const link = await data.getSound(id, msg.guild.id);
       info.push({
         name: 'Joinsound',
-        value: link || '',
+        value: sound || '',
         inline: false,
       });
       const user = await msg.guild.members.fetch(id);
-      const embed:MessageEmbedOptions = {
+      const embed: MessageEmbedOptions = {
         color: user.displayColor,
         description: `Here's some info on ${user.displayName}`,
         fields: info,
@@ -59,7 +73,14 @@ export const profile: magibotCommand = {
     }
   },
   ehelp() {
-    return [{ name: '', value: 'Get info about yourself.' }, { name: '<@user|userid|nickname>', value: 'Get info about a certain user. If you use the nickname you need to at least define three characters.' }];
+    return [
+      { name: '', value: 'Get info about yourself.' },
+      {
+        name: '<@user|userid|nickname>',
+        value:
+          'Get info about a certain user. If you use the nickname you need to at least define three characters.',
+      },
+    ];
   },
   perm: 'SEND_MESSAGES',
   admin: false,

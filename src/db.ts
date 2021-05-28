@@ -1,8 +1,7 @@
 ﻿import {
-  Client, TextChannel, Message, Guild, GuildMember,
+  Client, TextChannel, Message, Guild,
 } from 'discord.js';
 import mongoose, { Model } from 'mongoose';
-import { OWNERID, PREFIXES, resetPrefixes } from './shared_assets';
 import { asyncForEach } from './bamands';
 import config from './token';
 
@@ -289,8 +288,8 @@ const stillMutedSchema = new mongoose.Schema<StillMuted, Model<StillMuted>>(
 stillMutedSchema.index({ userid: 1, guildid: 1 });
 export const StillMutedModel = mongoose.model('stillMuted', stillMutedSchema);
 
-// Define Methods, these are reworked versions of the old ones and will stay:
-async function getuser(userid: string, guildID: string) {
+// Define Methods
+export async function getUser(userid: string, guildID: string) {
   const result = await UserModel.findOneAndUpdate(
     { userID: userid, guildID },
     {
@@ -306,55 +305,11 @@ async function getuser(userid: string, guildID: string) {
   );
   return result;
 }
-// eslint-disable-next-line require-await
-async function saltGuild(
-  salter: string,
-  guildID: string,
-  add = 1,
-  reset = false,
-) {
-  const user = await SaltrankModel.findOne({ salter, guild: guildID });
-  if (!user) {
-    const myobj = new SaltrankModel({ salter, salt: 1, guild: guildID });
-    await myobj.save();
-  } else {
-    const slt = user.salt + add;
-    if (slt <= 0 || reset) {
-      await SaltrankModel.deleteOne({ salter, guild: guildID });
-    } else {
-      const update = { $set: { salt: slt } };
-      await SaltrankModel.updateOne({ salter, guild: guildID }, update);
-    }
-  }
-}
-// eslint-disable-next-line require-await
-async function addSalt(userid: string, reporter: string, guildID: string) {
-  const date = new Date();
-  const myobj = new SaltModel({
-    salter: userid,
-    reporter,
-    date,
-    guild: guildID,
-  });
-  await myobj.save();
-  await saltGuild(userid, guildID, 1);
-  return 0;
-}
+
 async function updateUser(userid: string, update, guildID: string) {
   await UserModel.updateOne({ userID: userid, guildID }, update);
 }
-async function saltDowntimeDone(userid1: string, userid2: string) {
-  // get newest entry in salt
-  const d2 = await SaltModel.find({ salter: userid1, reporter: userid2 })
-    .sort({ date: -1 })
-    .limit(1);
-  if (d2[0]) {
-    const d1 = new Date();
-    const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
-    return ret;
-  }
-  return 2;
-}
+
 async function firstSettings(guildID: string) {
   const settings = new SettingsModel({
     _id: guildID,
@@ -662,8 +617,12 @@ async function getNotChannel(guildID: string) {
   const set = await getSettings(guildID);
   return set.notChannel;
 }
+
+function setSaltKing(guildID: string, userID: string) {
+  return setSettings(guildID, { saltKing: userID });
+}
 // top 5 salty people
-async function topSalt(guildID: string) {
+export async function topSalt(guildID: string) {
   const result = await SaltrankModel.find({ guild: guildID })
     .sort({ salt: -1 })
     .limit(5);
@@ -672,10 +631,7 @@ async function topSalt(guildID: string) {
   }
   return result;
 }
-function setSaltKing(guildID: string, userID: string) {
-  return setSettings(guildID, { saltKing: userID });
-}
-async function updateSaltKing(G: Guild) {
+export async function updateSaltKing(G: Guild) {
   if (G.available && G.me) {
     if (
       G.me.hasPermission('MANAGE_ROLES', {
@@ -812,19 +768,6 @@ async function getSalt(userid: string, guildID: string) {
     return 0;
   }
   return result.salt;
-}
-
-async function saltUp(
-  userid1: string,
-  userid2: string,
-  ad: boolean,
-  guildID: string,
-) {
-  const time = await saltDowntimeDone(userid1, userid2);
-  if (time > 1 || ad) {
-    return addSalt(userid1, userid2, guildID);
-  }
-  return time;
 }
 
 async function usageUp(userid: string, guildID: string) {
@@ -975,7 +918,7 @@ async function joinsound(
   }
   return true;
 }
-
+/*
 export default {
   async startup(bot: Client) {
     // repeating functions:
@@ -1167,3 +1110,4 @@ export default {
     return find;
   },
 };
+ */
