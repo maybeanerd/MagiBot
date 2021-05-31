@@ -373,14 +373,20 @@ export const setup: magibotCommand = {
       });
 
       let str = '';
-      let cmd = set.commandChannels;
+      const { commandChannels } = set;
       /* eslint-enable no-case-declarations */
 
-      if (!cmd.toString()) {
+      if (commandChannels.length === 0) {
         str = 'no whitelist, so every channel is allowed';
       } else {
-        cmd.forEach((com) => {
-          str += `<#${com}> `;
+        const { guild } = msg;
+        commandChannels.forEach((channel) => {
+          const chann = guild!.channels.cache.get(channel);
+          if (chann && !chann.deleted) {
+            str += `<#${channel}> `;
+          } else {
+            setCommandChannel(guild!.id, channel, false);
+          }
         });
       }
       info.push({
@@ -390,12 +396,13 @@ export const setup: magibotCommand = {
       });
 
       str = '';
-      cmd = set.adminRoles;
-      if (!cmd.toString()) {
+      // eslint-disable-next-line no-case-declarations
+      const { adminRoles } = set;
+      if (adminRoles.length === 0) {
         str = 'Empty';
       } else {
-        cmd.forEach((com) => {
-          str += `<@&${com}> `;
+        adminRoles.forEach((role) => {
+          str += `<@&${role}> `;
         });
       }
       info.push({
@@ -405,17 +412,18 @@ export const setup: magibotCommand = {
       });
 
       str = '';
-      cmd = set.joinChannels;
-      if (!cmd.toString()) {
+      // eslint-disable-next-line no-case-declarations
+      const { joinChannels } = set;
+      if (joinChannels.length === 0) {
         str = 'Empty';
       } else {
         const { guild } = msg;
-        cmd.forEach((com) => {
-          const chann = guild!.channels.cache.get(com);
-          if (chann) {
+        joinChannels.forEach((channel) => {
+          const chann = guild!.channels.cache.get(channel);
+          if (chann && !chann.deleted) {
             str += `${chann.name}, `;
           } else {
-            setJoinChannel(guild!.id, com, false);
+            setJoinChannel(guild!.id, channel, false);
           }
         });
         str = str.substring(0, str.length - 2);
@@ -427,12 +435,13 @@ export const setup: magibotCommand = {
       });
 
       str = '';
-      cmd = set.blacklistedUsers;
-      if (!cmd.toString()) {
+      // eslint-disable-next-line no-case-declarations
+      const { blacklistedUsers } = set;
+      if (blacklistedUsers.length === 0) {
         str = 'Empty';
       } else {
-        cmd.forEach((com) => {
-          str += `<@!${com}>, `;
+        blacklistedUsers.forEach((user) => {
+          str += `<@!${user}>, `;
         });
         str = str.substring(0, str.length - 2);
       }
@@ -442,12 +451,12 @@ export const setup: magibotCommand = {
         inline: false,
       });
 
-      str = '';
-      cmd = set.blacklistedEveryone;
-      if (!cmd.toString()) {
+      /* str = '';
+      const { blacklistedEveryone } = set;
+      if (blacklistedEveryone.length === 0) {
         str = 'Empty';
       } else {
-        cmd.forEach((com) => {
+        blacklistedEveryone.forEach((com) => {
           str += `<#${com}>, `;
         });
         str = str.substring(0, str.length - 2);
@@ -456,7 +465,7 @@ export const setup: magibotCommand = {
         name: 'Channel with @everyone blacklist',
         value: str,
         inline: false,
-      });
+      }); */
 
       if (!set.saltKing) {
         str = 'None';
