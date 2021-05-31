@@ -340,15 +340,6 @@ export async function checkGuild(id: string) {
   }
   return false;
 }
-
-async function getSaltKing(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.saltKing;
-}
-async function getSaltRole(guildID: string) {
-  const set = await getSettings(guildID);
-  return set.saltRole;
-}
 export async function setSettings(
   guildID: string,
   // this was difficult to find, but is awesome
@@ -359,9 +350,18 @@ export async function setSettings(
   }
   return true;
 }
+async function getSaltKing(guildID: string) {
+  const settings = await getSettings(guildID);
+  return settings.saltKing;
+}
+async function getSaltRole(guildID: string) {
+  const set = await getSettings(guildID);
+  return set.saltRole;
+}
 async function setSaltRole(guildID: string, roleID: string) {
   await setSettings(guildID, { saltRole: roleID });
 }
+
 export async function getNotChannel(guildID: string) {
   const set = await getSettings(guildID);
   return set.notChannel;
