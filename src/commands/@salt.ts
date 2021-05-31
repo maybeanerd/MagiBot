@@ -1,9 +1,39 @@
-﻿import { GuildMember } from 'discord.js';
+﻿import { Guild, GuildMember } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
-import data from '../db';
 import { findMember, yesOrNo } from '../bamands';
 import { magibotCommand } from '../types/magibot';
+import { SaltModel, SaltrankModel, updateSaltKing } from '../db';
+import { saltUp, saltGuild } from './salt';
+
+async function resetSalt(G: Guild) {
+  const guildID = G.id;
+  await SaltrankModel.deleteMany({ guild: guildID });
+  await SaltModel.deleteMany({ guild: guildID });
+  await updateSaltKing(G);
+}
+
+async function remOldestSalt(userid: string, G: Guild) {
+  const guildID = G.id;
+  const id = await SaltModel.find({ salter: userid, guild: guildID })
+    .sort({ date: 1 })
+    .limit(1);
+  if (id[0]) {
+    // eslint-disable-next-line no-underscore-dangle
+    await SaltModel.deleteOne({ _id: id[0]._id });
+    saltGuild(userid, guildID, -1);
+    updateSaltKing(G);
+    return true;
+  }
+  return false;
+};
+
+async function clrSalt(userid: string, G: Guild) {
+  const guildID = G.id;
+  await SaltModel.deleteMany({ guild: guildID, salter: userid });
+  await saltGuild(userid, guildID, 1, true);
+  await updateSaltKing(G);
+};
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];
@@ -49,7 +79,7 @@ export const salt: magibotCommand = {
               'Successfully canceled salt reset.',
             )
           ) {
-            data.resetSalt(msg.guild);
+            resetSalt(msg.guild);
             msg.channel.send(
               `Successfully reset all salt on **${msg.guild.name}**!`,
             );
@@ -71,7 +101,7 @@ export const salt: magibotCommand = {
           msg.reply("you can't report bots!");
           return;
         }
-        await data.saltUpAdmin(uid, msg.author.id, msg.guild);
+        await saltUp(uid, msg.author.id, msg.guild, true);
         msg.channel.send(
           `Successfully reported ${mem} for being a salty bitch!`,
         );
@@ -86,7 +116,7 @@ export const salt: magibotCommand = {
           msg.reply('bots are never salty!');
           return;
         }
-        if (await data.remOldestSalt(uid, msg.guild)) {
+        if (await remOldestSalt(uid, msg.guild)) {
           msg.channel.send(
             `Successfully removed the oldest salt from ${mem}!`,
           );
@@ -104,14 +134,14 @@ export const salt: magibotCommand = {
           msg.reply('bots are never salty!');
           return;
         }
-        await data.clrSalt(uid, msg.guild);
+        await clrSalt(uid, msg.guild);
         msg.channel.send(`Successfully cleared all salt from ${mem}!`);
         break;
       default:
         msg.reply(
-          `this command doesn't exist. Use \`${
-            PREFIXES[msg.guild.id]
-          }:help salt\` to get more info.`,
+          `this command doesn't exist. Use \`${PREFIXES.get(
+            msg.guild.id,
+          )}:help salt\` to get more info.`,
         );
         break;
       }

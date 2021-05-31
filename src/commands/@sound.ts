@@ -1,8 +1,8 @@
 import { PREFIXES } from '../shared_assets';
-import data from '../db';
 import { commandCategories } from '../types/enums';
 import { findMember } from '../bamands';
 import { magibotCommand } from '../types/magibot';
+import { addSound } from './sound';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];
@@ -29,20 +29,17 @@ export const sound: magibotCommand = {
       const uid = await findMember(msg.guild!, mention);
       /* eslint-enable no-case-declarations */
       if (mention && uid) {
-        if (await data.addSound(uid, false, msg.guild!.id)) {
-          msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
-        } else {
-          msg.reply('Aaaaaand you failed.');
-        }
+        await addSound(uid, undefined, msg.guild!.id);
+        msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
       } else {
         msg.reply('you need to mention a user you want to use this on!');
       }
       break;
     default:
       msg.reply(
-        `this command doesn't exist. Use \`${
-          PREFIXES[msg.guild!.id]
-        }:help sound\` for more info.`,
+        `this command doesn't exist. Use \`${PREFIXES.get(
+            msg.guild!.id,
+        )}:help sound\` for more info.`,
       );
       break;
     }

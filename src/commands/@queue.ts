@@ -1,11 +1,12 @@
 ﻿import { TextChannel, VoiceChannel, User } from 'discord.js';
+// eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
-import data from '../db';
 import { yesOrNo } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { userJoinedQueue } from '../statTracking';
 import { magibotCommand } from '../types/magibot';
+import { isAdmin, toggleStillMuted } from '../db';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
@@ -231,7 +232,7 @@ export const queue: magibotCommand = {
                                     );
                                     if (
                                       mem
-                                      && !(await data.isAdmin(msg.guild!.id, mem))
+                                      && !(await isAdmin(msg.guild!.id, mem))
                                     ) {
                                       mem.voice.setMute(
                                         true,
@@ -407,7 +408,7 @@ export const queue: magibotCommand = {
                                       .forEach(async (mem) => {
                                         // make sure users will be unmuted even if this unmute loop
                                         // fails because they left the voice channel too quickly
-                                        await data.toggleStillMuted(
+                                        await toggleStillMuted(
                                           mem.id,
                                           mem.guild.id,
                                           true,
@@ -416,7 +417,7 @@ export const queue: magibotCommand = {
                                           false,
                                           'queue ended',
                                         );
-                                        await data.toggleStillMuted(
+                                        await toggleStillMuted(
                                           mem.id,
                                           mem.guild.id,
                                           false,

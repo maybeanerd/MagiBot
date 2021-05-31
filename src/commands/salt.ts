@@ -1,9 +1,70 @@
-import { Message, MessageEmbedOptions } from 'discord.js';
-import data from '../db';
+import { Guild, Message, MessageEmbedOptions } from 'discord.js';
 import * as cmds from '../bamands';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
 import { magibotCommand } from '../types/magibot';
+import {
+  SaltModel, SaltrankModel, updateSaltKing, topSalt,
+} from '../db';
+
+async function saltDowntimeDone(userid1: string, userid2: string) {
+  // get newest entry in salt
+  const d2 = await SaltModel.find({ salter: userid1, reporter: userid2 })
+    .sort({ date: -1 })
+    .limit(1);
+  if (d2[0]) {
+    const d1 = new Date();
+    const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
+    return ret;
+  }
+  return 2;
+}
+
+export async function saltGuild(
+  salter: string,
+  guildID: string,
+  add = 1,
+  reset = false,
+) {
+  const user = await SaltrankModel.findOne({ salter, guild: guildID });
+  if (!user) {
+    const myobj = new SaltrankModel({ salter, salt: 1, guild: guildID });
+    await myobj.save();
+  } else {
+    const slt = user.salt + add;
+    if (slt <= 0 || reset) {
+      await SaltrankModel.deleteOne({ salter, guild: guildID });
+    } else {
+      const update = { $set: { salt: slt } };
+      await SaltrankModel.updateOne({ salter, guild: guildID }, update);
+    }
+  }
+}
+
+export async function saltUp(
+  salter: string,
+  reporter: string,
+  guild: Guild,
+  admin = false,
+) {
+  const time = await saltDowntimeDone(salter, reporter);
+  if (time > 1 || admin) {
+    const date = new Date();
+    const myobj = new SaltModel({
+      salter,
+      reporter,
+      date,
+      guild: guild.id,
+    });
+    await myobj.save();
+    await saltGuild(salter, guild.id, 1);
+    await updateSaltKing(guild);
+    return 0;
+  }
+  return time;
+}
+
+// TODO we might want to add even more of the DB logic into here
 
 function printHelp(msg: Message) {
   const info: Array<{ name: string; value: string }> = [];
@@ -44,16 +105,16 @@ export const salt: magibotCommand = {
             msg.reply("you can't report bots!");
             return;
           }
-          const time = await data.saltUp(uid, msg.author.id, msg.guild);
+          const time = await saltUp(uid, msg.author.id, msg.guild);
           if (time === 0) {
             msg.channel.send(
               `Successfully reported ${mem} for being a salty bitch!`,
             );
           } else {
             msg.reply(
-              `you can report ${mem} again in ${59
-                  - Math.floor((time * 60) % 60)} min and ${60
-                  - Math.floor((time * 60 * 60) % 60)} sec!`,
+              `you can report ${mem} again in ${
+                59 - Math.floor((time * 60) % 60)
+              } min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
             );
           }
         } else {
@@ -62,7 +123,7 @@ export const salt: magibotCommand = {
         break;
       case 'top':
         /* eslint-disable no-case-declarations */
-        const salters = await data.topSalt(msg.guild.id);
+        const salters = await topSalt(msg.guild.id);
         const info: Array<{
             name: string;
             value: string;
@@ -103,9 +164,9 @@ export const salt: magibotCommand = {
         break;
       default:
         msg.reply(
-          `this command doesn't exist. Use \`${
-            PREFIXES[msg.guild.id]
-          }.help salt\` for more info.`,
+          `this command doesn't exist. Use \`${PREFIXES.get(
+            msg.guild.id,
+          )}.help salt\` for more info.`,
         );
         break;
       }

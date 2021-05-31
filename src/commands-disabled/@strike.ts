@@ -1,5 +1,4 @@
-﻿import { PREFIXES, user } from '../shared_assets';
-import data from '../db';
+﻿/*  import { PREFIXES, user } from '../shared_assets';
 import {
   findMember,
 } from '../bamands';
@@ -73,7 +72,7 @@ module.exports = {
         msg.channel.send(`Successfully cleared all salt from <@!${uid}>!`);
         break;
       default:
-        msg.reply(`this command doesn't exist. Use \`${PREFIXES[msg.guild.id]}:help salt\` to get more info.`);
+        msg.reply(`this command doesn't exist. Use \`${PREFIXES.get(msg.guild.id)}:help salt\` to get more info.`);
         break;
       }
     } else {
@@ -88,3 +87,8 @@ module.exports = {
   hide: false,
   category: 'Utility',
 };
+
+ */
+
+// so that TS doesnt have any issues:
+export {};
