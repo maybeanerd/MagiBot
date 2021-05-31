@@ -1,14 +1,14 @@
-﻿import Discord, { DiscordAPIError } from 'discord.js';
+﻿import Discord, { Client, DiscordAPIError, Guild } from 'discord.js';
 import Statcord from 'statcord.js';
 import { handle } from 'blapi';
 import config from './token';
-import data from './db';
 import {
   PREFIX,
   PREFIXES,
   TOKEN,
   queueVoiceChannels,
   setUser,
+  resetPrefixes,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
@@ -19,7 +19,33 @@ import {
   sendUsersWhoJoinedQueue,
   playedJoinsound,
 } from './statTracking';
+import {
+  checkGuild,
+  getPrefix,
+  StillMutedModel,
+  isBlacklistedUser,
+  getUser,
+  toggleStillMuted,
+  isJoinableVc,
+} from './db';
+import { asyncForEach } from './bamands';
+import { startUp } from './cronjobs';
 
+async function initializePrefixes(bot: Client) {
+  resetPrefixes();
+  const guilds = bot.guilds.cache.array();
+  asyncForEach(guilds, async (G) => {
+    PREFIXES.set(G.id, await getPrefix(G.id));
+  });
+}
+
+async function isStillMuted(userID: string, guildID: string) {
+  const find = await StillMutedModel.findOne({
+    userid: userID,
+    guildid: guildID,
+  });
+  return Boolean(find);
+}
 export const bot = new Discord.Client();
 
 if (!process.env.STATCORD_TOKEN) {
@@ -45,26 +71,27 @@ process.on('uncaughtException', async (err) => {
     `**Uncaught Exception:**\n\`\`\`${err.stack ? err.stack : err}\`\`\``,
   );
 });
-process.on('unhandledRejection', async (
-  err: any, /* to fix weird type issues */
-) => {
-  console.error(`Unhandled promise rejection:\n${err}`);
-  if (err) {
-    if (err instanceof DiscordAPIError) {
-      await catchErrorOnDiscord(
-        `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
-          err.message
-        }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
-      );
-    } else {
-      await catchErrorOnDiscord(
-        `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
-          err.stack ? err.stack.substring(0, 1200) : ''
-        }\`\`\``,
-      );
+process.on(
+  'unhandledRejection',
+  async (err: any /* to fix weird type issues */) => {
+    console.error(`Unhandled promise rejection:\n${err}`);
+    if (err) {
+      if (err instanceof DiscordAPIError) {
+        await catchErrorOnDiscord(
+          `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
+            err.message
+          }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
+        );
+      } else {
+        await catchErrorOnDiscord(
+          `**Outer Unhandled promise rejection:**\n\`\`\`${err}\`\`\`\`\`\`${
+            err.stack ? err.stack.substring(0, 1200) : ''
+          }\`\`\``,
+        );
+      }
     }
-  }
-});
+  },
+);
 
 // fires on startup and on reconnect
 let justStartedUp = true;
@@ -79,8 +106,7 @@ bot.on('ready', async () => {
   }
   if (justStartedUp) {
     (chann as Discord.TextChannel).send('Running startup...');
-
-    data.startup(bot);
+    startUp(bot);
     justStartedUp = false;
   } else {
     (chann as Discord.TextChannel).send('Just reconnected to Discord...');
@@ -93,8 +119,7 @@ bot.on('ready', async () => {
     },
     status: 'online',
   });
-  data.getPrefixesE(bot);
-
+  initializePrefixes(bot);
   statcord.autopost();
 });
 
@@ -106,10 +131,10 @@ bot.on('message', async (msg) => {
   }
 });
 
-async function guildPrefixStartup(guild) {
+async function guildPrefixStartup(guild: Guild) {
   try {
-    await data.addGuild(guild.id);
-    PREFIXES[guild.id] = await data.getPrefixE(guild.id);
+    await checkGuild(guild.id);
+    PREFIXES.set(guild.id, await getPrefix(guild.id));
   } catch (err) {
     console.error(err);
   }
@@ -160,44 +185,47 @@ bot.on('voiceStateUpdate', async (o, n) => {
       && (!o.channel || !newVc || o.channel.id !== newVc.id)
     ) {
       // is muted and joined a vc? maybe still muted from queue
-      if (n.serverMute && (await data.isStillMuted(n.id, n.guild.id))) {
+      if (n.serverMute && (await isStillMuted(n.id, n.guild.id))) {
         n.setMute(
           false,
           'was still muted from a queue which user disconnected from',
         );
-        data.toggleStillMuted(n.id, n.guild.id, false);
+        toggleStillMuted(n.id, n.guild.id, false);
       } else if (
         !n.serverMute
         && newVc
-        && queueVoiceChannels[n.guild.id]
-        && queueVoiceChannels[n.guild.id] === newVc.id
+        && queueVoiceChannels.has(n.guild.id)
+        && queueVoiceChannels.get(n.guild.id) === newVc.id
       ) {
         // user joined a muted channel
         n.setMute(true, 'joined active queue voice channel');
       } else if (
         o.serverMute
-        && queueVoiceChannels[o.guild.id]
         && o.channel
-        && queueVoiceChannels[o.guild.id] === o.channel.id
+        && queueVoiceChannels.has(o.guild.id)
+        && queueVoiceChannels.get(o.guild.id) === o.channel.id
       ) {
         // user left a muted channel
         if (newVc) {
           n.setMute(false, 'left active queue voice channel');
         } else {
           // save the unmute for later
-          data.toggleStillMuted(n.id, n.guild.id, true);
+          toggleStillMuted(n.id, n.guild.id, true);
         }
-      } else if (
+      }
+      // TODO remove/rework mute logic before this comment
+      if (
         newVc
         && n.guild.me
         && !n.guild.me.voice.channel
         && n.id !== bot.user!.id
-        && !(await data.isBlacklistedUser(n.id, n.guild.id))
-        && (await data.joinable(n.guild.id, newVc.id))
+        && !(await isBlacklistedUser(n.id, n.guild.id))
+        && (await isJoinableVc(n.guild.id, newVc.id))
       ) {
         const perms = newVc.permissionsFor(n.guild.me);
         if (perms && perms.has('CONNECT')) {
-          const sound = await data.getSound(n.id, n.guild.id);
+          const user = await getUser(n.id, n.guild.id);
+          const { sound } = user;
           if (sound) {
             const connection = await newVc.join();
             const dispatcher = connection.play(sound, {
@@ -212,8 +240,9 @@ bot.on('voiceStateUpdate', async (o, n) => {
                 connection.disconnect();
               } catch (err) {
                 catchErrorOnDiscord(
-                  `**Error in timeout (${(err.toString && err.toString())
-                    || 'NONE'}):**\n\`\`\`
+                  `**Error in timeout (${
+                    (err.toString && err.toString()) || 'NONE'
+                  }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
                 );
@@ -226,8 +255,9 @@ bot.on('voiceStateUpdate', async (o, n) => {
                 connection.disconnect();
               } catch (err) {
                 catchErrorOnDiscord(
-                  `**Error in once finish (${(err.toString && err.toString())
-                    || 'NONE'}):**\n\`\`\`
+                  `**Error in once finish (${
+                    (err.toString && err.toString()) || 'NONE'
+                  }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
                 );
@@ -238,8 +268,9 @@ bot.on('voiceStateUpdate', async (o, n) => {
               clearTimeout(timeoutID);
               dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
               catchErrorOnDiscord(
-                `**Dispatcher Error (${(err.toString && err.toString())
-                  || 'NONE'}):**\n\`\`\`
+                `**Dispatcher Error (${
+                  (err.toString && err.toString()) || 'NONE'
+                }):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
               ).then(() => connection.disconnect());

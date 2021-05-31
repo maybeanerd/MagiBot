@@ -1,4 +1,5 @@
 ﻿import { TextChannel } from 'discord.js';
+// eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
 import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
@@ -10,7 +11,7 @@ export const bug: magibotCommand = {
     if (!(content.length > 0)) {
       msg.reply(
         `you need to add info about the report after the command. Use \`${
-          PREFIXES[msg.guild!.id]
+          PREFIXES.get(msg.guild!.id)
         }.help bug\` to get more info.`,
       );
       return;
