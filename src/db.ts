@@ -1,8 +1,5 @@
-﻿import {
-  Client, TextChannel, Message, Guild, GuildMember,
-} from 'discord.js';
+﻿import { TextChannel, Guild, GuildMember } from 'discord.js';
 import mongoose, { Model } from 'mongoose';
-import { asyncForEach } from './bamands';
 import { OWNERID } from './shared_assets';
 import config from './token';
 
