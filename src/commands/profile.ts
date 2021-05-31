@@ -53,7 +53,7 @@ export const profile: magibotCommand = {
       });
       info.push({
         name: 'Joinsound',
-        value: sound || '',
+        value: sound || 'Empty',
         inline: false,
       });
       const user = await msg.guild.members.fetch(id);
