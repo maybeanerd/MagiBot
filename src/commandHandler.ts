@@ -1,4 +1,4 @@
-import Discord, { GuildMember, Message } from 'discord.js';
+import Discord, { Message } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { statcord } from './bot';
 import { vote } from './commands/vote';
@@ -32,7 +32,12 @@ import {
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { magibotCommand } from './types/magibot';
-import { getAdminRoles, isBlacklistedUser, getCommandChannel } from './db';
+import {
+  isBlacklistedUser,
+  getCommandChannel,
+  getUser,
+  isAdmin,
+} from './db';
 
 export const commands: { [k: string]: magibotCommand } = {
   _dc,
@@ -66,40 +71,32 @@ async function catchError(error: Error, msg: Discord.Message, command: string) {
 
   msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
 If you can reproduce this, consider using \`${
-  PREFIXES[msg.guild ? msg.guild.id : 0]
+  msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
 }.bug <bugreport>\` or join the support discord (link via \`${
-  PREFIXES[msg.guild ? msg.guild.id : 0]
+  msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
 }.info\`) to tell us exactly how.`);
-}
-
-async function isAdmin(guildID: string, member: GuildMember) {
-  // checks for admin and Owner, they can always use
-  if (
-    member.hasPermission('ADMINISTRATOR', {
-      checkAdmin: true,
-      checkOwner: true,
-    })
-  ) {
-    return true;
-  }
-  // Owner of bot is always admin hehe
-  if (member.id === OWNERID) {
-    return true;
-  }
-  const roles = await getAdminRoles(guildID);
-  let ret = false;
-  roles.forEach((role) => {
-    if (member.roles.cache.has(role)) {
-      ret = true;
-    }
-  });
-  return ret;
 }
 
 async function commandAllowed(guildID: string, cid: string) {
   const channels = await getCommandChannel(guildID);
   return channels.length === 0 || channels.includes(cid);
-};
+}
+
+async function usageUp(userid: string, guildID: string) {
+  const usr = await getUser(userid, guildID);
+  const updateval = usr.botusage + 1;
+  usr.botusage = updateval;
+  await usr.save();
+}
+
+async function printCommandChannels(guildID: string) {
+  const channels = await getCommandChannel(guildID);
+  let out = '';
+  channels.forEach((channel: string) => {
+    out += ` <#${channel}>`;
+  });
+  return out;
+}
 
 const userCooldowns = new Set<string>();
 
@@ -119,7 +116,7 @@ export async function checkCommand(msg: Discord.Message) {
     || msg.content.startsWith(`<@!${user().id}>`)
   ) {
     isMention = true;
-  } else if (msg.content.startsWith(PREFIXES[msg.guild.id])) {
+  } else if (msg.content.startsWith(PREFIXES.get(msg.guild.id)!)) {
     isMention = false;
   } else {
     return;
@@ -141,11 +138,13 @@ export async function checkCommand(msg: Discord.Message) {
     command = `.${command}`;
   } else {
     command = msg.content
-      .substring(PREFIXES[msg.guild.id].length, msg.content.length)
+      .substring(PREFIXES.get(msg.guild.id)!.length, msg.content.length)
       .split(' ')[0]
       .toLowerCase();
     // delete prefix and command
-    content = msg.content.slice(command.length + PREFIXES[msg.guild.id].length);
+    content = msg.content.slice(
+      command.length + PREFIXES.get(msg.guild.id)!.length,
+    );
     content = content.replace(/^\s+/g, ''); // delete leading spaces
   }
   if (command) {
@@ -190,10 +189,7 @@ export async function checkCommand(msg: Discord.Message) {
       commands[command]
       && (!commands[command].dev || msg.author.id === OWNERID)
     ) {
-      if (
-        pre === ':'
-        || (await commandAllowed(msg.guild.id, msg.channel.id))
-      ) {
+      if (pre === ':' || (await commandAllowed(msg.guild.id, msg.channel.id))) {
         const perms = commands[command].perm;
         if (!perms || (myPerms && myPerms.has(perms))) {
           // cooldown for command usage
@@ -209,10 +205,10 @@ export async function checkCommand(msg: Discord.Message) {
               catchError(
                 err,
                 msg,
-                `${PREFIXES[msg.guild.id]}${pre}${commandVal}`,
+                `${PREFIXES.get(msg.guild.id)}${pre}${commandVal}`,
               );
             }
-            data.usageUp(msg.author.id, msg.guild.id);
+            usageUp(msg.author.id, msg.guild.id);
           } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
             msg.reply("whoa cool down, you're using commands too quick!");
           }
@@ -230,11 +226,11 @@ export async function checkCommand(msg: Discord.Message) {
           .reply(
             `commands aren't allowed in <#${
               msg.channel.id
-            }>. Use them in ${await data.commandChannel(
+            }>. Use them in ${await printCommandChannels(
               msg.guild.id,
-            )}. If you're an admin use \`${
-              PREFIXES[msg.guild.id]
-            }:help\` to see how you can change that.`,
+            )}. If you're an admin use \`${PREFIXES.get(
+              msg.guild.id,
+            )}:help\` to see how you can change that.`,
           )
           .then((mess) => (mess as Message).delete({ timeout: 15000 }));
       }

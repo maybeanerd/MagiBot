@@ -29,7 +29,7 @@ export const profile: magibotCommand = {
       } else if (!id) {
         msg.reply(
           ` you need to define the user uniquely or not mention any user. For more help use \`${
-            PREFIXES[msg.guild.id]
+            PREFIXES.get(msg.guild.id)
           }.help profile\``,
         );
         return;

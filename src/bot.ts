@@ -27,6 +27,7 @@ import {
   getSettings,
   isBlacklistedUser,
   getUser,
+  toggleStillMuted,
 } from './db';
 import { asyncForEach } from './bamands';
 
@@ -44,23 +45,6 @@ async function isStillMuted(userID: string, guildID: string) {
     guildid: guildID,
   });
   return Boolean(find);
-}
-
-async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
-  if (
-    add
-    && !(
-      (await StillMutedModel.find({
-        userid: userID,
-        guildid: guildID,
-      }).count()) > 0
-    )
-  ) {
-    const newMute = new StillMutedModel({ userid: userID, guildid: guildID });
-    await newMute.save();
-  } else if (!add) {
-    await StillMutedModel.deleteMany({ userid: userID, guildid: guildID });
-  }
 }
 
 async function isJoinableVc(guildID: string, channelID: string) {

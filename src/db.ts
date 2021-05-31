@@ -1,8 +1,9 @@
 ﻿import {
-  Client, TextChannel, Message, Guild,
+  Client, TextChannel, Message, Guild, GuildMember,
 } from 'discord.js';
 import mongoose, { Model } from 'mongoose';
 import { asyncForEach } from './bamands';
+import { OWNERID } from './shared_assets';
 import config from './token';
 
 if (!config.dburl) {
@@ -226,7 +227,7 @@ UserModel.aggregate([
 });
 
 // entry per vote
-type Vote = {
+export type Vote = {
   messageID: string;
   channelID: string;
   options: Array<string>;
@@ -308,8 +309,14 @@ export async function getUser(userid: string, guildID: string) {
   return result;
 }
 
-async function updateUser(userid: string, update, guildID: string) {
-  await UserModel.updateOne({ userID: userid, guildID }, update);
+// TODO we might not even need this...
+export async function updateUser(
+  userid: string,
+  guildID: string,
+  // this was difficult to find, but is awesome
+  update: { [Property in keyof User]?: User[Property] },
+) {
+  await UserModel.updateOne({ userID: userid, guildID }, { $set: update });
 }
 
 async function firstSettings(guildID: string) {
@@ -590,7 +597,7 @@ async function getSaltRole(guildID: string) {
   const set = await getSettings(guildID);
   return set.saltRole;
 }
-async function setSettings(guildID: string, settings) {
+export async function setSettings(guildID: string, settings) {
   if (await getSettings(guildID)) {
     await SettingsModel.updateOne({ _id: guildID }, { $set: settings });
   }
@@ -599,7 +606,7 @@ async function setSettings(guildID: string, settings) {
 async function setSaltRole(guildID: string, roleID: string) {
   await setSettings(guildID, { saltRole: roleID });
 }
-async function getNotChannel(guildID: string) {
+export async function getNotChannel(guildID: string) {
   const set = await getSettings(guildID);
   return set.notChannel;
 }
@@ -719,31 +726,6 @@ export async function updateSaltKing(G: Guild) {
     }
   }
 }
-function setNotChannel(guildID: string, channelID: String | false) {
-  return setSettings(guildID, { notChannel: channelID });
-}
-async function sendUpdate(update: string, bot: Client) {
-  await asyncForEach(bot.guilds.cache.array(), async (G) => {
-    if (G.available) {
-      const cid = await getNotChannel(G.id);
-      if (cid) {
-        const channel = G.channels.cache.get(cid) as TextChannel;
-        if (channel && G.me) {
-          const perms = channel.permissionsFor(G.me);
-          if (perms && perms.has('SEND_MESSAGES')) {
-            if (G.id === '380669498014957569') {
-              channel.send(`<@&460218236185739264> ${update}`);
-            } else {
-              channel.send(update);
-            }
-          }
-        } else {
-          setNotChannel(G.id, false);
-        }
-      }
-    }
-  });
-}
 
 async function getSalt(userid: string, guildID: string) {
   const result = await SaltrankModel.findOne({
@@ -754,12 +736,6 @@ async function getSalt(userid: string, guildID: string) {
     return 0;
   }
   return result.salt;
-}
-
-async function usageUp(userid: string, guildID: string) {
-  const user = await getuser(userid, guildID);
-  const updateval = user.botusage + 1;
-  updateUser(userid, { $set: { botusage: updateval } }, guildID);
 }
 
 function setPrefix(guildID: string, pref?: string) {
@@ -775,9 +751,50 @@ export async function getPrefix(guildID: string) {
   return prefix;
 }
 
-export async function getAdminRoles(guildID: string) {
+export async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
+  if (
+    add
+    && !(
+      (await StillMutedModel.find({
+        userid: userID,
+        guildid: guildID,
+      }).count()) > 0
+    )
+  ) {
+    const newMute = new StillMutedModel({ userid: userID, guildid: guildID });
+    await newMute.save();
+  } else if (!add) {
+    await StillMutedModel.deleteMany({ userid: userID, guildid: guildID });
+  }
+}
+
+async function getAdminRoles(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.adminRoles;
+}
+
+export async function isAdmin(guildID: string, member: GuildMember) {
+  // checks for admin and Owner, they can always use
+  if (
+    member.hasPermission('ADMINISTRATOR', {
+      checkAdmin: true,
+      checkOwner: true,
+    })
+  ) {
+    return true;
+  }
+  // Owner of bot is always admin hehe
+  if (member.id === OWNERID) {
+    return true;
+  }
+  const roles = await getAdminRoles(guildID);
+  let ret = false;
+  roles.forEach((role) => {
+    if (member.roles.cache.has(role)) {
+      ret = true;
+    }
+  });
+  return ret;
 }
 
 async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
@@ -852,25 +869,6 @@ export async function isBlacklistedUser(userid: string, guildID: string) {
   return users.includes(userid);
 }
 
-export async function setBlacklistedUser(
-  userid: string,
-  guildID: string,
-  insert: boolean,
-) {
-  const users = await getBlacklistedUser(guildID);
-  if (insert) {
-    if (!users.includes(userid)) {
-      users.push(userid);
-    }
-  } else {
-    const index = users.indexOf(userid);
-    if (index > -1) {
-      users.splice(index, 1);
-    }
-  }
-  const settings = { blacklistedUsers: users };
-  return setSettings(guildID, settings);
-}
 /* eslint-disable */
 // TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID: string) {
@@ -885,19 +883,7 @@ async function setBlacklistedEveryone(
 ) {}
 /* eslint-enable */
 
-async function joinsound(
-  userid: string,
-  surl: string | undefined,
-  guildID: string,
-) {
-  if (await checks(userid, guildID)) {
-    const update = { $set: { sound: surl } };
-    await UserModel.updateOne({ userID: userid, guildID }, update);
-  }
-  return true;
-}
-
-export function startUp(bot:Client) {
+export function startUp(bot: Client) {
   // repeating functions:
   onHour(bot, true);
   voteCheck(bot);
@@ -921,11 +907,7 @@ export default {
     updateSaltKing(G);
     return ret;
   },
-  async saltUpAdmin(userid1: string, userid2: string, G: Guild) {
-    const ret = await saltUp(userid1, userid2, true, G.id);
-    updateSaltKing(G);
-    return ret;
-  },
+
   getSalt(userid: string, guildID: string) {
     return getSalt(userid, guildID);
   },
@@ -933,20 +915,7 @@ export default {
     const user = await getuser(userid, guildID);
     return user.botusage;
   },
-  async remOldestSalt(userid: string, G: Guild) {
-    const guildID = G.id;
-    const id = await SaltModel.find({ salter: userid, guild: guildID })
-      .sort({ date: 1 })
-      .limit(1);
-    if (id[0]) {
-      // eslint-disable-next-line no-underscore-dangle
-      await SaltModel.deleteOne({ _id: id[0]._id });
-      saltGuild(userid, guildID, -1);
-      updateSaltKing(G);
-      return true;
-    }
-    return false;
-  },
+
   async addGuild(guildID: string) {
     await checkGuild(guildID);
   },
@@ -1010,9 +979,6 @@ export default {
     const user = await getuser(userid, guildID);
     return user.sound;
   },
-  addSound(userid: string, surl: string | undefined, guildID: string) {
-    return joinsound(userid, surl, guildID);
-  },
   async isBlacklistedUser(userID: string, guildID: string) {
     if (await checks(userID, guildID)) {
       return isBlacklistedUser(userID, guildID);
@@ -1041,18 +1007,7 @@ export default {
   getSettings(guildID: string) {
     return getSettings(guildID);
   },
-  async clrSalt(userid: string, G: Guild) {
-    const guildID = G.id;
-    await SaltModel.deleteMany({ guild: guildID, salter: userid });
-    await saltGuild(userid, guildID, 1, true);
-    await updateSaltKing(G);
-  },
-  async resetSalt(G: Guild) {
-    const guildID = G.id;
-    await SaltrankModel.deleteMany({ guild: guildID });
-    await SaltModel.deleteMany({ guild: guildID });
-    await updateSaltKing(G);
-  },
+
   async setNotification(guildID: string, cid: string | false) {
     await setNotChannel(guildID, cid);
   },
@@ -1065,23 +1020,6 @@ export default {
   },
   getPrefixE(guildID: string) {
     return getPrefix(guildID);
-  },
-  async setPrefixE(guildID: string, pref: string) {
-    await setPrefix(guildID, pref);
-    PREFIXES[guildID] = pref;
-    return pref;
-  },
-  async getPrefixesE(bot: Client) {
-    resetPrefixes();
-    const guilds = bot.guilds.cache.array();
-    asyncForEach(guilds, async (G) => {
-      PREFIXES[G.id] = await getPrefix(G.id);
-    });
-  },
-  async addVote(vote: Vote) {
-    const voteCreated = new VoteModel(vote);
-    await voteCreated.save();
-    return voteCreated.toObject();
   },
   toggleStillMuted(userID: string, guildID: string, add: boolean) {
     return toggleStillMuted(userID, guildID, add);

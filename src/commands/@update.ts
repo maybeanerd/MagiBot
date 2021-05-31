@@ -1,7 +1,33 @@
-﻿import { commandCategories } from '../types/enums';
+﻿import { TextChannel } from 'discord.js';
+import { commandCategories } from '../types/enums';
+// eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
-import data from '../db';
 import { magibotCommand } from '../types/magibot';
+import { asyncForEach } from '../bamands';
+import { getNotChannel, setSettings } from '../db';
+
+async function sendUpdate(update: string) {
+  await asyncForEach(bot.guilds.cache.array(), async (G) => {
+    if (G.available) {
+      const cid = await getNotChannel(G.id);
+      if (cid) {
+        const channel = G.channels.cache.get(cid) as TextChannel;
+        if (channel && G.me) {
+          const perms = channel.permissionsFor(G.me);
+          if (perms && perms.has('SEND_MESSAGES')) {
+            if (G.id === '380669498014957569') {
+              channel.send(`<@&460218236185739264> ${update}`);
+            } else {
+              channel.send(update);
+            }
+          }
+        } else {
+          await setSettings(G.id, { notChannel: false });
+        }
+      }
+    }
+  });
+}
 
 export const update: magibotCommand = {
   ehelp: () => [],
@@ -19,7 +45,7 @@ export const update: magibotCommand = {
           mess.delete();
           const frst = reacts.first();
           if (frst && frst.emoji.name === '☑') {
-            data.sendUpdate(content, bot);
+            sendUpdate(content);
             msg.channel.send(`Successfully sent:\n${content}`);
           } else if (reacts.first()) {
             msg.channel.send('successfully canceled update');

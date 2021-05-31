@@ -1,10 +1,30 @@
 ﻿import { MessageEmbedOptions } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
-
-import data from '../db';
 import { findMember, yesOrNo, findRole } from '../bamands';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
+import { getSettings } from '../db';
+
+async function setBlacklistedUser(
+  userid: string,
+  guildID: string,
+  insert: boolean,
+) {
+  const settings = await getSettings(guildID);
+  const { blacklistedUsers } = settings;
+  if (insert) {
+    if (!blacklistedUsers.includes(userid)) {
+      blacklistedUsers.push(userid);
+    }
+  } else {
+    const index = blacklistedUsers.indexOf(userid);
+    if (index > -1) {
+      blacklistedUsers.splice(index, 1);
+    }
+  }
+  settings.blacklistedUsers = blacklistedUsers;
+  await settings.save();
+}
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];
@@ -69,7 +89,7 @@ export const setup: magibotCommand = {
             'Successfully canceled ban.',
           )
         ) {
-          data.setBlacklistedUser(msg.guild!.id, uid, true);
+          setBlacklistedUser(msg.guild!.id, uid, true);
           msg.channel.send(
             `Successfully banned <@!${uid}> from using the bot.`,
           );
@@ -88,7 +108,7 @@ export const setup: magibotCommand = {
             'Successfully canceled unban.',
           )
         ) {
-          data.setBlacklistedUser(msg.guild!.id, uid, false);
+          setBlacklistedUser(msg.guild!.id, uid, false);
           msg.channel.send(
             `Successfully banned <@!${uid}> from using the bot.`,
           );
@@ -102,7 +122,7 @@ export const setup: magibotCommand = {
       if (msg.member) {
         const voiceChannel = msg.member.voice.channel;
         if (voiceChannel) {
-          const isJoinable = await data.isJoinable(
+          const isJoinable = await isJoinable( // TODO continue here
               msg.guild!.id,
               voiceChannel.id,
           );
@@ -233,9 +253,9 @@ export const setup: magibotCommand = {
         if (
           await yesOrNo(
             msg,
-            `Do you want to change the prefix in ${msg.guild!.name} from \`${
-              PREFIXES[msg.guild!.id]
-            }.\` to \`${mention}.\` ?`,
+            `Do you want to change the prefix in ${
+                msg.guild!.name
+            } from \`${PREFIXES.get(msg.guild!.id)}.\` to \`${mention}.\` ?`,
             'Cancelled changing the prefix.',
           )
         ) {
@@ -400,9 +420,9 @@ export const setup: magibotCommand = {
       break;
     default:
       msg.reply(
-        `this command doesn't exist. Use \`${
-          PREFIXES[msg.guild!.id]
-        }:help setup\` for more info.`,
+        `this command doesn't exist. Use \`${PREFIXES.get(
+            msg.guild!.id,
+        )}:help setup\` for more info.`,
       );
       break;
     }

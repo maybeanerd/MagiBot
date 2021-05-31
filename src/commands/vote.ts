@@ -1,7 +1,7 @@
-﻿import data from '../db';
-import { asyncForEach } from '../bamands';
+﻿import { asyncForEach } from '../bamands';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
+import { Vote, VoteModel } from '../db';
 
 const reactions = [
   '🇦',
@@ -39,6 +39,12 @@ function getTime(content: string) {
     return false;
   }
   return false;
+}
+
+async function addVote(vote: Vote) {
+  const voteCreated = new VoteModel(vote);
+  await voteCreated.save();
+  return voteCreated.toObject();
 }
 
 export const vote: magibotCommand = {
@@ -159,7 +165,7 @@ export const vote: magibotCommand = {
                                                   },
                                                 );
                                                 // vote structure
-                                                const vt = {
+                                                const vt: Vote = {
                                                   messageID: ms.id,
                                                   channelID: ms.channel.id,
                                                   options: args,
@@ -168,7 +174,7 @@ export const vote: magibotCommand = {
                                                   guildid: ms.guild!.id,
                                                   authorID,
                                                 };
-                                                await data.addVote(vt);
+                                                await addVote(vt);
                                               });
                                           } else if (reacts.first()) {
                                             msg.channel.send(

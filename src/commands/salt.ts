@@ -20,7 +20,7 @@ async function saltDowntimeDone(userid1: string, userid2: string) {
   return 2;
 }
 
-async function saltGuild(
+export async function saltGuild(
   salter: string,
   guildID: string,
   add = 1,
@@ -41,11 +41,11 @@ async function saltGuild(
   }
 }
 
-async function saltUp(
+export async function saltUp(
   salter: string,
   reporter: string,
-  admin: boolean,
   guild: Guild,
+  admin = false,
 ) {
   const time = await saltDowntimeDone(salter, reporter);
   if (time > 1 || admin) {
@@ -105,7 +105,7 @@ export const salt: magibotCommand = {
             msg.reply("you can't report bots!");
             return;
           }
-          const time = await saltUp(uid, msg.author.id, false, msg.guild);
+          const time = await saltUp(uid, msg.author.id, msg.guild);
           if (time === 0) {
             msg.channel.send(
               `Successfully reported ${mem} for being a salty bitch!`,
@@ -164,9 +164,9 @@ export const salt: magibotCommand = {
         break;
       default:
         msg.reply(
-          `this command doesn't exist. Use \`${
-            PREFIXES.get(msg.guild.id)
-          }.help salt\` for more info.`,
+          `this command doesn't exist. Use \`${PREFIXES.get(
+            msg.guild.id,
+          )}.help salt\` for more info.`,
         );
         break;
       }

@@ -73,7 +73,7 @@ module.exports = {
         msg.channel.send(`Successfully cleared all salt from <@!${uid}>!`);
         break;
       default:
-        msg.reply(`this command doesn't exist. Use \`${PREFIXES[msg.guild.id]}:help salt\` to get more info.`);
+        msg.reply(`this command doesn't exist. Use \`${PREFIXES.get(msg.guild.id)}:help salt\` to get more info.`);
         break;
       }
     } else {

@@ -56,7 +56,7 @@ export const roll: magibotCommand = {
     if (!throws) {
       msg.channel.send(
         `Your inputs could not be interpreted. Use \`${
-          PREFIXES[msg.guild!.id]
+          PREFIXES.get(msg.guild!.id)
         }.help roll\` for more info.`,
       );
       return;

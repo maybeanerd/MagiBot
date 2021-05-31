@@ -10,7 +10,7 @@ export const bug: magibotCommand = {
     if (!(content.length > 0)) {
       msg.reply(
         `you need to add info about the report after the command. Use \`${
-          PREFIXES[msg.guild!.id]
+          PREFIXES.get(msg.guild!.id)
         }.help bug\` to get more info.`,
       );
       return;
