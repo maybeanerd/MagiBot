@@ -309,16 +309,6 @@ export async function getUser(userid: string, guildID: string) {
   return result;
 }
 
-// TODO we might not even need this...
-export async function updateUser(
-  userid: string,
-  guildID: string,
-  // this was difficult to find, but is awesome
-  update: { [Property in keyof User]?: User[Property] },
-) {
-  await UserModel.updateOne({ userID: userid, guildID }, { $set: update });
-}
-
 async function firstSettings(guildID: string) {
   const settings = new SettingsModel({
     _id: guildID,
@@ -597,9 +587,13 @@ async function getSaltRole(guildID: string) {
   const set = await getSettings(guildID);
   return set.saltRole;
 }
-export async function setSettings(guildID: string, settings) {
+export async function setSettings(
+  guildID: string,
+  // this was difficult to find, but is awesome
+  update: { [Property in keyof Settings]?: Settings[Property] },
+) {
   if (await getSettings(guildID)) {
-    await SettingsModel.updateOne({ _id: guildID }, { $set: settings });
+    await SettingsModel.updateOne({ _id: guildID }, { $set: update });
   }
   return true;
 }

@@ -22,7 +22,7 @@ async function sendUpdate(update: string) {
             }
           }
         } else {
-          await setSettings(G.id, { notChannel: false });
+          await setSettings(G.id, { notChannel: undefined });
         }
       }
     }
