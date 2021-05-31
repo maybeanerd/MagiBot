@@ -775,13 +775,13 @@ export async function getPrefix(guildID: string) {
   return prefix;
 }
 
-async function getAdminRole(guildID: string) {
+export async function getAdminRoles(guildID: string) {
   const settings = await getSettings(guildID);
-  return settings.adminRoles as Array<string>;
+  return settings.adminRoles;
 }
 
 async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
-  const roles = await getAdminRole(guildID);
+  const roles = await getAdminRoles(guildID);
   if (insert) {
     if (!roles.includes(roleID)) {
       roles.push(roleID);
@@ -796,7 +796,7 @@ async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
   return setSettings(guildID, settings);
 }
 
-async function getCommandChannel(guildID: string) {
+export async function getCommandChannel(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.commandChannels;
 }

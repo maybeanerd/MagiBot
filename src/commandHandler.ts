@@ -1,4 +1,4 @@
-import Discord, { Message } from 'discord.js';
+import Discord, { GuildMember, Message } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { statcord } from './bot';
 import { vote } from './commands/vote';
@@ -26,13 +26,13 @@ import { update as _update } from './commands/@update';
 // we allow this cycle once, as the help command also needs to list itself
 import { help } from './commands/help'; // eslint-disable-line import/no-cycle
 
-import data from './db';
 import {
   PREFIXES, OWNERID, DELETE_COMMANDS, user,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { magibotCommand } from './types/magibot';
+import { getAdminRoles, isBlacklistedUser, getCommandChannel } from './db';
 
 export const commands: { [k: string]: magibotCommand } = {
   _dc,
@@ -72,6 +72,35 @@ If you can reproduce this, consider using \`${
 }.info\`) to tell us exactly how.`);
 }
 
+async function isAdmin(guildID: string, member: GuildMember) {
+  // checks for admin and Owner, they can always use
+  if (
+    member.hasPermission('ADMINISTRATOR', {
+      checkAdmin: true,
+      checkOwner: true,
+    })
+  ) {
+    return true;
+  }
+  // Owner of bot is always admin hehe
+  if (member.id === OWNERID) {
+    return true;
+  }
+  const roles = await getAdminRoles(guildID);
+  let ret = false;
+  roles.forEach((role) => {
+    if (member.roles.cache.has(role)) {
+      ret = true;
+    }
+  });
+  return ret;
+}
+
+async function commandAllowed(guildID: string, cid: string) {
+  const channels = await getCommandChannel(guildID);
+  return channels.length === 0 || channels.includes(cid);
+};
+
 const userCooldowns = new Set<string>();
 
 export async function checkCommand(msg: Discord.Message) {
@@ -96,7 +125,7 @@ export async function checkCommand(msg: Discord.Message) {
     return;
   }
   // ignore blacklisted users
-  if (await data.isBlacklistedUser(msg.author.id, msg.guild.id)) {
+  if (await isBlacklistedUser(msg.author.id, msg.guild.id)) {
     // we dont delete the message because this would delete everything that starts with the prefix
     /*     msg.delete(); */
     return;
@@ -140,7 +169,7 @@ export async function checkCommand(msg: Discord.Message) {
       if (!commands[command]) {
         return;
       }
-      if (!(msg.member && (await data.isAdmin(msg.guild.id, msg.member)))) {
+      if (!(msg.member && (await isAdmin(msg.guild.id, msg.member)))) {
         if (myPerms) {
           if (myPerms.has('MANAGE_MESSAGES')) {
             msg.delete();
@@ -163,7 +192,7 @@ export async function checkCommand(msg: Discord.Message) {
     ) {
       if (
         pre === ':'
-        || (await data.commandAllowed(msg.guild.id, msg.channel.id))
+        || (await commandAllowed(msg.guild.id, msg.channel.id))
       ) {
         const perms = commands[command].perm;
         if (!perms || (myPerms && myPerms.has(perms))) {
