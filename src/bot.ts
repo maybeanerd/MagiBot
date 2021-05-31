@@ -20,7 +20,6 @@ import {
   playedJoinsound,
 } from './statTracking';
 import {
-  startUp,
   checkGuild,
   getPrefix,
   StillMutedModel,
@@ -30,6 +29,7 @@ import {
   isJoinableVc,
 } from './db';
 import { asyncForEach } from './bamands';
+import { startUp } from './cronjobs';
 
 async function initializePrefixes(bot: Client) {
   resetPrefixes();
