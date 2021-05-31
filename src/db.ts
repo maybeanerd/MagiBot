@@ -727,17 +727,6 @@ export async function updateSaltKing(G: Guild) {
   }
 }
 
-async function getSalt(userid: string, guildID: string) {
-  const result = await SaltrankModel.findOne({
-    salter: userid,
-    guild: guildID,
-  });
-  if (!result) {
-    return 0;
-  }
-  return result.salt;
-}
-
 export async function isJoinableVc(guildID: string, channelID: string) {
   const settings = await getSettings(guildID);
   return settings.joinChannels.includes(channelID);
@@ -809,22 +798,6 @@ export async function isAdmin(guildID: string, member: GuildMember) {
   return ret;
 }
 
-async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
-  const roles = await getAdminRoles(guildID);
-  if (insert) {
-    if (!roles.includes(roleID)) {
-      roles.push(roleID);
-    }
-  } else {
-    const index = roles.indexOf(roleID);
-    if (index > -1) {
-      roles.splice(index, 1);
-    }
-  }
-  const settings = { adminRoles: roles };
-  return setSettings(guildID, settings);
-}
-
 export async function getCommandChannels(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.commandChannels;
@@ -834,6 +807,12 @@ export async function isBlacklistedUser(userid: string, guildID: string) {
   const settings = await getSettings(guildID);
   const users = settings.blacklistedUsers;
   return users.includes(userid);
+}
+
+export function startUp(bot: Client) {
+  // repeating functions:
+  onHour(bot, true);
+  voteCheck(bot);
 }
 
 /* eslint-disable */
@@ -849,154 +828,3 @@ async function setBlacklistedEveryone(
   insert: boolean
 ) {}
 /* eslint-enable */
-
-export function startUp(bot: Client) {
-  // repeating functions:
-  onHour(bot, true);
-  voteCheck(bot);
-}
-/*
-export default {
-  async startup(bot: Client) {
-    // repeating functions:
-    onHour(bot, true);
-    voteCheck(bot);
-  },
-  async getUser(userid: string, guildID: string) {
-    const result = await getuser(userid, guildID);
-    return result;
-  },
-  usageUp(userid: string, guildID: string) {
-    usageUp(userid, guildID);
-  },
-  async saltUp(userid1: string, userid2: string, G: Guild) {
-    const ret = await saltUp(userid1, userid2, false, G.id);
-    updateSaltKing(G);
-    return ret;
-  },
-
-  getSalt(userid: string, guildID: string) {
-    return getSalt(userid, guildID);
-  },
-  async getUsage(userid: string, guildID: string) {
-    const user = await getuser(userid, guildID);
-    return user.botusage;
-  },
-
-  async addGuild(guildID: string) {
-    await checkGuild(guildID);
-  },
-  topSalt(guildID: string) {
-    return topSalt(guildID);
-  },
-  async joinable(guildID: string, cid: string) {
-    const channels = await getJoinChannel(guildID);
-    return channels.includes(cid);
-  },
-  async isAdmin(guildID: string, user: GuildMember) {
-    // checks for admin and Owner, they can always use
-    if (
-      user.hasPermission('ADMINISTRATOR', {
-        checkAdmin: true,
-        checkOwner: true,
-      })
-    ) {
-      return true;
-    }
-    // Owner is always admin hehe
-    if (user.id === OWNERID) {
-      return true;
-    }
-    const roles = await getAdminRole(guildID);
-    let ret = false;
-    roles.forEach((role) => {
-      if (user.roles.cache.has(role)) {
-        ret = true;
-      }
-    });
-    return ret;
-  },
-  isAdminRole: async (guildID: string, adminRole: string) => {
-    const roles = await getAdminRole(guildID);
-    let ret = false;
-    roles.forEach((role) => {
-      if (adminRole === role) {
-        ret = true;
-      }
-    });
-    return ret;
-  },
-  async commandAllowed(guildID: string, cid: string) {
-    const channels = await getCommandChannel(guildID);
-    return channels.length === 0 || channels.includes(cid);
-  },
-  async isCommandChannel(guildID: string, cid: string) {
-    const channels = await getCommandChannel(guildID);
-    return channels.includes(cid);
-  },
-  async commandChannel(guildID: string) {
-    const channels = await getCommandChannel(guildID);
-    let out = '';
-    channels.forEach((channel: string) => {
-      out += ` <#${channel}>`;
-    });
-    return out;
-  },
-  async getSound(userid: string, guildID: string) {
-    const user = await getuser(userid, guildID);
-    return user.sound;
-  },
-  async isBlacklistedUser(userID: string, guildID: string) {
-    if (await checks(userID, guildID)) {
-      return isBlacklistedUser(userID, guildID);
-    }
-    return false;
-  },
-  setJoinable(guildID: string, channelID: string, insert: boolean) {
-    return setJoinChannel(guildID, channelID, insert);
-  },
-  isJoinable: async (guildID: string, channelID: string) => {
-    const channels = await getJoinChannel(guildID);
-    return channels.includes(channelID);
-  },
-  setCommandChannel(guildID: string, channelID: string, insert: boolean) {
-    return setCommandChannel(guildID, channelID, insert);
-  },
-  setAdmin(guildID: string, roleID: string, insert: boolean) {
-    return setAdminRole(guildID, roleID, insert);
-  },
-  async setBlacklistedUser(guildID: string, userID: string, insert: boolean) {
-    if (await checks(userID, guildID)) {
-      return setBlacklistedUser(userID, guildID, insert);
-    }
-    return false;
-  },
-  getSettings(guildID: string) {
-    return getSettings(guildID);
-  },
-
-  async setNotification(guildID: string, cid: string | false) {
-    await setNotChannel(guildID, cid);
-  },
-  isNotChannel: async (guildID: string, channID: string) => {
-    const notChann = await getNotChannel(guildID);
-    return channID === notChann;
-  },
-  sendUpdate(update: string, bot: Client) {
-    sendUpdate(update, bot);
-  },
-  getPrefixE(guildID: string) {
-    return getPrefix(guildID);
-  },
-  toggleStillMuted(userID: string, guildID: string, add: boolean) {
-    return toggleStillMuted(userID, guildID, add);
-  },
-  async isStillMuted(userID: string, guildID: string) {
-    const find = await StillMutedModel.findOne({
-      userid: userID,
-      guildid: guildID,
-    });
-    return find;
-  },
-};
- */
