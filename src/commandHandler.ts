@@ -34,7 +34,7 @@ import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { magibotCommand } from './types/magibot';
 import {
   isBlacklistedUser,
-  getCommandChannel,
+  getCommandChannels,
   getUser,
   isAdmin,
 } from './db';
@@ -78,7 +78,7 @@ If you can reproduce this, consider using \`${
 }
 
 async function commandAllowed(guildID: string, cid: string) {
-  const channels = await getCommandChannel(guildID);
+  const channels = await getCommandChannels(guildID);
   return channels.length === 0 || channels.includes(cid);
 }
 
@@ -90,7 +90,7 @@ async function usageUp(userid: string, guildID: string) {
 }
 
 async function printCommandChannels(guildID: string) {
-  const channels = await getCommandChannel(guildID);
+  const channels = await getCommandChannels(guildID);
   let out = '';
   channels.forEach((channel: string) => {
     out += ` <#${channel}>`;

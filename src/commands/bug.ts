@@ -1,4 +1,5 @@
 ﻿import { TextChannel } from 'discord.js';
+// eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
 import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';

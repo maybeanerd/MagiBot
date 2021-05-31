@@ -1,5 +1,4 @@
-﻿import { PREFIXES, user } from '../shared_assets';
-import data from '../db';
+﻿/*  import { PREFIXES, user } from '../shared_assets';
 import {
   findMember,
 } from '../bamands';
@@ -88,3 +87,8 @@ module.exports = {
   hide: false,
   category: 'Utility',
 };
+
+ */
+
+// so that TS doesnt have any issues:
+export {};

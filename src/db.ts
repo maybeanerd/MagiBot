@@ -738,9 +738,17 @@ async function getSalt(userid: string, guildID: string) {
   return result.salt;
 }
 
-function setPrefix(guildID: string, pref?: string) {
-  return setSettings(guildID, { prefix: pref });
+export async function isJoinableVc(guildID: string, channelID: string) {
+  const settings = await getSettings(guildID);
+  return settings.joinChannels.includes(channelID);
 }
+
+export async function setPrefix(guildID: string, prefix: string) {
+  return setSettings(guildID, {
+    prefix,
+  });
+}
+
 export async function getPrefix(guildID: string) {
   const settings = await getSettings(guildID);
   const { prefix } = settings;
@@ -751,7 +759,11 @@ export async function getPrefix(guildID: string) {
   return prefix;
 }
 
-export async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
+export async function toggleStillMuted(
+  userID: string,
+  guildID: string,
+  add: boolean,
+) {
   if (
     add
     && !(
@@ -768,7 +780,7 @@ export async function toggleStillMuted(userID: string, guildID: string, add: boo
   }
 }
 
-async function getAdminRoles(guildID: string) {
+export async function getAdminRoles(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.adminRoles;
 }
@@ -813,59 +825,14 @@ async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
   return setSettings(guildID, settings);
 }
 
-export async function getCommandChannel(guildID: string) {
+export async function getCommandChannels(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.commandChannels;
 }
 
-async function setCommandChannel(
-  guildID: string,
-  cid: string,
-  insert: boolean,
-) {
-  const channels = await getCommandChannel(guildID);
-  if (insert) {
-    if (!channels.includes(cid)) {
-      channels.push(cid);
-    }
-  } else {
-    const index = channels.indexOf(cid);
-    if (index > -1) {
-      channels.splice(index, 1);
-    }
-  }
-  const settings = { commandChannels: channels };
-  return setSettings(guildID, settings);
-}
-
-async function getJoinChannel(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.joinChannels;
-}
-
-async function setJoinChannel(guildID: string, cid: string, insert: boolean) {
-  const channels = await getJoinChannel(guildID);
-  if (insert) {
-    if (!channels.includes(cid)) {
-      channels.push(cid);
-    }
-  } else {
-    const index = channels.indexOf(cid);
-    if (index > -1) {
-      channels.splice(index, 1);
-    }
-  }
-  const settings = { joinChannels: channels };
-  return setSettings(guildID, settings);
-}
-
-async function getBlacklistedUser(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.blacklistedUsers;
-}
-
 export async function isBlacklistedUser(userid: string, guildID: string) {
-  const users = await getBlacklistedUser(guildID);
+  const settings = await getSettings(guildID);
+  const users = settings.blacklistedUsers;
   return users.includes(userid);
 }
 

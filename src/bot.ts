@@ -24,10 +24,10 @@ import {
   checkGuild,
   getPrefix,
   StillMutedModel,
-  getSettings,
   isBlacklistedUser,
   getUser,
   toggleStillMuted,
+  isJoinableVc,
 } from './db';
 import { asyncForEach } from './bamands';
 
@@ -45,11 +45,6 @@ async function isStillMuted(userID: string, guildID: string) {
     guildid: guildID,
   });
   return Boolean(find);
-}
-
-async function isJoinableVc(guildID: string, channelID: string) {
-  const settings = await getSettings(guildID);
-  return settings.joinChannels.includes(channelID);
 }
 export const bot = new Discord.Client();
 

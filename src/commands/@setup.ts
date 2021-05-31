@@ -3,7 +3,16 @@ import { COLOR, PREFIXES } from '../shared_assets';
 import { findMember, yesOrNo, findRole } from '../bamands';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
-import { getSettings } from '../db';
+import {
+  getSettings,
+  isJoinableVc,
+  getAdminRoles,
+  getNotChannel,
+  setSettings,
+  getCommandChannels,
+  getPrefix,
+  setPrefix,
+} from '../db';
 
 async function setBlacklistedUser(
   userid: string,
@@ -23,6 +32,88 @@ async function setBlacklistedUser(
     }
   }
   settings.blacklistedUsers = blacklistedUsers;
+  await settings.save();
+}
+
+async function setJoinChannel(
+  guildID: string,
+  cid: string,
+  setActive: boolean,
+) {
+  const settings = await getSettings(guildID);
+  const { joinChannels } = settings;
+  if (setActive) {
+    if (!joinChannels.includes(cid)) {
+      joinChannels.push(cid);
+    }
+  } else {
+    const index = joinChannels.indexOf(cid);
+    if (index > -1) {
+      joinChannels.splice(index, 1);
+    }
+  }
+  settings.joinChannels = joinChannels;
+  await settings.save();
+}
+
+async function isAdminRole(guildID: string, role: string) {
+  const roles = await getAdminRoles(guildID);
+  let ret = false;
+  roles.forEach((adminRole) => {
+    if (role === adminRole) {
+      ret = true;
+    }
+  });
+  return ret;
+}
+
+async function setAdminRole(guildID: string, roleID: string, insert: boolean) {
+  const roles = await getAdminRoles(guildID);
+  if (insert) {
+    if (!roles.includes(roleID)) {
+      roles.push(roleID);
+    }
+  } else {
+    const index = roles.indexOf(roleID);
+    if (index > -1) {
+      roles.splice(index, 1);
+    }
+  }
+  const settings = { adminRoles: roles };
+  return setSettings(guildID, settings);
+}
+
+async function isCommandChannel(guildID: string, cid: string) {
+  const channels = await getCommandChannels(guildID);
+  return channels.includes(cid);
+}
+
+async function setCommandChannel(
+  guildID: string,
+  cid: string,
+  insert: boolean,
+) {
+  const channels = await getCommandChannels(guildID);
+  if (insert) {
+    if (!channels.includes(cid)) {
+      channels.push(cid);
+    }
+  } else {
+    const index = channels.indexOf(cid);
+    if (index > -1) {
+      channels.splice(index, 1);
+    }
+  }
+  const settings = { commandChannels: channels };
+  return setSettings(guildID, settings);
+}
+
+async function setNotificationChannel(
+  guildID: string,
+  notChannel: string | undefined,
+) {
+  const settings = await getSettings(guildID);
+  settings.notChannel = notChannel;
   await settings.save();
 }
 
@@ -122,7 +213,7 @@ export const setup: magibotCommand = {
       if (msg.member) {
         const voiceChannel = msg.member.voice.channel;
         if (voiceChannel) {
-          const isJoinable = await isJoinable( // TODO continue here
+          const isJoinable = await isJoinableVc(
               msg.guild!.id,
               voiceChannel.id,
           );
@@ -137,11 +228,7 @@ export const setup: magibotCommand = {
               `Cancelled ${de}activating joinsounds in **${voiceChannel.name}**.`,
             )
           ) {
-            await data.setJoinable(
-                msg.guild!.id,
-                voiceChannel.id,
-                !isJoinable,
-            );
+            await setJoinChannel(msg.guild!.id, voiceChannel.id, !isJoinable);
             msg.channel.send(
               `Successfully ${de}activated joinsounds in **${voiceChannel.name}**.`,
             );
@@ -159,7 +246,7 @@ export const setup: magibotCommand = {
       // eslint-disable-next-line no-case-declarations
       const rid = await findRole(msg.guild!, mention);
       if (mention && rid) {
-        if (!(await data.isAdminRole(msg.guild!.id, rid))) {
+        if (!(await isAdminRole(msg.guild!.id, rid))) {
           if (
             await yesOrNo(
               msg,
@@ -167,7 +254,7 @@ export const setup: magibotCommand = {
               `Cancelled setting <@&${rid}> as admin role`,
             )
           ) {
-            await data.setAdmin(msg.guild!.id, rid, true);
+            await setAdminRole(msg.guild!.id, rid, true);
             msg.channel.send(`Successfully set <@&${rid}> as admin role!`);
           }
         } else if (
@@ -177,7 +264,7 @@ export const setup: magibotCommand = {
             `Cancelled removing <@&${rid}> from the admin roles`,
           )
         ) {
-          await data.setAdmin(msg.guild!.id, rid, false);
+          await setAdminRole(msg.guild!.id, rid, false);
           msg.channel.send(
             `Successfully removed <@&${rid}> from the admin roles!`,
           );
@@ -188,12 +275,12 @@ export const setup: magibotCommand = {
       break;
     case 'command':
       // eslint-disable-next-line no-case-declarations
-      const isCommandChannel = await data.isCommandChannel(
+      const currentlyIsCommandChannel = await isCommandChannel(
           msg.guild!.id,
           msg.channel.id,
       );
       de = '';
-      if (isCommandChannel) {
+      if (currentlyIsCommandChannel) {
         de = 'de';
       }
       if (
@@ -203,10 +290,10 @@ export const setup: magibotCommand = {
           `Cancelled ${de}activating commands in <#${msg.channel.id}>`,
         )
       ) {
-        await data.setCommandChannel(
+        await setCommandChannel(
             msg.guild!.id,
             msg.channel.id,
-            !isCommandChannel,
+            !currentlyIsCommandChannel,
         );
         msg.channel.send(
           `Successfully ${de}activated commands in <#${msg.channel.id}>.`,
@@ -215,10 +302,8 @@ export const setup: magibotCommand = {
       break;
     case 'notification':
       // eslint-disable-next-line no-case-declarations
-      const isNotChann = await data.isNotChannel(
-          msg.guild!.id,
-          msg.channel.id,
-      );
+      const isNotChann = msg.channel.id === (await getNotChannel(msg.guild!.id));
+
       if (!isNotChann) {
         if (
           await yesOrNo(
@@ -227,7 +312,7 @@ export const setup: magibotCommand = {
             `Cancelled activating notifications in <#${msg.channel.id}>`,
           )
         ) {
-          await data.setNotification(msg.guild!.id, msg.channel.id);
+          await setNotificationChannel(msg.guild!.id, msg.channel.id);
           msg.channel
             .send(
               `Successfully activated notifications in <#${msg.channel.id}>.`,
@@ -244,7 +329,7 @@ export const setup: magibotCommand = {
           `Cancelled deactivating notifications in <#${msg.channel.id}>`,
         )
       ) {
-        await data.setNotification(msg.guild!.id, false);
+        await setNotificationChannel(msg.guild!.id, undefined);
         msg.channel.send('Successfully deactivated notifications.');
       }
       break;
@@ -259,7 +344,7 @@ export const setup: magibotCommand = {
             'Cancelled changing the prefix.',
           )
         ) {
-          const newpref = await data.setPrefixE(msg.guild!.id, mention);
+          const newpref = await setPrefix(msg.guild!.id, mention);
           if (newpref) {
             msg.channel.send(
               `Successfully changed prefix to \`${newpref}.\` !`,
@@ -279,11 +364,11 @@ export const setup: magibotCommand = {
           value: string;
           inline: boolean;
         }> = [];
-      const set = await data.getSettings(msg.guild!.id);
+      const set = await getSettings(msg.guild!.id);
 
       info.push({
         name: 'Prefix',
-        value: `${await data.getPrefixE(msg.guild!.id)}.`,
+        value: `${await getPrefix(msg.guild!.id)}.`,
         inline: false,
       });
 
@@ -330,7 +415,7 @@ export const setup: magibotCommand = {
           if (chann) {
             str += `${chann.name}, `;
           } else {
-            data.setJoinable(guild!.id, com, false);
+            setJoinChannel(guild!.id, com, false);
           }
         });
         str = str.substring(0, str.length - 2);
