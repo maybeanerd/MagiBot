@@ -64,6 +64,8 @@ async function saltUp(
   return time;
 }
 
+// TODO we might want to add even more of the DB logic into here
+
 function printHelp(msg: Message) {
   const info: Array<{ name: string; value: string }> = [];
   info.push({
@@ -163,7 +165,7 @@ export const salt: magibotCommand = {
       default:
         msg.reply(
           `this command doesn't exist. Use \`${
-            PREFIXES[msg.guild.id]
+            PREFIXES.get(msg.guild.id)
           }.help salt\` for more info.`,
         );
         break;

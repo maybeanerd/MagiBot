@@ -217,7 +217,9 @@ UserModel.aggregate([
     duplicateUsers
       .filter((u) => u.count > 1)
       .forEach(async (u) => {
+        // eslint-disable-next-line no-underscore-dangle
         await UserModel.deleteMany(u._id);
+        // eslint-disable-next-line no-underscore-dangle
         console.log('Deleted user', u._id);
       });
   }
@@ -327,14 +329,14 @@ async function firstSettings(guildID: string) {
   await settings.save();
   return settings;
 }
-async function getSettings(guildID: string) {
+export async function getSettings(guildID: string) {
   let result = await SettingsModel.findById(guildID);
   if (!result) {
     result = await firstSettings(guildID);
   }
   return result;
 }
-async function checkGuild(id: string) {
+export async function checkGuild(id: string) {
   // create settings
   if (await getSettings(id)) {
     return true;
@@ -580,22 +582,6 @@ async function voteCheck(bot: Client) {
   // endof vote stuff
 }
 
-async function toggleStillMuted(userID: string, guildID: string, add: boolean) {
-  if (
-    add
-    && !(
-      (await StillMutedModel.find({
-        userid: userID,
-        guildid: guildID,
-      }).count()) > 0
-    )
-  ) {
-    const newMute = new StillMutedModel({ userid: userID, guildid: guildID });
-    await newMute.save();
-  } else if (!add) {
-    await StillMutedModel.deleteMany({ userid: userID, guildid: guildID });
-  }
-}
 async function getSaltKing(guildID: string) {
   const settings = await getSettings(guildID);
   return settings.saltKing;
@@ -776,18 +762,10 @@ async function usageUp(userid: string, guildID: string) {
   updateUser(userid, { $set: { botusage: updateval } }, guildID);
 }
 
-async function checks(userid: string, guildID: string) {
-  // maybe add more checks
-  if (await getuser(userid, guildID)) {
-    return true;
-  }
-  // else
-  return false;
-}
 function setPrefix(guildID: string, pref?: string) {
   return setSettings(guildID, { prefix: pref });
 }
-async function getPrefix(guildID: string) {
+export async function getPrefix(guildID: string) {
   const settings = await getSettings(guildID);
   const { prefix } = settings;
   if (!prefix) {
@@ -869,12 +847,12 @@ async function getBlacklistedUser(guildID: string) {
   return settings.blacklistedUsers;
 }
 
-async function isBlacklistedUser(userid: string, guildID: string) {
+export async function isBlacklistedUser(userid: string, guildID: string) {
   const users = await getBlacklistedUser(guildID);
   return users.includes(userid);
 }
 
-async function setBlacklistedUser(
+export async function setBlacklistedUser(
   userid: string,
   guildID: string,
   insert: boolean,
@@ -917,6 +895,12 @@ async function joinsound(
     await UserModel.updateOne({ userID: userid, guildID }, update);
   }
   return true;
+}
+
+export function startUp(bot:Client) {
+  // repeating functions:
+  onHour(bot, true);
+  voteCheck(bot);
 }
 /*
 export default {

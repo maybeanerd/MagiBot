@@ -12,10 +12,8 @@ export const ERROR_COLOR = 0x0000ff;
 export const INFO_COLOR = 0x0000ff;
 export const SIGN = 'MagiBot - created by T0TProduction#0001';
 // eslint-disable-next-line import/no-mutable-exports
-export let PREFIXES: {
-  [k: string]: string;
-} = {};
-export const queueVoiceChannels: { [key: string]: string } = {};
+export const PREFIXES: Map<string, string> = new Map();
+export const queueVoiceChannels: Map<string, string> = new Map();
 
 export function sendNotification(
   info: string,
@@ -43,5 +41,5 @@ export function user() {
   return bot_user;
 }
 export function resetPrefixes() {
-  PREFIXES = {};
+  PREFIXES.clear();
 }
