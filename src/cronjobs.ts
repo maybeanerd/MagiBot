@@ -1,7 +1,6 @@
 ﻿import { Client, TextChannel, Message } from 'discord.js';
 import { asyncForEach } from './bamands';
 import {
-  checkGuild,
   SaltModel,
   SaltrankModel,
   SettingsModel,
@@ -10,6 +9,7 @@ import {
   Vote,
   VoteModel,
 } from './db';
+import { checkGuild } from './dbHelpers';
 import config from './token';
 
 if (!config.dburl) {

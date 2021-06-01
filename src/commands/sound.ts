@@ -1,6 +1,6 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getUser } from '../db';
+import { getUser } from '../dbHelpers';
 import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';

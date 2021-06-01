@@ -4,7 +4,7 @@ import { commandCategories } from '../types/enums';
 // we allow this cycle once, as the help command also needs to list itself
 import { commands } from '../commandHandler'; // eslint-disable-line import/no-cycle
 import { magibotCommand } from '../types/magibot';
-import { isAdmin } from '../db';
+import { isAdmin } from '../dbHelpers';
 
 export const help: magibotCommand = {
   name: 'help',

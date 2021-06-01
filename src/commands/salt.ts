@@ -3,9 +3,8 @@ import * as cmds from '../bamands';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
 import { magibotCommand } from '../types/magibot';
-import {
-  SaltModel, SaltrankModel, updateSaltKing, topSalt,
-} from '../db';
+import { SaltModel, SaltrankModel } from '../db';
+import { updateSaltKing, topSalt } from '../dbHelpers';
 
 async function saltDowntimeDone(userid1: string, userid2: string) {
   // get newest entry in salt
