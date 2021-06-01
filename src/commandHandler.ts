@@ -37,7 +37,7 @@ import {
   getCommandChannels,
   getUser,
   isAdmin,
-} from './db';
+} from './dbHelpers';
 
 export const commands: { [k: string]: magibotCommand } = {
   _dc,

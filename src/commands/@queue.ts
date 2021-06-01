@@ -6,7 +6,7 @@ import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { userJoinedQueue } from '../statTracking';
 import { magibotCommand } from '../types/magibot';
-import { isAdmin, toggleStillMuted } from '../db';
+import { isAdmin, toggleStillMuted } from '../dbHelpers';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
@@ -212,7 +212,9 @@ export const queue: magibotCommand = {
                                     time,
                                   },
                                 );
-                                const deleteme = await (chann as TextChannel).send(
+                                const deleteme = await (
+                                  chann as TextChannel
+                                ).send(
                                   `Started queue **${topic}** on server **${mess4.guild}**`,
                                 );
                                 used[msg.guild!.id] = {
@@ -257,9 +259,7 @@ export const queue: magibotCommand = {
                                         userJoinedQueue();
                                         if (activeUser) {
                                           queuedUsers.push(userThatReacted);
-                                          const reactn = mess4.reactions.cache.get(
-                                            '❌',
-                                          );
+                                          const reactn = mess4.reactions.cache.get('❌');
                                           if (reactn) {
                                             reactn.users.remove(
                                               userThatReacted,
@@ -322,9 +322,7 @@ export const queue: magibotCommand = {
                                             topic,
                                           ),
                                         );
-                                        const reactn = mess4.reactions.cache.get(
-                                          '☑',
-                                        );
+                                        const reactn = mess4.reactions.cache.get('☑');
                                         if (reactn) {
                                           reactn.users.remove(activeUser);
                                         }
@@ -364,9 +362,7 @@ export const queue: magibotCommand = {
                                           && userThatReacted.id !== user().id
                                       ) {
                                         r.users.remove(userThatReacted);
-                                        const rctn = mess4.reactions.cache.get(
-                                          '☑',
-                                        );
+                                        const rctn = mess4.reactions.cache.get('☑');
                                         if (rctn) {
                                           rctn.users.remove(userThatReacted);
                                         }

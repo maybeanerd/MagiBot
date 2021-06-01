@@ -22,12 +22,12 @@ import {
 import {
   checkGuild,
   getPrefix,
-  StillMutedModel,
   isBlacklistedUser,
   getUser,
   toggleStillMuted,
   isJoinableVc,
-} from './db';
+} from './dbHelpers';
+import { StillMutedModel } from './db';
 import { asyncForEach } from './bamands';
 import { startUp } from './cronjobs';
 

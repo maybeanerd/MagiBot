@@ -12,7 +12,7 @@ import {
   getCommandChannels,
   getPrefix,
   setPrefix,
-} from '../db';
+} from '../dbHelpers';
 
 async function setBlacklistedUser(
   userid: string,

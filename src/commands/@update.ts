@@ -4,7 +4,7 @@ import { commandCategories } from '../types/enums';
 import { bot } from '../bot';
 import { magibotCommand } from '../types/magibot';
 import { asyncForEach } from '../bamands';
-import { getNotChannel, setSettings } from '../db';
+import { getNotChannel, setSettings } from '../dbHelpers';
 
 async function sendUpdate(update: string) {
   await asyncForEach(bot.guilds.cache.array(), async (G) => {

@@ -3,7 +3,8 @@ import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
 import { findMember } from '../bamands';
 import { magibotCommand } from '../types/magibot';
-import { SaltrankModel, getUser } from '../db';
+import { SaltrankModel } from '../db';
+import { getUser } from '../dbHelpers';
 
 async function getSalt(userid: string, guildID: string) {
   const result = await SaltrankModel.findOne({
@@ -28,9 +29,9 @@ export const profile: magibotCommand = {
         id = msg.author.id;
       } else if (!id) {
         msg.reply(
-          ` you need to define the user uniquely or not mention any user. For more help use \`${
-            PREFIXES.get(msg.guild.id)
-          }.help profile\``,
+          ` you need to define the user uniquely or not mention any user. For more help use \`${PREFIXES.get(
+            msg.guild.id,
+          )}.help profile\``,
         );
         return;
       }
@@ -40,7 +41,7 @@ export const profile: magibotCommand = {
         inline: boolean;
       }> = [];
       const salt = await getSalt(id, msg.guild.id);
-      const { botusage, sound } = (await getUser(id, msg.guild.id));
+      const { botusage, sound } = await getUser(id, msg.guild.id);
       info.push({
         name: 'Saltlevel',
         value: String(salt),
