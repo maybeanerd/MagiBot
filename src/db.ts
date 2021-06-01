@@ -254,6 +254,7 @@ const voteSchema = new mongoose.Schema<Vote, Model<Vote>>(
     date: {
       type: Date,
       required: true,
+      index: true,
     },
     guildid: {
       type: String,
