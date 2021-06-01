@@ -31,9 +31,9 @@ async function firstSettings(guildID: string) {
     joinChannels: [],
     blacklistedUsers: [],
     blacklistedEveryone: [],
-    saltKing: false,
-    saltRole: false,
-    notChannel: false,
+    saltKing: undefined,
+    saltRole: undefined,
+    notChannel: undefined,
     prefix: config.prefix,
     lastConnected: new Date(),
   });
