@@ -215,7 +215,7 @@ export async function checkCommand(msg: Discord.Message) {
           // endof cooldown management
         } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
           msg.channel.send(
-            `I don't have the permissions needed for this command. (${perms}) `,
+            `I don't have all the permissions needed for this command: (${perms}) `,
           );
         }
       } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
