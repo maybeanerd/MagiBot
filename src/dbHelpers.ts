@@ -4,7 +4,7 @@ import {
 } from './db';
 import { OWNERID } from './shared_assets';
 
-import config from './token';
+import config from './configuration';
 
 export async function getUser(userid: string, guildID: string) {
   const result = await UserModel.findOneAndUpdate(

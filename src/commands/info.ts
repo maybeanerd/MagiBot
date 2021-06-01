@@ -4,6 +4,8 @@ import { COLOR, user, SIGN } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
+const inviteURL = 'https://discord.com/api/oauth2/authorize?client_id=384820232583249921&permissions=276130929&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot';
+
 export const inf: magibotCommand = {
   dev: false,
   name: 'info',
@@ -16,8 +18,7 @@ export const inf: magibotCommand = {
 
     info.push({
       name: 'Links',
-      value:
-        '[Invite me to your guild](https://discordapp.com/oauth2/authorize?client_id=384820232583249921&permissions=8&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot)\n[Official support Discord](https://discord.gg/2Evcf4T)',
+      value: `[Invite me to your guild](${inviteURL})\n[Official support Discord](https://discord.gg/2Evcf4T)`,
       inline: false,
     });
 
