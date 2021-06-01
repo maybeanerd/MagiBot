@@ -186,7 +186,7 @@ const userSchema = new mongoose.Schema<User, Model<User>>(
 userSchema.index({ userID: 1, guildID: -1 }, { unique: true });
 export const UserModel = mongoose.model('users', userSchema);
 
-const deleteDuplicateUsers = false;
+const deleteDuplicateUsers = true;
 // TODO check if we have duplicates on live
 UserModel.aggregate([
   {
@@ -213,10 +213,12 @@ UserModel.aggregate([
     duplicateUsers
       .filter((u) => u.count > 1)
       .forEach(async (u) => {
-        // eslint-disable-next-line no-underscore-dangle
-        await UserModel.deleteMany(u._id);
-        // eslint-disable-next-line no-underscore-dangle
-        console.log('Deleted user', u._id);
+        for (let i = 1; i < u.count; i++) {
+          // eslint-disable-next-line no-underscore-dangle, no-await-in-loop
+          await UserModel.deleteOne(u._id);
+          // eslint-disable-next-line no-underscore-dangle
+          console.log('Deleted user', u._id, 'run', i, 'of', u.count - 1);
+        }
       });
   }
 });
