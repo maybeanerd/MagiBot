@@ -1,7 +1,7 @@
 ﻿import Discord, { Client, DiscordAPIError, Guild } from 'discord.js';
 import Statcord from 'statcord.js';
 import { handle } from 'blapi';
-import config from './token';
+import config from './configuration';
 import {
   PREFIX,
   PREFIXES,

@@ -1,5 +1,5 @@
 import Discord, { ClientUser } from 'discord.js';
-import config from './token';
+import config from './configuration';
 
 export const OWNERID = config.owner;
 export const PREFIX = config.prefix;

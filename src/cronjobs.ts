@@ -10,7 +10,7 @@ import {
   VoteModel,
 } from './db';
 import { checkGuild } from './dbHelpers';
-import config from './token';
+import config from './configuration';
 
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
