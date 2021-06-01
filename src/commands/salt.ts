@@ -177,7 +177,7 @@ export const salt: magibotCommand = {
   ehelp(msg: Message) {
     return printHelp(msg);
   },
-  perm: 'SEND_MESSAGES',
+  perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
   admin: false,
   hide: false,
   category: commandCategories.fun,

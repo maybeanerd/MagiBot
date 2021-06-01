@@ -10,7 +10,7 @@ export const help: magibotCommand = {
   name: 'help',
   category: commandCategories.misc,
   admin: false,
-  perm: 'SEND_MESSAGES',
+  perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
   main: async function main(content, msg) {
     if (!msg.guild) {
       return;

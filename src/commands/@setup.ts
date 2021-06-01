@@ -468,7 +468,7 @@ export const setup: magibotCommand = {
       }); */
 
       if (!set.saltKing) {
-        str = 'None';
+        str = 'Empty';
       } else {
         str = `<@${set.saltKing}>`;
       }
@@ -478,7 +478,7 @@ export const setup: magibotCommand = {
         inline: false,
       });
       if (!set.saltRole) {
-        str = 'None';
+        str = 'Empty';
       } else {
         str = `<@&${set.saltRole}>`;
       }
@@ -488,7 +488,7 @@ export const setup: magibotCommand = {
         inline: false,
       });
       if (!set.notChannel) {
-        str = 'None';
+        str = 'Empty';
       } else {
         str = `<#${set.notChannel}>`;
       }
@@ -524,7 +524,7 @@ export const setup: magibotCommand = {
   ehelp() {
     return printHelp();
   },
-  perm: 'SEND_MESSAGES',
+  perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
   admin: true,
   hide: false,
   category: commandCategories.util,
