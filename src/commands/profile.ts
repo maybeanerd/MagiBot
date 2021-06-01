@@ -83,7 +83,7 @@ export const profile: magibotCommand = {
       },
     ];
   },
-  perm: 'SEND_MESSAGES',
+  perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
   admin: false,
   hide: false,
   category: commandCategories.util,

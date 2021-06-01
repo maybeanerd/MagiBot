@@ -91,7 +91,7 @@ Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
   ehelp() {
     return [{ name: '', value: 'Get some stats from the bot.' }];
   },
-  perm: 'SEND_MESSAGES',
+  perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
   admin: false,
   hide: false,
   category: commandCategories.misc,
