@@ -158,7 +158,7 @@ async function startQueue(
 		`Cancelled queue creation of **${topic}** due to timeout.`,
 	)
 		.finally(() => remMessage.delete()
-			.catch(doNothingOnError()))) {
+			.catch(doNothingOnError))) {
 		delete used[guild!.id];
 		return false;
 	}
@@ -179,7 +179,6 @@ function onReaction(
 	return async (reactionEvent, reactionUser) => {
 		switch (reactionEvent.emoji.name) {
 		case '☑':
-			console.log(activeUser, queuedUsers);
 			if (
 				!queuedUsers.includes(
 					reactionUser,
@@ -194,7 +193,8 @@ function onReaction(
 					if (reactDeclined) {
 						reactDeclined.users.remove(
 							reactionUser,
-						).catch(doNothingOnError);
+						)
+							.catch(doNothingOnError);
 					}
 				} else {
 					activeUser = reactionUser;
@@ -215,7 +215,8 @@ function onReaction(
 							currentMember.voice.setMute(
 								false,
 								'Its their turn in the queue',
-							).catch(doNothingOnError);
+							)
+								.catch(doNothingOnError);
 						}
 					}
 				}
@@ -226,7 +227,8 @@ function onReaction(
 						queuedUsers,
 						topic,
 					),
-				).catch(doNothingOnError);
+				)
+					.catch(doNothingOnError);
 			}
 			break;
 		case '➡':
@@ -240,7 +242,8 @@ function onReaction(
 						currentMember.voice.setMute(
 							true,
 							'its not your turn in the queue anymore',
-						).catch(doNothingOnError);
+						)
+							.catch(doNothingOnError);
 					}
 				}
 				activeUser = queuedUsers.shift()!;
@@ -251,10 +254,12 @@ function onReaction(
 						queuedUsers,
 						topic,
 					),
-				).catch(doNothingOnError);
+				)
+					.catch(doNothingOnError);
 				const reactConfirm = topicMessage.reactions.cache.get('☑');
 				if (reactConfirm) {
-					reactConfirm.users.remove(activeUser).catch(doNothingOnError);
+					reactConfirm.users.remove(activeUser)
+						.catch(doNothingOnError);
 				}
 				channel
 					.send(
@@ -272,7 +277,8 @@ function onReaction(
 						currentMember.voice.setMute(
 							false,
 							'Its their turn in the queue',
-						).catch(doNothingOnError);
+						)
+							.catch(doNothingOnError);
 					}
 				}
 			} else {
@@ -293,7 +299,8 @@ function onReaction(
 			) {
 				const reactConfirm = topicMessage.reactions.cache.get('☑');
 				if (reactConfirm) {
-					reactConfirm.users.remove(reactionUser).catch(doNothingOnError);
+					reactConfirm.users.remove(reactionUser)
+						.catch(doNothingOnError);
 				}
 				const ind = queuedUsers.findIndex(
 					(obj) => obj.id === reactionUser.id,
@@ -306,7 +313,8 @@ function onReaction(
 						queuedUsers,
 						topic,
 					),
-				).catch(doNothingOnError);
+				)
+					.catch(doNothingOnError);
 			}
 			break;
 		case '🔚':
@@ -395,7 +403,8 @@ async function createQueue(
 	const topicMessage = await channel.send(`Queue: **${topic}:**\n\nUse ☑ to join the queue!`);
 	const debugChannel = await bot.channels.fetch(
 		'433357857937948672',
-	).catch(doNothingOnError);
+	)
+		.catch(doNothingOnError);
 	await topicMessage.react('➡');
 	await topicMessage.react('☑');
 	await topicMessage.react('❌');
@@ -412,7 +421,7 @@ async function createQueue(
 			time,
 		},
 	);
-	let debugMessage : Message | null = null;
+	let debugMessage: Message | null = null;
 	if (debugChannel) {
 		debugMessage = await (
 			debugChannel as TextChannel
