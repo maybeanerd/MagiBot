@@ -7,26 +7,26 @@ const owner = process.env.OWNERID;
 const prefix = process.env.PREFIX;
 const dburl = process.env.DATABASE_URL;
 let blapis: {
-  [listname: string]: string;
+	[listname: string]: string;
 };
 
 try {
-  // eslint-disable-next-line import/no-dynamic-require, global-require
-  blapis = require(`${__dirname}/../botlistTokens.json`);
+	// eslint-disable-next-line import/no-dynamic-require, global-require
+	blapis = require(`${__dirname}/../botlistTokens.json`);
 } catch (e) {
-  // eslint-disable-next-line no-console
-  console.warn('no bot list tokens found, defaulting to none');
-  blapis = {};
+	// eslint-disable-next-line no-console
+	console.warn('no bot list tokens found, defaulting to none');
+	blapis = {};
 }
 
 if (!(token && owner && prefix && dburl)) {
-  throw new Error('Missing .env configuration!');
+	throw new Error('Missing .env configuration!');
 }
 
 export default {
-  tk: token,
-  owner,
-  prefix,
-  dburl,
-  blapis,
+	tk: token,
+	owner,
+	prefix,
+	dburl,
+	blapis,
 };

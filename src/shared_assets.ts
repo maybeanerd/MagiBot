@@ -16,30 +16,39 @@ export const PREFIXES: Map<string, string> = new Map();
 export const queueVoiceChannels: Map<string, string> = new Map();
 
 export function sendNotification(
-  info: string,
-  type: string,
-  msg: Discord.Message,
+	info: string,
+	type: string,
+	msg: Discord.Message,
 ) {
-  let icolor: number | undefined;
+	let icolor: number | undefined;
 
-  if (type === 'success') icolor = SUCCESS_COLOR;
-  else if (type === 'error') icolor = ERROR_COLOR;
-  else if (type === 'info') icolor = INFO_COLOR;
-  else icolor = COLOR;
+	if (type === 'success') {
+		icolor = SUCCESS_COLOR;
+	} else if (type === 'error') {
+		icolor = ERROR_COLOR;
+	} else if (type === 'info') {
+		icolor = INFO_COLOR;
+	} else {
+		icolor = COLOR;
+	}
 
-  const embed = {
-    color: icolor,
-    description: info,
-  };
-  msg.channel.send('', { embed });
+	const embed = {
+		color: icolor,
+		description: info,
+	};
+	msg.channel.send('', { embed });
 }
+
 let bot_user: ClientUser;
+
 export function setUser(usr: ClientUser) {
-  bot_user = usr;
+	bot_user = usr;
 }
+
 export function user() {
-  return bot_user;
+	return bot_user;
 }
+
 export function resetPrefixes() {
-  PREFIXES.clear();
+	PREFIXES.clear();
 }
