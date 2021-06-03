@@ -1,5 +1,5 @@
 ﻿import { Client, TextChannel, Message } from 'discord.js';
-import { asyncForEach } from './bamands';
+import { asyncForEach, returnNullOnError } from './bamands';
 import {
 	SaltModel,
 	SaltrankModel,
@@ -35,8 +35,10 @@ async function onHour(bot: Client, isFirst: boolean) {
 	}
 	let msg: Message;
 	if (isFirst) {
-		const chann = bot.channels.fetch('382233880469438465');
-		msg = await ((await chann) as TextChannel).send('0 %');
+		const teabotChannel = await bot.channels.fetch('382233880469438465').catch(returnNullOnError);
+		if (teabotChannel) {
+			msg = await (teabotChannel as TextChannel).send('0 %');
+		}
 	}
 
 	const t0 = process.hrtime();
@@ -156,9 +158,9 @@ const reactions = [
 // this should take care of everything that needs to be done when a vote ends
 async function endVote(vote: Vote, bot: Client) {
 	try {
-		const chann = (await bot.channels.fetch(vote.channelID)) as TextChannel;
-		if (chann) {
-			const msg = await chann.messages.fetch(vote.messageID);
+		const voteChannel = (await bot.channels.fetch(vote.channelID)) as TextChannel;
+		if (voteChannel) {
+			const msg = await voteChannel.messages.fetch(vote.messageID);
 			if (msg) {
 				const reacts = msg.reactions;
 				let finalReact: Array<{ reaction: number; count: number }> = [];

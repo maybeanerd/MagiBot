@@ -28,7 +28,7 @@ import {
 	isJoinableVc,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import { asyncForEach } from './bamands';
+import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
 import { startUp } from './cronjobs';
 
 async function initializePrefixes(bot: Client) {
@@ -101,16 +101,18 @@ bot.on('ready', async () => {
 		throw new Error('FATAL Bot has no user.');
 	}
 	setUser(bot.user); // give user ID to other code
-	const chann = await bot.channels.fetch('382233880469438465');
-	if (!chann || chann.type !== 'text') {
+	const teabotChannel = await bot.channels.fetch('382233880469438465').catch(returnNullOnError);
+	if (!teabotChannel || teabotChannel.type !== 'text') {
 		console.error('Teabots Server Channel not found.');
 	}
 	if (justStartedUp) {
-		(chann as Discord.TextChannel).send('Running startup...');
+		if (teabotChannel) {
+			(teabotChannel as Discord.TextChannel).send('Running startup...').catch(doNothingOnError);
+		}
 		startUp(bot);
 		justStartedUp = false;
-	} else {
-		(chann as Discord.TextChannel).send('Just reconnected to Discord...');
+	} else if (teabotChannel) {
+		(teabotChannel as Discord.TextChannel).send('Just reconnected to Discord...').catch(doNothingOnError);
 	}
 	await bot.user.setPresence({
 		activity: {
