@@ -350,23 +350,24 @@ function onEnd(
 			// remove all mutes
 			voiceChannel.members
 				.array()
-				.forEach(async (member) => {
+				.forEach((member) => {
 					// make sure users will be unmuted even if this unmute loop
 					// fails because they left the voice channel too quickly
-					await toggleStillMuted(
+					toggleStillMuted(
 						member.id,
 						guild.id,
 						true,
-					);
-					await member.voice.setMute(
-						false,
-						'queue ended',
-					);
-					await toggleStillMuted(
-						member.id,
-						guild.id,
-						false,
-					);
+					)
+						.then(() => member.voice.setMute(
+							false,
+							'queue ended',
+						))
+						.then(() => toggleStillMuted(
+							member.id,
+							guild.id,
+							false,
+						))
+						.catch(doNothingOnError);
 				});
 		}
 		topicMessage
