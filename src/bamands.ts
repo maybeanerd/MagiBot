@@ -89,7 +89,7 @@ export async function yesOrNo(
 	}
 	const reacts = await mess.awaitReactions(filter, {
 		max: 1,
-		time
+		time,
 	});
 	mess.delete();
 	const firstReacts = reacts.first();
@@ -98,7 +98,7 @@ export async function yesOrNo(
 	}
 	if (firstReacts) {
 		if (abortMessage) {
-			msg.channel.send(abortMessage);
+			msg.channel.send(abortMessage).catch(doNothingOnError);
 		}
 		return false;
 	}
@@ -124,4 +124,11 @@ export async function asyncForEach<T, F, O>(
 ) {
 	const arr = array.map((e, i) => callback(e, i, optParams));
 	return Promise.all<F>(arr);
+}
+
+export function doNothingOnError() {
+}
+
+export function returnNullOnError() {
+	return null;
 }
