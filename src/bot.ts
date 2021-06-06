@@ -1,5 +1,4 @@
 ﻿import Discord, { Client, DiscordAPIError, Guild } from 'discord.js';
-import Statcord from 'statcord.js';
 import { handle } from 'blapi';
 import config from './configuration';
 import {
@@ -49,19 +48,6 @@ async function isStillMuted(userID: string, guildID: string) {
 
 export const bot = new Discord.Client();
 
-if (!process.env.STATCORD_TOKEN) {
-	throw new Error('Statcord token missing!');
-}
-
-export const statcord = new Statcord.Client({
-	client: bot,
-	key: process.env.STATCORD_TOKEN,
-});
-
-// register custom stats
-statcord.registerCustomFieldHandler(1, sendJoinSoundsPlayed);
-statcord.registerCustomFieldHandler(2, sendUsersWhoJoinedQueue);
-
 // post to the APIs every 30 minutes
 if (config.blapis) {
 	handle(bot, config.blapis, 30);
@@ -101,18 +87,24 @@ bot.on('ready', async () => {
 		throw new Error('FATAL Bot has no user.');
 	}
 	setUser(bot.user); // give user ID to other code
-	const teabotChannel = await bot.channels.fetch('382233880469438465').catch(returnNullOnError);
+	const teabotChannel = await bot.channels
+		.fetch('382233880469438465')
+		.catch(returnNullOnError);
 	if (!teabotChannel || teabotChannel.type !== 'text') {
 		console.error('Teabots Server Channel not found.');
 	}
 	if (justStartedUp) {
 		if (teabotChannel) {
-			(teabotChannel as Discord.TextChannel).send('Running startup...').catch(doNothingOnError);
+			(teabotChannel as Discord.TextChannel)
+				.send('Running startup...')
+				.catch(doNothingOnError);
 		}
 		startUp(bot);
 		justStartedUp = false;
 	} else if (teabotChannel) {
-		(teabotChannel as Discord.TextChannel).send('Just reconnected to Discord...').catch(doNothingOnError);
+		(teabotChannel as Discord.TextChannel)
+			.send('Just reconnected to Discord...')
+			.catch(doNothingOnError);
 	}
 	await bot.user.setPresence({
 		activity: {
@@ -123,7 +115,6 @@ bot.on('ready', async () => {
 		status: 'online',
 	});
 	initializePrefixes(bot);
-	statcord.autopost();
 });
 
 bot.on('message', async (msg) => {
@@ -150,10 +141,9 @@ bot.on('guildCreate', async (guild) => {
 			guild.owner
 				.send(
 					`Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
-					+ `join to use joinsounds (\`${PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
+            + `join to use joinsounds (\`${PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
 				)
-				.catch(() => {
-				});
+				.catch(() => {});
 		}
 		const chan = await bot.channels.fetch('408611226998800390');
 		if (chan && chan.type === 'text') {
@@ -185,8 +175,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
 		// check if voice channel actually changed, don't mute bots
 		if (
 			n.member
-			&& !n.member.user.bot
-			&& (!o.channel || !newVc || o.channel.id !== newVc.id)
+      && !n.member.user.bot
+      && (!o.channel || !newVc || o.channel.id !== newVc.id)
 		) {
 			// is muted and joined a vc? maybe still muted from queue
 			if (n.serverMute && (await isStillMuted(n.id, n.guild.id))) {
@@ -197,17 +187,17 @@ bot.on('voiceStateUpdate', async (o, n) => {
 				toggleStillMuted(n.id, n.guild.id, false);
 			} else if (
 				!n.serverMute
-				&& newVc
-				&& queueVoiceChannels.has(n.guild.id)
-				&& queueVoiceChannels.get(n.guild.id) === newVc.id
+        && newVc
+        && queueVoiceChannels.has(n.guild.id)
+        && queueVoiceChannels.get(n.guild.id) === newVc.id
 			) {
 				// user joined a muted channel
 				n.setMute(true, 'joined active queue voice channel');
 			} else if (
 				o.serverMute
-				&& o.channel
-				&& queueVoiceChannels.has(o.guild.id)
-				&& queueVoiceChannels.get(o.guild.id) === o.channel.id
+        && o.channel
+        && queueVoiceChannels.has(o.guild.id)
+        && queueVoiceChannels.get(o.guild.id) === o.channel.id
 			) {
 				// user left a muted channel
 				if (newVc) {
@@ -220,11 +210,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
 			// TODO remove/rework mute logic before this comment
 			if (
 				newVc
-				&& n.guild.me
-				&& !n.guild.me.voice.channel
-				&& n.id !== bot.user!.id
-				&& !(await isBlacklistedUser(n.id, n.guild.id))
-				&& (await isJoinableVc(n.guild.id, newVc.id))
+        && n.guild.me
+        && !n.guild.me.voice.channel
+        && n.id !== bot.user!.id
+        && !(await isBlacklistedUser(n.id, n.guild.id))
+        && (await isJoinableVc(n.guild.id, newVc.id))
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
 				if (perms && perms.has('CONNECT')) {
@@ -277,8 +267,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
 								}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
-							)
-								.then(() => connection.disconnect());
+							).then(() => connection.disconnect());
 						});
 					}
 				}
