@@ -1,34 +1,30 @@
 // following functions are async because the statcord types expect promises
 import { ShardingManager } from 'discord.js';
 import { promises as fsp } from 'fs';
+import path from 'path';
 import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
 
-// attempt to share data over saved files; unfinished and therefore not used
+// attempt to share data over saved files
+// tbh we should just use REDIS instead of this...
 
 export async function saveJoinsoundsPlayedOfShard(shardId: number) {
+	return;
 	try {
-		const data = await fsp
-			.readFile(`/shard-${shardId}-jsplayed`, 'utf8')
-			.catch(returnNullOnError);
+		const filePath = path.resolve(__dirname, `./shard-${shardId}-jsplayed`);
+		const data = await fsp.readFile(filePath, 'utf8').catch(returnNullOnError);
 		let joinsoundsPlayed = data ? Number(data) : 0;
-		await fsp.writeFile(
-			`/shard-${shardId}-jsplayed`,
-			String(++joinsoundsPlayed),
-		);
+		await fsp.writeFile(filePath, String(++joinsoundsPlayed));
 	} catch (e) {
 		doNothingOnError();
 	}
 }
 export async function saveUsersWhoJoinedQueue(shardId: number) {
+	return;
 	try {
-		const data = await fsp
-			.readFile(`/shard-${shardId}-uqueue`, 'utf8')
-			.catch(returnNullOnError);
+		const filePath = path.resolve(__dirname, `./shard-${shardId}-uqueue`);
+		const data = await fsp.readFile(filePath, 'utf8').catch(returnNullOnError);
 		let usersWhoJoinedQueue = data ? Number(data) : 0;
-		await fsp.writeFile(
-			`/shard-${shardId}-uqueue`,
-			String(++usersWhoJoinedQueue),
-		);
+		await fsp.writeFile(filePath, String(++usersWhoJoinedQueue));
 	} catch (e) {
 		doNothingOnError();
 	}
@@ -38,8 +34,9 @@ async function loadJoinsoundsPlayedOfShard(
 	dataMap: Map<number, number>,
 ) {
 	try {
-		const data = await fsp.readFile(`/shard-${shardId}-jsplayed`, 'utf8');
-		await fsp.writeFile(`/shard-${shardId}-jsplayed`, String(0));
+		const filePath = path.resolve(__dirname, `./shard-${shardId}-jsplayed`);
+		const data = await fsp.readFile(filePath, 'utf8');
+		await fsp.writeFile(filePath, String(0));
 		dataMap.set(shardId, Number(data));
 	} catch (e) {
 		console.error('Error loading shared shard data:', e);
@@ -50,8 +47,9 @@ async function loadUsersWhoJoinedQueue(
 	dataMap: Map<number, number>,
 ) {
 	try {
-		const data = await fsp.readFile(`/shard-${shardId}-uqueue`, 'utf8');
-		await fsp.writeFile(`/shard-${shardId}-uqueue`, String(0));
+		const filePath = path.resolve(__dirname, `./shard-${shardId}-uqueue`);
+		const data = await fsp.readFile(filePath, 'utf8');
+		await fsp.writeFile(filePath, String(0));
 		dataMap.set(shardId, Number(data));
 	} catch (e) {
 		console.error('Error loading shared shard data:', e);

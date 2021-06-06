@@ -1,10 +1,10 @@
 import { ShardingManager } from 'discord.js';
 import Statcord from 'statcord.js';
 import configuration from './configuration';
-import {
+/* import {
 	accumulateJoinsoundsPlayed,
 	accumulateUsersJoinedQueue,
-} from './statTracking';
+} from './statTracking'; */
 
 export const TOKEN = configuration.tk;
 
@@ -22,8 +22,8 @@ export const statcord = new Statcord.ShardingClient({
 });
 
 // register custom stats
-statcord.registerCustomFieldHandler(1, accumulateJoinsoundsPlayed);
-statcord.registerCustomFieldHandler(2, accumulateUsersJoinedQueue);
+// statcord.registerCustomFieldHandler(1, accumulateJoinsoundsPlayed);
+// statcord.registerCustomFieldHandler(2, accumulateUsersJoinedQueue);
 
 statcord.on('autopost-start', () => {
 	// Emitted when statcord autopost starts
