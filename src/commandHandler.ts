@@ -1,6 +1,6 @@
 import Discord, { Message } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
-import { statcord } from './bot';
+import Statcord from 'statcord.js';
 import { vote } from './commands/vote';
 import { sound } from './commands/sound';
 import { rfact } from './commands/rfact';
@@ -38,6 +38,8 @@ import {
 	getUser,
 	isAdmin,
 } from './dbHelpers';
+// eslint-disable-next-line import/no-cycle
+import { bot } from './bot';
 
 export const commands: { [k: string]: magibotCommand } = {
 	_dc,
@@ -71,10 +73,10 @@ async function catchError(error: Error, msg: Discord.Message, command: string) {
 
 	msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
 If you can reproduce this, consider using \`${
-		msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
-	}.bug <bugreport>\` or join the support discord (link via \`${
-		msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
-	}.info\`) to tell us exactly how.`);
+	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
+}.bug <bugreport>\` or join the support discord (link via \`${
+	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
+}.info\`) to tell us exactly how.`);
 }
 
 async function commandAllowed(guildID: string, cid: string) {
@@ -113,7 +115,7 @@ export async function checkCommand(msg: Discord.Message) {
 	let isMention: boolean;
 	if (
 		msg.content.startsWith(`<@${user().id}>`)
-		|| msg.content.startsWith(`<@!${user().id}>`)
+    || msg.content.startsWith(`<@!${user().id}>`)
 	) {
 		isMention = true;
 	} else if (msg.content.startsWith(PREFIXES.get(msg.guild.id)!)) {
@@ -175,7 +177,7 @@ export async function checkCommand(msg: Discord.Message) {
 					}
 					if (myPerms.has('SEND_MESSAGES')) {
 						msg
-							.reply('you\'re not allowed to use this command.')
+							.reply("you're not allowed to use this command.")
 							.then((mess) => (mess as Discord.Message).delete({ timeout: 5000 }));
 					}
 				}
@@ -187,7 +189,7 @@ export async function checkCommand(msg: Discord.Message) {
 
 		if (
 			commands[command]
-			&& (!commands[command].dev || msg.author.id === OWNERID)
+      && (!commands[command].dev || msg.author.id === OWNERID)
 		) {
 			if (pre === ':' || (await commandAllowed(msg.guild.id, msg.channel.id))) {
 				const perms = commands[command].perm;
@@ -199,7 +201,7 @@ export async function checkCommand(msg: Discord.Message) {
 							userCooldowns.delete(msg.author.id);
 						}, 4000);
 						try {
-							statcord.postCommand(command, msg.author.id);
+							Statcord.ShardingClient.postCommand(command, msg.author.id, bot);
 							await commands[command].main(content, msg);
 						} catch (err) {
 							catchError(
@@ -210,7 +212,7 @@ export async function checkCommand(msg: Discord.Message) {
 						}
 						usageUp(msg.author.id, msg.guild.id);
 					} else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-						msg.reply('whoa cool down, you\'re using commands too quick!');
+						msg.reply("whoa cool down, you're using commands too quick!");
 					}
 					// endof cooldown management
 				} else if (myPerms && myPerms.has('SEND_MESSAGES')) {
