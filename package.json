@@ -2,7 +2,7 @@
   "name": "magibot",
   "version": "3.0.0",
   "description": "MagiBot - a Discord bot to build communities",
-  "main": "dist/bot.js",
+  "main": "dist/index.js",
   "directories": {
     "doc": "docs",
     "test": "test"
@@ -53,12 +53,12 @@
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
-    "dev": "tsc && node dist/bot.js",
+    "dev": "tsc && node dist/index.js",
     "lint": "eslint .",
     "build": "tsc",
-    "start": "node dist/bot.js",
-    "startforever": "forever start dist/bot.js",
-    "stopforever": "forever stop dist/bot.js"
+    "start": "node dist/index.js",
+    "startforever": "forever start dist/index.js",
+    "stopforever": "forever stop dist/index.js"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,8 @@
 	Message,
 	Guild,
 	Snowflake,
-	GuildMember, ReactionCollector,
+	GuildMember,
+	ReactionCollector,
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
@@ -39,27 +40,30 @@ function messageEdit(
 	return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse ☑ to join and ❌ to leave the queue!`;
 }
 
-function askQuestion(channel: TextChannel, authorID: Snowflake, question: string) {
-	return channel
-		.send(question)
-		.then((questionMessage) => channel.awaitMessages((message) => message.author.id === authorID, {
+function askQuestion(
+	channel: TextChannel,
+	authorID: Snowflake,
+	question: string,
+) {
+	return channel.send(question).then((questionMessage) => channel
+		.awaitMessages((message) => message.author.id === authorID, {
 			max: 1,
 			time: 60000,
 		})
-			.then((collected) => {
-				questionMessage.delete()
+		.then((collected) => {
+			questionMessage.delete().catch(doNothingOnError);
+			const firstCollected = collected.first();
+			if (firstCollected) {
+				firstCollected.delete().catch(doNothingOnError);
+			} else {
+				channel
+					.send('Cancelled queue creation due to timeout.')
 					.catch(doNothingOnError);
-				collected.first()
-					?.delete()
-					.catch(doNothingOnError);
-				if (!collected.first()) {
-					channel.send('Cancelled queue creation due to timeout.')
-						.catch(doNothingOnError);
-					delete used[channel.guild!.id];
-					return null;
-				}
-				return collected;
-			}));
+				delete used[channel.guild!.id];
+				return null;
+			}
+			return collected;
+		}));
 }
 
 async function getQueueTopic(
@@ -67,23 +71,25 @@ async function getQueueTopic(
 	channel: TextChannel,
 	authorID: Snowflake,
 ): Promise<string | null> {
-	return askQuestion(channel, authorID, 'What do you want the queue to be about?')
-		.then((collected) => {
-			if (!collected) {
-				return null;
-			}
-			const topic = collected.first()!.content;
-			collected.first()!.delete()
-				.catch(doNothingOnError);
-			if (topic.length > 1000) {
-				channel.send(
-					'Oops, your topic seems to be larger than 1000 characters. Discord message sizes are limited, so please shorten your topic.',
-				);
-				delete used[guild!.id];
-				return null;
-			}
-			return topic;
-		});
+	return askQuestion(
+		channel,
+		authorID,
+		'What do you want the queue to be about?',
+	).then((collected) => {
+		if (!collected) {
+			return null;
+		}
+		const topic = collected.first()!.content;
+    collected.first()!.delete().catch(doNothingOnError);
+    if (topic.length > 1000) {
+    	channel.send(
+    		'Oops, your topic seems to be larger than 1000 characters. Discord message sizes are limited, so please shorten your topic.',
+    	);
+    	delete used[guild!.id];
+    	return null;
+    }
+    return topic;
+	});
 }
 
 async function getQueueTimeout(
@@ -91,26 +97,29 @@ async function getQueueTimeout(
 	channel: TextChannel,
 	author: GuildMember,
 ): Promise<null | number> {
-	return askQuestion(channel, author.id, 'How long is this queue supposed to last? *(in minutes, maximum of 120)*')
-		.then((collected) => {
-			if (!collected) {
-				return null;
-			}
-			let time = parseInt(collected.first()!.content, 10);
-			if (!time) {
-				channel.send(
-					'That\'s not a real number duh. Cancelled queue creation, try again.',
-				);
-				delete used[guild!.id];
-				return null;
-			}
-			if (time > 120) {
-				time = 120;
-			} else if (time < 1) {
-				time = 1;
-			}
-			return time;
-		});
+	return askQuestion(
+		channel,
+		author.id,
+		'How long is this queue supposed to last? *(in minutes, maximum of 120)*',
+	).then((collected) => {
+		if (!collected) {
+			return null;
+		}
+		let time = parseInt(collected.first()!.content, 10);
+		if (!time) {
+			channel.send(
+				"That's not a real number duh. Cancelled queue creation, try again.",
+			);
+			delete used[guild!.id];
+			return null;
+		}
+		if (time > 120) {
+			time = 120;
+		} else if (time < 1) {
+			time = 1;
+		}
+		return time;
+	});
 }
 
 async function startQueue(
@@ -151,14 +160,14 @@ async function startQueue(
 		);
 	}
 
-	if (!await yesOrNo(
-		message,
-		`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`,
-		`Successfully canceled queue **${topic}**`,
-		`Cancelled queue creation of **${topic}** due to timeout.`,
-	)
-		.finally(() => remMessage.delete()
-			.catch(doNothingOnError))) {
+	if (
+		!(await yesOrNo(
+			message,
+			`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`,
+			`Successfully canceled queue **${topic}**`,
+			`Cancelled queue creation of **${topic}** due to timeout.`,
+		).finally(() => remMessage.delete().catch(doNothingOnError)))
+	) {
 		delete used[guild!.id];
 		return false;
 	}
@@ -180,54 +189,35 @@ function onReaction(
 		switch (reactionEvent.emoji.name) {
 		case '☑':
 			if (
-				!queuedUsers.includes(
-					reactionUser,
-				)
-				&& reactionUser !== activeUser
-				&& !reactionEvent.me
+				!queuedUsers.includes(reactionUser)
+          && reactionUser !== activeUser
+          && !reactionEvent.me
 			) {
 				userJoinedQueue();
 				if (activeUser) {
 					queuedUsers.push(reactionUser);
 					const reactDeclined = topicMessage.reactions.cache.get('❌');
 					if (reactDeclined) {
-						reactDeclined.users.remove(
-							reactionUser,
-						)
-							.catch(doNothingOnError);
+						reactDeclined.users.remove(reactionUser).catch(doNothingOnError);
 					}
 				} else {
 					activeUser = reactionUser;
 					reactionEvent.users.remove(activeUser);
-					channel
-						.send(
-							`It's your turn ${activeUser}!`,
-						)
-						.then((ms) => {
-							ms.delete({ timeout: 1000 });
-						});
+					channel.send(`It's your turn ${activeUser}!`).then((ms) => {
+						ms.delete({ timeout: 1000 });
+					});
 					if (voiceChannel) {
 						// unmute currentUser
-						const currentMember = await guild!.members.fetch(
-							reactionUser,
-						);
+						const currentMember = await guild!.members.fetch(reactionUser);
 						if (currentMember) {
-							currentMember.voice.setMute(
-								false,
-								'Its their turn in the queue',
-							)
+							currentMember.voice
+								.setMute(false, 'Its their turn in the queue')
 								.catch(doNothingOnError);
 						}
 					}
 				}
-				topicMessage.edit(
-					messageEdit(
-						voiceChannel,
-						activeUser,
-						queuedUsers,
-						topic,
-					),
-				)
+				topicMessage
+					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
 					.catch(doNothingOnError);
 			}
 			break;
@@ -236,93 +226,58 @@ function onReaction(
 				if (voiceChannel) {
 					// mute old current user
 					if (activeUser) {
-						const currentMember = await guild!.members.fetch(
-							activeUser,
-						);
-						currentMember.voice.setMute(
-							true,
-							'its not your turn in the queue anymore',
-						)
+						const currentMember = await guild!.members.fetch(activeUser);
+						currentMember.voice
+							.setMute(true, 'its not your turn in the queue anymore')
 							.catch(doNothingOnError);
 					}
 				}
 				activeUser = queuedUsers.shift()!;
-				topicMessage.edit(
-					messageEdit(
-						voiceChannel,
-						activeUser,
-						queuedUsers,
-						topic,
-					),
-				)
+				topicMessage
+					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
 					.catch(doNothingOnError);
 				const reactConfirm = topicMessage.reactions.cache.get('☑');
 				if (reactConfirm) {
-					reactConfirm.users.remove(activeUser)
-						.catch(doNothingOnError);
+					reactConfirm.users.remove(activeUser).catch(doNothingOnError);
 				}
-				channel
-					.send(
-						`It's your turn ${activeUser}!`,
-					)
-					.then((ms) => {
-						ms.delete({ timeout: 1000 });
-					});
+				channel.send(`It's your turn ${activeUser}!`).then((ms) => {
+					ms.delete({ timeout: 1000 });
+				});
 				if (voiceChannel) {
 					// unmute currentUser
-					const currentMember = await guild!.members.fetch(
-						activeUser,
-					);
+					const currentMember = await guild!.members.fetch(activeUser);
 					if (currentMember) {
-						currentMember.voice.setMute(
-							false,
-							'Its their turn in the queue',
-						)
+						currentMember.voice
+							.setMute(false, 'Its their turn in the queue')
 							.catch(doNothingOnError);
 					}
 				}
 			} else {
-				channel
-					.send('No users left in queue.')
-					.then((ms) => {
-						ms.delete({ timeout: 2000 });
-					});
+				channel.send('No users left in queue.').then((ms) => {
+					ms.delete({ timeout: 2000 });
+				});
 			}
 			reactionEvent.users.remove(reactionUser);
 			break;
 		case '❌':
-			if (
-				queuedUsers.includes(
-					reactionUser,
-				)
-				&& !reactionEvent.me
-			) {
+			if (queuedUsers.includes(reactionUser) && !reactionEvent.me) {
 				const reactConfirm = topicMessage.reactions.cache.get('☑');
 				if (reactConfirm) {
-					reactConfirm.users.remove(reactionUser)
-						.catch(doNothingOnError);
+					reactConfirm.users.remove(reactionUser).catch(doNothingOnError);
 				}
 				const ind = queuedUsers.findIndex(
 					(obj) => obj.id === reactionUser.id,
 				);
 				queuedUsers.splice(ind, 1);
-				topicMessage.edit(
-					messageEdit(
-						voiceChannel,
-						activeUser,
-						queuedUsers,
-						topic,
-					),
-				)
+				topicMessage
+					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
 					.catch(doNothingOnError);
 			}
 			break;
 		case '🔚':
-			channel
-				.send('Successfully ended queue.')
-				.then((ms) => {
-					ms.delete({ timeout: 5000 });
-				});
+			channel.send('Successfully ended queue.').then((ms) => {
+				ms.delete({ timeout: 5000 });
+			});
 			collector.stop();
 			break;
 		default:
@@ -341,40 +296,23 @@ function onEnd(
 ) {
 	return () => {
 		if (debugMessage) {
-			debugMessage.delete()
-				.catch(doNothingOnError);
+			debugMessage.delete().catch(doNothingOnError);
 		}
 		delete used[guild.id];
 		if (voiceChannel) {
 			delete queueVoiceChannels[guild.id];
 			// remove all mutes
-			voiceChannel.members
-				.array()
-				.forEach((member) => {
-					// make sure users will be unmuted even if this unmute loop
-					// fails because they left the voice channel too quickly
-					toggleStillMuted(
-						member.id,
-						guild.id,
-						true,
-					)
-						.then(() => member.voice.setMute(
-							false,
-							'queue ended',
-						))
-						.then(() => toggleStillMuted(
-							member.id,
-							guild.id,
-							false,
-						))
-						.catch(doNothingOnError);
-				});
+			voiceChannel.members.array().forEach((member) => {
+				// make sure users will be unmuted even if this unmute loop
+				// fails because they left the voice channel too quickly
+				toggleStillMuted(member.id, guild.id, true)
+					.then(() => member.voice.setMute(false, 'queue ended'))
+					.then(() => toggleStillMuted(member.id, guild.id, false))
+					.catch(doNothingOnError);
+			});
 		}
-		topicMessage
-			.edit(`**${topic}** ended.`)
-			.catch(doNothingOnError);
-		topicMessage.reactions.removeAll()
-			.catch(doNothingOnError);
+		topicMessage.edit(`**${topic}** ended.`).catch(doNothingOnError);
+		topicMessage.reactions.removeAll().catch(doNothingOnError);
 	};
 }
 
@@ -394,39 +332,41 @@ async function createQueue(
 		return;
 	}
 
-	const startQueueValue = await startQueue(guild, channel, message, author, topic, time);
+	const startQueueValue = await startQueue(
+		guild,
+		channel,
+		message,
+		author,
+		topic,
+		time,
+	);
 	if (startQueueValue === false) {
 		return;
 	}
 	const voiceChannel = startQueueValue as VoiceChannel;
 	time *= 60000;
 
-	const topicMessage = await channel.send(`Queue: **${topic}:**\n\nUse ☑ to join the queue!`);
-	const debugChannel = await bot.channels.fetch(
-		'433357857937948672',
-	)
+	const topicMessage = await channel.send(
+		`Queue: **${topic}:**\n\nUse ☑ to join the queue!`,
+	);
+	const debugChannel = await bot.channels
+		.fetch('433357857937948672')
 		.catch(doNothingOnError);
 	await topicMessage.react('➡');
 	await topicMessage.react('☑');
 	await topicMessage.react('❌');
 	await topicMessage.react('🔚');
 	const filter = (reaction, usr) => reaction.emoji.name === '☑'
-		|| reaction.emoji.name === '❌'
-		|| ((reaction.emoji.name === '➡'
-			|| reaction.emoji.name === '🔚')
-			&& usr.id === author.id);
+    || reaction.emoji.name === '❌'
+    || ((reaction.emoji.name === '➡' || reaction.emoji.name === '🔚')
+      && usr.id === author.id);
 
-	const collector = topicMessage.createReactionCollector(
-		filter,
-		{
-			time,
-		},
-	);
+	const collector = topicMessage.createReactionCollector(filter, {
+		time,
+	});
 	let debugMessage: Message | null = null;
 	if (debugChannel) {
-		debugMessage = await (
-			debugChannel as TextChannel
-		).send(
+		debugMessage = await (debugChannel as TextChannel).send(
 			`Started queue **${topic}** on server **${topicMessage.guild}**`,
 		);
 	}
@@ -442,60 +382,61 @@ async function createQueue(
 		// servermute all users in voiceChannel
 		const voiceChannelMembers = voiceChannel.members.array();
 		voiceChannelMembers.forEach(async (member) => {
-			if (
-				member
-				&& !(await isAdmin(guild!.id, member))
-			) {
-				member.voice.setMute(
-					true,
-					'Queue started in this voice channel',
-				)
+			if (member && !(await isAdmin(guild!.id, member))) {
+				member.voice
+					.setMute(true, 'Queue started in this voice channel')
 					.catch(doNothingOnError);
 			}
 		});
 	}
 
-	collector.on('collect', onReaction(guild, channel, voiceChannel, topicMessage, topic, collector));
+	collector.on(
+		'collect',
+		onReaction(guild, channel, voiceChannel, topicMessage, topic, collector),
+	);
 
-	collector.on('end', onEnd(guild, voiceChannel, debugMessage, topicMessage, topic));
+	collector.on(
+		'end',
+		onEnd(guild, voiceChannel, debugMessage, topicMessage, topic),
+	);
 }
 
 export const queue: magibotCommand = {
 	hide: false,
 	name: 'queue',
 	async main(content, message) {
-		if (!message.guild || !(message.channel instanceof TextChannel) || !message.member) {
+		if (
+			!message.guild
+      || !(message.channel instanceof TextChannel)
+      || !message.member
+		) {
 			return;
 		}
-		const {
-			guild,
-			member: author,
-			channel,
-		} = message;
+		const { guild, member: author, channel } = message;
 		if (used[guild.id]) {
 			const d = new Date();
 			if (d.getTime() - used[guild.id].date.getTime() <= 0) {
 				// check if its already 2hours old
 				if (used[guild.id].msg && used[guild.id].cid) {
-					const previousChannel = guild.channels.cache.get(
-						used[guild.id].cid,
-					);
+					const previousChannel = guild.channels.cache.get(used[guild.id].cid);
 					if (
 						previousChannel
-						&& (await (previousChannel as TextChannel).messages
-							.fetch(used[guild.id].msg)
-							.catch(doNothingOnError))
+            && (await (previousChannel as TextChannel).messages
+            	.fetch(used[guild.id].msg)
+            	.catch(doNothingOnError))
 					) {
-						channel.send(
-							'There\'s already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.',
-						)
+						channel
+							.send(
+								"There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
+							)
 							.catch(doNothingOnError);
 						return;
 					}
 				} else {
-					channel.send(
-						'There\'s currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.',
-					)
+					channel
+						.send(
+							"There's currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.",
+						)
 						.catch(doNothingOnError);
 					return;
 				}
@@ -507,22 +448,16 @@ export const queue: magibotCommand = {
 			cid: '',
 		};
 
-		message.delete()
-			.catch(doNothingOnError);
+		message.delete().catch(doNothingOnError);
 
-		await createQueue(
-			guild,
-			channel,
-			message,
-			author,
-		);
+		await createQueue(guild, channel, message, author);
 	},
 	ehelp() {
 		return [
 			{
 				name: '',
 				value:
-					'Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou can activate an optional voicemode which will automatically (un)mute users if you start the queue while connected to a voicechannel.\nYou get all the setup instructions when using the command.',
+          'Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou can activate an optional voicemode which will automatically (un)mute users if you start the queue while connected to a voicechannel.\nYou get all the setup instructions when using the command.',
 			},
 		];
 	},
