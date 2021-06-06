@@ -13,11 +13,7 @@ import {
 import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import {
-	sendJoinSoundsPlayed,
-	sendUsersWhoJoinedQueue,
-	playedJoinsound,
-} from './statTracking';
+import { saveJoinsoundsPlayedOfShard } from './statTracking';
 import {
 	checkGuild,
 	getPrefix,
@@ -227,7 +223,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
 							volume: 0.5,
 							bitrate: 'auto',
 						});
-						playedJoinsound();
+						saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
 						// disconnect after 10 seconds if for some reason we don't get the events
 						const timeoutID = setTimeout(() => {
 							try {

@@ -13,7 +13,7 @@ import { bot } from '../bot';
 import { yesOrNo, doNothingOnError } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
-import { userJoinedQueue } from '../statTracking';
+import { saveUsersWhoJoinedQueue } from '../statTracking';
 import { magibotCommand } from '../types/magibot';
 import { isAdmin, toggleStillMuted } from '../dbHelpers';
 
@@ -193,7 +193,7 @@ function onReaction(
           && reactionUser !== activeUser
           && !reactionEvent.me
 			) {
-				userJoinedQueue();
+				saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
 				if (activeUser) {
 					queuedUsers.push(reactionUser);
 					const reactDeclined = topicMessage.reactions.cache.get('❌');
