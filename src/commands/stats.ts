@@ -12,20 +12,27 @@ export const stats: magibotCommand = {
 	name: 'stats',
 	main: async (content, msg) => {
 		const info: Array<{
-			name: string;
-			value: string | number;
-			inline: boolean;
-		}> = [];
-		const guilds = bot.guilds.cache.array();
+      name: string;
+      value: string | number;
+      inline: boolean;
+    }> = [];
+
+		const numberOfGuilds = (
+      await bot.shard!.fetchClientValues('guilds.cache.size')
+    ).reduce((acc, guildCount) => acc + guildCount, 0) as number;
+
+		const numberOfUsers = (
+      await bot.shard!.fetchClientValues('users.cache.size')
+    ).reduce((acc, userCount) => acc + userCount, 0) as number;
 
 		info.push({
 			name: 'Number of guilds currently being served',
-			value: guilds.length,
+			value: numberOfGuilds,
 			inline: false,
 		});
 		info.push({
 			name: 'Number of users currently being served',
-			value: bot.users.cache.size,
+			value: numberOfUsers,
 			inline: false,
 		});
 
@@ -70,8 +77,8 @@ export const stats: magibotCommand = {
 				)}% of used memory)
 Total available memory: ${Math.round(memInfo.total / 1048576)} MB
 Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
-					(memInfo.used / memInfo.total) * 100,
-				)}%)`,
+	(memInfo.used / memInfo.total) * 100,
+)}%)`,
 				inline: false,
 			});
 		}
@@ -81,8 +88,7 @@ Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
 			description: 'Here are some stats:',
 			fields: info,
 			footer: {
-				iconURL: user()
-					.avatarURL() || '',
+				iconURL: user().avatarURL() || '',
 				text: SIGN,
 			},
 		};
@@ -90,10 +96,12 @@ Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
 		msg.channel.send({ embed });
 	},
 	ehelp() {
-		return [{
-			name: '',
-			value: 'Get some stats from the bot.'
-		}];
+		return [
+			{
+				name: '',
+				value: 'Get some stats from the bot.',
+			},
+		];
 	},
 	perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
 	admin: false,
