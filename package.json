@@ -24,7 +24,7 @@
     "mongoose": "^5.12.11",
     "opusscript": "0.0.8",
     "statcord.js": "^3.2.0",
-    "systeminformation": "^5.7.2",
+    "systeminformation": "^5.7.3",
     "utf-8-validate": "^5.0.5",
     "zucc": "^0.1.2"
   },
