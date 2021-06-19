@@ -1,5 +1,5 @@
 ﻿import { Client, TextChannel, Message } from 'discord.js';
-import { asyncForEach, returnNullOnError } from './bamands';
+import { asyncForEach } from './bamands';
 import {
 	SaltModel,
 	SaltrankModel,
@@ -11,6 +11,7 @@ import {
 } from './db';
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
+import { sendStartupEvent } from './webhooks';
 
 if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
@@ -33,12 +34,8 @@ async function onHour(bot: Client, isFirst: boolean) {
 		// some arbitrary time period
 		setTimeout(onHour.bind(null, bot, false), e);
 	}
-	let msg: Message;
 	if (isFirst) {
-		const teabotChannel = await bot.channels.fetch('382233880469438465').catch(returnNullOnError);
-		if (teabotChannel) {
-			msg = await (teabotChannel as TextChannel).send('0 %');
-		}
+		await sendStartupEvent(bot.shard!.ids[0], true);
 	}
 
 	const t0 = process.hrtime();
@@ -46,8 +43,8 @@ async function onHour(bot: Client, isFirst: boolean) {
 	nd.setDate(nd.getDate() - 7);
 	const guilds = bot.guilds.cache.array();
 	let counter = 0;
-	let lastPostedCounter = 0;
-	let latestTimePassed = 0;
+	const lastPostedCounter = 0;
+	const latestTimePassed = 0;
 	await asyncForEach(guilds, async (G) => {
 		const guildID = G.id;
 		const localCounter = ++counter;
@@ -76,7 +73,7 @@ async function onHour(bot: Client, isFirst: boolean) {
 					await SaltrankModel.updateOne(
 						{
 							salter: report.salter,
-							guild: guildID
+							guild: guildID,
 						},
 						{ $set: { salt: slt } },
 					);
@@ -84,11 +81,11 @@ async function onHour(bot: Client, isFirst: boolean) {
 			}
 		});
 		// update percentage message
-		if (msg) {
+		/* if (msg) {
 			const u = process.hrtime(t0);
 			if (
 				(u[0] - latestTimePassed > 0 && localCounter > lastPostedCounter)
-				|| localCounter === guilds.length
+        || localCounter === guilds.length
 			) {
 				// eslint-disable-next-line prefer-destructuring
 				latestTimePassed = u[0];
@@ -105,8 +102,13 @@ async function onHour(bot: Client, isFirst: boolean) {
 				if (x >= 0) {
 					uptime += `${x}s`;
 				}
-				await msg.edit(`${percentage} % with ${uptime} passed`);
+				await msg.edit(
+					`Shard ${bot.shard!.ids[0]}: ${percentage} % with ${uptime} passed`,
+				);
 			}
+		} */
+		if (localCounter >= guilds.length) {
+			await sendStartupEvent(bot.shard!.ids[0]);
 		}
 	});
 
@@ -158,7 +160,9 @@ const reactions = [
 // this should take care of everything that needs to be done when a vote ends
 async function endVote(vote: Vote, bot: Client) {
 	try {
-		const voteChannel = (await bot.channels.fetch(vote.channelID)) as TextChannel;
+		const voteChannel = (await bot.channels.fetch(
+			vote.channelID,
+		)) as TextChannel;
 		if (voteChannel) {
 			const msg = await voteChannel.messages.fetch(vote.messageID);
 			if (msg) {
@@ -172,14 +176,16 @@ async function endVote(vote: Vote, bot: Client) {
 					if (react && react.count) {
 						if (!finalReact[0] || finalReact[0].count <= react.count) {
 							if (!finalReact[0] || finalReact[0].count < react.count) {
-								finalReact = [{
-									reaction: i,
-									count: react.count
-								}];
+								finalReact = [
+									{
+										reaction: i,
+										count: react.count,
+									},
+								];
 							} else {
 								finalReact.push({
 									reaction: i,
-									count: react.count
+									count: react.count,
 								});
 							}
 						}
