@@ -21,7 +21,7 @@
     "forever": "^3.0.4",
     "libsodium-wrappers": "^0.7.9",
     "mongodb": "^3.6.8",
-    "mongoose": "^5.12.11",
+    "mongoose": "^5.12.12",
     "opusscript": "0.0.8",
     "statcord.js": "^3.2.0",
     "systeminformation": "^5.7.3",
