@@ -234,7 +234,7 @@ async function endVote(vote: Vote, bot: Client) {
 		console.error(JSON.stringify(error, null, 2));
 		// eslint-disable-next-line eqeqeq
 		if (error.httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
-			throw new Error(error);
+			throw error;
 		}
 	}
 }
