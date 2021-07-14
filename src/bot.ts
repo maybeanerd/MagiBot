@@ -25,6 +25,7 @@ import {
 import { StillMutedModel } from './db';
 import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
 import { startUp } from './cronjobs';
+import { sendJoinEvent } from './webhooks';
 
 async function initializePrefixes(bot: Client) {
 	resetPrefixes();
@@ -83,24 +84,9 @@ bot.on('ready', async () => {
 		throw new Error('FATAL Bot has no user.');
 	}
 	setUser(bot.user); // give user ID to other code
-	const teabotChannel = await bot.channels
-		.fetch('382233880469438465')
-		.catch(returnNullOnError);
-	if (!teabotChannel || teabotChannel.type !== 'text') {
-		console.error('Teabots Server Channel not found.');
-	}
 	if (justStartedUp) {
-		if (teabotChannel) {
-			(teabotChannel as Discord.TextChannel)
-				.send('Running startup...')
-				.catch(doNothingOnError);
-		}
 		startUp(bot);
 		justStartedUp = false;
-	} else if (teabotChannel) {
-		(teabotChannel as Discord.TextChannel)
-			.send('Just reconnected to Discord...')
-			.catch(doNothingOnError);
 	}
 	await bot.user.setPresence({
 		activity: {
@@ -141,23 +127,17 @@ bot.on('guildCreate', async (guild) => {
 				)
 				.catch(() => {});
 		}
-		const chan = await bot.channels.fetch('408611226998800390');
-		if (chan && chan.type === 'text') {
-			(chan as Discord.TextChannel).send(
-				`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`,
-			);
-		}
+		await sendJoinEvent(
+			`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`,
+		);
 	}
 });
 
 bot.on('guildDelete', async (guild) => {
 	if (guild.available) {
-		const chan = await bot.channels.fetch('408611226998800390');
-		if (chan && chan.type === 'text') {
-			(chan as Discord.TextChannel).send(
-				`:x: left ${guild.name} (${guild.memberCount} users, ID: ${guild.id})`,
-			);
-		}
+		await sendJoinEvent(
+			`:x: left ${guild.name} (${guild.memberCount} users, ID: ${guild.id})`,
+		);
 	}
 });
 

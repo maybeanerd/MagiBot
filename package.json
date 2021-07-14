@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@types/ffprobe-static": "^2.0.0",
-    "@types/mongodb": "^3.6.18",
     "axios": "^0.21.1",
     "blapi": "^2.1.0",
     "bufferutil": "^4.0.3",
@@ -20,7 +19,6 @@
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.4",
     "libsodium-wrappers": "^0.7.9",
-    "mongodb": "^3.6.8",
     "mongoose": "^5.12.11",
     "opusscript": "0.0.8",
     "statcord.js": "^3.2.0",
