@@ -1,4 +1,4 @@
-import { PREFIXES } from '../shared_assets';
+import { PREFIXES, shadowbannedGuilds } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { findMember } from '../bamands';
 import { magibotCommand } from '../types/magibot';
@@ -10,7 +10,7 @@ function printHelp() {
 	info.push({
 		name: 'rem <@User|userid|nickname>',
 		value:
-			'Remove the joinsound of a user. If you use nickname it has to be at least three characters long',
+      'Remove the joinsound of a user. If you use nickname it has to be at least three characters long',
 	});
 
 	return info;
@@ -20,16 +20,23 @@ export const sound: magibotCommand = {
 	name: 'sound',
 	dev: false,
 	main: async function main(content, msg) {
+		if (!msg.guild) {
+			return;
+		}
+		if (shadowbannedGuilds.get(msg.guild.id)) {
+			msg.reply('you cant do this.');
+			return;
+		}
 		const args = content.split(/ +/);
 		const command = args[0].toLowerCase();
 		const mention = args[1];
 		switch (command) {
 		case 'rem':
 			/* eslint-disable no-case-declarations */
-			const uid = await findMember(msg.guild!, mention);
+			const uid = await findMember(msg.guild, mention);
 			/* eslint-enable no-case-declarations */
 			if (mention && uid) {
-				await addSound(uid, undefined, msg.guild!.id);
+				await addSound(uid, undefined, msg.guild.id);
 				msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
 			} else {
 				msg.reply('you need to mention a user you want to use this on!');
@@ -38,7 +45,7 @@ export const sound: magibotCommand = {
 		default:
 			msg.reply(
 				`this command doesn't exist. Use \`${PREFIXES.get(
-					msg.guild!.id,
+					msg.guild.id,
 				)}:help sound\` for more info.`,
 			);
 			break;

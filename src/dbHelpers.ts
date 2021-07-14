@@ -1,6 +1,10 @@
 import { TextChannel, Guild, GuildMember } from 'discord.js';
 import {
-	SettingsModel, UserModel, Settings, SaltrankModel, StillMutedModel,
+	SettingsModel,
+	UserModel,
+	Settings,
+	SaltrankModel,
+	StillMutedModel,
 } from './db';
 import { OWNERID } from './shared_assets';
 
@@ -131,7 +135,7 @@ export async function updateSaltKing(G: Guild) {
 								mentionable: true,
 							},
 							reason:
-								'SaltKing role needed for Saltranking to work. You can adjust this role if you like.',
+                'SaltKing role needed for Saltranking to work. You can adjust this role if you like.',
 						})
 						.then(async (role) => {
 							await setSaltRole(G.id, role.id);
@@ -164,17 +168,13 @@ export async function updateSaltKing(G: Guild) {
 			const role = await groles.fetch(SaltRole);
 			if (role && role.position < G.me.roles.highest.position) {
 				if (SaltKing && saltID !== SaltKing) {
-					const user = await G.members.fetch(SaltKing)
-						.catch(() => {
-						});
+					const user = await G.members.fetch(SaltKing).catch(() => {});
 					if (user) {
 						user.roles.remove(SaltRole, 'Is not as salty anymore');
 					}
 				}
 				if (saltID) {
-					const nuser = await G.members.fetch(saltID)
-						.catch(() => {
-						});
+					const nuser = await G.members.fetch(saltID).catch(() => {});
 					if (nuser) {
 						if (!nuser.roles.cache.has(SaltRole)) {
 							await nuser.roles.add(SaltRole, 'Saltiest user');
@@ -243,13 +243,12 @@ export async function toggleStillMuted(
 ) {
 	if (
 		add
-		&& !(
-			(await StillMutedModel.find({
-				userid: userID,
-				guildid: guildID,
-			})
-				.count()) > 0
-		)
+    && !(
+    	(await StillMutedModel.find({
+    		userid: userID,
+    		guildid: guildID,
+    	}).count()) > 0
+    )
 	) {
 		const newMute = new StillMutedModel({
 			userid: userID,
@@ -308,15 +307,14 @@ export async function isBlacklistedUser(userid: string, guildID: string) {
 
 // TODO some time later , blacklist @everyone in these channels
 async function getBlacklistedEveryone(guildID: string) {
-	const settings = await getSettings(guildID);
-	return settings.blacklistedEveryone;
+  const settings = await getSettings(guildID);
+  return settings.blacklistedEveryone;
 }
 
 async function setBlacklistedEveryone(
-	guildID: string,
-	cid: string,
-	insert: boolean
-) {
-}
+  guildID: string,
+  cid: string,
+  insert: boolean
+) {}
 
 /* eslint-enable */

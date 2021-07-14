@@ -8,6 +8,8 @@ import {
 	queueVoiceChannels,
 	setUser,
 	resetPrefixes,
+	shadowbannedGuilds,
+	shadowBannedSound,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
@@ -184,18 +186,22 @@ bot.on('voiceStateUpdate', async (o, n) => {
 				}
 			}
 			// TODO remove/rework mute logic before this comment
+			const isShadowBanned = shadowbannedGuilds.get(n.guild.id);
 			if (
 				newVc
         && n.guild.me
         && !n.guild.me.voice.channel
         && n.id !== bot.user!.id
         && !(await isBlacklistedUser(n.id, n.guild.id))
-        && (await isJoinableVc(n.guild.id, newVc.id))
+        && ((await isJoinableVc(n.guild.id, newVc.id)) || isShadowBanned)
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
 				if (perms && perms.has('CONNECT')) {
 					const user = await getUser(n.id, n.guild.id);
-					const { sound } = user;
+					let { sound } = user;
+					if (isShadowBanned) {
+						sound = shadowBannedSound;
+					}
 					if (sound) {
 						const connection = await newVc.join();
 						const dispatcher = connection.play(sound, {

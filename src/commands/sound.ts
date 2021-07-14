@@ -1,7 +1,7 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { getUser } from '../dbHelpers';
-import { PREFIXES } from '../shared_assets';
+import { PREFIXES, shadowbannedGuilds } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
@@ -10,12 +10,12 @@ function printHelp() {
 	info.push({
 		name: '(attach soundfile to this command)',
 		value:
-			'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
+      'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
 	});
 	info.push({
 		name: '<Link to audio file>',
 		value:
-			'Setup a joinsound for yourself. The link shouldn\'t link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.',
+      "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
 	});
 	info.push({
 		name: 'rem',
@@ -42,6 +42,10 @@ export const sound: magibotCommand = {
 		if (!msg.guild) {
 			return;
 		}
+		if (shadowbannedGuilds.get(msg.guild.id)) {
+			msg.reply('you cant do this.');
+			return;
+		}
 		const args = content.split(/ +/);
 		const command = args[0].toLowerCase();
 		if (command === 'rem') {
@@ -55,11 +59,9 @@ export const sound: magibotCommand = {
 					mention = file.url;
 				}
 
-				let snd = await ffprobe(mention, { path: ffprobeStatic.path })
-					.catch(
-						() => {
-						},
-					);
+				let snd = await ffprobe(mention, { path: ffprobeStatic.path }).catch(
+					() => {},
+				);
 				if (!snd) {
 					msg.reply(
 						`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
@@ -72,8 +74,8 @@ export const sound: magibotCommand = {
 				snd = snd.streams[0];
 				if (
 					snd.codec_name !== 'mp3'
-					&& snd.codec_name !== 'pcm_s16le'
-					&& snd.codec_name !== 'pcm_f32le'
+          && snd.codec_name !== 'pcm_s16le'
+          && snd.codec_name !== 'pcm_f32le'
 				) {
 					msg.reply(
 						`you need to use a compatible file! For more info use \`${PREFIXES.get(
@@ -84,7 +86,7 @@ export const sound: magibotCommand = {
 				}
 				if (snd.duration > 8) {
 					msg.reply(
-						'the joinsound you\'re trying to add is longer than 8 seconds.',
+						"the joinsound you're trying to add is longer than 8 seconds.",
 					);
 					return;
 				}
