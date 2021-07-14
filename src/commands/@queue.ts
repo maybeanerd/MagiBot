@@ -349,9 +349,7 @@ async function createQueue(
 	const topicMessage = await channel.send(
 		`Queue: **${topic}:**\n\nUse ☑ to join the queue!`,
 	);
-	const debugChannel = await bot.channels
-		.fetch('433357857937948672')
-		.catch(doNothingOnError);
+
 	await topicMessage.react('➡');
 	await topicMessage.react('☑');
 	await topicMessage.react('❌');
@@ -364,12 +362,13 @@ async function createQueue(
 	const collector = topicMessage.createReactionCollector(filter, {
 		time,
 	});
-	let debugMessage: Message | null = null;
-	if (debugChannel) {
+	const debugMessage: Message | null = null;
+	// TODO maybe readd this with webhooks? but honestly just not needed atm.
+	/* if (debugChannel) {
 		debugMessage = await (debugChannel as TextChannel).send(
 			`Started queue **${topic}** on server **${topicMessage.guild}**`,
 		);
-	}
+	} */
 	used[guild!.id] = {
 		date: new Date(Date.now() + time),
 		cid: topicMessage.channel.id,
