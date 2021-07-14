@@ -1,4 +1,4 @@
-import { PREFIXES, shadowbannedGuilds } from '../shared_assets';
+import { PREFIXES, isShadowBanned, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { findMember } from '../bamands';
 import { magibotCommand } from '../types/magibot';
@@ -23,7 +23,7 @@ export const sound: magibotCommand = {
 		if (!msg.guild) {
 			return;
 		}
-		if (shadowbannedGuilds.get(msg.guild.id)) {
+		if (isShadowBanned(msg.author.id, msg.guild.id) !== shadowBannedLevel.not) {
 			msg.reply('you cant do this.');
 			return;
 		}

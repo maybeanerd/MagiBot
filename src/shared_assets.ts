@@ -54,11 +54,32 @@ export function resetPrefixes() {
 }
 
 // for shadowbanned servers we want do deny
-
-export const shadowbannedGuilds = new Map([
+const shadowbannedGuilds = new Map([
 	// rik and stefans server
 	['859803064537186334', true],
 	// test: teabots : seems to work!
 	// ['380669498014957569', true],
 ]);
+const shadowbannedUsers = new Map([
+	// rik
+	['206502772533624832', true],
+	// stefan
+	['223967778615459842', true],
+]);
+
+export const enum shadowBannedLevel {
+  not = 0x0000,
+  member = 0x0001,
+  guild = 0x1001,
+}
+
+export function isShadowBanned(userid: string, guildid: string) {
+	if (shadowbannedGuilds.get(guildid)) {
+		return shadowBannedLevel.guild;
+	}
+	if (shadowbannedUsers.get(userid)) {
+		return shadowBannedLevel.member;
+	}
+	return shadowBannedLevel.not;
+}
 export const shadowBannedSound = 'https://www.myinstants.com/media/sounds/wet-fart_1.mp3';

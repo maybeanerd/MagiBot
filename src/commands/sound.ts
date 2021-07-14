@@ -1,7 +1,7 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { getUser } from '../dbHelpers';
-import { PREFIXES, shadowbannedGuilds } from '../shared_assets';
+import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
@@ -42,7 +42,7 @@ export const sound: magibotCommand = {
 		if (!msg.guild) {
 			return;
 		}
-		if (shadowbannedGuilds.get(msg.guild.id)) {
+		if (isShadowBanned(msg.author.id, msg.guild.id) !== shadowBannedLevel.not) {
 			msg.reply('you cant do this.');
 			return;
 		}
