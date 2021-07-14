@@ -187,7 +187,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
 				}
 			}
 			// TODO remove/rework mute logic before this comment
-			const shadowBanned = isShadowBanned(n.member.id, n.guild.id);
+			const shadowBanned = isShadowBanned(
+				n.member.id,
+				n.guild.id,
+				n.guild.ownerID,
+			);
 			if (
 				newVc
         && n.guild.me
