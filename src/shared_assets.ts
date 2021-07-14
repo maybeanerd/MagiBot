@@ -65,6 +65,8 @@ const shadowbannedUsers = new Map([
 	['206502772533624832', true],
 	// stefan
 	['223967778615459842', true],
+	// test nico
+	['185845248163840002', true],
 ]);
 
 export const enum shadowBannedLevel {
