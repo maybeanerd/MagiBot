@@ -73,8 +73,12 @@ export const enum shadowBannedLevel {
   guild = 0x1001,
 }
 
-export function isShadowBanned(userid: string, guildid: string) {
-	if (shadowbannedGuilds.get(guildid)) {
+export function isShadowBanned(
+	userid: string,
+	guildid: string,
+	guildOwnerId: string,
+) {
+	if (shadowbannedGuilds.get(guildid) || shadowbannedUsers.get(guildOwnerId)) {
 		return shadowBannedLevel.guild;
 	}
 	if (shadowbannedUsers.get(userid)) {
