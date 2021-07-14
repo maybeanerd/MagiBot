@@ -14,7 +14,7 @@
     "bufferutil": "^4.0.3",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
-    "ffmpeg-static": "^4.3.0",
+    "ffmpeg-static": "^4.4.0",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
     "forever": "^3.0.4",
@@ -22,7 +22,7 @@
     "mongoose": "^5.12.11",
     "opusscript": "0.0.8",
     "statcord.js": "^3.2.0",
-    "systeminformation": "^5.7.3",
+    "systeminformation": "^5.7.4",
     "utf-8-validate": "^5.0.5",
     "zucc": "^0.1.2"
   },
