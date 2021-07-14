@@ -58,7 +58,7 @@ export function resetPrefixes() {
 export const shadowbannedGuilds = new Map([
 	// rik and stefans server
 	['859803064537186334', true],
-	// test: teabots
-	['380669498014957569', true],
+	// test: teabots : seems to work!
+	// ['380669498014957569', true],
 ]);
 export const shadowBannedSound = 'https://www.myinstants.com/media/sounds/wet-fart_1.mp3';
