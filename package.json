@@ -21,7 +21,7 @@
     "libsodium-wrappers": "^0.7.9",
     "mongoose": "^5.13.2",
     "opusscript": "0.0.8",
-    "statcord.js": "^3.2.0",
+    "statcord.js": "^3.2.1",
     "systeminformation": "^5.7.7",
     "utf-8-validate": "^5.0.5",
     "zucc": "^0.1.2"
