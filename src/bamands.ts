@@ -21,14 +21,12 @@ export async function findMember(
 		return user.id;
 	}
 	if (mention.length >= 3) {
-		let memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase()
-			.startsWith(mention));
+		let memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase().startsWith(mention));
 		if (memberArray.size === 1) {
 			return memberArray.first()!.id;
 		}
 		if (memberArray.size === 0) {
-			memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase()
-				.includes(mention));
+			memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase().includes(mention));
 			if (memberArray.size === 1) {
 				return memberArray.first()!.id;
 			}
@@ -43,8 +41,7 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 	}
 	const mention = ment.toLowerCase();
 	if (mention.startsWith('<@&') && mention.endsWith('>')) {
-		const id = mention.substr(3)
-			.slice(0, -1);
+		const id = mention.substr(3).slice(0, -1);
 		return id;
 	}
 	const role = await guild.roles.fetch(mention);
@@ -52,14 +49,12 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 		return role.id;
 	}
 	if (mention.length >= 3) {
-		let roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase()
-			.startsWith(mention));
+		let roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().startsWith(mention));
 		if (roleArray.size === 1) {
 			return roleArray[0].id;
 		}
 		if (roleArray.size === 0) {
-			roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase()
-				.includes(mention));
+			roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().includes(mention));
 			if (roleArray.size === 1) {
 				return roleArray[0].id;
 			}
@@ -80,7 +75,7 @@ export async function yesOrNo(
 	const mess = await msg.channel.send(question);
 
 	const filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-		&& user.id === msg.author.id;
+    && user.id === msg.author.id;
 	await mess.react('☑');
 	await mess.react('❌');
 	let time = tim;
@@ -116,18 +111,18 @@ export function printError(error) {
 	);
 }
 
-// TODO compare to flint code again, iirc i updated this at some point
 export async function asyncForEach<T, F, O>(
-	array: Array<T>,
+	values: Array<T> | IterableIterator<T>,
 	callback: (input: T, index: number, optionalParams?: O) => Promise<F>,
 	optParams?: O,
 ) {
-	const arr = array.map((e, i) => callback(e, i, optParams));
+	// TODO validate if this works with iterables
+	const valuesArray = values instanceof Array ? values : (Object.values(values) as Array<T>);
+	const arr = valuesArray.map((e, i) => callback(e, i, optParams));
 	return Promise.all<F>(arr);
 }
 
-export function doNothingOnError() {
-}
+export function doNothingOnError() {}
 
 export function returnNullOnError() {
 	return null;

@@ -26,13 +26,15 @@ import {
 	isJoinableVc,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
+import {
+	asyncForEach /* , doNothingOnError, returnNullOnError */,
+} from './bamands';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 
 async function initializePrefixes(bot: Client) {
 	resetPrefixes();
-	const guilds = bot.guilds.cache.array();
+	const guilds = bot.guilds.cache.values();
 	asyncForEach(guilds, async (G) => {
 		PREFIXES.set(G.id, await getPrefix(G.id));
 	});
