@@ -1,4 +1,6 @@
-﻿import Discord, { Client, DiscordAPIError, Guild } from 'discord.js';
+﻿import Discord, {
+	Client, DiscordAPIError, Guild, Intents,
+} from 'discord.js';
 import { handle } from 'blapi';
 import config from './configuration';
 import {
@@ -48,8 +50,23 @@ async function isStillMuted(userID: string, guildID: string) {
 	return Boolean(find);
 }
 
-export const bot = new Discord.Client();
+const intents = [
+	Intents.FLAGS.GUILDS,
+	// Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+	Intents.FLAGS.GUILD_INTEGRATIONS,
+	/* | 'GUILD_WEBHOOKS'
+  | 'GUILD_INVITES' */
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	// | 'GUILD_PRESENCES'
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+	// | 'GUILD_MESSAGE_TYPING'
+	Intents.FLAGS.DIRECT_MESSAGES,
+	Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+	// | 'DIRECT_MESSAGE_TYPING';
+];
 
+export const bot = new Client({ intents });
 // post to the APIs every 30 minutes
 if (config.blapis) {
 	handle(bot, config.blapis, 30);

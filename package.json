@@ -8,11 +8,13 @@
     "test": "test"
   },
   "dependencies": {
+    "@discordjs/rest": "^0.1.0-canary.0",
     "@discordjs/voice": "^0.6.0",
     "@types/ffprobe-static": "^2.0.0",
     "axios": "^0.21.1",
-    "blapi": "^2.1.0",
+    "blapi": "^2.2.0",
     "bufferutil": "^4.0.3",
+    "discord-api-types": "^0.22.0",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "ffmpeg-static": "^4.4.0",
