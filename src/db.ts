@@ -1,4 +1,4 @@
-﻿import mongoose, { Model } from 'mongoose';
+﻿import mongoose from 'mongoose';
 import config from './configuration';
 
 if (!config.dburl) {

@@ -26,22 +26,22 @@ if (
 	throw new Error('Discord Webhook information is missing.');
 }
 
-const exceptionsWebhook = new Discord.WebhookClient(
-	WEBHOOK_ID_EX,
-	WEBHOOK_TOKEN_EX,
-);
-const joinsWebhook = new Discord.WebhookClient(
-	WEBHOOK_ID_JOIN,
-	WEBHOOK_TOKEN_JOIN,
-);
-const bugreportWebhook = new Discord.WebhookClient(
-	WEBHOOK_ID_BUG,
-	WEBHOOK_TOKEN_BUG,
-);
-const startupWebhook = new Discord.WebhookClient(
-	WEBHOOK_ID_STARTUP,
-	WEBHOOK_TOKEN_STARTUP,
-);
+const exceptionsWebhook = new Discord.WebhookClient({
+	id: WEBHOOK_ID_EX,
+	token: WEBHOOK_TOKEN_EX,
+});
+const joinsWebhook = new Discord.WebhookClient({
+	id: WEBHOOK_ID_JOIN,
+	token: WEBHOOK_TOKEN_JOIN,
+});
+const bugreportWebhook = new Discord.WebhookClient({
+	id: WEBHOOK_ID_BUG,
+	token: WEBHOOK_TOKEN_BUG,
+});
+const startupWebhook = new Discord.WebhookClient({
+	id: WEBHOOK_ID_STARTUP,
+	token: WEBHOOK_TOKEN_STARTUP,
+});
 
 export async function sendException(value: string) {
 	return exceptionsWebhook.send(value).catch(doNothingOnError);

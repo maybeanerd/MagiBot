@@ -58,7 +58,7 @@ async function loadUsersWhoJoinedQueue(
 
 export async function accumulateJoinsoundsPlayed(manager: ShardingManager) {
 	const dataMap = new Map<number, number>();
-	await asyncForEach(manager.shards.array(), async (shard) => {
+	await asyncForEach(manager.shards, async (shard) => {
 		await loadJoinsoundsPlayedOfShard(shard.id, dataMap);
 	});
 	let amount = 0;
@@ -70,7 +70,7 @@ export async function accumulateJoinsoundsPlayed(manager: ShardingManager) {
 }
 export async function accumulateUsersJoinedQueue(manager: ShardingManager) {
 	const dataMap = new Map<number, number>();
-	await asyncForEach(manager.shards.array(), async (shard) => {
+	await asyncForEach(manager.shards, async (shard) => {
 		await loadUsersWhoJoinedQueue(shard.id, dataMap);
 	});
 	let amount = 0;

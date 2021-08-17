@@ -1,4 +1,4 @@
-import Discord, { Message } from 'discord.js';
+import Discord from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import Statcord from 'statcord.js';
 import { vote } from './commands/vote';
@@ -40,6 +40,7 @@ import {
 } from './dbHelpers';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
+import { asyncWait } from './bamands';
 
 export const commands: { [k: string]: magibotCommand } = {
 	_dc,
@@ -108,8 +109,8 @@ export async function checkCommand(msg: Discord.Message) {
 		console.error('Invalid message received:', msg);
 		return;
 	}
-	if (!(!msg.author.bot && msg.channel.type === 'text')) {
-		// check for in guild and text channel
+	// only read guild messages from non-bots
+	if (!(!msg.author.bot && msg.channel.type === 'GUILD_TEXT')) {
 		return;
 	}
 	let isMention: boolean;
@@ -176,9 +177,11 @@ export async function checkCommand(msg: Discord.Message) {
 						msg.delete();
 					}
 					if (myPerms.has('SEND_MESSAGES')) {
-						msg
-							.reply("you're not allowed to use this command.")
-							.then((mess) => (mess as Discord.Message).delete({ timeout: 5000 }));
+						const reply = await msg.reply(
+							"you're not allowed to use this command.",
+						);
+						await asyncWait(5000);
+						await reply.delete();
 					}
 				}
 				return;
@@ -224,17 +227,17 @@ export async function checkCommand(msg: Discord.Message) {
 				if (myPerms && myPerms.has('MANAGE_MESSAGES')) {
 					msg.delete();
 				}
-				msg
-					.reply(
-						`commands aren't allowed in <#${
-							msg.channel.id
-						}>. Use them in ${await printCommandChannels(
-							msg.guild.id,
-						)}. If you're an admin use \`${PREFIXES.get(
-							msg.guild.id,
-						)}:help\` to see how you can change that.`,
-					)
-					.then((mess) => (mess as Message).delete({ timeout: 15000 }));
+				const reply = await msg.reply(
+					`commands aren't allowed in <#${
+						msg.channel.id
+					}>. Use them in ${await printCommandChannels(
+						msg.guild.id,
+					)}. If you're an admin use \`${PREFIXES.get(
+						msg.guild.id,
+					)}:help\` to see how you can change that.`,
+				);
+				await asyncWait(15000);
+				await reply.delete();
 			}
 		}
 	}

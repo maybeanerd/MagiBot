@@ -16,7 +16,7 @@ export async function findMember(
 		}
 		return id;
 	}
-	const user = guild.member(mention);
+	const user = await guild.members.fetch(mention);
 	if (user) {
 		return user.id;
 	}
@@ -63,6 +63,12 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 	return false;
 }
 
+export function doNothingOnError() {}
+
+export function returnNullOnError() {
+	return null;
+}
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function yesOrNo(
@@ -72,6 +78,8 @@ export async function yesOrNo(
 	timeoutMessage?: string,
 	tim?: number,
 ) {
+	// TODO use buttons!!!
+
 	const mess = await msg.channel.send(question);
 
 	const filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
@@ -82,10 +90,7 @@ export async function yesOrNo(
 	if (!time) {
 		time = 20000;
 	}
-	const reacts = await mess.awaitReactions(filter, {
-		max: 1,
-		time,
-	});
+	const reacts = await mess.awaitReactions({ filter, max: 1, time });
 	mess.delete();
 	const firstReacts = reacts.first();
 	if (firstReacts && firstReacts.emoji.name === '☑') {
@@ -112,18 +117,37 @@ export function printError(error) {
 }
 
 export async function asyncForEach<T, F, O>(
-	values: Array<T> | IterableIterator<T>,
-	callback: (input: T, index: number, optionalParams?: O) => Promise<F>,
+	values: Array<T> | Discord.Collection<string | number, T>,
+	callback: (
+    input: T,
+    index: number | string,
+    optionalParams?: O
+  ) => Promise<F>,
 	optParams?: O,
 ) {
-	// TODO validate if this works with iterables
-	const valuesArray = values instanceof Array ? values : (Object.values(values) as Array<T>);
-	const arr = valuesArray.map((e, i) => callback(e, i, optParams));
+	if (Array.isArray(values)) {
+		const arr = values.map((e, i) => callback(e, i, optParams));
+		return Promise.all<F>(arr);
+	}
+	const arr = values.map((e, i) => callback(e, i, optParams));
 	return Promise.all<F>(arr);
 }
 
-export function doNothingOnError() {}
+// unused
+export async function asyncForEachFromFlint<T, F, N, O>(
+	array: Array<T> | Map<N, T>,
+	callback: (input: T, index: number | N, optParams?: O) => Promise<F>,
+	optionalParams?: O,
+) {
+	if (Array.isArray(array)) {
+		const arr = array.map((e, i) => callback(e, i, optionalParams));
+		return Promise.all<F>(arr);
+	}
+	const arr: Array<Promise<F>> = [];
+	array.forEach((e, i) => arr.push(callback(e, i, optionalParams)));
+	return Promise.all<F>(arr);
+}
 
-export function returnNullOnError() {
-	return null;
+export async function asyncWait(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }

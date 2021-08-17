@@ -45,7 +45,7 @@ console.log(generateDependencyReport());
 
 async function initializePrefixes(bot: Client) {
 	resetPrefixes();
-	const guilds = bot.guilds.cache.values();
+	const guilds = bot.guilds.cache;
 	asyncForEach(guilds, async (G) => {
 		PREFIXES.set(G.id, await getPrefix(G.id));
 	});
@@ -119,7 +119,7 @@ bot.on('ready', async () => {
 		startUp(bot);
 		justStartedUp = false;
 	}
-	await bot.user.setPresence({
+	bot.user.setPresence({
 		activities: [
 			{
 				name: `${PREFIX}.help`,
