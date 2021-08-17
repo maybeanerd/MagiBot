@@ -12,7 +12,7 @@
     "@discordjs/voice": "^0.6.0",
     "@types/ffprobe-static": "^2.0.0",
     "axios": "^0.21.1",
-    "blapi": "^2.2.0",
+    "blapi": "^2.2.1",
     "bufferutil": "^4.0.3",
     "discord-api-types": "^0.22.0",
     "discord.js": "^13.1.0",
