@@ -7,10 +7,11 @@
 	Snowflake,
 	GuildMember,
 	ReactionCollector,
+	StageChannel,
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
-import { yesOrNo, doNothingOnError } from '../bamands';
+import { yesOrNo, doNothingOnError, asyncWait } from '../bamands';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { saveUsersWhoJoinedQueue } from '../statTracking';
@@ -46,7 +47,8 @@ function askQuestion(
 	question: string,
 ) {
 	return channel.send(question).then((questionMessage) => channel
-		.awaitMessages((message) => message.author.id === authorID, {
+		.awaitMessages({
+			filter: (message) => message.author.id === authorID,
 			max: 1,
 			time: 60000,
 		})
@@ -130,11 +132,11 @@ async function startQueue(
 	topic: string,
 	time: number,
 ) {
-	let voiceChannel: VoiceChannel | null | undefined = author.voice.channel;
+	let voiceChannel: VoiceChannel | StageChannel | null | undefined = author.voice.channel;
 	let remMessage;
 	if (voiceChannel) {
 		const botMember = await guild!.members.fetch(user());
-		if (!botMember.hasPermission('MUTE_MEMBERS')) {
+		if (!botMember.permissions.has('MUTE_MEMBERS')) {
 			remMessage = await channel.send(
 				'If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.',
 			);
@@ -203,9 +205,8 @@ function onReaction(
 				} else {
 					activeUser = reactionUser;
 					reactionEvent.users.remove(activeUser);
-					channel.send(`It's your turn ${activeUser}!`).then((ms) => {
-						ms.delete({ timeout: 1000 });
-					});
+					const message = await channel.send(`It's your turn ${activeUser}!`);
+					asyncWait(1000).then(() => message.delete());
 					if (voiceChannel) {
 						// unmute currentUser
 						const currentMember = await guild!.members.fetch(reactionUser);
@@ -240,9 +241,8 @@ function onReaction(
 				if (reactConfirm) {
 					reactConfirm.users.remove(activeUser).catch(doNothingOnError);
 				}
-				channel.send(`It's your turn ${activeUser}!`).then((ms) => {
-					ms.delete({ timeout: 1000 });
-				});
+				const message = await channel.send(`It's your turn ${activeUser}!`);
+				asyncWait(1000).then(() => message.delete());
 				if (voiceChannel) {
 					// unmute currentUser
 					const currentMember = await guild!.members.fetch(activeUser);
@@ -253,9 +253,8 @@ function onReaction(
 					}
 				}
 			} else {
-				channel.send('No users left in queue.').then((ms) => {
-					ms.delete({ timeout: 2000 });
-				});
+				const message = await channel.send('No users left in queue.');
+				asyncWait(2000).then(() => message.delete());
 			}
 			reactionEvent.users.remove(reactionUser);
 			break;
@@ -275,9 +274,9 @@ function onReaction(
 			}
 			break;
 		case '🔚':
-			channel.send('Successfully ended queue.').then((ms) => {
-				ms.delete({ timeout: 5000 });
-			});
+			// eslint-disable-next-line no-case-declarations
+			const message = await channel.send('Successfully ended queue.');
+			asyncWait(5000).then(() => message.delete());
 			collector.stop();
 			break;
 		default:
@@ -302,7 +301,7 @@ function onEnd(
 		if (voiceChannel) {
 			delete queueVoiceChannels[guild.id];
 			// remove all mutes
-			voiceChannel.members.array().forEach((member) => {
+			voiceChannel.members.forEach((member) => {
 				// make sure users will be unmuted even if this unmute loop
 				// fails because they left the voice channel too quickly
 				toggleStillMuted(member.id, guild.id, true)
@@ -359,9 +358,7 @@ async function createQueue(
     || ((reaction.emoji.name === '➡' || reaction.emoji.name === '🔚')
       && usr.id === author.id);
 
-	const collector = topicMessage.createReactionCollector(filter, {
-		time,
-	});
+	const collector = topicMessage.createReactionCollector({ filter, time });
 	const debugMessage: Message | null = null;
 	// TODO maybe readd this with webhooks? but honestly just not needed atm.
 	/* if (debugChannel) {
@@ -379,7 +376,7 @@ async function createQueue(
 		// add the vc to the global variable so joins get muted
 		queueVoiceChannels[guild!.id] = voiceChannel.id;
 		// servermute all users in voiceChannel
-		const voiceChannelMembers = voiceChannel.members.array();
+		const voiceChannelMembers = voiceChannel.members;
 		voiceChannelMembers.forEach(async (member) => {
 			if (member && !(await isAdmin(guild!.id, member))) {
 				member.voice

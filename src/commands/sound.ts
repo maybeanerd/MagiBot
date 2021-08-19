@@ -43,7 +43,7 @@ export const sound: magibotCommand = {
 			return;
 		}
 		if (
-			isShadowBanned(msg.author.id, msg.guild.id, msg.guild.ownerID)
+			isShadowBanned(msg.author.id, msg.guild.id, msg.guild.ownerId)
       !== shadowBannedLevel.not
 		) {
 			msg.reply('you cant do this.');
@@ -56,7 +56,7 @@ export const sound: magibotCommand = {
 			msg.reply('you successfully removed your joinsound!');
 		} else {
 			let mention = args[0];
-			const file = msg.attachments.array()[0];
+			const file = msg.attachments.first();
 			if (mention || file) {
 				if (file) {
 					mention = file.url;

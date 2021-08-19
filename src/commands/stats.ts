@@ -13,26 +13,26 @@ export const stats: magibotCommand = {
 	main: async (content, msg) => {
 		const info: Array<{
       name: string;
-      value: string | number;
+      value: string;
       inline: boolean;
     }> = [];
 
 		const numberOfGuilds = (
-      await bot.shard!.fetchClientValues('guilds.cache.size')
-    ).reduce((acc, guildCount) => acc + guildCount, 0) as number;
+      await bot.shard!.fetchClientValues('guilds.size')
+    ).reduce((acc: number, guildCount: any) => acc + guildCount, 0) as number;
 
 		const numberOfUsers = (
-      await bot.shard!.fetchClientValues('users.cache.size')
-    ).reduce((acc, userCount) => acc + userCount, 0) as number;
+      await bot.shard!.fetchClientValues('users.size')
+    ).reduce((acc: number, userCount: any) => acc + userCount, 0) as number;
 
 		info.push({
 			name: 'Number of guilds currently being served',
-			value: numberOfGuilds,
+			value: String(numberOfGuilds),
 			inline: false,
 		});
 		info.push({
 			name: 'Number of users currently being served',
-			value: numberOfUsers,
+			value: String(numberOfUsers),
 			inline: false,
 		});
 
@@ -93,7 +93,7 @@ Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
 			},
 		};
 
-		msg.channel.send({ embed });
+		msg.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		return [

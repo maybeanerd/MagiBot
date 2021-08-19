@@ -1,7 +1,4 @@
-﻿import { TextChannel } from 'discord.js';
-// eslint-disable-next-line import/no-cycle
-import { bot } from '../bot';
-import { PREFIXES } from '../shared_assets';
+﻿import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { sendBugreport } from '../webhooks';
@@ -25,10 +22,7 @@ export const bug: magibotCommand = {
 				mess.react('☑');
 				mess.react('❌');
 				mess
-					.awaitReactions(filter, {
-						max: 1,
-						time: 20000,
-					})
+					.awaitReactions({ filter, max: 1, time: 20000 })
 					.then(async (reacts) => {
 						mess.delete();
 						const frst = reacts.first();

@@ -1,6 +1,8 @@
 ﻿import { MessageEmbedOptions } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
-import { findMember, yesOrNo, findRole } from '../bamands';
+import {
+	findMember, yesOrNo, findRole, asyncWait,
+} from '../bamands';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import {
@@ -130,7 +132,7 @@ function printHelp() {
 	});
 	info.push({
 		name: 'join',
-		value: '(De)activate joinsounds for the voicechannel you\'re connected to',
+		value: "(De)activate joinsounds for the voicechannel you're connected to",
 	});
 	info.push({
 		name: 'admin <@Role>',
@@ -139,7 +141,7 @@ function printHelp() {
 	info.push({
 		name: 'command',
 		value:
-			'(De)activate bot commands for the text channel you\'re sending this in',
+      "(De)activate bot commands for the text channel you're sending this in",
 	});
 	info.push({
 		name: 'notification',
@@ -214,8 +216,8 @@ export const setup: magibotCommand = {
 				const voiceChannel = msg.member.voice.channel;
 				if (voiceChannel) {
 					const isJoinable = await isJoinableVc(
-						msg.guild!.id,
-						voiceChannel.id,
+              msg.guild!.id,
+              voiceChannel.id,
 					);
 					de = '';
 					if (isJoinable) {
@@ -234,7 +236,7 @@ export const setup: magibotCommand = {
 						);
 					}
 				} else {
-					msg.channel.send('You\'re connected to no voice channel!');
+					msg.channel.send("You're connected to no voice channel!");
 				}
 			}
 			break;
@@ -276,8 +278,8 @@ export const setup: magibotCommand = {
 		case 'command':
 			// eslint-disable-next-line no-case-declarations
 			const currentlyIsCommandChannel = await isCommandChannel(
-				msg.guild!.id,
-				msg.channel.id,
+          msg.guild!.id,
+          msg.channel.id,
 			);
 			de = '';
 			if (currentlyIsCommandChannel) {
@@ -291,9 +293,9 @@ export const setup: magibotCommand = {
 				)
 			) {
 				await setCommandChannel(
-					msg.guild!.id,
-					msg.channel.id,
-					!currentlyIsCommandChannel,
+            msg.guild!.id,
+            msg.channel.id,
+            !currentlyIsCommandChannel,
 				);
 				msg.channel.send(
 					`Successfully ${de}activated commands in <#${msg.channel.id}>.`,
@@ -313,16 +315,12 @@ export const setup: magibotCommand = {
 					)
 				) {
 					await setNotificationChannel(msg.guild!.id, msg.channel.id);
-					msg.channel
-						.send(
-							`Successfully activated notifications in <#${msg.channel.id}>.`,
-						)
-						.then((mess) => {
-							mess.delete({ timeout: 5000 })
-								.catch(() => {
-								});
-							msg.delete();
-						});
+					const message = await msg.channel.send(
+						`Successfully activated notifications in <#${msg.channel.id}>.`,
+					);
+					asyncWait(5000).then(() => {
+						message.delete();
+					});
 				}
 			} else if (
 				await yesOrNo(
@@ -341,7 +339,7 @@ export const setup: magibotCommand = {
 					await yesOrNo(
 						msg,
 						`Do you want to change the prefix in ${
-							msg.guild!.name
+                msg.guild!.name
 						} from \`${PREFIXES.get(msg.guild!.id)}.\` to \`${mention}.\` ?`,
 						'Cancelled changing the prefix.',
 					)
@@ -362,10 +360,10 @@ export const setup: magibotCommand = {
 		case 'info':
 			/* eslint-disable no-case-declarations */
 			const info: Array<{
-				name: string;
-				value: string;
-				inline: boolean;
-			}> = [];
+          name: string;
+          value: string;
+          inline: boolean;
+        }> = [];
 			const set = await getSettings(msg.guild!.id);
 
 			info.push({
@@ -512,12 +510,12 @@ export const setup: magibotCommand = {
 			};
 			/* eslint-enable no-case-declarations */
 			/* eslint-enable camelcase */
-			msg.channel.send('', { embed });
+			msg.channel.send({ embeds: [embed] });
 			break;
 		default:
 			msg.reply(
 				`this command doesn't exist. Use \`${PREFIXES.get(
-					msg.guild!.id,
+            msg.guild!.id,
 				)}:help setup\` for more info.`,
 			);
 			break;
