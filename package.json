@@ -3,6 +3,9 @@
   "version": "3.0.0",
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
+  "engines": {
+    "node": "16.x"
+  },
   "directories": {
     "doc": "docs",
     "test": "test"
@@ -31,7 +34,6 @@
   },
   "optionalDependencies": {
     "@discordjs/opus": "^0.5.3",
-    "erlpack": "github:discord/erlpack",
     "sodium": "^3.0.2",
     "zlib-sync": "^0.1.7"
   },
