@@ -14,7 +14,6 @@ import { inv as invite } from './commands/invite';
 import { ping } from './commands/ping';
 import { profile } from './commands/profile';
 import { roll } from './commands/roll';
-import { dc as _dc } from './commands/@dc';
 import { evall as _eval } from './commands/@eval';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/@queue';
@@ -43,7 +42,6 @@ import { bot } from './bot';
 import { asyncWait } from './bamands';
 
 export const commands: { [k: string]: magibotCommand } = {
-	_dc,
 	_eval,
 	_queue,
 	_sound,
