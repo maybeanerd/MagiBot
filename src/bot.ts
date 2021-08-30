@@ -249,8 +249,9 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						const player = createAudioPlayer();
 						connection.subscribe(player);
 						const resource = createAudioResource(sound, { inlineVolume: true });
-            resource.volume!.setVolume(0.5);
+            resource.volume!.setVolume(0.8);
             const timeToPlay = resource.playbackDuration;
+            console.log('time of sound:', timeToPlay);
             player.play(resource);
             saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
             // disconnect after time the sound needs to play
