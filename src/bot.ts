@@ -1,5 +1,14 @@
-﻿import Discord, { Client, DiscordAPIError, Guild } from 'discord.js';
+﻿import Discord, {
+	Client, DiscordAPIError, Guild, Intents,
+} from 'discord.js';
 import { handle } from 'blapi';
+import {
+	AudioPlayerStatus,
+	createAudioPlayer,
+	createAudioResource,
+	generateDependencyReport,
+	joinVoiceChannel,
+} from '@discordjs/voice';
 import config from './configuration';
 import {
 	PREFIX,
@@ -26,13 +35,17 @@ import {
 	isJoinableVc,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
+import {
+	asyncForEach /* , doNothingOnError, returnNullOnError */,
+} from './bamands';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 
+console.log(generateDependencyReport());
+
 async function initializePrefixes(bot: Client) {
 	resetPrefixes();
-	const guilds = bot.guilds.cache.array();
+	const guilds = bot.guilds.cache;
 	asyncForEach(guilds, async (G) => {
 		PREFIXES.set(G.id, await getPrefix(G.id));
 	});
@@ -46,8 +59,23 @@ async function isStillMuted(userID: string, guildID: string) {
 	return Boolean(find);
 }
 
-export const bot = new Discord.Client();
+const intents = [
+	Intents.FLAGS.GUILDS,
+	// Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+	Intents.FLAGS.GUILD_INTEGRATIONS,
+	/* | 'GUILD_WEBHOOKS'
+  | 'GUILD_INVITES' */
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	// | 'GUILD_PRESENCES'
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+	// | 'GUILD_MESSAGE_TYPING'
+	Intents.FLAGS.DIRECT_MESSAGES,
+	Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+	// | 'DIRECT_MESSAGE_TYPING';
+];
 
+export const bot = new Client({ intents });
 // post to the APIs every 30 minutes
 if (config.blapis) {
 	handle(bot, config.blapis, 30);
@@ -91,12 +119,14 @@ bot.on('ready', async () => {
 		startUp(bot);
 		justStartedUp = false;
 	}
-	await bot.user.setPresence({
-		activity: {
-			name: `${PREFIX}.help`,
-			type: 'WATCHING',
-			url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
-		},
+	bot.user.setPresence({
+		activities: [
+			{
+				name: `${PREFIX}.help`,
+				type: 'WATCHING',
+				url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
+			},
+		],
 		status: 'online',
 	});
 	initializePrefixes(bot);
@@ -122,16 +152,17 @@ async function guildPrefixStartup(guild: Guild) {
 bot.on('guildCreate', async (guild) => {
 	if (guild.available) {
 		await guildPrefixStartup(guild);
-		if (guild.owner) {
-			guild.owner
+		const owner = await guild.fetchOwner();
+		if (owner) {
+			owner
 				.send(
-					`Hi there ${guild.owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
+					`Hi there ${owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
             + `join to use joinsounds (\`${PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
 				)
 				.catch(() => {});
 		}
 		await sendJoinEvent(
-			`:white_check_mark: joined **${guild.name}** from ${guild.region} (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerID}> (ID: ${guild.ownerID})`,
+			`:white_check_mark: joined **${guild.name}**: "${guild.description}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerId}> (ID: ${guild.ownerId})`,
 		);
 	}
 });
@@ -190,15 +221,16 @@ bot.on('voiceStateUpdate', async (o, n) => {
 			const shadowBanned = isShadowBanned(
 				n.member.id,
 				n.guild.id,
-				n.guild.ownerID,
+				n.guild.ownerId,
 			);
 			if (
 				newVc
         && n.guild.me
         && !n.guild.me.voice.channel
         && n.id !== bot.user!.id
+        && newVc.joinable // checks vc size
         && !(await isBlacklistedUser(n.id, n.guild.id))
-        && ((await isJoinableVc(n.guild.id, newVc.id))
+        && ((await isJoinableVc(n.guild.id, newVc.id)) // checks magibot settings
           || shadowBanned === shadowBannedLevel.guild)
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
@@ -209,53 +241,43 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						sound = shadowBannedSound;
 					}
 					if (sound) {
-						const connection = await newVc.join();
-						const dispatcher = connection.play(sound, {
-							seek: 0,
-							volume: 0.5,
-							bitrate: 'auto',
+						const connection = joinVoiceChannel({
+							channelId: newVc.id,
+							guildId: newVc.guild.id,
+							adapterCreator: newVc.guild.voiceAdapterCreator,
 						});
+						const player = createAudioPlayer();
+						connection.subscribe(player);
+						const resource = createAudioResource(sound);
+						player.play(resource);
 						saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
 						// disconnect after 10 seconds if for some reason we don't get the events
 						const timeoutID = setTimeout(() => {
-							try {
-								connection.disconnect();
-							} catch (err) {
-								catchErrorOnDiscord(
-									`**Error in timeout (${
-										(err.toString && err.toString()) || 'NONE'
-									}):**\n\`\`\`
-                ${err.stack || 'NO STACK'}
-                \`\`\``,
-								);
-							}
-							dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+							connection.disconnect();
+							player.removeAllListeners(); // To be sure noone listens to this anymore
+							player.stop();
 						}, 10 * 1000);
-						dispatcher.once('finish', () => {
-							clearTimeout(timeoutID);
-							try {
+						player.once('stateChange', (state) => {
+							console.log('Voice state changed to:', state);
+							if (state.status === AudioPlayerStatus.Idle) {
+								clearTimeout(timeoutID);
 								connection.disconnect();
-							} catch (err) {
-								catchErrorOnDiscord(
-									`**Error in once finish (${
-										(err.toString && err.toString()) || 'NONE'
-									}):**\n\`\`\`
-                ${err.stack || 'NO STACK'}
-                \`\`\``,
-								);
+								player.removeAllListeners(); // To be sure noone listens to this anymore
+								player.stop();
 							}
-							dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
 						});
-						dispatcher.on('error', (err) => {
+						player.on('error', (err) => {
 							clearTimeout(timeoutID);
-							dispatcher.removeAllListeners(); // To be sure noone listens to this anymore
+							connection.disconnect();
+							player.removeAllListeners(); // To be sure noone listens to this anymore
+							player.stop();
 							catchErrorOnDiscord(
 								`**Dispatcher Error (${
 									(err.toString && err.toString()) || 'NONE'
 								}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
-							).then(() => connection.disconnect());
+							);
 						});
 					}
 				}

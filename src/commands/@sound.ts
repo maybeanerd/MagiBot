@@ -24,7 +24,7 @@ export const sound: magibotCommand = {
 			return;
 		}
 		if (
-			isShadowBanned(msg.author.id, msg.guild.id, msg.guild.ownerID)
+			isShadowBanned(msg.author.id, msg.guild.id, msg.guild.ownerId)
       !== shadowBannedLevel.not
 		) {
 			msg.reply('you cant do this.');

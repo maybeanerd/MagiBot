@@ -11,10 +11,10 @@ export const inf: magibotCommand = {
 	name: 'info',
 	main: (content, msg) => {
 		const info: Array<{
-			name: string;
-			value: string;
-			inline: boolean;
-		}> = [];
+      name: string;
+      value: string;
+      inline: boolean;
+    }> = [];
 
 		info.push({
 			name: 'Links',
@@ -25,14 +25,14 @@ export const inf: magibotCommand = {
 		info.push({
 			name: 'How to support MagiBot',
 			value:
-				'Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nLeave a review on [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!',
+        'Donate a buck via [Paypal](https://paypal.me/pools/c/8be5ok31vB)\nPledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nLeave a review on [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!',
 			inline: false,
 		});
 
 		info.push({
 			name: 'A bit of background',
 			value:
-				'MagiBot is being developed in Germany by T0TProduction#0001 as a hobby project.\nIt was originally a private bot for a Discord guild themed after the Pokemon Magikarp which is the reason it\'s called MagiBot.',
+        "MagiBot is being developed in Germany by T0TProduction#0001 as a hobby project.\nIt was originally a private bot for a Discord guild themed after the Pokemon Magikarp which is the reason it's called MagiBot.",
 			inline: false,
 		});
 
@@ -41,20 +41,19 @@ export const inf: magibotCommand = {
 			description: 'Some information about the bot:',
 			fields: info,
 			footer: {
-				iconURL: user()
-					.avatarURL() || '',
+				iconURL: user().avatarURL() || '',
 				text: SIGN,
 			},
 		};
 
-		msg.channel.send({ embed });
+		msg.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		return [
 			{
 				name: '',
 				value:
-					'Get some info about the bot as well as links to official MagiBot stuff.',
+          'Get some info about the bot as well as links to official MagiBot stuff.',
 			},
 		];
 	},
