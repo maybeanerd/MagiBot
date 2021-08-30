@@ -256,15 +256,16 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						player.play(resource);
 						saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
 						// disconnect after time the sound needs to play
-						const timeoutID = setTimeout(
-							() => {
-								connection.disconnect();
-								player.removeAllListeners(); // To be sure noone listens to this anymore
-								player.stop();
-							},
-							Math.max(Math.min(timeToPlay, 8 * 1000)), // at most end after 8 seconds
+						const timeoutTime = Math.max(
+							Math.min(timeToPlay, 8 * 1000), // at most end after 8 seconds
 							500, // at least wait half a second to end
 						);
+						console.log('timeoutTime', timeoutTime);
+						const timeoutID = setTimeout(() => {
+							connection.disconnect();
+							player.removeAllListeners(); // To be sure noone listens to this anymore
+							player.stop();
+						}, timeoutTime);
 						// this does not get triggered once the sound has finished.
 						player.once('stateChange', (state) => {
 							if (state.status === AudioPlayerStatus.Idle) {
