@@ -26,9 +26,9 @@
 	"typescript.tsdk": "node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
-  },
-  "editor.insertSpaces": false,
-  "editor.defaultFormatter": "HookyQR.beautify",
+	},
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
 "editor.detectIndentation": false,
+"editor.insertSpaces": false,
 "editor.tabSize": 2
 }

@@ -248,37 +248,39 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						});
 						const player = createAudioPlayer();
 						connection.subscribe(player);
-						const resource = createAudioResource(sound);
-						player.play(resource);
-						saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
-						// disconnect after 10 seconds if for some reason we don't get the events
-						const timeoutID = setTimeout(() => {
-							connection.disconnect();
-							player.removeAllListeners(); // To be sure noone listens to this anymore
-							player.stop();
-						}, 10 * 1000);
-						player.once('stateChange', (state) => {
-							console.log('Voice state changed to:', state);
-							if (state.status === AudioPlayerStatus.Idle) {
-								clearTimeout(timeoutID);
-								connection.disconnect();
-								player.removeAllListeners(); // To be sure noone listens to this anymore
-								player.stop();
-							}
-						});
-						player.on('error', (err) => {
-							clearTimeout(timeoutID);
-							connection.disconnect();
-							player.removeAllListeners(); // To be sure noone listens to this anymore
-							player.stop();
-							catchErrorOnDiscord(
-								`**Dispatcher Error (${
-									(err.toString && err.toString()) || 'NONE'
-								}):**\n\`\`\`
+						const resource = createAudioResource(sound, { inlineVolume: true });
+            resource.volume!.setVolume(0.5);
+            const timeToPlay = resource.playbackDuration;
+            player.play(resource);
+            saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
+            // disconnect after time the sound needs to play
+            const timeoutID = setTimeout(() => {
+            	connection.disconnect();
+            	player.removeAllListeners(); // To be sure noone listens to this anymore
+            	player.stop();
+            }, Math.min(timeToPlay, 8 * 1000)); // always end after 8 seconds
+            // this does not get triggered once the sound has finished.
+            player.once('stateChange', (state) => {
+            	if (state.status === AudioPlayerStatus.Idle) {
+            		clearTimeout(timeoutID);
+            		connection.disconnect();
+            		player.removeAllListeners(); // To be sure noone listens to this anymore
+            		player.stop();
+            	}
+            });
+            player.on('error', (err) => {
+            	clearTimeout(timeoutID);
+            	connection.disconnect();
+            	player.removeAllListeners(); // To be sure noone listens to this anymore
+            	player.stop();
+            	catchErrorOnDiscord(
+            		`**Dispatcher Error (${
+            			(err.toString && err.toString()) || 'NONE'
+            		}):**\n\`\`\`
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
-							);
-						});
+            	);
+            });
 					}
 				}
 			}
