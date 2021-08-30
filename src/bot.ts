@@ -249,6 +249,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						const player = createAudioPlayer();
 						connection.subscribe(player);
 						const resource = createAudioResource(sound, { inlineVolume: true });
+						console.log('audio resource:');
+						console.log(JSON.stringify(resource, null, 2));
 						player.play(resource);
             resource.volume!.setVolume(0.5);
             const timeToPlay = resource.playbackDuration;
