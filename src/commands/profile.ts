@@ -36,15 +36,12 @@ export const profile: magibotCommand = {
 				return;
 			}
 			const info: Array<{
-				name: string;
-				value: string;
-				inline: boolean;
-			}> = [];
+        name: string;
+        value: string;
+        inline: boolean;
+      }> = [];
 			const salt = await getSalt(id, msg.guild.id);
-			const {
-				botusage,
-				sound
-			} = await getUser(id, msg.guild.id);
+			const { botusage, sound } = await getUser(id, msg.guild.id);
 			info.push({
 				name: 'Saltlevel',
 				value: String(salt),
@@ -71,7 +68,7 @@ export const profile: magibotCommand = {
 					text: user.user.tag,
 				},
 			};
-			msg.channel.send('', { embed });
+			msg.channel.send({ embeds: [embed] });
 		} else {
 			msg.reply('This command is only available in guilds.');
 		}
@@ -80,12 +77,12 @@ export const profile: magibotCommand = {
 		return [
 			{
 				name: '',
-				value: 'Get info about yourself.'
+				value: 'Get info about yourself.',
 			},
 			{
 				name: '<@user|userid|nickname>',
 				value:
-					'Get info about a certain user. If you use the nickname you need to at least define three characters.',
+          'Get info about a certain user. If you use the nickname you need to at least define three characters.',
 			},
 		];
 	},

@@ -32,20 +32,21 @@ export const rfact: magibotCommand = {
 			description: fact,
 			footer: {
 				/* eslint-disable camelcase */
-				iconURL: user()
-					.avatarURL() || '',
+				iconURL: user().avatarURL() || '',
 				/* eslint-enable camelcase */
 				text: 'powered by numbersapi.com',
 			},
 		};
 
-		msg.channel.send({ embed });
+		msg.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
-		return [{
-			name: '',
-			value: 'Get a random fact about the current date.'
-		}];
+		return [
+			{
+				name: '',
+				value: 'Get a random fact about the current date.',
+			},
+		];
 	},
 	name: 'rfact',
 	dev: false,

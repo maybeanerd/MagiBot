@@ -1,4 +1,4 @@
-﻿import mongoose, { Model } from 'mongoose';
+﻿import mongoose from 'mongoose';
 import config from './configuration';
 
 if (!config.dburl) {
@@ -22,19 +22,19 @@ mongoose.connect(`${url}/MagiBot`, {
 // define types and Models of DB. later on we will move them out of here and just import them
 // settings per guild
 export type Settings = {
-	_id: string;
-	commandChannels: Array<string>;
-	adminRoles: Array<string>;
-	joinChannels: Array<string>;
-	blacklistedUsers: Array<string>;
-	blacklistedEveryone: Array<string>;
-	saltKing?: string;
-	saltRole?: string;
-	notChannel?: string;
-	prefix: string;
-	lastConnected: Date;
+  _id: string;
+  commandChannels: Array<string>;
+  adminRoles: Array<string>;
+  joinChannels: Array<string>;
+  blacklistedUsers: Array<string>;
+  blacklistedEveryone: Array<string>;
+  saltKing?: string;
+  saltRole?: string;
+  notChannel?: string;
+  prefix: string;
+  lastConnected: Date;
 };
-const settingsSchema = new mongoose.Schema<Settings, Model<Settings>>(
+const settingsSchema = new mongoose.Schema<Settings>(
 	{
 		_id: {
 			// _id is auto indexed and unique
@@ -84,11 +84,14 @@ const settingsSchema = new mongoose.Schema<Settings, Model<Settings>>(
 	},
 	{ collection: 'settings' },
 );
-export const SettingsModel = mongoose.model('settings', settingsSchema);
+export const SettingsModel = mongoose.model<Settings>(
+	'settings',
+	settingsSchema,
+);
 
 // saltrank per user
 type Saltrank = { salter: string; salt: number; guild: string };
-const saltrankSchema = new mongoose.Schema<Saltrank, Model<Saltrank>>(
+const saltrankSchema = new mongoose.Schema<Saltrank>(
 	{
 		salter: {
 			type: String,
@@ -105,20 +108,26 @@ const saltrankSchema = new mongoose.Schema<Saltrank, Model<Saltrank>>(
 	},
 	{ collection: 'saltrank' },
 );
-saltrankSchema.index({
-	salter: 1,
-	guild: -1
-}, { unique: true });
-export const SaltrankModel = mongoose.model('saltrank', saltrankSchema);
+saltrankSchema.index(
+	{
+		salter: 1,
+		guild: -1,
+	},
+	{ unique: true },
+);
+export const SaltrankModel = mongoose.model<Saltrank>(
+	'saltrank',
+	saltrankSchema,
+);
 
 // salt reports per report
 type Salt = {
-	salter: string;
-	reporter: string;
-	date: Date;
-	guild: string;
+  salter: string;
+  reporter: string;
+  date: Date;
+  guild: string;
 };
-const saltSchema = new mongoose.Schema<Salt, Model<Salt>>(
+const saltSchema = new mongoose.Schema<Salt>(
 	{
 		salter: {
 			type: String,
@@ -142,21 +151,21 @@ const saltSchema = new mongoose.Schema<Salt, Model<Salt>>(
 );
 saltSchema.index({
 	salter: 1,
-	reporter: -1
+	reporter: -1,
 });
-export const SaltModel = mongoose.model('salt', saltSchema);
+export const SaltModel = mongoose.model<Salt>('salt', saltSchema);
 
 // userdata per user per guild
 type User = {
-	userID: string;
-	guildID: string;
-	warnings: number;
-	kicks: number;
-	bans: number;
-	botusage: number;
-	sound?: string;
+  userID: string;
+  guildID: string;
+  warnings: number;
+  kicks: number;
+  bans: number;
+  botusage: number;
+  sound?: string;
 };
-const userSchema = new mongoose.Schema<User, Model<User>>(
+const userSchema = new mongoose.Schema<User>(
 	{
 		userID: {
 			type: String,
@@ -189,11 +198,14 @@ const userSchema = new mongoose.Schema<User, Model<User>>(
 	},
 	{ collection: 'users' },
 );
-userSchema.index({
-	userID: 1,
-	guildID: -1
-}, { unique: true });
-export const UserModel = mongoose.model('users', userSchema);
+userSchema.index(
+	{
+		userID: 1,
+		guildID: -1,
+	},
+	{ unique: true },
+);
+export const UserModel = mongoose.model<User>('users', userSchema);
 
 const deleteDuplicateUsers = true;
 // TODO check if we have duplicates on live
@@ -209,41 +221,40 @@ UserModel.aggregate([
 			},
 		},
 	},
-])
-	.then((duplicateUsers) => {
-		console.log(
-			'duplicate users:',
-			JSON.stringify(
-				duplicateUsers.filter((u) => u.count > 1),
-				null,
-				2,
-			),
-		);
-		if (deleteDuplicateUsers) {
-			duplicateUsers
-				.filter((u) => u.count > 1)
-				.forEach(async (u) => {
-					for (let i = 1; i < u.count; i++) {
-						// eslint-disable-next-line no-underscore-dangle, no-await-in-loop
-						await UserModel.deleteOne(u._id);
-						// eslint-disable-next-line no-underscore-dangle
-						console.log('Deleted user', u._id, 'run', i, 'of', u.count - 1);
-					}
-				});
-		}
-	});
+]).then((duplicateUsers) => {
+	console.log(
+		'duplicate users:',
+		JSON.stringify(
+			duplicateUsers.filter((u) => u.count > 1),
+			null,
+			2,
+		),
+	);
+	if (deleteDuplicateUsers) {
+		duplicateUsers
+			.filter((u) => u.count > 1)
+			.forEach(async (u) => {
+				for (let i = 1; i < u.count; i++) {
+					// eslint-disable-next-line no-underscore-dangle, no-await-in-loop
+					await UserModel.deleteOne(u._id);
+					// eslint-disable-next-line no-underscore-dangle
+					console.log('Deleted user', u._id, 'run', i, 'of', u.count - 1);
+				}
+			});
+	}
+});
 
 // entry per vote
 export type Vote = {
-	messageID: string;
-	channelID: string;
-	options: Array<string>;
-	topic: string;
-	date: Date;
-	guildid: string;
-	authorID: string;
+  messageID: string;
+  channelID: string;
+  options: Array<string>;
+  topic: string;
+  date: Date;
+  guildid: string;
+  authorID: string;
 };
-const voteSchema = new mongoose.Schema<Vote, Model<Vote>>(
+const voteSchema = new mongoose.Schema<Vote>(
 	{
 		messageID: {
 			type: String,
@@ -279,14 +290,14 @@ const voteSchema = new mongoose.Schema<Vote, Model<Vote>>(
 );
 voteSchema.index({
 	messageID: 1,
-	channelID: 1
+	channelID: 1,
 });
-export const VoteModel = mongoose.model('votes', voteSchema);
+export const VoteModel = mongoose.model<Vote>('votes', voteSchema);
 
 // one entry per user per guild
 // deprecated, we want to remove this system?
 type StillMuted = { userid: string; guildid: string };
-const stillMutedSchema = new mongoose.Schema<StillMuted, Model<StillMuted>>(
+const stillMutedSchema = new mongoose.Schema<StillMuted>(
 	{
 		userid: {
 			type: String,
@@ -301,6 +312,9 @@ const stillMutedSchema = new mongoose.Schema<StillMuted, Model<StillMuted>>(
 );
 stillMutedSchema.index({
 	userid: 1,
-	guildid: 1
+	guildid: 1,
 });
-export const StillMutedModel = mongoose.model('stillMuted', stillMutedSchema);
+export const StillMutedModel = mongoose.model<StillMuted>(
+	'stillMuted',
+	stillMutedSchema,
+);

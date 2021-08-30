@@ -7,7 +7,7 @@ import { asyncForEach } from '../bamands';
 import { getNotChannel, setSettings } from '../dbHelpers';
 
 async function sendUpdate(update: string) {
-	await asyncForEach(bot.guilds.cache.array(), async (G) => {
+	await asyncForEach(bot.guilds.cache, async (G) => {
 		if (G.available) {
 			const cid = await getNotChannel(G.id);
 			if (cid) {
@@ -38,23 +38,19 @@ export const update: magibotCommand = {
 			.send(`Do you want to send the update\n${content}`)
 			.then((mess) => {
 				const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-					&& user.id === msg.author.id;
+          && user.id === msg.author.id;
 				mess.react('☑');
 				mess.react('❌');
-				mess.awaitReactions(filter, {
-					max: 1,
-					time: 60000
-				})
-					.then((reacts) => {
-						mess.delete();
-						const frst = reacts.first();
-						if (frst && frst.emoji.name === '☑') {
-							sendUpdate(content);
-							msg.channel.send(`Successfully sent:\n${content}`);
-						} else if (reacts.first()) {
-							msg.channel.send('successfully canceled update');
-						}
-					});
+				mess.awaitReactions({ filter, max: 1, time: 60000 }).then((reacts) => {
+					mess.delete();
+					const frst = reacts.first();
+					if (frst && frst.emoji.name === '☑') {
+						sendUpdate(content);
+						msg.channel.send(`Successfully sent:\n${content}`);
+					} else if (reacts.first()) {
+						msg.channel.send('successfully canceled update');
+					}
+				});
 			});
 	},
 	admin: true,

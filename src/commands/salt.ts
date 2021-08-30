@@ -10,7 +10,7 @@ async function saltDowntimeDone(userid1: string, userid2: string) {
 	// get newest entry in salt
 	const d2 = await SaltModel.find({
 		salter: userid1,
-		reporter: userid2
+		reporter: userid2,
 	})
 		.sort({ date: -1 })
 		.limit(1);
@@ -30,13 +30,13 @@ export async function saltGuild(
 ) {
 	const user = await SaltrankModel.findOne({
 		salter,
-		guild: guildID
+		guild: guildID,
 	});
 	if (!user) {
 		const myobj = new SaltrankModel({
 			salter,
 			salt: 1,
-			guild: guildID
+			guild: guildID,
 		});
 		await myobj.save();
 	} else {
@@ -44,14 +44,17 @@ export async function saltGuild(
 		if (slt <= 0 || reset) {
 			await SaltrankModel.deleteOne({
 				salter,
-				guild: guildID
+				guild: guildID,
 			});
 		} else {
 			const update = { $set: { salt: slt } };
-			await SaltrankModel.updateOne({
-				salter,
-				guild: guildID
-			}, update);
+			await SaltrankModel.updateOne(
+				{
+					salter,
+					guild: guildID,
+				},
+				update,
+			);
 		}
 	}
 }
@@ -86,7 +89,7 @@ function printHelp(msg: Message) {
 	info.push({
 		name: 'add <@user|userid|nickname>',
 		value:
-			'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.',
+      'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.',
 	});
 	info.push({
 		name: 'top',
@@ -108,18 +111,16 @@ export const salt: magibotCommand = {
 				/* eslint-enable no-case-declarations */
 				if (mention && uid) {
 					if (uid === msg.author.id) {
-						msg.reply('you can\'t report yourself!');
+						msg.reply("you can't report yourself!");
 						return;
 					}
-					const mem = await msg.guild.members.fetch(uid)
-						.catch(() => {
-						});
+					const mem = await msg.guild.members.fetch(uid).catch(() => {});
 					if (!mem) {
-						msg.reply('the user with this ID doesn\'t exist on this guild.');
+						msg.reply("the user with this ID doesn't exist on this guild.");
 						return;
 					}
 					if (mem.user.bot) {
-						msg.reply('you can\'t report bots!');
+						msg.reply("you can't report bots!");
 						return;
 					}
 					const time = await saltUp(uid, msg.author.id, msg.guild);
@@ -142,10 +143,10 @@ export const salt: magibotCommand = {
 				/* eslint-disable no-case-declarations */
 				const salters = await topSalt(msg.guild.id);
 				const info: Array<{
-					name: string;
-					value: string;
-					inline: boolean;
-				}> = [];
+            name: string;
+            value: string;
+            inline: boolean;
+          }> = [];
 				/* eslint-enable no-case-declarations */
 				for (let i = 0; i < 5; i++) {
 					let mname = 'User left guild';
@@ -153,8 +154,7 @@ export const salt: magibotCommand = {
 						// eslint-disable-next-line no-await-in-loop
 						const member = await msg.guild.members
 							.fetch(salters[i].salter)
-							.catch(() => {
-							});
+							.catch(() => {});
 						if (member) {
 							mname = member.displayName;
 						}
@@ -178,7 +178,7 @@ export const salt: magibotCommand = {
 					},
 				};
 				/* eslint-enable no-case-declarations */
-				msg.channel.send('', { embed });
+				msg.channel.send({ embeds: [embed] });
 				break;
 			default:
 				msg.reply(

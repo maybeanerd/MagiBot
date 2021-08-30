@@ -1,4 +1,4 @@
-﻿import { Client, TextChannel, Message } from 'discord.js';
+﻿import { Client, TextChannel } from 'discord.js';
 import { asyncForEach } from './bamands';
 import {
 	SaltModel,
@@ -38,13 +38,13 @@ async function onHour(bot: Client, isFirst: boolean) {
 		await sendStartupEvent(bot.shard!.ids[0], true);
 	}
 
-	const t0 = process.hrtime();
+	/* const t0 = process.hrtime(); */
 	const nd = new Date();
 	nd.setDate(nd.getDate() - 7);
-	const guilds = bot.guilds.cache.array();
+	const guilds = bot.guilds.cache;
 	let counter = 0;
-	const lastPostedCounter = 0;
-	const latestTimePassed = 0;
+	/* const lastPostedCounter = 0;
+	const latestTimePassed = 0; */
 	await asyncForEach(guilds, async (G) => {
 		const guildID = G.id;
 		const localCounter = ++counter;
@@ -107,7 +107,7 @@ async function onHour(bot: Client, isFirst: boolean) {
 				);
 			}
 		} */
-		if (localCounter >= guilds.length) {
+		if (localCounter >= guilds.size) {
 			await sendStartupEvent(bot.shard!.ids[0]);
 		}
 	});

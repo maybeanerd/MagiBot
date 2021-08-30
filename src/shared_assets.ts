@@ -36,7 +36,7 @@ export function sendNotification(
 		color: icolor,
 		description: info,
 	};
-	msg.channel.send('', { embed });
+	msg.channel.send({ embeds: [embed] });
 }
 
 let bot_user: ClientUser;
@@ -69,6 +69,7 @@ const shadowbannedUsers = new Map([
 	// ['185845248163840002', true],
 ]);
 
+// eslint-disable-next-line no-shadow
 export const enum shadowBannedLevel {
   not = 0x0000,
   member = 0x0001,

@@ -41,7 +41,7 @@ function parse(de: string) {
 	// eslint-disable-next-line prefer-spread
 	return comp.apply(
 		null,
-		de.match(/(?:(\d+)\s*\*\s*)?(\d*)d(\d+)(?:\s*([+-]\s*\d+))?/i) as any,
+    de.match(/(?:(\d+)\s*\*\s*)?(\d*)d(\d+)(?:\s*([+-]\s*\d+))?/i) as any,
 	);
 }
 
@@ -56,17 +56,17 @@ export const roll: magibotCommand = {
 		const throws = parse(input);
 		if (!throws) {
 			msg.channel.send(
-				`Your inputs could not be interpreted. Use \`${
-					PREFIXES.get(msg.guild!.id)
-				}.help roll\` for more info.`,
+				`Your inputs could not be interpreted. Use \`${PREFIXES.get(
+          msg.guild!.id,
+				)}.help roll\` for more info.`,
 			);
 			return;
 		}
 		const info: Array<{
-			name: string;
-			value: string;
-			inline: boolean;
-		}> = [];
+      name: string;
+      value: string;
+      inline: boolean;
+    }> = [];
 		const size = throws.length;
 		if (throws[size - 6]) {
 			msg.reply('the dungeon master can only roll 22 dice at a time!');
@@ -92,7 +92,7 @@ export const roll: magibotCommand = {
 			value: `${String(
 				Math.floor(
 					((throws[size - 1] as number) / thro / (throws[size - 3] as number))
-					* 100,
+            * 100,
 				) - 50,
 			)}%`,
 			inline: false,
@@ -111,19 +111,19 @@ export const roll: magibotCommand = {
 			footer: {
 				/* eslint-disable camelcase */
 				icon_url:
-					'https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png',
+          'https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png',
 				/* eslint-enable camelcase */
 				text: 'The real dungeon master',
 			},
 		};
-		msg.channel.send('', { embed });
+		msg.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		const ret: Array<{ name: string; value: string }> = [];
 		ret.push({
 			name: '[multiplier]*[number of rolls]d<die number>[+ <modifier>]',
 			value:
-				'Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`',
+        'Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`',
 		});
 		return ret;
 	},

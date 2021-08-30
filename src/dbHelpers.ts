@@ -114,12 +114,7 @@ export async function topSalt(guildID: string) {
 
 export async function updateSaltKing(G: Guild) {
 	if (G.available && G.me) {
-		if (
-			G.me.hasPermission('MANAGE_ROLES', {
-				checkAdmin: true,
-				checkOwner: false,
-			})
-		) {
+		if (G.me.permissions.has('MANAGE_ROLES', true)) {
 			const SaltKing = await getSaltKing(G.id);
 			let SaltRole = await getSaltRole(G.id);
 			const groles = G.roles;
@@ -127,13 +122,11 @@ export async function updateSaltKing(G: Guild) {
 				if (G.roles.cache.size < 250) {
 					await G.roles
 						.create({
-							data: {
-								name: 'SaltKing',
-								color: '#FFFFFF',
-								position: 0,
-								permissions: [],
-								mentionable: true,
-							},
+							name: 'SaltKing',
+							color: '#FFFFFF',
+							position: 0,
+							permissions: [],
+							mentionable: true,
 							reason:
                 'SaltKing role needed for Saltranking to work. You can adjust this role if you like.',
 						})
@@ -148,8 +141,9 @@ export async function updateSaltKing(G: Guild) {
 						if (chan) {
 							const perms = chan.permissionsFor(G.me);
 							if (perms && perms.has('SEND_MESSAGES')) {
+								const owner = await G.fetchOwner();
 								(chan as TextChannel).send(
-									`Hey there ${G.owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
+									`Hey there ${owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
 								);
 							}
 						}
@@ -191,8 +185,9 @@ export async function updateSaltKing(G: Guild) {
 					if (chan) {
 						const perms = chan.permissionsFor(G.me);
 						if (perms && perms.has('SEND_MESSAGES')) {
+							const owner = await G.fetchOwner();
 							(chan as TextChannel).send(
-								`Hey there ${G.owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
+								`Hey there ${owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
 							);
 						}
 					}
@@ -205,8 +200,9 @@ export async function updateSaltKing(G: Guild) {
 				if (chan) {
 					const perms = chan.permissionsFor(G.me);
 					if (perms && perms.has('SEND_MESSAGES')) {
+						const owner = await G.fetchOwner();
 						(chan as TextChannel).send(
-							`Hey there ${G.owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
+							`Hey there ${owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
 						);
 					}
 				}
@@ -270,12 +266,7 @@ export async function getAdminRoles(guildID: string) {
 
 export async function isAdmin(guildID: string, member: GuildMember) {
 	// checks for admin and Owner, they can always use
-	if (
-		member.hasPermission('ADMINISTRATOR', {
-			checkAdmin: true,
-			checkOwner: true,
-		})
-	) {
+	if (member.permissions.has('ADMINISTRATOR', true)) {
 		return true;
 	}
 	// Owner of bot is always admin hehe
