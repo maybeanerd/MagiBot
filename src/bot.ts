@@ -8,6 +8,7 @@ import {
 	createAudioResource,
 	generateDependencyReport,
 	joinVoiceChannel,
+	VoiceConnectionStatus,
 } from '@discordjs/voice';
 import config from './configuration';
 import {
@@ -249,8 +250,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						const player = createAudioPlayer();
 						connection.subscribe(player);
 						const resource = createAudioResource(sound, { inlineVolume: true });
-						console.log('audio resource:');
-						console.log(resource);
+						/* console.log('audio resource:');
+						console.log(resource); */
 						player.play(resource);
             resource.volume!.setVolume(0.5);
             const timeToPlay = resource.playbackDuration;
@@ -270,12 +271,22 @@ bot.on('voiceStateUpdate', async (o, n) => {
             }, timeoutTime);
             // this does not get triggered once the sound has finished.
             player.once('stateChange', (state) => {
+            	console.log('player state:', state);
             	if (state.status === AudioPlayerStatus.Idle) {
             		clearTimeout(timeoutID);
             		connection.disconnect();
             		player.removeAllListeners(); // To be sure noone listens to this anymore
             		player.stop();
             	}
+            });
+            connection.once('stateChange', (state) => {
+            	console.log('connection state:', state);
+            	/* if (state.status === VoiceConnectionStatus.) {
+            		clearTimeout(timeoutID);
+            		connection.disconnect();
+            		player.removeAllListeners(); // To be sure noone listens to this anymore
+            		player.stop();
+            	} */
             });
             player.on('error', (err) => {
             	clearTimeout(timeoutID);
