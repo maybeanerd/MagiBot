@@ -254,39 +254,26 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						console.log(resource); */
 						player.play(resource);
             resource.volume!.setVolume(0.5);
-            const timeToPlay = resource.playbackDuration;
-            console.log('time of sound:', timeToPlay);
-            console.log('volume of sound:', resource.volume!.volume);
             saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
-            // disconnect after time the sound needs to play
-            const timeoutTime = Math.max(
-            	Math.min(timeToPlay, 8 * 1000), // at most end after 8 seconds
-            	8000, // 500, // at least wait half a second to end
-            );
-            console.log('timeoutTime', timeoutTime);
             const timeoutID = setTimeout(() => {
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
-            }, timeoutTime);
+            }, 8 * 1000);
             // this does not get triggered once the sound has finished.
             player.on('stateChange', (state) => {
             	console.log('player state:', state);
-            	if (state.status === AudioPlayerStatus.Idle) {
-            		clearTimeout(timeoutID);
-            		connection.disconnect();
-            		player.removeAllListeners(); // To be sure noone listens to this anymore
-            		player.stop();
+            	if (state.status === AudioPlayerStatus.Playing) {
+            		if (state.playbackDuration > 0) {
+            			// disconnect after time the sound needs to play
+            			setTimeout(() => {
+            				clearTimeout(timeoutID);
+            				connection.disconnect();
+            				player.removeAllListeners(); // To be sure noone listens to this anymore
+            				player.stop();
+            			}, state.playbackDuration);
+            		}
             	}
-            });
-            connection.on('stateChange', (state) => {
-            	console.log('connection state:', state);
-            	/* if (state.status === VoiceConnectionStatus.) {
-            		clearTimeout(timeoutID);
-            		connection.disconnect();
-            		player.removeAllListeners(); // To be sure noone listens to this anymore
-            		player.stop();
-            	} */
             });
             player.on('error', (err) => {
             	clearTimeout(timeoutID);
