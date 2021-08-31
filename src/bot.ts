@@ -262,16 +262,19 @@ bot.on('voiceStateUpdate', async (o, n) => {
             }, 8 * 1000);
             // this does not get triggered once the sound has finished.
             player.on('stateChange', (state) => {
-            	console.log('player state:', state);
+            	console.log('player state:', state.status);
             	if (state.status === AudioPlayerStatus.Playing) {
+            		console.log(
+            			'player state playback duration:',
+            			state.playbackDuration,
+            		);
+
             		if (state.playbackDuration > 0) {
-            			// disconnect after time the sound needs to play
-            			setTimeout(() => {
-            				clearTimeout(timeoutID);
-            				connection.disconnect();
-            				player.removeAllListeners(); // To be sure noone listens to this anymore
-            				player.stop();
-            			}, state.playbackDuration);
+            			// this occurrs *after* the sound has finished
+            			clearTimeout(timeoutID);
+            			connection.disconnect();
+            			player.removeAllListeners(); // To be sure noone listens to this anymore
+            			player.stop();
             		}
             	}
             });
