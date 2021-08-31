@@ -270,7 +270,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             	player.stop();
             }, timeoutTime);
             // this does not get triggered once the sound has finished.
-            player.once('stateChange', (state) => {
+            player.on('stateChange', (state) => {
             	console.log('player state:', state);
             	if (state.status === AudioPlayerStatus.Idle) {
             		clearTimeout(timeoutID);
@@ -279,7 +279,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             		player.stop();
             	}
             });
-            connection.once('stateChange', (state) => {
+            connection.on('stateChange', (state) => {
             	console.log('connection state:', state);
             	/* if (state.status === VoiceConnectionStatus.) {
             		clearTimeout(timeoutID);
