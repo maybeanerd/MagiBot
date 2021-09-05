@@ -14,7 +14,7 @@
     "@discordjs/rest": "^0.1.0-canary.0",
     "@discordjs/voice": "^0.6.0",
     "@types/ffprobe-static": "^2.0.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.3",
     "blapi": "^2.2.1",
     "bufferutil": "^4.0.3",
     "discord-api-types": "^0.22.0",
