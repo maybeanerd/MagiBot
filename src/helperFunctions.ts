@@ -133,7 +133,11 @@ export async function resolveYesOrNoButton(
 	const id = idParts[0];
 	const callbacks = yesOrNoButtonCallbacks.get(id);
 	console.log(callbacks);
-	if (callbacks) {
+	if (
+		callbacks
+		// only accept reactions from the user that created this question
+    && callbacks.msg.author.id === interaction.user.id
+	) {
 		yesOrNoButtonCallbacks.delete(id);
 		callbacks.msg.delete();
 		if (!isYesButton && callbacks.abortMessage) {

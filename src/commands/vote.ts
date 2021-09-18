@@ -1,4 +1,5 @@
-﻿import { asyncForEach } from '../helperFunctions';
+﻿import { MessageReaction, User } from 'discord.js';
+import { asyncForEach } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { Vote, VoteModel } from '../db';
@@ -131,7 +132,10 @@ export const vote: magibotCommand = {
                                 			`Do you want to start the vote **${topic}** lasting **${timestr}**with the options\n${str}`,
                                 		)
                                 		.then((mess3) => {
-                                			const filter = (reaction, user) => (reaction.emoji.name === '☑'
+                                			const filter = (
+                                				reaction: MessageReaction,
+                                				user: User,
+                                			) => (reaction.emoji.name === '☑'
                                           || reaction.emoji.name === '❌')
                                         && user.id === authorID;
                                 			mess3.react('☑');
