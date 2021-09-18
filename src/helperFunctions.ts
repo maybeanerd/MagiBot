@@ -1,5 +1,5 @@
 ﻿// commands made by Basti for use of the Bot
-import Discord from 'discord.js';
+import Discord, { MessageActionRow, MessageButton } from 'discord.js';
 
 export async function findMember(
 	guild: Discord.Guild,
@@ -69,6 +69,15 @@ export function returnNullOnError() {
 	return null;
 }
 
+export const yesOrNoButtonCallbacks = new Map<
+  string,
+  {
+    msg: Discord.Message;
+    resolve:(success: boolean) => void;
+    abortMessage?: string;
+  }
+>();
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function yesOrNo(
@@ -76,38 +85,64 @@ export async function yesOrNo(
 	question: string,
 	abortMessage?: string,
 	timeoutMessage?: string,
-	tim?: number,
+	timeoutTime?: number,
+): Promise<boolean> {
+	const row = new MessageActionRow();
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${msg.id}-yes`)
+			.setLabel('Yes')
+			.setStyle('SUCCESS'),
+	);
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${msg.id}-no`)
+			.setLabel('No')
+			.setStyle('DANGER'),
+	);
+	const mess = await msg.channel.send({ content: question, components: [row] });
+
+	const time = timeoutTime || 20000;
+
+	const promise = new Promise<boolean>((resolve) => {
+		yesOrNoButtonCallbacks.set(msg.id, {
+			msg: mess,
+			abortMessage,
+			resolve,
+		});
+		const message = timeoutMessage || 'Cancelled due to timeout.';
+		setTimeout(async () => {
+			if (yesOrNoButtonCallbacks.has(msg.id)) {
+				yesOrNoButtonCallbacks.delete(msg.id);
+				await msg.channel.send(message);
+			}
+			resolve(false);
+		}, time);
+	});
+	return promise;
+}
+
+export async function resolveYesOrNoButton(
+	interaction: Discord.ButtonInteraction,
 ) {
-	// TODO use buttons!!!
-
-	const mess = await msg.channel.send(question);
-
-	const filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-    && user.id === msg.author.id;
-	await mess.react('☑');
-	await mess.react('❌');
-	let time = tim;
-	if (!time) {
-		time = 20000;
-	}
-	const reacts = await mess.awaitReactions({ filter, max: 1, time });
-	mess.delete();
-	const firstReacts = reacts.first();
-	if (firstReacts && firstReacts.emoji.name === '☑') {
-		return true;
-	}
-	if (firstReacts) {
-		if (abortMessage) {
-			msg.channel.send(abortMessage).catch(doNothingOnError);
+	// load info of that button
+	// if yes button, resolve with true. else resolve with false
+	const idParts = interaction.customId.split('-');
+	const isYesButton = idParts[1] === 'yes';
+	console.log(isYesButton);
+	const id = idParts[0];
+	const callbacks = yesOrNoButtonCallbacks.get(id);
+	console.log(callbacks);
+	if (callbacks) {
+		yesOrNoButtonCallbacks.delete(id);
+		callbacks.msg.delete();
+		if (!isYesButton && callbacks.abortMessage) {
+			callbacks.msg.channel
+				.send(callbacks.abortMessage)
+				.catch(doNothingOnError);
 		}
-		return false;
+		callbacks.resolve(isYesButton);
 	}
-	let message = timeoutMessage;
-	if (!message) {
-		message = 'Cancelled due to timeout.';
-	}
-	await msg.channel.send(message);
-	return false;
 }
 
 export function printError(error) {

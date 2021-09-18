@@ -2,7 +2,7 @@
 import { ShardingManager } from 'discord.js';
 import { promises as fsp } from 'fs';
 import path from 'path';
-import { asyncForEach, doNothingOnError, returnNullOnError } from './bamands';
+import { asyncForEach, doNothingOnError, returnNullOnError } from './helperFunctions';
 
 // attempt to share data over saved files
 // tbh we should just use REDIS instead of this...

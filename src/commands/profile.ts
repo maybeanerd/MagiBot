@@ -1,7 +1,7 @@
 import { MessageEmbedOptions } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
-import { findMember } from '../bamands';
+import { findMember } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { SaltrankModel } from '../db';
 import { getUser } from '../dbHelpers';

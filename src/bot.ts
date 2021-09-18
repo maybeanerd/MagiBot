@@ -37,7 +37,9 @@ import {
 import { StillMutedModel } from './db';
 import {
 	asyncForEach /* , doNothingOnError, returnNullOnError */,
-} from './bamands';
+	resolveYesOrNoButton,
+	yesOrNoButtonCallbacks,
+} from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 
@@ -177,6 +179,20 @@ bot.on('guildDelete', async (guild) => {
 
 bot.on('error', (err) => {
 	console.error(err);
+});
+
+bot.on('interactionCreate', async (interaction) => {
+	if (
+		interaction.isButton()
+    && yesOrNoButtonCallbacks.has(interaction.customId) // might not want this test as well
+	) {
+		console.log(interaction);
+		await resolveYesOrNoButton(interaction);
+	}
+	if (!interaction.isButton()) {
+		// TODO work with interactions
+
+	}
 });
 
 bot.on('voiceStateUpdate', async (o, n) => {

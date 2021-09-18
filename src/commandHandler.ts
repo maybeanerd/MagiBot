@@ -39,7 +39,7 @@ import {
 } from './dbHelpers';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
-import { asyncWait } from './bamands';
+import { asyncWait } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
 	_eval,

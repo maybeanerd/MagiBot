@@ -11,7 +11,7 @@
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
-import { yesOrNo, doNothingOnError, asyncWait } from '../bamands';
+import { yesOrNo, doNothingOnError, asyncWait } from '../helperFunctions';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { saveUsersWhoJoinedQueue } from '../statTracking';

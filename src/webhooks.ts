@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import { doNothingOnError } from './bamands';
+import { doNothingOnError } from './helperFunctions';
 
 const {
 	WEBHOOK_ID_EX,

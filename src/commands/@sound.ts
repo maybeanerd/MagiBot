@@ -1,6 +1,6 @@
 import { PREFIXES, isShadowBanned, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
-import { findMember } from '../bamands';
+import { findMember } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { addSound } from './sound';
 

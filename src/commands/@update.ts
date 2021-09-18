@@ -3,7 +3,7 @@ import { commandCategories } from '../types/enums';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
 import { magibotCommand } from '../types/magibot';
-import { asyncForEach } from '../bamands';
+import { asyncForEach } from '../helperFunctions';
 import { getNotChannel, setSettings } from '../dbHelpers';
 
 async function sendUpdate(update: string) {

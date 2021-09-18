@@ -1,5 +1,5 @@
 ﻿import { Client, TextChannel } from 'discord.js';
-import { asyncForEach } from './bamands';
+import { asyncForEach } from './helperFunctions';
 import {
 	SaltModel,
 	SaltrankModel,

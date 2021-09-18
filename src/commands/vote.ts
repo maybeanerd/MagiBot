@@ -1,4 +1,4 @@
-﻿import { asyncForEach } from '../bamands';
+﻿import { asyncForEach } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { Vote, VoteModel } from '../db';
