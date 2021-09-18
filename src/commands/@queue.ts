@@ -133,7 +133,7 @@ async function startQueue(
 	time: number,
 ) {
 	let voiceChannel: VoiceChannel | StageChannel | null | undefined = author.voice.channel;
-	let remMessage;
+	let remMessage: Message;
 	if (voiceChannel) {
 		const botMember = await guild!.members.fetch(user());
 		if (!botMember.permissions.has('MUTE_MEMBERS')) {
@@ -161,15 +161,14 @@ async function startQueue(
 			'If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.',
 		);
 	}
-
-	if (
-		!(await yesOrNo(
-			message,
-			`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`,
-			`Successfully canceled queue **${topic}**`,
-			`Cancelled queue creation of **${topic}** due to timeout.`,
-		).finally(() => remMessage.delete().catch(doNothingOnError)))
-	) {
+	const wantsToStartQueue = await yesOrNo(
+		message,
+		`Do you want to start the queue **${topic}** lasting **${time} minutes** ?`,
+		`Successfully canceled queue **${topic}**`,
+		`Cancelled queue creation of **${topic}** due to timeout.`,
+	);
+	remMessage.delete().catch(doNothingOnError);
+	if (!wantsToStartQueue) {
 		delete used[guild!.id];
 		return false;
 	}

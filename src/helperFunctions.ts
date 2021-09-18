@@ -78,6 +78,13 @@ export const yesOrNoButtonCallbacks = new Map<
   }
 >();
 
+// for some reason eslint doesnt get this...
+// eslint-disable-next-line no-shadow
+export const enum buttonId {
+  'yesOrNo' = 0x0001,
+  'queue' = 0x1001,
+}
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function yesOrNo(
@@ -90,13 +97,13 @@ export async function yesOrNo(
 	const row = new MessageActionRow();
 	row.addComponents(
 		new MessageButton()
-			.setCustomId(`${msg.id}-yes`)
+			.setCustomId(`${buttonId.yesOrNo}-${msg.id}-yes`)
 			.setLabel('Yes')
 			.setStyle('SUCCESS'),
 	);
 	row.addComponents(
 		new MessageButton()
-			.setCustomId(`${msg.id}-no`)
+			.setCustomId(`${buttonId.yesOrNo}-${msg.id}-no`)
 			.setLabel('No')
 			.setStyle('DANGER'),
 	);
@@ -128,14 +135,14 @@ export async function resolveYesOrNoButton(
 	// load info of that button
 	// if yes button, resolve with true. else resolve with false
 	const idParts = interaction.customId.split('-');
-	const isYesButton = idParts[1] === 'yes';
+	const isYesButton = idParts[2] === 'yes';
 	console.log(isYesButton);
-	const id = idParts[0];
+	const id = idParts[1];
 	const callbacks = yesOrNoButtonCallbacks.get(id);
 	console.log(callbacks);
 	if (
 		callbacks
-		// only accept reactions from the user that created this question
+    // only accept reactions from the user that created this question
     && callbacks.msg.author.id === interaction.user.id
 	) {
 		yesOrNoButtonCallbacks.delete(id);

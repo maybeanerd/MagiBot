@@ -37,6 +37,7 @@ import {
 import { StillMutedModel } from './db';
 import {
 	asyncForEach /* , doNothingOnError, returnNullOnError */,
+	buttonId,
 	resolveYesOrNoButton,
 	yesOrNoButtonCallbacks,
 } from './helperFunctions';
@@ -186,12 +187,21 @@ bot.on('interactionCreate', async (interaction) => {
 		interaction.isButton()
     && yesOrNoButtonCallbacks.has(interaction.customId) // might not want this test as well
 	) {
-		console.log(interaction);
-		await resolveYesOrNoButton(interaction);
+		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
+		switch (buttonType) {
+		case buttonId.yesOrNo:
+			await resolveYesOrNoButton(interaction);
+			break;
+		case buttonId.queue:
+			// TODO
+			break;
+		default:
+			console.error('Got unknown button interaction!');
+			break;
+		}
 	}
 	if (!interaction.isButton()) {
 		// TODO work with interactions
-
 	}
 });
 
