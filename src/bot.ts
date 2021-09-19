@@ -38,8 +38,6 @@ import { StillMutedModel } from './db';
 import {
 	asyncForEach /* , doNothingOnError, returnNullOnError */,
 	buttonId,
-	resolveYesOrNoButton,
-	yesOrNoButtonCallbacks,
 } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
