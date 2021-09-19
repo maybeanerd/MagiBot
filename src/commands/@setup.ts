@@ -2,7 +2,7 @@
 import { COLOR, PREFIXES } from '../shared_assets';
 import {
 	findMember, yesOrNo, findRole, asyncWait,
-} from '../bamands';
+} from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import {
