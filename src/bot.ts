@@ -181,14 +181,14 @@ bot.on('error', (err) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-	if (interaction.isButton()) {
+	/* if (interaction.isButton()) {
 		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
 		switch (buttonType) {
 		default:
 			console.info('Got button interaction!', buttonType);
 			break;
 		}
-	}
+	} */
 	if (!interaction.isButton()) {
 		// TODO work with interactions here
 	}
