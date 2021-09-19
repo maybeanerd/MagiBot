@@ -210,10 +210,9 @@ async function onQueueAction(
 	const actionUser = interaction.user;
 	switch (typeOfAction) {
 	case typeOfQueueAction.join:
-		if (
-			!queuedUsers.includes(actionUser)
-        && actionUser !== sharedQueueData.activeUser
-		) {
+		// eslint-disable-next-line no-case-declarations
+		const indexOfUser = queuedUsers.indexOf(actionUser);
+		if (indexOfUser === -1 && actionUser !== sharedQueueData.activeUser) {
 			saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
 			if (sharedQueueData.activeUser) {
 				queuedUsers.push(actionUser);
@@ -247,6 +246,22 @@ async function onQueueAction(
 					),
 				)
 				.catch(doNothingOnError);
+			interaction.reply({
+				content: `Successfully joined the queue! Your position is: ${queuedUsers.length}`,
+				ephemeral: true,
+			});
+		} else if (indexOfUser !== -1) {
+			interaction.reply({
+				content: `You were already in the queue! Your current position is: ${
+					indexOfUser + 1
+				}`,
+				ephemeral: true,
+			});
+		} else {
+			interaction.reply({
+				content: "It's your turn!",
+				ephemeral: true,
+			});
 		}
 		break;
 	case typeOfQueueAction.leave:
@@ -263,6 +278,15 @@ async function onQueueAction(
 					),
 				)
 				.catch(doNothingOnError);
+			interaction.reply({
+				content: 'Successfully left the queue!',
+				ephemeral: true,
+			});
+		} else {
+			interaction.reply({
+				content: 'You are not in the queue anyways!',
+				ephemeral: true,
+			});
 		}
 		break;
 	case typeOfQueueAction.next:
@@ -309,9 +333,15 @@ async function onQueueAction(
 						.catch(doNothingOnError);
 				}
 			}
+			interaction.reply({
+				content: 'Successfully moved the queue to the next user!',
+				ephemeral: true,
+			});
 		} else {
-			const message = await channel.send('No users left in queue.');
-			asyncWait(2000).then(() => message.delete());
+			interaction.reply({
+				content: 'There are no users left in the queue!',
+				ephemeral: true,
+			});
 		}
 		break;
 	case typeOfQueueAction.end:
@@ -319,10 +349,11 @@ async function onQueueAction(
 		if (author.id !== interaction.member?.user.id) {
 			return;
 		}
-		// eslint-disable-next-line no-case-declarations
-		const message = await channel.send('Successfully ended queue.');
+		interaction.reply({
+			content: 'Successfully ended the queue!',
+			ephemeral: true,
+		});
 		collector.stop('Ended by user.');
-		asyncWait(5000).then(() => message.delete());
 		break;
 	default:
 		break;
