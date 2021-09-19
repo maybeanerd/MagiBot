@@ -47,7 +47,7 @@ function messageEdit(
 	} else {
 		nextUsers = ' no more queued users\n';
 	}
-	return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse ☑ to join and ❌ to leave the queue!`;
+	return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 function askQuestion(
@@ -399,31 +399,31 @@ async function createQueue(
 	row.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.next}`)
-			.setLabel('➡ Next Turn')
+			.setLabel('Next Turn')
 			.setStyle('PRIMARY'),
 	);
 	row.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.end}`)
-			.setLabel('🔚 End Queue')
-			.setStyle('DANGER'),
+			.setLabel('End Queue Early')
+			.setStyle('SECONDARY'),
 	);
 	const rowTwo = new MessageActionRow();
 	rowTwo.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.join}`)
-			.setLabel('☑ Join Queue')
+			.setLabel('Join Queue')
 			.setStyle('SUCCESS'),
 	);
 	rowTwo.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.leave}`)
-			.setLabel('❌ Leave Queue')
-			.setStyle('DANGER'),
+			.setLabel('Leave Queue')
+			.setStyle('SECONDARY'),
 	);
 
 	const topicMessage = await channel.send({
-		content: `Queue: **${topic}:**\n\nUse ☑ to join the queue!`,
+		content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
 		components: [row, rowTwo],
 	});
 	used[guild.id] = {
