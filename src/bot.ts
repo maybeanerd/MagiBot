@@ -37,7 +37,8 @@ import {
 import { StillMutedModel } from './db';
 import {
 	asyncForEach /* , doNothingOnError, returnNullOnError */,
-} from './bamands';
+	buttonId,
+} from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 
@@ -177,6 +178,20 @@ bot.on('guildDelete', async (guild) => {
 
 bot.on('error', (err) => {
 	console.error(err);
+});
+
+bot.on('interactionCreate', async (interaction) => {
+	if (interaction.isButton()) {
+		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
+		switch (buttonType) {
+		default:
+			console.info('Got button interaction!', buttonType);
+			break;
+		}
+	}
+	if (!interaction.isButton()) {
+		// TODO work with interactions here
+	}
 });
 
 bot.on('voiceStateUpdate', async (o, n) => {

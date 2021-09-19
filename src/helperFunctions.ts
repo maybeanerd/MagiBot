@@ -1,5 +1,12 @@
 ﻿// commands made by Basti for use of the Bot
-import Discord from 'discord.js';
+import Discord, {
+	ButtonInteraction,
+	Interaction,
+	MessageActionRow,
+	MessageButton,
+	MessageComponent,
+	MessageComponentInteraction,
+} from 'discord.js';
 
 export async function findMember(
 	guild: Discord.Guild,
@@ -69,6 +76,13 @@ export function returnNullOnError() {
 	return null;
 }
 
+// for some reason eslint doesnt get this...
+// eslint-disable-next-line no-shadow
+export const enum buttonId {
+  'yesOrNo' = 0x0001,
+  'queue' = 0x1001,
+}
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function yesOrNo(
@@ -76,38 +90,56 @@ export async function yesOrNo(
 	question: string,
 	abortMessage?: string,
 	timeoutMessage?: string,
-	tim?: number,
-) {
-	// TODO use buttons!!!
-
-	const mess = await msg.channel.send(question);
-
-	const filter = (reaction: Discord.MessageReaction, user: Discord.User) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-    && user.id === msg.author.id;
-	await mess.react('☑');
-	await mess.react('❌');
-	let time = tim;
-	if (!time) {
-		time = 20000;
-	}
-	const reacts = await mess.awaitReactions({ filter, max: 1, time });
-	mess.delete();
-	const firstReacts = reacts.first();
-	if (firstReacts && firstReacts.emoji.name === '☑') {
-		return true;
-	}
-	if (firstReacts) {
-		if (abortMessage) {
-			msg.channel.send(abortMessage).catch(doNothingOnError);
-		}
-		return false;
-	}
-	let message = timeoutMessage;
-	if (!message) {
-		message = 'Cancelled due to timeout.';
-	}
-	await msg.channel.send(message);
-	return false;
+	timeoutTime?: number,
+): Promise<boolean> {
+	const row = new MessageActionRow();
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.yesOrNo}-${msg.id}-yes`)
+			.setLabel('Yes')
+			.setStyle('SUCCESS'),
+	);
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.yesOrNo}-${msg.id}-no`)
+			.setLabel('No')
+			.setStyle('DANGER'),
+	);
+	const questionMessage = await msg.channel.send({
+		content: question,
+		components: [row],
+	});
+	const time = timeoutTime || 20000;
+	const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
+	// only accept reactions from the user that created this question
+	const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
+    && interaction.customId.startsWith(`${buttonId.yesOrNo}-${msg.id}-`);
+	const collector = msg.channel.createMessageComponentCollector({
+		filter,
+		time,
+	});
+	const promise = new Promise<boolean>((resolve) => {
+		let alreadyResolved = false;
+		collector.once('collect', async (interaction) => {
+			alreadyResolved = true;
+			// load info of that button
+			const idParts = interaction.customId.split('-');
+			const isYesButton = idParts[2] === 'yes';
+			questionMessage.delete();
+			if (!isYesButton && abortMessage) {
+				questionMessage.channel.send(abortMessage).catch(doNothingOnError);
+			}
+			resolve(isYesButton);
+			collector.stop('Got an answer.');
+		});
+		collector.once('end', (/* collected */) => {
+			if (!alreadyResolved) {
+				msg.channel.send(messageForTimeout);
+				resolve(false);
+			}
+		});
+	});
+	return promise;
 }
 
 export function printError(error) {

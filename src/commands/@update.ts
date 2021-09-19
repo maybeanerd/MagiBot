@@ -3,7 +3,7 @@ import { commandCategories } from '../types/enums';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
 import { magibotCommand } from '../types/magibot';
-import { asyncForEach } from '../bamands';
+import { asyncForEach, yesOrNo } from '../helperFunctions';
 import { getNotChannel, setSettings } from '../dbHelpers';
 
 async function sendUpdate(update: string) {
@@ -34,24 +34,17 @@ export const update: magibotCommand = {
 	perm: ['ADMINISTRATOR'],
 	name: 'update',
 	main: async function main(content, msg) {
-		await msg.channel
-			.send(`Do you want to send the update\n${content}`)
-			.then((mess) => {
-				const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-          && user.id === msg.author.id;
-				mess.react('☑');
-				mess.react('❌');
-				mess.awaitReactions({ filter, max: 1, time: 60000 }).then((reacts) => {
-					mess.delete();
-					const frst = reacts.first();
-					if (frst && frst.emoji.name === '☑') {
-						sendUpdate(content);
-						msg.channel.send(`Successfully sent:\n${content}`);
-					} else if (reacts.first()) {
-						msg.channel.send('successfully canceled update');
-					}
-				});
-			});
+		const confirmed = await yesOrNo(
+			msg,
+			`Do you want to send the update\n${content}`,
+			'Successfully canceled update',
+			undefined,
+			60000,
+		);
+		if (confirmed) {
+			sendUpdate(content);
+			msg.channel.send(`Successfully sent:\n${content}`);
+		}
 	},
 	admin: true,
 	hide: true,

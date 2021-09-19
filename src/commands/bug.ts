@@ -1,4 +1,5 @@
-﻿import { PREFIXES } from '../shared_assets';
+﻿import { yesOrNo } from '../helperFunctions';
+import { PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { sendBugreport } from '../webhooks';
@@ -14,33 +15,19 @@ export const bug: magibotCommand = {
 			);
 			return;
 		}
-		msg.channel
-			.send(`Do you want to send this bugreport?\n${content}`)
-			.then((mess) => {
-				const filter = (reaction, user) => (reaction.emoji.name === '☑' || reaction.emoji.name === '❌')
-          && user.id === msg.author.id;
-				mess.react('☑');
-				mess.react('❌');
-				mess
-					.awaitReactions({ filter, max: 1, time: 20000 })
-					.then(async (reacts) => {
-						mess.delete();
-						const frst = reacts.first();
-						if (frst && frst.emoji.name === '☑') {
-							sendBugreport(
-								`**Bugreport** by ${msg.author.username} (<@${
-									msg.author.id
-								}>) on server ${msg.guild!.name}( ${
-                  msg.guild!.id
-								} ) :\n${content}`,
-							).then(() => {
-								msg.channel.send('Succesfully sent bugreport.');
-							});
-						} else if (reacts.first()) {
-							msg.channel.send('Successfully canceled bugreport.');
-						}
-					});
-			});
+		const confirmed = await yesOrNo(
+			msg,
+			`Do you want to send this bugreport?\n${content}`,
+			'Successfully canceled bugreport.',
+		);
+		if (confirmed) {
+			await sendBugreport(
+				`**Bugreport** by ${msg.author.username} (<@${
+					msg.author.id
+				}>) on server ${msg.guild!.name}( ${msg.guild!.id} ) :\n${content}`,
+			);
+			await msg.channel.send('Succesfully sent bugreport.');
+		}
 	},
 	admin: false,
 	ehelp() {
