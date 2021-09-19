@@ -130,6 +130,7 @@ export async function yesOrNo(
 				questionMessage.channel.send(abortMessage).catch(doNothingOnError);
 			}
 			resolve(isYesButton);
+			collector.stop('Got an answer.');
 		});
 		collector.once('end', (/* collected */) => {
 			if (!alreadyResolved) {

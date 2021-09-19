@@ -186,14 +186,14 @@ async function startQueue(
 
 // eslint being stupid again
 // eslint-disable-next-line no-shadow
-const enum typeOfQueueReaction {
+const enum typeOfQueueAction {
   next = 'next',
   end = 'end',
   join = 'join',
   leave = 'leave',
 }
 
-async function onQueueReaction(
+async function onQueueAction(
 	interaction: ButtonInteraction,
 	channel: TextChannel,
 	voiceChannel: VoiceChannel | null,
@@ -204,22 +204,22 @@ async function onQueueReaction(
 	collector: InteractionCollector<MessageComponentInteraction>,
 	author: GuildMember,
 ) {
-	const typeOfReaction: typeOfQueueReaction = interaction.customId.split(
+	const typeOfAction: typeOfQueueAction = interaction.customId.split(
 		'-',
 	)[2] as any;
-	const reactionUser = interaction.user;
-	switch (typeOfReaction) {
-	case typeOfQueueReaction.join:
+	const actionUser = interaction.user;
+	switch (typeOfAction) {
+	case typeOfQueueAction.join:
 		if (
-			!queuedUsers.includes(reactionUser)
-        && reactionUser !== sharedQueueData.activeUser
+			!queuedUsers.includes(actionUser)
+        && actionUser !== sharedQueueData.activeUser
 		) {
 			saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
 			if (sharedQueueData.activeUser) {
-				queuedUsers.push(reactionUser);
+				queuedUsers.push(actionUser);
 			} else {
 				// eslint-disable-next-line no-param-reassign
-				sharedQueueData.activeUser = reactionUser;
+				sharedQueueData.activeUser = actionUser;
 				const message = await channel.send(
 					`It's your turn ${sharedQueueData.activeUser}!`,
 				);
@@ -228,7 +228,7 @@ async function onQueueReaction(
 					// TODO rework muting in here
 					// unmute currentUser
 					const currentMember = await interaction.guild!.members.fetch(
-						reactionUser,
+						actionUser,
 					);
 					if (currentMember) {
 						currentMember.voice
@@ -249,9 +249,9 @@ async function onQueueReaction(
 				.catch(doNothingOnError);
 		}
 		break;
-	case typeOfQueueReaction.leave:
-		if (queuedUsers.includes(reactionUser)) {
-			const ind = queuedUsers.findIndex((obj) => obj.id === reactionUser.id);
+	case typeOfQueueAction.leave:
+		if (queuedUsers.includes(actionUser)) {
+			const ind = queuedUsers.findIndex((obj) => obj.id === actionUser.id);
 			queuedUsers.splice(ind, 1);
 			topicMessage
 				.edit(
@@ -265,7 +265,7 @@ async function onQueueReaction(
 				.catch(doNothingOnError);
 		}
 		break;
-	case typeOfQueueReaction.next:
+	case typeOfQueueAction.next:
 		// only creator of queue is allowed to do this
 		if (author.id !== interaction.member?.user.id) {
 			return;
@@ -294,12 +294,6 @@ async function onQueueReaction(
 					),
 				)
 				.catch(doNothingOnError);
-			const reactConfirm = topicMessage.reactions.cache.get('☑');
-			if (reactConfirm) {
-				reactConfirm.users
-					.remove(sharedQueueData.activeUser)
-					.catch(doNothingOnError);
-			}
 			const message = await channel.send(
 				`It's your turn ${sharedQueueData.activeUser}!`,
 			);
@@ -320,7 +314,7 @@ async function onQueueReaction(
 			asyncWait(2000).then(() => message.delete());
 		}
 		break;
-	case typeOfQueueReaction.end:
+	case typeOfQueueAction.end:
 		// only creator of queue is allowed to do this
 		if (author.id !== interaction.member?.user.id) {
 			return;
@@ -360,7 +354,6 @@ function onEnd(
 			});
 		}
 		topicMessage.edit(`**${topic}** ended.`).catch(doNothingOnError);
-		topicMessage.reactions.removeAll().catch(doNothingOnError);
 	};
 }
 
@@ -405,26 +398,26 @@ async function createQueue(
 	const row = new MessageActionRow();
 	row.addComponents(
 		new MessageButton()
-			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.next}`)
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.next}`)
 			.setLabel('➡ Next Turn')
 			.setStyle('PRIMARY'),
 	);
 	row.addComponents(
 		new MessageButton()
-			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.end}`)
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.end}`)
 			.setLabel('🔚 End Queue')
 			.setStyle('DANGER'),
 	);
 	const rowTwo = new MessageActionRow();
 	rowTwo.addComponents(
 		new MessageButton()
-			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.join}`)
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.join}`)
 			.setLabel('☑ Join Queue')
 			.setStyle('SUCCESS'),
 	);
 	rowTwo.addComponents(
 		new MessageButton()
-			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.leave}`)
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.leave}`)
 			.setLabel('❌ Leave Queue')
 			.setStyle('DANGER'),
 	);
@@ -461,7 +454,7 @@ async function createQueue(
 	const sharedQueueData: { activeUser: User | null } = { activeUser: null };
 	const queuedUsers: Array<User> = [];
 	collector.on('collect', async (interaction) => {
-		await onQueueReaction(
+		await onQueueAction(
       interaction as ButtonInteraction,
       channel,
       voiceChannel,
