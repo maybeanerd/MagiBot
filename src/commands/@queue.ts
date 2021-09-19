@@ -6,12 +6,21 @@
 	Guild,
 	Snowflake,
 	GuildMember,
-	ReactionCollector,
 	StageChannel,
+	ButtonInteraction,
+	MessageActionRow,
+	MessageButton,
+	MessageComponentInteraction,
+	InteractionCollector,
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../bot';
-import { yesOrNo, doNothingOnError, asyncWait } from '../helperFunctions';
+import {
+	yesOrNo,
+	doNothingOnError,
+	asyncWait,
+	buttonId,
+} from '../helperFunctions';
 import { user, queueVoiceChannels } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { saveUsersWhoJoinedQueue } from '../statTracking';
@@ -22,7 +31,7 @@ const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
 function messageEdit(
 	voiceChannel: VoiceChannel | null | undefined,
-	activeUser: User | undefined,
+	activeUser: User | null,
 	queuedUsers: Array<User>,
 	topic: string,
 ) {
@@ -175,119 +184,160 @@ async function startQueue(
 	return voiceChannel;
 }
 
-function onReaction(
-	guild: Guild,
+// eslint being stupid again
+// eslint-disable-next-line no-shadow
+const enum typeOfQueueReaction {
+  next = 'next',
+  end = 'end',
+  join = 'join',
+  leave = 'leave',
+}
+
+async function onQueueReaction(
+	interaction: ButtonInteraction,
 	channel: TextChannel,
-	voiceChannel: VoiceChannel,
+	voiceChannel: VoiceChannel | null,
 	topicMessage: Message,
 	topic: string,
-	collector: ReactionCollector,
+	queuedUsers: Array<User>,
+	sharedQueueData: { activeUser: User | null },
+	collector: InteractionCollector<MessageComponentInteraction>,
+	author: GuildMember,
 ) {
-	const queuedUsers: Array<User> = [];
-	let activeUser: User | undefined;
-
-	return async (reactionEvent, reactionUser) => {
-		switch (reactionEvent.emoji.name) {
-		case '☑':
-			if (
-				!queuedUsers.includes(reactionUser)
-          && reactionUser !== activeUser
-          && !reactionEvent.me
-			) {
-				saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
-				if (activeUser) {
-					queuedUsers.push(reactionUser);
-					const reactDeclined = topicMessage.reactions.cache.get('❌');
-					if (reactDeclined) {
-						reactDeclined.users.remove(reactionUser).catch(doNothingOnError);
-					}
-				} else {
-					activeUser = reactionUser;
-					reactionEvent.users.remove(activeUser);
-					const message = await channel.send(`It's your turn ${activeUser}!`);
-					asyncWait(1000).then(() => message.delete());
-					if (voiceChannel) {
-						// unmute currentUser
-						const currentMember = await guild!.members.fetch(reactionUser);
-						if (currentMember) {
-							currentMember.voice
-								.setMute(false, 'Its their turn in the queue')
-								.catch(doNothingOnError);
-						}
-					}
-				}
-				topicMessage
-					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
-					.catch(doNothingOnError);
-			}
-			break;
-		case '➡':
-			if (queuedUsers[0]) {
-				if (voiceChannel) {
-					// mute old current user
-					if (activeUser) {
-						const currentMember = await guild!.members.fetch(activeUser);
-						currentMember.voice
-							.setMute(true, 'its not your turn in the queue anymore')
-							.catch(doNothingOnError);
-					}
-				}
-				activeUser = queuedUsers.shift()!;
-				topicMessage
-					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
-					.catch(doNothingOnError);
-				const reactConfirm = topicMessage.reactions.cache.get('☑');
-				if (reactConfirm) {
-					reactConfirm.users.remove(activeUser).catch(doNothingOnError);
-				}
-				const message = await channel.send(`It's your turn ${activeUser}!`);
+	const typeOfReaction: typeOfQueueReaction = interaction.customId.split(
+		'-',
+	)[2] as any;
+	const reactionUser = interaction.user;
+	switch (typeOfReaction) {
+	case typeOfQueueReaction.join:
+		if (
+			!queuedUsers.includes(reactionUser)
+        && reactionUser !== sharedQueueData.activeUser
+		) {
+			saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
+			if (sharedQueueData.activeUser) {
+				queuedUsers.push(reactionUser);
+			} else {
+				// eslint-disable-next-line no-param-reassign
+				sharedQueueData.activeUser = reactionUser;
+				const message = await channel.send(
+					`It's your turn ${sharedQueueData.activeUser}!`,
+				);
 				asyncWait(1000).then(() => message.delete());
 				if (voiceChannel) {
+					// TODO rework muting in here
 					// unmute currentUser
-					const currentMember = await guild!.members.fetch(activeUser);
+					const currentMember = await interaction.guild!.members.fetch(
+						reactionUser,
+					);
 					if (currentMember) {
 						currentMember.voice
 							.setMute(false, 'Its their turn in the queue')
 							.catch(doNothingOnError);
 					}
 				}
-			} else {
-				const message = await channel.send('No users left in queue.');
-				asyncWait(2000).then(() => message.delete());
 			}
-			reactionEvent.users.remove(reactionUser);
-			break;
-		case '❌':
-			if (queuedUsers.includes(reactionUser) && !reactionEvent.me) {
-				const reactConfirm = topicMessage.reactions.cache.get('☑');
-				if (reactConfirm) {
-					reactConfirm.users.remove(reactionUser).catch(doNothingOnError);
+			topicMessage
+				.edit(
+					messageEdit(
+						voiceChannel,
+						sharedQueueData.activeUser,
+						queuedUsers,
+						topic,
+					),
+				)
+				.catch(doNothingOnError);
+		}
+		break;
+	case typeOfQueueReaction.leave:
+		if (queuedUsers.includes(reactionUser)) {
+			const ind = queuedUsers.findIndex((obj) => obj.id === reactionUser.id);
+			queuedUsers.splice(ind, 1);
+			topicMessage
+				.edit(
+					messageEdit(
+						voiceChannel,
+						sharedQueueData.activeUser,
+						queuedUsers,
+						topic,
+					),
+				)
+				.catch(doNothingOnError);
+		}
+		break;
+	case typeOfQueueReaction.next:
+		// only creator of queue is allowed to do this
+		if (author.id !== interaction.member?.user.id) {
+			return;
+		}
+		if (queuedUsers[0]) {
+			if (voiceChannel) {
+				// mute old current user
+				if (sharedQueueData.activeUser) {
+					const currentMember = await interaction.guild!.members.fetch(
+						sharedQueueData.activeUser,
+					);
+					currentMember.voice
+						.setMute(true, 'its not your turn in the queue anymore')
+						.catch(doNothingOnError);
 				}
-				const ind = queuedUsers.findIndex(
-					(obj) => obj.id === reactionUser.id,
-				);
-				queuedUsers.splice(ind, 1);
-				topicMessage
-					.edit(messageEdit(voiceChannel, activeUser, queuedUsers, topic))
+			}
+			// eslint-disable-next-line no-param-reassign
+			sharedQueueData.activeUser = queuedUsers.shift()!;
+			topicMessage
+				.edit(
+					messageEdit(
+						voiceChannel,
+						sharedQueueData.activeUser,
+						queuedUsers,
+						topic,
+					),
+				)
+				.catch(doNothingOnError);
+			const reactConfirm = topicMessage.reactions.cache.get('☑');
+			if (reactConfirm) {
+				reactConfirm.users
+					.remove(sharedQueueData.activeUser)
 					.catch(doNothingOnError);
 			}
-			break;
-		case '🔚':
-			// eslint-disable-next-line no-case-declarations
-			const message = await channel.send('Successfully ended queue.');
-			asyncWait(5000).then(() => message.delete());
-			collector.stop();
-			break;
-		default:
-			break;
+			const message = await channel.send(
+				`It's your turn ${sharedQueueData.activeUser}!`,
+			);
+			asyncWait(1000).then(() => message.delete());
+			if (voiceChannel) {
+				// unmute currentUser
+				const currentMember = await interaction.guild!.members.fetch(
+					sharedQueueData.activeUser,
+				);
+				if (currentMember) {
+					currentMember.voice
+						.setMute(false, 'Its their turn in the queue')
+						.catch(doNothingOnError);
+				}
+			}
+		} else {
+			const message = await channel.send('No users left in queue.');
+			asyncWait(2000).then(() => message.delete());
 		}
-		reactionEvent.users.remove(reactionUser);
-	};
+		break;
+	case typeOfQueueReaction.end:
+		// only creator of queue is allowed to do this
+		if (author.id !== interaction.member?.user.id) {
+			return;
+		}
+		// eslint-disable-next-line no-case-declarations
+		const message = await channel.send('Successfully ended queue.');
+		collector.stop('Ended by user.');
+		asyncWait(5000).then(() => message.delete());
+		break;
+	default:
+		break;
+	}
 }
 
 function onEnd(
 	guild: Guild,
-	voiceChannel: VoiceChannel,
+	voiceChannel: VoiceChannel | null,
 	debugMessage: Message | null,
 	topicMessage: Message,
 	topic: string,
@@ -341,23 +391,9 @@ async function createQueue(
 	if (startQueueValue === false) {
 		return;
 	}
-	const voiceChannel = startQueueValue as VoiceChannel;
+	const voiceChannel = startQueueValue as VoiceChannel | null;
 	time *= 60000;
 
-	const topicMessage = await channel.send(
-		`Queue: **${topic}:**\n\nUse ☑ to join the queue!`,
-	);
-
-	await topicMessage.react('➡');
-	await topicMessage.react('☑');
-	await topicMessage.react('❌');
-	await topicMessage.react('🔚');
-	const filter = (reaction, usr) => reaction.emoji.name === '☑'
-    || reaction.emoji.name === '❌'
-    || ((reaction.emoji.name === '➡' || reaction.emoji.name === '🔚')
-      && usr.id === author.id);
-
-	const collector = topicMessage.createReactionCollector({ filter, time });
 	const debugMessage: Message | null = null;
 	// TODO maybe readd this with webhooks? but honestly just not needed atm.
 	/* if (debugChannel) {
@@ -365,7 +401,39 @@ async function createQueue(
 			`Started queue **${topic}** on server **${topicMessage.guild}**`,
 		);
 	} */
-	used[guild!.id] = {
+
+	const row = new MessageActionRow();
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.next}`)
+			.setLabel('➡ Next Turn')
+			.setStyle('PRIMARY'),
+	);
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.end}`)
+			.setLabel('🔚 End Queue')
+			.setStyle('DANGER'),
+	);
+	const rowTwo = new MessageActionRow();
+	rowTwo.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.join}`)
+			.setLabel('☑ Join Queue')
+			.setStyle('SUCCESS'),
+	);
+	rowTwo.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueReaction.leave}`)
+			.setLabel('❌ Leave Queue')
+			.setStyle('DANGER'),
+	);
+
+	const topicMessage = await channel.send({
+		content: `Queue: **${topic}:**\n\nUse ☑ to join the queue!`,
+		components: [row, rowTwo],
+	});
+	used[guild.id] = {
 		date: new Date(Date.now() + time),
 		cid: topicMessage.channel.id,
 		msg: topicMessage.id,
@@ -373,11 +441,11 @@ async function createQueue(
 
 	if (voiceChannel) {
 		// add the vc to the global variable so joins get muted
-		queueVoiceChannels[guild!.id] = voiceChannel.id;
+		queueVoiceChannels[guild.id] = voiceChannel.id;
 		// servermute all users in voiceChannel
 		const voiceChannelMembers = voiceChannel.members;
 		voiceChannelMembers.forEach(async (member) => {
-			if (member && !(await isAdmin(guild!.id, member))) {
+			if (member && !(await isAdmin(guild.id, member))) {
 				member.voice
 					.setMute(true, 'Queue started in this voice channel')
 					.catch(doNothingOnError);
@@ -385,15 +453,29 @@ async function createQueue(
 		});
 	}
 
-	collector.on(
-		'collect',
-		onReaction(guild, channel, voiceChannel, topicMessage, topic, collector),
-	);
-
-	collector.on(
-		'end',
-		onEnd(guild, voiceChannel, debugMessage, topicMessage, topic),
-	);
+	const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonId.queue}-${guild.id}-`);
+	const collector = message.channel.createMessageComponentCollector({
+		filter,
+		time,
+	});
+	const sharedQueueData: { activeUser: User | null } = { activeUser: null };
+	const queuedUsers: Array<User> = [];
+	collector.on('collect', async (interaction) => {
+		await onQueueReaction(
+      interaction as ButtonInteraction,
+      channel,
+      voiceChannel,
+      topicMessage,
+      topic,
+      queuedUsers,
+      sharedQueueData,
+      collector,
+      author,
+		);
+	});
+	collector.once('end', (/* collected */) => {
+		onEnd(guild, voiceChannel, debugMessage, topicMessage, topic);
+	});
 }
 
 export const queue: magibotCommand = {

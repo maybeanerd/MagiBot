@@ -183,25 +183,16 @@ bot.on('error', (err) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-	if (
-		interaction.isButton()
-    && yesOrNoButtonCallbacks.has(interaction.customId) // might not want this test as well
-	) {
+	if (interaction.isButton()) {
 		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
 		switch (buttonType) {
-		case buttonId.yesOrNo:
-			await resolveYesOrNoButton(interaction);
-			break;
-		case buttonId.queue:
-			// TODO
-			break;
 		default:
-			console.error('Got unknown button interaction!');
+			console.info('Got button interaction!', buttonType);
 			break;
 		}
 	}
 	if (!interaction.isButton()) {
-		// TODO work with interactions
+		// TODO work with interactions here
 	}
 });
 

@@ -1,5 +1,12 @@
 ﻿// commands made by Basti for use of the Bot
-import Discord, { MessageActionRow, MessageButton } from 'discord.js';
+import Discord, {
+	ButtonInteraction,
+	Interaction,
+	MessageActionRow,
+	MessageButton,
+	MessageComponent,
+	MessageComponentInteraction,
+} from 'discord.js';
 
 export async function findMember(
 	guild: Discord.Guild,
@@ -69,15 +76,6 @@ export function returnNullOnError() {
 	return null;
 }
 
-export const yesOrNoButtonCallbacks = new Map<
-  string,
-  {
-    msg: Discord.Message;
-    resolve:(success: boolean) => void;
-    abortMessage?: string;
-  }
->();
-
 // for some reason eslint doesnt get this...
 // eslint-disable-next-line no-shadow
 export const enum buttonId {
@@ -107,53 +105,40 @@ export async function yesOrNo(
 			.setLabel('No')
 			.setStyle('DANGER'),
 	);
-	const mess = await msg.channel.send({ content: question, components: [row] });
-
+	const questionMessage = await msg.channel.send({
+		content: question,
+		components: [row],
+	});
 	const time = timeoutTime || 20000;
-
+	const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
+	// only accept reactions from the user that created this question
+	const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
+    && interaction.customId.startsWith(`${buttonId.yesOrNo}-${msg.id}-`);
+	const collector = msg.channel.createMessageComponentCollector({
+		filter,
+		time,
+	});
 	const promise = new Promise<boolean>((resolve) => {
-		yesOrNoButtonCallbacks.set(msg.id, {
-			msg: mess,
-			abortMessage,
-			resolve,
-		});
-		const message = timeoutMessage || 'Cancelled due to timeout.';
-		setTimeout(async () => {
-			if (yesOrNoButtonCallbacks.has(msg.id)) {
-				yesOrNoButtonCallbacks.delete(msg.id);
-				await msg.channel.send(message);
+		let alreadyResolved = false;
+		collector.once('collect', async (interaction) => {
+			alreadyResolved = true;
+			// load info of that button
+			const idParts = interaction.customId.split('-');
+			const isYesButton = idParts[2] === 'yes';
+			questionMessage.delete();
+			if (!isYesButton && abortMessage) {
+				questionMessage.channel.send(abortMessage).catch(doNothingOnError);
 			}
-			resolve(false);
-		}, time);
+			resolve(isYesButton);
+		});
+		collector.once('end', (/* collected */) => {
+			if (!alreadyResolved) {
+				msg.channel.send(messageForTimeout);
+				resolve(false);
+			}
+		});
 	});
 	return promise;
-}
-
-export async function resolveYesOrNoButton(
-	interaction: Discord.ButtonInteraction,
-) {
-	// load info of that button
-	// if yes button, resolve with true. else resolve with false
-	const idParts = interaction.customId.split('-');
-	const isYesButton = idParts[2] === 'yes';
-	console.log(isYesButton);
-	const id = idParts[1];
-	const callbacks = yesOrNoButtonCallbacks.get(id);
-	console.log(callbacks);
-	if (
-		callbacks
-    // only accept reactions from the user that created this question
-    && callbacks.msg.author.id === interaction.user.id
-	) {
-		yesOrNoButtonCallbacks.delete(id);
-		callbacks.msg.delete();
-		if (!isYesButton && callbacks.abortMessage) {
-			callbacks.msg.channel
-				.send(callbacks.abortMessage)
-				.catch(doNothingOnError);
-		}
-		callbacks.resolve(isYesButton);
-	}
 }
 
 export function printError(error) {
