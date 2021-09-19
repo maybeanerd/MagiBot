@@ -336,25 +336,25 @@ function onEnd(
 	topicMessage: Message,
 	topic: string,
 ) {
-	return () => {
-		if (debugMessage) {
-			debugMessage.delete().catch(doNothingOnError);
-		}
-		delete used[guild.id];
-		if (voiceChannel) {
-			delete queueVoiceChannels[guild.id];
-			// remove all mutes
-			voiceChannel.members.forEach((member) => {
-				// make sure users will be unmuted even if this unmute loop
-				// fails because they left the voice channel too quickly
-				toggleStillMuted(member.id, guild.id, true)
-					.then(() => member.voice.setMute(false, 'queue ended'))
-					.then(() => toggleStillMuted(member.id, guild.id, false))
-					.catch(doNothingOnError);
-			});
-		}
-		topicMessage.edit(`**${topic}** ended.`).catch(doNothingOnError);
-	};
+	if (debugMessage) {
+		debugMessage.delete().catch(doNothingOnError);
+	}
+	delete used[guild.id];
+	if (voiceChannel) {
+		delete queueVoiceChannels[guild.id];
+		// remove all mutes
+		voiceChannel.members.forEach((member) => {
+			// make sure users will be unmuted even if this unmute loop
+			// fails because they left the voice channel too quickly
+			toggleStillMuted(member.id, guild.id, true)
+				.then(() => member.voice.setMute(false, 'queue ended'))
+				.then(() => toggleStillMuted(member.id, guild.id, false))
+				.catch(doNothingOnError);
+		});
+	}
+	topicMessage
+		.edit({ content: `**${topic}** ended.`, components: [] })
+		.catch(doNothingOnError);
 }
 
 async function createQueue(
@@ -399,13 +399,13 @@ async function createQueue(
 	row.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.next}`)
-			.setLabel('Next Turn')
+			.setLabel('Next User')
 			.setStyle('PRIMARY'),
 	);
 	row.addComponents(
 		new MessageButton()
 			.setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.end}`)
-			.setLabel('End Queue Early')
+			.setLabel('End Queue')
 			.setStyle('SECONDARY'),
 	);
 	const rowTwo = new MessageActionRow();
