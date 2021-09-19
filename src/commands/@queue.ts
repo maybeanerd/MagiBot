@@ -447,7 +447,7 @@ async function createQueue(
 	}
 
 	const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonId.queue}-${guild.id}-`);
-	const collector = message.channel.createMessageComponentCollector({
+	const collector = topicMessage.createMessageComponentCollector({
 		filter,
 		time,
 	});

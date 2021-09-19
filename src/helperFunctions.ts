@@ -107,6 +107,7 @@ export async function yesOrNo(
 	);
 	const questionMessage = await msg.channel.send({
 		content: question,
+		// ephemeral: true, // TODO we can only do this if its a reply to an interaction : slash command
 		components: [row],
 	});
 	const time = timeoutTime || 20000;
@@ -114,7 +115,7 @@ export async function yesOrNo(
 	// only accept reactions from the user that created this question
 	const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
     && interaction.customId.startsWith(`${buttonId.yesOrNo}-${msg.id}-`);
-	const collector = msg.channel.createMessageComponentCollector({
+	const collector = questionMessage.createMessageComponentCollector({
 		filter,
 		time,
 	});
