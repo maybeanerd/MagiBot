@@ -344,10 +344,10 @@ export const setup: magibotCommand = {
 						'Cancelled changing the prefix.',
 					)
 				) {
-					const newpref = await setPrefix(msg.guild!.id, mention);
-					if (newpref) {
+					const success = await setPrefix(msg.guild!.id, mention);
+					if (success) {
 						msg.channel.send(
-							`Successfully changed prefix to \`${newpref}.\` !`,
+							`Successfully changed prefix to \`${mention}.\` !`,
 						);
 					} else {
 						msg.channel.send('Something bad happened...');

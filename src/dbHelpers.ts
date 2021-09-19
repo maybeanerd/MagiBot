@@ -6,7 +6,7 @@ import {
 	SaltrankModel,
 	StillMutedModel,
 } from './db';
-import { OWNERID } from './shared_assets';
+import { OWNERID, PREFIXES } from './shared_assets';
 
 import config from './configuration';
 
@@ -217,9 +217,13 @@ export async function isJoinableVc(guildID: string, channelID: string) {
 }
 
 export async function setPrefix(guildID: string, prefix: string) {
-	return setSettings(guildID, {
+	const success = await setSettings(guildID, {
 		prefix,
 	});
+	if (success) {
+		PREFIXES.set(guildID, prefix);
+	}
+	return success;
 }
 
 export async function getPrefix(guildID: string) {
