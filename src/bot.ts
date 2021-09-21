@@ -255,7 +255,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
 					if (shadowBanned !== shadowBannedLevel.not) {
 						sound = shadowBannedSound;
 					}
-					if (sound) {
+					// because apparently some are saved as the string false...
+					if (sound && sound !== 'false') {
 						const connection = joinVoiceChannel({
 							channelId: newVc.id,
 							guildId: newVc.guild.id,
