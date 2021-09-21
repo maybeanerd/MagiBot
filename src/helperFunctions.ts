@@ -1,21 +1,22 @@
-﻿// commands made by Basti for use of the Bot
-import Discord, {
-	ButtonInteraction,
-	Interaction,
+﻿import Discord, {
 	MessageActionRow,
 	MessageButton,
-	MessageComponent,
 	MessageComponentInteraction,
 } from 'discord.js';
 
+export function doNothingOnError() {}
+
+export function returnNullOnError() {
+	return null;
+}
 export async function findMember(
 	guild: Discord.Guild,
-	ment: string,
+	userMention?: string,
 ): Promise<string | null> {
-	if (!ment) {
+	if (!userMention) {
 		return null;
 	}
-	const mention = ment.toLowerCase();
+	const mention = userMention.toLowerCase();
 	if (mention.startsWith('<@') && mention.endsWith('>')) {
 		let id = mention.slice(2, -1);
 		if (id.startsWith('!')) {
@@ -23,17 +24,17 @@ export async function findMember(
 		}
 		return id;
 	}
-	const user = await guild.members.fetch(mention);
+	const user = await guild.members.fetch(mention).catch(returnNullOnError);
 	if (user) {
 		return user.id;
 	}
 	if (mention.length >= 3) {
-		let memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase().startsWith(mention));
+		let memberArray = guild.members.cache.filter((member) => member.displayName.toLowerCase().startsWith(mention));
 		if (memberArray.size === 1) {
 			return memberArray.first()!.id;
 		}
 		if (memberArray.size === 0) {
-			memberArray = guild.members.cache.filter((memb) => memb.displayName.toLowerCase().includes(mention));
+			memberArray = guild.members.cache.filter((member) => member.displayName.toLowerCase().includes(mention));
 			if (memberArray.size === 1) {
 				return memberArray.first()!.id;
 			}
@@ -68,12 +69,6 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 		}
 	}
 	return false;
-}
-
-export function doNothingOnError() {}
-
-export function returnNullOnError() {
-	return null;
 }
 
 // for some reason eslint doesnt get this...
