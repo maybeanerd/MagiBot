@@ -133,9 +133,9 @@ bot.on('ready', async () => {
 	initializePrefixes(bot);
 });
 
-bot.on('message', async (msg) => {
+bot.on('messageCreate ', async (message: Discord.Message) => {
 	try {
-		await checkCommand(msg as Discord.Message);
+		await checkCommand(message);
 	} catch (err) {
 		console.error(err);
 	}
