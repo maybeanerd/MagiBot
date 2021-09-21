@@ -1,4 +1,4 @@
-﻿import { Guild, GuildMember } from 'discord.js';
+﻿import { Guild } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
 import { findMember, yesOrNo } from '../helperFunctions';
@@ -30,7 +30,7 @@ async function remOldestSalt(userid: string, G: Guild) {
 		return true;
 	}
 	return false;
-};
+}
 
 async function clrSalt(userid: string, G: Guild) {
 	const guildID = G.id;
@@ -40,7 +40,7 @@ async function clrSalt(userid: string, G: Guild) {
 	});
 	await saltGuild(userid, guildID, 1, true);
 	await updateSaltKing(G);
-};
+}
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -76,8 +76,8 @@ export const salt: magibotCommand = {
 		const command = args[0].toLowerCase();
 		if (msg.guild) {
 			const mention = args[1];
-			const uid = await findMember(msg.guild, mention);
-			if (!(mention && uid)) {
+			const { user, fuzzy } = await findMember(msg.guild, mention);
+			if (!(mention && user)) {
 				if (command === 'reset') {
 					if (
 						await yesOrNo(
@@ -96,53 +96,64 @@ export const salt: magibotCommand = {
 				msg.reply('you need to mention a user you want to use this on!');
 				return;
 			}
-			let mem: GuildMember;
 			switch (command) {
 			case 'add':
-				mem = await msg.guild.members.fetch(uid);
-				if (!mem) {
-					msg.reply('the user with this ID doesn\'t exist on this guild.');
+				if (user.user.bot) {
+					msg.reply("you can't report bots!");
 					return;
 				}
-				if (mem.user.bot) {
-					msg.reply('you can\'t report bots!');
-					return;
+				if (fuzzy) {
+					const confirm = await yesOrNo(
+						msg,
+						`Do you want to report ${user} for being a salty bitch?`,
+					);
+					if (!confirm) {
+						return;
+					}
 				}
-				await saltUp(uid, msg.author.id, msg.guild, true);
+				await saltUp(user.id, msg.author.id, msg.guild, true);
 				msg.channel.send(
-					`Successfully reported ${mem} for being a salty bitch!`,
+					`Successfully reported ${user} for being a salty bitch!`,
 				);
 				break;
 			case 'rem':
-				mem = await msg.guild.members.fetch(uid);
-				if (!mem) {
-					msg.reply('the user with this ID doesn\'t exist on this guild.');
-					return;
-				}
-				if (mem.user.bot) {
+				if (user.user.bot) {
 					msg.reply('bots are never salty!');
 					return;
 				}
-				if (await remOldestSalt(uid, msg.guild)) {
+				if (fuzzy) {
+					const confirm = await yesOrNo(
+						msg,
+						`Do you want to remove the oldest salt from ${user}?`,
+					);
+					if (!confirm) {
+						return;
+					}
+				}
+				if (await remOldestSalt(user.id, msg.guild)) {
 					msg.channel.send(
-						`Successfully removed the oldest salt from ${mem}!`,
+						`Successfully removed the oldest salt from ${user}!`,
 					);
 				} else {
-					msg.channel.send(`${mem} has no salt that could be removed!`);
+					msg.channel.send(`${user} has no salt that could be removed!`);
 				}
 				break;
 			case 'clr':
-				mem = await msg.guild.members.fetch(uid);
-				if (!mem) {
-					msg.reply('the user with this ID doesn\'t exist on this guild.');
-					return;
-				}
-				if (mem.user.bot) {
+				if (user.user.bot) {
 					msg.reply('bots are never salty!');
 					return;
 				}
-				await clrSalt(uid, msg.guild);
-				msg.channel.send(`Successfully cleared all salt from ${mem}!`);
+				if (fuzzy) {
+					const confirm = await yesOrNo(
+						msg,
+						`Do you want to clear all salt from ${user}?`,
+					);
+					if (!confirm) {
+						return;
+					}
+				}
+				await clrSalt(user.id, msg.guild);
+				msg.channel.send(`Successfully cleared all salt from ${user}!`);
 				break;
 			default:
 				msg.reply(
