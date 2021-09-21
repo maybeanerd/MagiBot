@@ -133,7 +133,7 @@ bot.on('ready', async () => {
 	initializePrefixes(bot);
 });
 
-bot.on('message ', async (message: Discord.Message) => {
+bot.on('message', async (message: Discord.Message) => {
 	try {
 		await checkCommand(message);
 	} catch (err) {
