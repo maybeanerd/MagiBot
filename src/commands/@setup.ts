@@ -1,4 +1,4 @@
-﻿import { MessageEmbedOptions } from 'discord.js';
+﻿import { GuildMember, MessageEmbedOptions, User } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
 import {
 	findMember, yesOrNo, findRole, asyncWait,
@@ -169,42 +169,38 @@ export const setup: magibotCommand = {
 		const mention = args[1];
 
 		// Create variables to use in cases
-		let uid;
+		let user: GuildMember | null = null;
 		let de;
 		switch (command) {
 		case 'ban':
-			uid = await findMember(msg.guild!, mention);
-			if (mention && uid) {
+			user = (await findMember(msg.guild!, mention)).user;
+			if (mention && user) {
 				if (
 					await yesOrNo(
 						msg,
-						`Do you really want to ban <@!${uid}> from using the bot?`,
+						`Do you really want to ban ${user} from using the bot?`,
 						'Successfully canceled ban.',
 					)
 				) {
-					setBlacklistedUser(msg.guild!.id, uid, true);
-					msg.channel.send(
-						`Successfully banned <@!${uid}> from using the bot.`,
-					);
+					setBlacklistedUser(msg.guild!.id, user.id, true);
+					msg.channel.send(`Successfully banned ${user} from using the bot.`);
 				}
 			} else {
 				msg.reply('you need to mention a user you want to use this on!');
 			}
 			break;
 		case 'unban':
-			uid = await findMember(msg.guild!, mention);
-			if (mention && uid) {
+			user = (await findMember(msg.guild!, mention)).user;
+			if (mention && user) {
 				if (
 					await yesOrNo(
 						msg,
-						`Do you really want to reactivate bot usage for <@!${uid}>?`,
+						`Do you really want to reactivate bot usage for ${user}?`,
 						'Successfully canceled unban.',
 					)
 				) {
-					setBlacklistedUser(msg.guild!.id, uid, false);
-					msg.channel.send(
-						`Successfully banned <@!${uid}> from using the bot.`,
-					);
+					setBlacklistedUser(msg.guild!.id, user.id, false);
+					msg.channel.send(`Successfully banned ${user} from using the bot.`);
 				}
 			} else {
 				msg.reply('you need to mention a user you want to use this on!');
@@ -440,8 +436,8 @@ export const setup: magibotCommand = {
 			if (blacklistedUsers.length === 0) {
 				str = 'Empty';
 			} else {
-				blacklistedUsers.forEach((user) => {
-					str += `<@!${user}>, `;
+				blacklistedUsers.forEach((userId) => {
+					str += `<@!${userId}>, `;
 				});
 				str = str.substring(0, str.length - 2);
 			}

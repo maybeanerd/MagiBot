@@ -1,6 +1,6 @@
 import { PREFIXES, isShadowBanned, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
-import { findMember } from '../helperFunctions';
+import { findMember, yesOrNo } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { addSound } from './sound';
 
@@ -36,11 +36,20 @@ export const sound: magibotCommand = {
 		switch (command) {
 		case 'rem':
 			/* eslint-disable no-case-declarations */
-			const uid = await findMember(msg.guild, mention);
+			const { user, fuzzy } = await findMember(msg.guild, mention);
 			/* eslint-enable no-case-declarations */
-			if (mention && uid) {
-				await addSound(uid, undefined, msg.guild.id);
-				msg.reply(`you successfully removed <@!${uid}>s joinsound!`);
+			if (mention && user) {
+				if (fuzzy) {
+					const confirm = await yesOrNo(
+						msg,
+						`Do you want to remove ${user}s joinsound?`,
+					);
+					if (!confirm) {
+						return;
+					}
+				}
+				await addSound(user.id, undefined, msg.guild.id);
+				msg.reply(`you successfully removed ${user}s joinsound!`);
 			} else {
 				msg.reply('you need to mention a user you want to use this on!');
 			}

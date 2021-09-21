@@ -107,30 +107,34 @@ export const salt: magibotCommand = {
 			case 'add':
 				/* eslint-disable no-case-declarations */
 				const mention = args[1];
-				const uid = await cmds.findMember(msg.guild, mention);
+				const { user, fuzzy } = await cmds.findMember(msg.guild, mention);
 				/* eslint-enable no-case-declarations */
-				if (mention && uid) {
-					if (uid === msg.author.id) {
+				if (mention && user) {
+					if (user.id === msg.author.id) {
 						msg.reply("you can't report yourself!");
 						return;
 					}
-					const mem = await msg.guild.members.fetch(uid).catch(() => {});
-					if (!mem) {
-						msg.reply("the user with this ID doesn't exist on this guild.");
-						return;
-					}
-					if (mem.user.bot) {
+					if (user.user.bot) {
 						msg.reply("you can't report bots!");
 						return;
 					}
-					const time = await saltUp(uid, msg.author.id, msg.guild);
+					if (fuzzy) {
+						const confirm = await cmds.yesOrNo(
+							msg,
+							`Do you want to report ${user} for being a salty bitch?`,
+						);
+						if (!confirm) {
+							return;
+						}
+					}
+					const time = await saltUp(user.id, msg.author.id, msg.guild);
 					if (time === 0) {
 						msg.channel.send(
-							`Successfully reported ${mem} for being a salty bitch!`,
+							`Successfully reported ${user} for being a salty bitch!`,
 						);
 					} else {
 						msg.reply(
-							`you can report ${mem} again in ${
+							`you can report ${user} again in ${
 								59 - Math.floor((time * 60) % 60)
 							} min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
 						);

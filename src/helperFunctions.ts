@@ -11,36 +11,30 @@ export function returnNullOnError() {
 }
 export async function findMember(
 	guild: Discord.Guild,
-	userMention?: string,
-): Promise<string | null> {
-	if (!userMention) {
-		return null;
+	userMention: string,
+): Promise<{ user: Discord.GuildMember | null; fuzzy?: boolean }> {
+	if (!userMention || userMention.length === 0) {
+		return { user: null };
 	}
-	const mention = userMention.toLowerCase();
+	let mention = userMention.toLowerCase();
 	if (mention.startsWith('<@') && mention.endsWith('>')) {
-		let id = mention.slice(2, -1);
-		if (id.startsWith('!')) {
-			id = id.substr(1);
+		mention = mention.slice(2, -1);
+		if (mention.startsWith('!')) {
+			mention = mention.substr(1);
 		}
-		return id;
 	}
+	// fails if its not a snowflake
 	const user = await guild.members.fetch(mention).catch(returnNullOnError);
 	if (user) {
-		return user.id;
+		return { user, fuzzy: false };
 	}
-	if (mention.length >= 3) {
-		let memberArray = guild.members.cache.filter((member) => member.displayName.toLowerCase().startsWith(mention));
-		if (memberArray.size === 1) {
-			return memberArray.first()!.id;
-		}
-		if (memberArray.size === 0) {
-			memberArray = guild.members.cache.filter((member) => member.displayName.toLowerCase().includes(mention));
-			if (memberArray.size === 1) {
-				return memberArray.first()!.id;
-			}
-		}
+	// it will sometimes only find one if multiple would fit (even with higher limit).
+	// so we just call it fuzzy and take the first we get
+	const membersFound = await guild.members.search({ query: mention, limit: 1 });
+	if (membersFound.size >= 1) {
+		return { user: membersFound.first()!, fuzzy: true };
 	}
-	return null;
+	return { user: null };
 }
 
 export async function findRole(guild: Discord.Guild, ment: string) {

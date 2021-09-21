@@ -1,7 +1,7 @@
 import { MessageEmbedOptions } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
-import { findMember } from '../helperFunctions';
+import { findMember, yesOrNo } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { SaltrankModel } from '../db';
 import { getUser } from '../dbHelpers';
@@ -24,10 +24,8 @@ export const profile: magibotCommand = {
 		if (msg.guild) {
 			const args = content.split(/ +/);
 			const mention = args[0];
-			let id = await findMember(msg.guild, mention);
-			if (!id && !mention) {
-				id = msg.author.id;
-			} else if (!id) {
+			let { user /* , fuzzy */ } = await findMember(msg.guild, mention);
+			if (!user && mention) {
 				msg.reply(
 					` you need to define the user uniquely or not mention any user. For more help use \`${PREFIXES.get(
 						msg.guild.id,
@@ -35,13 +33,21 @@ export const profile: magibotCommand = {
 				);
 				return;
 			}
+			// profile doesnt do any harm so lets just always call it without asking
+			/* if (fuzzy) {
+				const confirm = await yesOrNo(msg, `Did you mean ${user}?`);
+				if (!confirm) {
+					return;
+				}
+			} */
+			const userId = user?.id || msg.author.id;
 			const info: Array<{
         name: string;
         value: string;
         inline: boolean;
       }> = [];
-			const salt = await getSalt(id, msg.guild.id);
-			const { botusage, sound } = await getUser(id, msg.guild.id);
+			const salt = await getSalt(userId, msg.guild.id);
+			const { botusage, sound } = await getUser(userId, msg.guild.id);
 			info.push({
 				name: 'Saltlevel',
 				value: String(salt),
@@ -57,7 +63,7 @@ export const profile: magibotCommand = {
 				value: sound || 'Empty',
 				inline: false,
 			});
-			const user = await msg.guild.members.fetch(id);
+			user = user || (await msg.guild.members.fetch(userId)!);
 			const embed: MessageEmbedOptions = {
 				color: user.displayColor,
 				description: `Here's some info on ${user.displayName}`,
