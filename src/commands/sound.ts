@@ -1,3 +1,6 @@
+import {
+	GuildMember, Message, MessageAttachment, User,
+} from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { getUser } from '../dbHelpers';
@@ -10,12 +13,12 @@ function printHelp() {
 	info.push({
 		name: '(attach soundfile to this command)',
 		value:
-      'Setup a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
+      'Set up a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
 	});
 	info.push({
 		name: '<Link to audio file>',
 		value:
-      "Setup a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
+      "Set up a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
 	});
 	info.push({
 		name: 'rem',
@@ -34,6 +37,49 @@ export async function addSound(
 	user.sound = surl;
 	await user.save();
 	return true;
+}
+
+export async function validateJoinsound(
+	url: string,
+	message: Message,
+	user?: GuildMember,
+) {
+	let sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(() => {});
+	if (!sound) {
+		message.reply(
+			`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
+        message.guild!.id,
+			)}.help sound\``,
+		);
+		return;
+	}
+	// eslint-disable-next-line prefer-destructuring
+	sound = sound.streams[0];
+	if (
+		sound.codec_name !== 'mp3'
+    && sound.codec_name !== 'pcm_s16le'
+    && sound.codec_name !== 'pcm_f32le'
+	) {
+		message.reply(
+			`You need to use a compatible file! For more info use \`${PREFIXES.get(
+        message.guild!.id,
+			)}.help sound\``,
+		);
+		return;
+	}
+	if (sound.duration > 8) {
+		message.reply(
+			"The joinsound you're trying to add is longer than 8 seconds.",
+		);
+		return;
+	}
+	const userId = user ? user.id : message.author.id;
+	await addSound(userId, url, message.guild!.id);
+	if (user) {
+		message.reply(`You successfully changed ${user}s joinsound!`);
+	} else {
+		message.reply('You successfully changed your joinsound!');
+	}
 }
 
 export const sound: magibotCommand = {
@@ -55,46 +101,13 @@ export const sound: magibotCommand = {
 			await addSound(msg.author.id, undefined, msg.guild.id);
 			msg.reply('you successfully removed your joinsound!');
 		} else {
-			let mention = args[0];
+			let fileUrl = args[0];
 			const file = msg.attachments.first();
-			if (mention || file) {
-				if (file) {
-					mention = file.url;
-				}
-
-				let snd = await ffprobe(mention, { path: ffprobeStatic.path }).catch(
-					() => {},
-				);
-				if (!snd) {
-					msg.reply(
-						`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
-							msg.guild.id,
-						)}.help sound\``,
-					);
-					return;
-				}
-				// eslint-disable-next-line prefer-destructuring
-				snd = snd.streams[0];
-				if (
-					snd.codec_name !== 'mp3'
-          && snd.codec_name !== 'pcm_s16le'
-          && snd.codec_name !== 'pcm_f32le'
-				) {
-					msg.reply(
-						`you need to use a compatible file! For more info use \`${PREFIXES.get(
-							msg.guild.id,
-						)}.help sound\``,
-					);
-					return;
-				}
-				if (snd.duration > 8) {
-					msg.reply(
-						"the joinsound you're trying to add is longer than 8 seconds.",
-					);
-					return;
-				}
-				await addSound(msg.author.id, mention, msg.guild.id);
-				msg.reply('you successfully changed your joinsound!');
+			if (file) {
+				fileUrl = file.url;
+			}
+			if (fileUrl) {
+				await validateJoinsound(fileUrl, msg);
 			} else {
 				msg.reply(
 					`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
