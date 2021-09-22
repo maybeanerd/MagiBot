@@ -33,6 +33,7 @@ import {
 	getUser,
 	toggleStillMuted,
 	isJoinableVc,
+	getSoundOfUser,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
 import {
@@ -250,8 +251,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
 				if (perms && perms.has('CONNECT')) {
-					const user = await getUser(n.id, n.guild.id);
-					let { sound } = user;
+					let sound = await getSoundOfUser(n.id, n.guild.id);
 					if (shadowBanned !== shadowBannedLevel.not) {
 						sound = shadowBannedSound;
 					}

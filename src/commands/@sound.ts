@@ -70,7 +70,7 @@ export const sound: magibotCommand = {
 				}
 			}
 			if (file && user) {
-				await validateJoinsound(file.url, msg, user);
+				await validateJoinsound(file.url, msg, false, user);
 			} else {
 				msg.reply(
 					`This is not a valid command. If you tried adding a sound for another user, remember to attach the file to the command and specify the user. Use \`${PREFIXES.get(

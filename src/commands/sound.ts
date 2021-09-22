@@ -1,6 +1,4 @@
-import {
-	GuildMember, Message, MessageAttachment, User,
-} from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { getUser } from '../dbHelpers';
@@ -42,8 +40,12 @@ export async function addSound(
 export async function validateJoinsound(
 	url: string,
 	message: Message,
+	setDefault: boolean,
 	user?: GuildMember,
 ) {
+	if (setDefault && user) {
+		throw new Error('Cant set default sounds for others!');
+	}
 	let sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(() => {});
 	if (!sound) {
 		message.reply(
@@ -74,11 +76,13 @@ export async function validateJoinsound(
 		return;
 	}
 	const userId = user ? user.id : message.author.id;
-	await addSound(userId, url, message.guild!.id);
+	await addSound(userId, url, setDefault ? 'default' : message.guild!.id);
 	if (user) {
 		message.reply(`You successfully changed ${user}s joinsound!`);
 	} else {
-		message.reply('You successfully changed your joinsound!');
+		message.reply(
+			`You successfully changed your ${setDefault ? 'default ' : ''}joinsound!`,
+		);
 	}
 }
 
@@ -98,16 +102,31 @@ export const sound: magibotCommand = {
 		const args = content.split(/ +/);
 		const command = args[0].toLowerCase();
 		if (command === 'rem') {
-			await addSound(msg.author.id, undefined, msg.guild.id);
-			msg.reply('you successfully removed your joinsound!');
-		} else {
-			let fileUrl = args[0];
-			const file = msg.attachments.first();
-			if (file) {
-				fileUrl = file.url;
+			const command2 = args[1];
+			if (command2.toLocaleLowerCase() === 'default') {
+				await addSound(msg.author.id, undefined, 'default');
+				msg.reply('you successfully removed your default joinsound!');
+			} else {
+				await addSound(msg.author.id, undefined, msg.guild.id);
+				msg.reply('you successfully removed your joinsound!');
 			}
+		} else if (command === 'default') {
+			const file = msg.attachments.first();
+			const fileUrl = file ? file.url : args[1];
 			if (fileUrl) {
-				await validateJoinsound(fileUrl, msg);
+				await validateJoinsound(fileUrl, msg, true);
+			} else {
+				msg.reply(
+					`Missing sound or sound URL. Use \`${PREFIXES.get(
+						msg.guild.id,
+					)}.help sound\` for more info.`,
+				);
+			}
+		} else {
+			const file = msg.attachments.first();
+			const fileUrl = file ? file.url : args[0];
+			if (fileUrl) {
+				await validateJoinsound(fileUrl, msg, false);
 			} else {
 				msg.reply(
 					`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(

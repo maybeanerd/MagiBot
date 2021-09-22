@@ -33,6 +33,15 @@ export async function getUser(userid: string, guildID: string) {
 	return result;
 }
 
+export async function getSoundOfUser(userId: string, guildId: string) {
+	const user = await getUser(userId, guildId);
+	if (user.sound && user.sound !== 'false') {
+		return user.sound;
+	}
+	const defaultUser = await getUser(userId, 'default'); // TODO or should this be an entirely differnt table alltogether?
+	return defaultUser.sound;
+}
+
 async function firstSettings(guildID: string) {
 	const settings = new SettingsModel({
 		_id: guildID,
