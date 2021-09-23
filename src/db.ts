@@ -33,6 +33,7 @@ export type Settings = {
   notChannel?: string;
   prefix: string;
   lastConnected: Date;
+  defaultJoinsound?: string;
 };
 const settingsSchema = new mongoose.Schema<Settings>(
 	{
@@ -80,6 +81,10 @@ const settingsSchema = new mongoose.Schema<Settings>(
 		lastConnected: {
 			type: Date,
 			required: true,
+		},
+		defaultJoinsound: {
+			type: String,
+			required: false,
 		},
 	},
 	{ collection: 'settings' },
@@ -208,7 +213,6 @@ userSchema.index(
 export const UserModel = mongoose.model<User>('users', userSchema);
 
 const deleteDuplicateUsers = true;
-// TODO check if we have duplicates on live
 UserModel.aggregate([
 	{
 		$group: {
@@ -243,6 +247,35 @@ UserModel.aggregate([
 			});
 	}
 });
+
+// global/default values for a specific user
+type globalUser = {
+  userID: string;
+  sound?: string;
+};
+const globalUserSchema = new mongoose.Schema<globalUser>(
+	{
+		userID: {
+			type: String,
+			required: true,
+		},
+		sound: {
+			type: String,
+			required: false,
+		},
+	},
+	{ collection: 'globalUsers' },
+);
+globalUserSchema.index(
+	{
+		userID: 1,
+	},
+	{ unique: true },
+);
+export const GlobalUserDataModel = mongoose.model<globalUser>(
+	'globalUsers',
+	globalUserSchema,
+);
 
 // entry per vote
 export type Vote = {
