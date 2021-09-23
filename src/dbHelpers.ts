@@ -5,6 +5,7 @@ import {
 	Settings,
 	SaltrankModel,
 	StillMutedModel,
+	GlobalUserDataModel,
 } from './db';
 import { OWNERID, PREFIXES } from './shared_assets';
 
@@ -22,6 +23,24 @@ export async function getUser(userid: string, guildID: string) {
 				kicks: 0,
 				bans: 0,
 				botusage: 0,
+				sound: undefined,
+			},
+		},
+		{
+			returnOriginal: false,
+			upsert: true,
+		},
+	);
+	return result;
+}
+
+export async function getGlobalUser(userId: string) {
+	const result = await GlobalUserDataModel.findOneAndUpdate(
+		{
+			userID: userId,
+		},
+		{
+			$setOnInsert: {
 				sound: undefined,
 			},
 		},
@@ -57,6 +76,25 @@ export async function getSettings(guildID: string) {
 		result = await firstSettings(guildID);
 	}
 	return result;
+}
+
+export async function getSoundOfUser(userId: string, guildId: string) {
+	const user = await getUser(userId, guildId);
+	if (user.sound && user.sound !== 'false') {
+		return user.sound;
+	}
+	const defaultUser = await getGlobalUser(userId);
+	if (defaultUser.sound && defaultUser.sound !== 'false') {
+		return defaultUser.sound;
+	}
+	const defaultGuildSound = await getSettings(guildId);
+	if (
+		defaultGuildSound.defaultJoinsound
+    && defaultGuildSound.defaultJoinsound !== 'false'
+	) {
+		return defaultGuildSound.defaultJoinsound;
+	}
+	return null;
 }
 
 export async function checkGuild(id: string) {
