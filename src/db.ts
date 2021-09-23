@@ -33,6 +33,7 @@ export type Settings = {
   notChannel?: string;
   prefix: string;
   lastConnected: Date;
+  defaultJoinsound?: string;
 };
 const settingsSchema = new mongoose.Schema<Settings>(
 	{
@@ -80,6 +81,10 @@ const settingsSchema = new mongoose.Schema<Settings>(
 		lastConnected: {
 			type: Date,
 			required: true,
+		},
+		defaultJoinsound: {
+			type: String,
+			required: false,
 		},
 	},
 	{ collection: 'settings' },

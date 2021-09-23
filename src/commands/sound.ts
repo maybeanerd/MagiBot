@@ -1,7 +1,7 @@
 import { GuildMember, Message } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getGlobalUser, getUser } from '../dbHelpers';
+import { getGlobalUser, getSettings, getUser } from '../dbHelpers';
 import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
@@ -9,18 +9,22 @@ import { magibotCommand } from '../types/magibot';
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
 	info.push({
-		name: '(attach soundfile to this command)',
+		name: '(and attach soundfile to this command)',
 		value:
       'Set up a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
 	});
 	info.push({
-		name: '<Link to audio file>',
+		name: 'default (and attach soundfile to this command)',
 		value:
-      "Set up a joinsound for yourself. The link shouldn't link to a website, but directly to the file.\nOnly .mp3 and .wav are being supported at the moment.",
+      'Set up a default joinsound for yourself. This will play for you on every server MagiBot is on, until you override it with a sound there.\nOnly .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
 	});
 	info.push({
 		name: 'rem',
 		value: 'Remove your joinsound',
+	});
+	info.push({
+		name: 'rem default',
+		value: 'Remove your default joinsound',
 	});
 
 	return info;
@@ -44,11 +48,22 @@ async function addGlobalSound(userId: string, surl: string | undefined) {
 	return true;
 }
 
+export async function setDefaultGuildJoinsound(
+	guildId: string,
+	soundUrl: string | undefined,
+) {
+	const guild = await getSettings(guildId);
+	guild.defaultJoinsound = soundUrl;
+	await guild.save();
+	return true;
+}
+
 export async function validateJoinsound(
 	url: string,
 	message: Message,
 	setDefault: boolean,
 	user?: GuildMember,
+	defaultForGuildId?: string,
 ) {
 	if (setDefault && user) {
 		throw new Error('Cant set default sounds for others!');
@@ -83,12 +98,18 @@ export async function validateJoinsound(
 		return;
 	}
 	const userId = user ? user.id : message.author.id;
-	if (setDefault) {
+	if (defaultForGuildId) {
+		await setDefaultGuildJoinsound(defaultForGuildId, url);
+	} else if (setDefault) {
 		await addGlobalSound(userId, url);
 	} else {
 		await addSound(userId, url, message.guild!.id);
 	}
-	if (user) {
+	if (defaultForGuildId) {
+		message.reply(
+			'You successfully changed the default joinsound for this server!',
+		);
+	} else if (user) {
 		message.reply(`You successfully changed ${user}s joinsound!`);
 	} else {
 		message.reply(
@@ -115,11 +136,11 @@ export const sound: magibotCommand = {
 		if (command === 'rem') {
 			const command2 = args[1];
 			if (command2 && command2.toLowerCase() === 'default') {
-				await addSound(msg.author.id, undefined, 'default');
-				msg.reply('you successfully removed your default joinsound!');
+				await addGlobalSound(msg.author.id, undefined);
+				msg.reply('You successfully removed your default joinsound!');
 			} else {
 				await addSound(msg.author.id, undefined, msg.guild.id);
-				msg.reply('you successfully removed your joinsound!');
+				msg.reply('You successfully removed your joinsound!');
 			}
 		} else if (command === 'default') {
 			const file = msg.attachments.first();
@@ -140,7 +161,7 @@ export const sound: magibotCommand = {
 				await validateJoinsound(fileUrl, msg, false);
 			} else {
 				msg.reply(
-					`this is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
+					`This is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
 						msg.guild.id,
 					)}.help sound\` for more info.`,
 				);
