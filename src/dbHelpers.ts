@@ -5,6 +5,7 @@ import {
 	Settings,
 	SaltrankModel,
 	StillMutedModel,
+	GlobalUserDataModel,
 } from './db';
 import { OWNERID, PREFIXES } from './shared_assets';
 
@@ -33,12 +34,30 @@ export async function getUser(userid: string, guildID: string) {
 	return result;
 }
 
+export async function getGlobalUser(userId: string) {
+	const result = await GlobalUserDataModel.findOneAndUpdate(
+		{
+			userID: userId,
+		},
+		{
+			$setOnInsert: {
+				sound: undefined,
+			},
+		},
+		{
+			returnOriginal: false,
+			upsert: true,
+		},
+	);
+	return result;
+}
+
 export async function getSoundOfUser(userId: string, guildId: string) {
 	const user = await getUser(userId, guildId);
 	if (user.sound && user.sound !== 'false') {
 		return user.sound;
 	}
-	const defaultUser = await getUser(userId, 'default'); // TODO or should this be an entirely differnt table alltogether?
+	const defaultUser = await getGlobalUser(userId);
 	return defaultUser.sound;
 }
 

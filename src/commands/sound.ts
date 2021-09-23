@@ -1,7 +1,7 @@
 import { GuildMember, Message } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getUser } from '../dbHelpers';
+import { getGlobalUser, getUser } from '../dbHelpers';
 import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
@@ -32,6 +32,13 @@ export async function addSound(
 	guildID: string,
 ) {
 	const user = await getUser(userid, guildID);
+	user.sound = surl;
+	await user.save();
+	return true;
+}
+
+async function addGlobalSound(userId: string, surl: string | undefined) {
+	const user = await getGlobalUser(userId);
 	user.sound = surl;
 	await user.save();
 	return true;
@@ -76,7 +83,11 @@ export async function validateJoinsound(
 		return;
 	}
 	const userId = user ? user.id : message.author.id;
-	await addSound(userId, url, setDefault ? 'default' : message.guild!.id);
+	if (setDefault) {
+		await addGlobalSound(userId, url);
+	} else {
+		await addSound(userId, url, message.guild!.id);
+	}
 	if (user) {
 		message.reply(`You successfully changed ${user}s joinsound!`);
 	} else {
