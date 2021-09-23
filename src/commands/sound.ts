@@ -114,7 +114,7 @@ export const sound: magibotCommand = {
 		const command = args[0].toLowerCase();
 		if (command === 'rem') {
 			const command2 = args[1];
-			if (command2.toLocaleLowerCase() === 'default') {
+			if (command2 && command2.toLowerCase() === 'default') {
 				await addSound(msg.author.id, undefined, 'default');
 				msg.reply('you successfully removed your default joinsound!');
 			} else {
