@@ -1,5 +1,5 @@
 ﻿import { MessageReaction, User } from 'discord.js';
-import { asyncForEach } from '../helperFunctions';
+import { asyncForEach, yesOrNo } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { Vote, VoteModel } from '../db';
@@ -108,7 +108,7 @@ export const vote: magibotCommand = {
                       				max: 1,
                       				time: 60000,
                       			})
-                      			.then((collected3) => {
+                      			.then(async (collected3) => {
                       				if (collected3.first()) {
                       					const args = collected3
                       						.first()!
@@ -127,77 +127,44 @@ export const vote: magibotCommand = {
                                 			timestr += `${v} ${times[s]}`;
                                 		}
                                 	});
-                                	msg.channel
-                                		.send(
-                                			`Do you want to start the vote **${topic}** lasting **${timestr}**with the options\n${str}`,
-                                		)
-                                		.then((mess3) => {
-                                			const filter = (
-                                				reaction: MessageReaction,
-                                				user: User,
-                                			) => (reaction.emoji.name === '☑'
-                                          || reaction.emoji.name === '❌')
-                                        && user.id === authorID;
-                                			mess3.react('☑');
-                                			mess3.react('❌');
-                                			mess3
-                                				.awaitReactions({
-                                					filter,
-                                					max: 1,
-                                					time: 20000,
-                                				})
-                                				.then((reacts) => {
-                                					mess3.delete();
-                                					if (
-                                						reacts.first()
-                                            && reacts.first()!.emoji.name === '☑'
-                                					) {
-                                						const dat = new Date();
-                                						const date = new Date(
-                                							dat.getFullYear(),
-                                							dat.getMonth(),
-                                							dat.getDate() + time[0],
-                                							dat.getHours() + time[1],
-                                							dat.getMinutes() + time[2],
-                                							dat.getSeconds(),
-                                							0,
-                                						);
-                                						msg.channel
-                                							.send(
-                                								`**${topic}**\n*by ${msg.author}, ends on ${date}*\n\n${str}`,
-                                							)
-                                							.then(async (ms) => {
-                                								asyncForEach(
-                                									args,
-                                									async (val, i) => {
-                                										await ms.react(
-                                											reactions[i],
-                                										);
-                                									},
-                                								);
-                                								// vote structure
-                                								const vt: Vote = {
-                                									messageID: ms.id,
-                                									channelID: ms.channel.id,
-                                									options: args,
-                                									topic,
-                                									date,
-                                									guildid: ms.guild!.id,
-                                									authorID,
-                                								};
-                                								await addVote(vt);
-                                							});
-                                					} else if (reacts.first()) {
-                                						msg.channel.send(
-                                							`successfully canceled vote **${topic}**`,
-                                						);
-                                					} else {
-                                						msg.channel.send(
-                                							'canceled vote due to timeout.',
-                                						);
-                                					}
+                                	const accept = await yesOrNo(
+                                		msg,
+                                		`Do you want to start the vote **${topic}** lasting **${timestr}**with the options\n${str}`,
+                                		`Successfully canceled vote **${topic}**`,
+                                		'Canceled vote due to timeout.',
+                                	);
+                                	if (accept) {
+                                		const dat = new Date();
+                                		const date = new Date(
+                                			dat.getFullYear(),
+                                			dat.getMonth(),
+                                			dat.getDate() + time[0],
+                                			dat.getHours() + time[1],
+                                			dat.getMinutes() + time[2],
+                                			dat.getSeconds(),
+                                			0,
+                                		);
+                                		msg.channel
+                                			.send(
+                                				`**${topic}**\n*by ${msg.author}, ends on ${date}*\n\n${str}`,
+                                			)
+                                			.then(async (ms) => {
+                                				asyncForEach(args, async (val, i) => {
+                                					await ms.react(reactions[i]);
                                 				});
-                                		});
+                                				// vote structure
+                                				const vt: Vote = {
+                                					messageID: ms.id,
+                                					channelID: ms.channel.id,
+                                					options: args,
+                                					topic,
+                                					date,
+                                					guildid: ms.guild!.id,
+                                					authorID,
+                                				};
+                                				await addVote(vt);
+                                			});
+                                	}
                                 } else if (!args) {
                                 	msg.channel.send(
                                 		'Please try again and add some options',
