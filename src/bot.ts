@@ -267,11 +267,14 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						player.play(resource);
             resource.volume!.setVolume(0.5);
             saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
+            // 8 seconds is max play time:
+            // so when something goes wrong this will time out latest 4 seconds after;
+            // this also gives the bot 4 seconds to connect and start playing when it actually works
             const timeoutID = setTimeout(() => {
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
-            }, 8 * 1000);
+            }, 12 * 1000);
             player.on('stateChange', (state) => {
             	if (state.status === AudioPlayerStatus.Playing) {
             		if (state.playbackDuration > 0) {
