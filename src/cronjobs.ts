@@ -11,40 +11,33 @@ import {
 } from './db';
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
-import { sendStartupEvent } from './webhooks';
+import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
 
 if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
 }
 
 // automatic deletion of reports:
-async function onHour(bot: Client, isFirst: boolean) {
-	const d = new Date();
+async function hourlyCleanup(bot: Client, isFirst: boolean) {
+	const now = new Date();
+	console.log('Running hourly cleanup at:', now);
 	const h = new Date(
-		d.getFullYear(),
-		d.getMonth(),
-		d.getDate() + 1,
-		0,
+		now.getFullYear(),
+		now.getMonth(),
+		now.getDate(),
+		now.getHours() + 1,
 		0,
 		0,
 		0,
 	);
-	const e = h.getTime() - d.getTime();
-	if (e > 100) {
-		// some arbitrary time period
-		setTimeout(onHour.bind(null, bot, false), e);
-	}
+	const timeoutForNextHour = h.getTime() - now.getTime();
 	if (isFirst) {
 		await sendStartupEvent(bot.shard!.ids[0], true);
 	}
-
-	/* const t0 = process.hrtime(); */
-	const nd = new Date();
-	nd.setDate(nd.getDate() - 7);
+	const sevenDaysAgo = new Date();
+	sevenDaysAgo.setDate(now.getDate() - 7);
 	const guilds = bot.guilds.cache;
 	let counter = 0;
-	/* const lastPostedCounter = 0;
-	const latestTimePassed = 0; */
 	await asyncForEach(guilds, async (G) => {
 		const guildID = G.id;
 		const localCounter = ++counter;
@@ -52,13 +45,12 @@ async function onHour(bot: Client, isFirst: boolean) {
 		// update the guild settings entry so that it does NOT get deleted
 		await SettingsModel.updateOne(
 			{ _id: guildID },
-			{ $set: { lastConnected: d } },
+			{ $set: { lastConnected: now } },
 		);
-
 		const ranking = await SaltrankModel.find({ guild: guildID });
 		await asyncForEach(ranking, async (report) => {
 			const removeData = await SaltModel.deleteMany({
-				date: { $lt: nd },
+				date: { $lt: sevenDaysAgo },
 				guild: guildID,
 				salter: report.salter,
 			});
@@ -112,26 +104,39 @@ async function onHour(bot: Client, isFirst: boolean) {
 		}
 	});
 
-	// delete every guild where lastConnected < nd from the DB TODO
 	// find all guilds that have not connected for a week
 	// or dont have the lastConnected attribute at all
 	const guilds2 = await SettingsModel.find({
 		$or: [
-			{ lastConnected: { $lt: nd } },
+			{ lastConnected: { $lt: sevenDaysAgo } },
 			{ lastConnected: { $exists: false } },
 		],
 	});
-
+	// remove all data saved for those guilds
 	await asyncForEach(guilds2, async (guild) => {
-		// ignore salt and saltrank, as they are removed after 7 days anyways
 		// eslint-disable-next-line no-underscore-dangle
 		const guildID = guild._id;
-		// remove all data saved for those guilds
-		await StillMutedModel.deleteMany({ guildid: guildID });
-		await UserModel.deleteMany({ guildID });
-		await VoteModel.deleteMany({ guildid: guildID });
-		await SettingsModel.deleteOne({ _id: guildID });
+		try {
+			const guildFromDiscord = await bot.guilds.fetch(guildID);
+			await sendJoinEvent(
+				`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.approximateMemberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
+				bot.shard?.ids[0],
+			);
+			// ignore salt and saltrank, as they are removed after 7 days anyways
+			await StillMutedModel.deleteMany({ guildid: guildID });
+			await UserModel.deleteMany({ guildID });
+			await VoteModel.deleteMany({ guildid: guildID });
+			await SettingsModel.deleteOne({ _id: guildID });
+		} catch (error) {
+			sendException(
+				`Failed deleting all information releated to guild with ID ${guildID} : ${error}`,
+				bot.shard?.ids[0],
+			);
+		}
 	});
+
+	// call function for next hour
+	setTimeout(hourlyCleanup.bind(null, bot, false), timeoutForNextHour);
 }
 
 const reactions = [
@@ -232,8 +237,10 @@ async function endVote(vote: Vote, bot: Client) {
 		}
 	} catch (error) {
 		console.error(JSON.stringify(error, null, 2));
+		if (
 		// eslint-disable-next-line eqeqeq
-		if (error.httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
+			(error as any).httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */
+		) {
 			throw error;
 		}
 	}
@@ -263,7 +270,10 @@ async function voteCheck(bot: Client) {
 			await endVote(vote, bot);
 			await vote.delete();
 		} catch (err) {
-			if (err.name === 'DiscordAPIError' && err.message === 'Missing Access') {
+			if (
+				(err as any).name === 'DiscordAPIError'
+        && (err as any).message === 'Missing Access'
+			) {
 				await vote.delete();
 			} else {
 				throw err;
@@ -275,6 +285,6 @@ async function voteCheck(bot: Client) {
 
 export function startUp(bot: Client) {
 	// repeating functions:
-	onHour(bot, true);
+	hourlyCleanup(bot, true);
 	voteCheck(bot);
 }
