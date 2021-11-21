@@ -4,7 +4,7 @@ import { PREFIXES } from '../shared_assets';
 import { findMember, yesOrNo } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { SaltrankModel } from '../db';
-import { getUser } from '../dbHelpers';
+import { getGlobalUser, getUser } from '../dbHelpers';
 
 async function getSalt(userid: string, guildID: string) {
 	const result = await SaltrankModel.findOne({
@@ -48,6 +48,15 @@ export const profile: magibotCommand = {
       }> = [];
 			const salt = await getSalt(userId, msg.guild.id);
 			const { botusage, sound } = await getUser(userId, msg.guild.id);
+			let joinsound = sound;
+			let isGlobalSound = false;
+			if (!joinsound) {
+				const globalUser = await getGlobalUser(userId);
+				if (globalUser && globalUser.sound) {
+					joinsound = globalUser.sound;
+					isGlobalSound = true;
+				}
+			}
 			info.push({
 				name: 'Saltlevel',
 				value: String(salt),
@@ -59,7 +68,7 @@ export const profile: magibotCommand = {
 				inline: false,
 			});
 			info.push({
-				name: 'Joinsound',
+				name: `Joinsound${isGlobalSound ? ' (default)' : ''}`,
 				value: sound || 'Empty',
 				inline: false,
 			});
