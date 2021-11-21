@@ -10,6 +10,6 @@ export type magibotCommand = {
 	perm: Discord.PermissionResolvable | Discord.PermissionResolvable[];
 	category: commandCategories;
 	main:
-		| ((content: string, msg: Discord.Message) => Promise<any>)
-		| ((content: string, msg: Discord.Message) => any);
+		| ((content: string, msg: Discord.Message) => Promise<void>)
+		| ((content: string, msg: Discord.Message) => void);
 };

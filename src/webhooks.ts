@@ -43,14 +43,20 @@ const startupWebhook = new Discord.WebhookClient({
 	token: WEBHOOK_TOKEN_STARTUP,
 });
 
-export async function sendException(value: string) {
-	return exceptionsWebhook.send(value).catch(doNothingOnError);
+export async function sendException(value: string, shardId?: number) {
+	return exceptionsWebhook
+		.send(`Shard ${shardId}: ${value}`)
+		.catch(doNothingOnError);
 }
-export async function sendJoinEvent(value: string) {
-	return joinsWebhook.send(value).catch(doNothingOnError);
+export async function sendJoinEvent(value: string, shardId?: number) {
+	return joinsWebhook
+		.send(`Shard ${shardId}: ${value}`)
+		.catch(doNothingOnError);
 }
-export async function sendBugreport(value: string) {
-	return bugreportWebhook.send(value).catch(doNothingOnError);
+export async function sendBugreport(value: string, shardId?: number) {
+	return bugreportWebhook
+		.send(`Shard ${shardId}: ${value}`)
+		.catch(doNothingOnError);
 }
 export async function sendStartupEvent(
 	shardId: number,
