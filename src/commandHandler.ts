@@ -206,7 +206,7 @@ export async function checkCommand(msg: Discord.Message) {
 							await commands[command].main(content, msg);
 						} catch (err) {
 							catchError(
-								err,
+								err as Error,
 								msg,
 								`${PREFIXES.get(msg.guild.id)}${pre}${commandVal}`,
 							);

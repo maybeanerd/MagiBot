@@ -30,16 +30,12 @@ import {
 	checkGuild,
 	getPrefix,
 	isBlacklistedUser,
-	getUser,
 	toggleStillMuted,
 	isJoinableVc,
 	getSoundOfUser,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import {
-	asyncForEach /* , doNothingOnError, returnNullOnError */,
-	buttonId,
-} from './helperFunctions';
+import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 

@@ -233,7 +233,7 @@ async function endVote(vote: Vote, bot: Client) {
 	} catch (error) {
 		console.error(JSON.stringify(error, null, 2));
 		// eslint-disable-next-line eqeqeq
-		if (error.httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
+		if ((error as any).httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */) {
 			throw error;
 		}
 	}
@@ -263,7 +263,7 @@ async function voteCheck(bot: Client) {
 			await endVote(vote, bot);
 			await vote.delete();
 		} catch (err) {
-			if (err.name === 'DiscordAPIError' && err.message === 'Missing Access') {
+			if ((err as any).name === 'DiscordAPIError' && (err as any).message === 'Missing Access') {
 				await vote.delete();
 			} else {
 				throw err;
