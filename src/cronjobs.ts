@@ -136,7 +136,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 	});
 
 	// call function for next hour
-	setTimeout(hourlyCleanup.bind(null, bot, false), timeoutForNextHour);
+	setTimeout(() => hourlyCleanup(bot, false), timeoutForNextHour);
 }
 
 const reactions = [
