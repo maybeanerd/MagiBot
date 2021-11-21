@@ -11,7 +11,7 @@ import {
 } from './db';
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
-import { sendJoinEvent, sendStartupEvent } from './webhooks';
+import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
 
 if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
@@ -116,16 +116,23 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 	await asyncForEach(guilds2, async (guild) => {
 		// eslint-disable-next-line no-underscore-dangle
 		const guildID = guild._id;
-		const guildFromDiscord = await bot.guilds.fetch(guildID);
-		await sendJoinEvent(
-			`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.approximateMemberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
-			bot.shard?.ids[0],
-		);
-		// ignore salt and saltrank, as they are removed after 7 days anyways
-		await StillMutedModel.deleteMany({ guildid: guildID });
-		await UserModel.deleteMany({ guildID });
-		await VoteModel.deleteMany({ guildid: guildID });
-		await SettingsModel.deleteOne({ _id: guildID });
+		try {
+			const guildFromDiscord = await bot.guilds.fetch(guildID);
+			await sendJoinEvent(
+				`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.approximateMemberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
+				bot.shard?.ids[0],
+			);
+			// ignore salt and saltrank, as they are removed after 7 days anyways
+			await StillMutedModel.deleteMany({ guildid: guildID });
+			await UserModel.deleteMany({ guildID });
+			await VoteModel.deleteMany({ guildid: guildID });
+			await SettingsModel.deleteOne({ _id: guildID });
+		} catch (error) {
+			sendException(
+				`Failed deleting all information releated to guild with ID ${guildID} : ${error}`,
+				bot.shard?.ids[0],
+			);
+		}
 	});
 
 	// call function for next hour
