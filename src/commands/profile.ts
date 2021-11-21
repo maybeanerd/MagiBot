@@ -69,7 +69,7 @@ export const profile: magibotCommand = {
 			});
 			info.push({
 				name: `Joinsound${isGlobalSound ? ' (default)' : ''}`,
-				value: sound || 'Empty',
+				value: joinsound || 'Empty',
 				inline: false,
 			});
 			user = user || (await msg.guild.members.fetch(userId)!);
