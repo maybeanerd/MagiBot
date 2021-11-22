@@ -99,7 +99,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 				);
 			}
 		} */
-		if (localCounter >= guilds.size) {
+		if (localCounter >= guilds.size && isFirst) {
 			await sendStartupEvent(bot.shard!.ids[0]);
 		}
 	});
@@ -119,7 +119,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 		try {
 			const guildFromDiscord = await bot.guilds.fetch(guildID);
 			await sendJoinEvent(
-				`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.approximateMemberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
+				`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.memberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
 				bot.shard?.ids[0],
 			);
 			// ignore salt and saltrank, as they are removed after 7 days anyways

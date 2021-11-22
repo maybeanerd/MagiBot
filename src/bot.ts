@@ -160,7 +160,7 @@ bot.on('guildCreate', async (guild) => {
 				.catch(() => {});
 		}
 		await sendJoinEvent(
-			`:white_check_mark: joined **${guild.name}**: "${guild.description}" (${guild.approximateMemberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerId}> (ID: ${guild.ownerId})`,
+			`:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerId}> (ID: ${guild.ownerId})`,
 		);
 	}
 });
@@ -168,7 +168,7 @@ bot.on('guildCreate', async (guild) => {
 bot.on('guildDelete', async (guild) => {
 	if (guild.available) {
 		await sendJoinEvent(
-			`:x: left ${guild.name} (${guild.approximateMemberCount} users, ID: ${guild.id})`,
+			`:x: left ${guild.name} (${guild.memberCount} users, ID: ${guild.id})`,
 		);
 	}
 });
