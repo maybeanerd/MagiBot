@@ -1,4 +1,4 @@
-﻿import Discord, {
+import Discord, {
 	Client, DiscordAPIError, Guild, Intents,
 } from 'discord.js';
 import { handle } from 'blapi';
@@ -267,6 +267,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
             const timeoutID = setTimeout(() => {
+            /* eslint-disable no-mixed-spaces-and-tabs */
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
@@ -294,6 +295,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
                 ${err.stack || 'NO STACK'}
                 \`\`\``,
             	);
+            	/* eslint-enable no-mixed-spaces-and-tabs */
             });
 					}
 				}

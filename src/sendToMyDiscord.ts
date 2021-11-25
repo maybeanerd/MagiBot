@@ -1,4 +1,4 @@
-﻿import { sendException } from './webhooks';
+import { sendException } from './webhooks';
 
 const maxMessageLength = 1950;
 

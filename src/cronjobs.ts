@@ -1,4 +1,4 @@
-﻿import { Client, TextChannel } from 'discord.js';
+import { Client, TextChannel } from 'discord.js';
 import { asyncForEach } from './helperFunctions';
 import {
 	SaltModel,
@@ -117,9 +117,8 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 		// eslint-disable-next-line no-underscore-dangle
 		const guildID = guild._id;
 		try {
-			const guildFromDiscord = await bot.guilds.fetch(guildID);
 			await sendJoinEvent(
-				`:wastebasket: Deleting all information from ${guildFromDiscord.name} (${guildFromDiscord.memberCount} users, ID: ${guildFromDiscord.id}) because they removed me more than seven days ago.`,
+				`:wastebasket: Deleting all information from guild with ID ${guildID} because they removed me more than seven days ago.`,
 				bot.shard?.ids[0],
 			);
 			// ignore salt and saltrank, as they are removed after 7 days anyways
