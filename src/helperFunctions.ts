@@ -1,4 +1,4 @@
-﻿import Discord, {
+import Discord, {
 	MessageActionRow,
 	MessageButton,
 	MessageComponentInteraction,

@@ -2,32 +2,32 @@
 import { ShardingManager } from 'discord.js';
 import { promises as fsp } from 'fs';
 import path from 'path';
-import { asyncForEach, doNothingOnError, returnNullOnError } from './helperFunctions';
+import { asyncForEach/* , doNothingOnError, returnNullOnError */ } from './helperFunctions';
 
 // attempt to share data over saved files
 // tbh we should just use REDIS instead of this...
 
 export async function saveJoinsoundsPlayedOfShard(shardId: number) {
-	return;
-	try {
+	return shardId;
+	/* try {
 		const filePath = path.resolve(__dirname, `./shard-${shardId}-jsplayed`);
 		const data = await fsp.readFile(filePath, 'utf8').catch(returnNullOnError);
 		let joinsoundsPlayed = data ? Number(data) : 0;
 		await fsp.writeFile(filePath, String(++joinsoundsPlayed));
 	} catch (e) {
 		doNothingOnError();
-	}
+	} */
 }
 export async function saveUsersWhoJoinedQueue(shardId: number) {
-	return;
-	try {
+	return shardId;
+	/* try {
 		const filePath = path.resolve(__dirname, `./shard-${shardId}-uqueue`);
 		const data = await fsp.readFile(filePath, 'utf8').catch(returnNullOnError);
 		let usersWhoJoinedQueue = data ? Number(data) : 0;
 		await fsp.writeFile(filePath, String(++usersWhoJoinedQueue));
 	} catch (e) {
 		doNothingOnError();
-	}
+	} */
 }
 async function loadJoinsoundsPlayedOfShard(
 	shardId: number,

@@ -279,21 +279,19 @@ export async function toggleStillMuted(
 	guildID: string,
 	add: boolean,
 ) {
-	if (
-		add
-    && !(
-    	(await StillMutedModel.find({
-    		userid: userID,
-    		guildid: guildID,
-    	}).count()) > 0
-    )
-	) {
-		const newMute = new StillMutedModel({
+	if (add) {
+		const isStillMutedAmount = await StillMutedModel.find({
 			userid: userID,
 			guildid: guildID,
-		});
-		await newMute.save();
-	} else if (!add) {
+		}).count();
+		if (isStillMutedAmount === 0) {
+			const newMute = new StillMutedModel({
+				userid: userID,
+				guildid: guildID,
+			});
+			await newMute.save();
+		}
+	} else {
 		await StillMutedModel.deleteMany({
 			userid: userID,
 			guildid: guildID,
