@@ -8,8 +8,8 @@ import {
 	GlobalUserDataModel,
 } from './db';
 import { OWNERID, PREFIXES } from './shared_assets';
-
 import config from './configuration';
+import { sendJoinEvent } from './webhooks';
 
 export async function getUser(userid: string, guildID: string) {
 	const result = await UserModel.findOneAndUpdate(
@@ -73,6 +73,14 @@ async function firstSettings(guildID: string) {
 export async function getSettings(guildID: string) {
 	let result = await SettingsModel.findById(guildID);
 	if (!result) {
+		await sendJoinEvent(
+			`:wastebasket: couldn't find settings for guild ${guildID} , resetting/setting empty state. Found this:${JSON.stringify(
+				result,
+				null,
+				2,
+			)}`,
+		);
+
 		result = await firstSettings(guildID);
 	}
 	return result;
