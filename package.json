@@ -23,7 +23,7 @@
     "ffmpeg-static": "^4.4.0",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
-    "forever": "^3.0.4",
+    "forever": "^4.0.2",
     "libsodium-wrappers": "^0.7.9",
     "mongoose": "^5.13.13",
     "opusscript": "0.0.8",
