@@ -1,3 +1,4 @@
+import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v9';
 import Discord, { Message } from 'discord.js';
 import { commandCategories } from './enums';
 
@@ -9,13 +10,12 @@ export type magibotCommand = {
   dev: boolean;
   perm: Discord.PermissionResolvable | Discord.PermissionResolvable[];
   category: commandCategories;
-  main:
-    | ((necessaryInformation: {
-        content: string;
-        message: Discord.Message;
-      }) => Promise<void>)
-    | ((necessaryInformation: {
-        content: string;
-        message: Discord.Message;
-      }) => void);
+  main: (necessaryInformation: {
+    content: string;
+    message: Discord.Message;
+  }) => Promise<void> | void;
+  slashCommand?: {
+    main: (interaction: Discord.CommandInteraction) => Promise<void> | void;
+    definition: RESTPostAPIApplicationCommandsJSONBody;
+  };
 };
