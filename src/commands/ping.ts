@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
@@ -22,6 +23,11 @@ export const ping: magibotCommand = {
 			const diff = stop - start;
 			newMsg.edit(`Pong! \nReactiontime: \`(${diff}ms)\``);
 		});
+	},
+	async slashMain(interaction: CommandInteraction) {
+		const stop = Date.now();
+		const diff = stop - interaction.createdAt.getTime();
+		await interaction.reply(`Pong! \nReactiontime: \`(${diff}ms)\``);
 	},
 	ehelp() {
 		return [

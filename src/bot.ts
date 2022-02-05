@@ -38,6 +38,7 @@ import { StillMutedModel } from './db';
 import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
+import { checkSlashCommand } from './slashCommandHandler';
 
 console.log(generateDependencyReport());
 
@@ -133,6 +134,15 @@ bot.on('ready', async () => {
 bot.on('message', async (message: Discord.Message) => {
 	try {
 		await checkCommand(message);
+	} catch (err) {
+		console.error(err);
+	}
+});
+
+bot.on('interactionCreate', async (interaction) => {
+	if (!interaction.isCommand()) { return; }
+	try {
+		await checkSlashCommand(interaction);
 	} catch (err) {
 		console.error(err);
 	}

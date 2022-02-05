@@ -10,14 +10,10 @@ export type magibotCommand = {
   dev: boolean;
   perm: Discord.PermissionResolvable | Discord.PermissionResolvable[];
   category: commandCategories;
-  main:
-    | ((necessaryInformation: {
-        content: string;
-        message: Discord.Message;
-      }) => Promise<void>)
-    | ((necessaryInformation: {
-        content: string;
-        message: Discord.Message;
-      }) => void);
-			slashCommand?: RESTPostAPIApplicationCommandsJSONBody
+  main: (necessaryInformation: {
+    content: string;
+    message: Discord.Message;
+  }) => Promise<void> | void;
+  slashMain: (interaction: Discord.CommandInteraction) => Promise<void> | void;
+  slashCommand?: RESTPostAPIApplicationCommandsJSONBody;
 };
