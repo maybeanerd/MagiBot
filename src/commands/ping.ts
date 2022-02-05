@@ -24,11 +24,6 @@ export const ping: magibotCommand = {
 			newMsg.edit(`Pong! \nReactiontime: \`(${diff}ms)\``);
 		});
 	},
-	async slashMain(interaction: CommandInteraction) {
-		const stop = Date.now();
-		const diff = stop - interaction.createdAt.getTime();
-		await interaction.reply(`Pong! \nReactiontime: \`(${diff}ms)\``);
-	},
 	ehelp() {
 		return [
 			{
@@ -40,5 +35,12 @@ export const ping: magibotCommand = {
 	perm: 'SEND_MESSAGES',
 	admin: false,
 	category: commandCategories.misc,
-	slashCommand,
+	slashCommand: {
+		async main(interaction: CommandInteraction) {
+			const stop = Date.now();
+			const diff = stop - interaction.createdAt.getTime();
+			await interaction.reply(`Pong! \nReactiontime: \`(${diff}ms)\``);
+		},
+		definition: slashCommand,
+	},
 };

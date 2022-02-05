@@ -3,7 +3,7 @@ import { Routes } from 'discord-api-types';
 import { ping } from './commands/ping';
 import { APP_ID, TOKEN } from './shared_assets';
 
-const commands = [ping.slashCommand];
+const commands = [ping.slashCommand!.definition];
 
 const rest = new REST({ version: '9' }).setToken(TOKEN);
 

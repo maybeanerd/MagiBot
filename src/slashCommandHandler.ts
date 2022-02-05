@@ -58,7 +58,7 @@ export async function checkSlashCommand(
 			interaction.member.user.id,
 			bot,
 		);
-		await commands[interaction.commandName].slashMain!(interaction);
+		await commands[interaction.commandName].slashCommand!.main(interaction);
 	} catch (err) {
 		catchError(err as Error, interaction);
 	}

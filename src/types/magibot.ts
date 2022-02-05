@@ -14,6 +14,8 @@ export type magibotCommand = {
     content: string;
     message: Discord.Message;
   }) => Promise<void> | void;
-  slashMain: (interaction: Discord.CommandInteraction) => Promise<void> | void;
-  slashCommand?: RESTPostAPIApplicationCommandsJSONBody;
+  slashCommand?: {
+    main: (interaction: Discord.CommandInteraction) => Promise<void> | void;
+    definition: RESTPostAPIApplicationCommandsJSONBody;
+  };
 };
