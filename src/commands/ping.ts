@@ -6,11 +6,7 @@ import { magibotCommand } from '../types/magibot';
 const slashCommand = new SlashCommandBuilder()
 	.setName('ping')
 	.setDescription('Returns the round trip time between you and MagiBot!')
-	.addStringOption((option) => option
-		.setName('optional input')
-		.setDescription('Some input just for fun.')
-		.setRequired(false))
-	.toJSON();
+	.addStringOption((option) => option.setName('optionalinput').setDescription('Some input just for fun.'));
 
 export const ping: magibotCommand = {
 	name: 'ping',
@@ -37,10 +33,10 @@ export const ping: magibotCommand = {
 	category: commandCategories.misc,
 	slashCommand: {
 		async main(interaction: CommandInteraction) {
-			const stop = Date.now();
-			const diff = stop - interaction.createdAt.getTime();
+			const stop = new Date();
+			const diff = stop.getTime() - interaction.createdAt.getTime();
 			await interaction.reply(`Pong! \nReactiontime: \`(${diff}ms)\``);
 		},
-		definition: slashCommand,
+		definition: slashCommand.toJSON(),
 	},
 };
