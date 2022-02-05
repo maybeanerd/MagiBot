@@ -53,12 +53,12 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 	if (mention.length >= 3) {
 		let roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().startsWith(mention));
 		if (roleArray.size === 1) {
-			return roleArray[0].id;
+			return roleArray.first()!.id;
 		}
 		if (roleArray.size === 0) {
 			roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().includes(mention));
 			if (roleArray.size === 1) {
-				return roleArray[0].id;
+				return roleArray.first()!.id;
 			}
 		}
 	}

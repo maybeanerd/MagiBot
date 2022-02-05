@@ -11,8 +11,8 @@ export const help: magibotCommand = {
 	category: commandCategories.misc,
 	admin: false,
 	perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
-	main: async function main(content, msg) {
-		if (!msg.guild) {
+	main: async function main({ content, message }) {
+		if (!message.guild) {
 			return;
 		}
 		const args = content.split(/ +/);
@@ -21,9 +21,9 @@ export const help: magibotCommand = {
 		if (command) {
 			const acommand = `_${command}`;
 			if (!(commands[command] || commands[acommand])) {
-				msg.reply(
+				message.reply(
 					`this command does not exist. Use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help\` to get a full list of the commands available.`,
 				);
 			} else if (commands[command]) {
@@ -32,11 +32,11 @@ export const help: magibotCommand = {
           value: string;
           inline: boolean;
         }> = [];
-				let ehelps = commands[command].ehelp(msg);
+				let ehelps = commands[command].ehelp(message);
 				ehelps.forEach((ehelp) => {
-					if (msg.guild) {
+					if (message.guild) {
 						info.push({
-							name: `${PREFIXES.get(msg.guild.id)}.${command} ${ehelp.name}`,
+							name: `${PREFIXES.get(message.guild.id)}.${command} ${ehelp.name}`,
 							value: ehelp.value,
 							inline: false,
 						});
@@ -45,7 +45,7 @@ export const help: magibotCommand = {
 				let embed: MessageEmbedOptions = {
 					color: COLOR,
 					description: `Commands available via the prefix \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.${command}\`:`,
 					fields: info,
 					footer: {
@@ -53,20 +53,20 @@ export const help: magibotCommand = {
 						text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
 					},
 				};
-				msg.channel.send({ embeds: [embed] });
+				message.channel.send({ embeds: [embed] });
 				// admin variant?
-				if (msg.member && (await isAdmin(msg.guild.id, msg.member))) {
+				if (message.member && (await isAdmin(message.guild.id, message.member))) {
 					if (commands[acommand]) {
 						const inf: Array<{
               name: string;
               value: string;
               inline: boolean;
             }> = [];
-						ehelps = commands[acommand].ehelp(msg);
+						ehelps = commands[acommand].ehelp(message);
 						ehelps.forEach((ehelp) => {
-							if (msg.guild) {
+							if (message.guild) {
 								inf.push({
-									name: `${PREFIXES.get(msg.guild.id)}:${acommand.slice(1)} ${
+									name: `${PREFIXES.get(message.guild.id)}:${acommand.slice(1)} ${
 										ehelp.name
 									}`,
 									value: ehelp.value,
@@ -77,7 +77,7 @@ export const help: magibotCommand = {
 						embed = {
 							color: COLOR,
 							description: `Admin commands available via the prefix \`${PREFIXES.get(
-								msg.guild.id,
+								message.guild.id,
 							)}:${command}\`:`,
 							fields: inf,
 							footer: {
@@ -85,10 +85,10 @@ export const help: magibotCommand = {
 								text: '<required input> , [optional input] , choose|one|of|these , (comment on the command)',
 							},
 						};
-						msg.channel.send({ embeds: [embed] });
+						message.channel.send({ embeds: [embed] });
 					}
 				}
-			} else if (msg.member && (await isAdmin(msg.guild.id, msg.member))) {
+			} else if (message.member && (await isAdmin(message.guild.id, message.member))) {
 				// Only Admin command
 				command = acommand;
 				if (commands[command]) {
@@ -97,11 +97,11 @@ export const help: magibotCommand = {
             value: string;
             inline: boolean;
           }> = [];
-					const ehelps = commands[command].ehelp(msg);
+					const ehelps = commands[command].ehelp(message);
 					ehelps.forEach((ehelp) => {
-						if (msg.guild) {
+						if (message.guild) {
 							inf.push({
-								name: `${PREFIXES.get(msg.guild.id)}:${command.slice(1)} ${
+								name: `${PREFIXES.get(message.guild.id)}:${command.slice(1)} ${
 									ehelp.name
 								}`,
 								value: ehelp.value,
@@ -112,7 +112,7 @@ export const help: magibotCommand = {
 					const embed: MessageEmbedOptions = {
 						color: COLOR,
 						description: `Admin commands available via the prefix \`${PREFIXES.get(
-							msg.guild.id,
+							message.guild.id,
 						)}:${command.slice(1)}\`:`,
 						fields: inf,
 						footer: {
@@ -121,7 +121,7 @@ export const help: magibotCommand = {
 						},
 					};
 
-					msg.channel.send({ embeds: [embed] });
+					message.channel.send({ embeds: [embed] });
 				}
 			}
 		} else {
@@ -150,22 +150,22 @@ export const help: magibotCommand = {
 			let embed: MessageEmbedOptions = {
 				color: COLOR,
 				description: `Commands available via the prefix \`${PREFIXES.get(
-					msg.guild.id,
+					message.guild.id,
 				)}.\` :\nto get more info on a single command use \`${PREFIXES.get(
-					msg.guild.id,
+					message.guild.id,
 				)}.help <command>\``,
 				fields: cmds,
 				footer: {
 					iconURL: user().avatarURL() || '',
 					text: `admins can override commands with ${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}: instead of ${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}. to ignore command channel restrictions`,
 				},
 			};
-			msg.channel.send({ embeds: [embed] });
-			if (msg.member && (await isAdmin(msg.guild.id, msg.member))) {
+			message.channel.send({ embeds: [embed] });
+			if (message.member && (await isAdmin(message.guild.id, message.member))) {
 				const cmd: Array<{ name: string; value: string; inline: boolean }> = [];
 				let coms = '';
 				Object.values(commands).forEach((commnd) => {
@@ -188,21 +188,21 @@ export const help: magibotCommand = {
 				embed = {
 					color: COLOR,
 					description: `Admin commands available via the prefix \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}:\` :\nto get more info on a single command use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help <command>\``,
 					fields: cmd,
 					footer: {
 						iconURL: user().avatarURL() || '',
 						text: `admins can override commands with ${PREFIXES.get(
-							msg.guild.id,
+							message.guild.id,
 						)}: instead of ${PREFIXES.get(
-							msg.guild.id,
+							message.guild.id,
 						)}. to ignore command channel restrictions`,
 					},
 				};
-				msg.channel.send({ embeds: [embed] });
+				message.channel.send({ embeds: [embed] });
 			}
 		}
 	},

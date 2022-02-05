@@ -84,7 +84,7 @@ export async function saltUp(
 
 // TODO we might want to add even more of the DB logic into here
 
-function printHelp(msg: Message) {
+function printHelp(message: Message) {
 	const info: Array<{ name: string; value: string }> = [];
 	info.push({
 		name: 'add <@user|userid|nickname>',
@@ -93,59 +93,59 @@ function printHelp(msg: Message) {
 	});
 	info.push({
 		name: 'top',
-		value: `Displays the top 5 salter in ${msg.guild!.name}`,
+		value: `Displays the top 5 salter in ${message.guild!.name}`,
 	});
 	return info;
 }
 
 export const salt: magibotCommand = {
-	main: async function main(content: string, msg: Message) {
+	main: async function main({ content, message }) {
 		const args = content.split(/ +/);
 		const command = args[0].toLowerCase();
-		if (msg.guild) {
+		if (message.guild) {
 			switch (command) {
 			case 'add':
 				/* eslint-disable no-case-declarations */
 				const mention = args[1];
-				const { user, fuzzy } = await cmds.findMember(msg.guild, mention);
+				const { user, fuzzy } = await cmds.findMember(message.guild, mention);
 				/* eslint-enable no-case-declarations */
 				if (mention && user) {
-					if (user.id === msg.author.id) {
-						msg.reply("you can't report yourself!");
+					if (user.id === message.author.id) {
+						message.reply("you can't report yourself!");
 						return;
 					}
 					if (user.user.bot) {
-						msg.reply("you can't report bots!");
+						message.reply("you can't report bots!");
 						return;
 					}
 					if (fuzzy) {
 						const confirm = await cmds.yesOrNo(
-							msg,
+							message,
 							`Do you want to report ${user} for being a salty bitch?`,
 						);
 						if (!confirm) {
 							return;
 						}
 					}
-					const time = await saltUp(user.id, msg.author.id, msg.guild);
+					const time = await saltUp(user.id, message.author.id, message.guild);
 					if (time === 0) {
-						msg.channel.send(
+						message.channel.send(
 							`Successfully reported ${user} for being a salty bitch!`,
 						);
 					} else {
-						msg.reply(
+						message.reply(
 							`you can report ${user} again in ${
 								59 - Math.floor((time * 60) % 60)
 							} min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
 						);
 					}
 				} else {
-					msg.reply('you need to mention a user you want to report!');
+					message.reply('you need to mention a user you want to report!');
 				}
 				break;
 			case 'top':
 				/* eslint-disable no-case-declarations */
-				const salters = await topSalt(msg.guild.id);
+				const salters = await topSalt(message.guild.id);
 				const info: Array<{
             name: string;
             value: string;
@@ -156,7 +156,7 @@ export const salt: magibotCommand = {
 					let mname = 'User left guild';
 					if (salters[i]) {
 						// eslint-disable-next-line no-await-in-loop
-						const member = await msg.guild.members
+						const member = await message.guild.members
 							.fetch(salters[i].salter)
 							.catch(() => {});
 						if (member) {
@@ -174,31 +174,31 @@ export const salt: magibotCommand = {
 				/* eslint-disable no-case-declarations */
 				const embed: MessageEmbedOptions = {
 					color: 0xffffff,
-					description: `Top 5 salter in ${msg.guild.name}:`,
+					description: `Top 5 salter in ${message.guild.name}:`,
 					fields: info,
 					footer: {
-						iconURL: msg.guild.iconURL() || '',
-						text: msg.guild.name,
+						iconURL: message.guild.iconURL() || '',
+						text: message.guild.name,
 					},
 				};
 				/* eslint-enable no-case-declarations */
-				msg.channel.send({ embeds: [embed] });
+				message.channel.send({ embeds: [embed] });
 				break;
 			default:
-				msg.reply(
+				message.reply(
 					`this command doesn't exist. Use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help salt\` for more info.`,
 				);
 				break;
 			}
 		} else {
-			msg.reply('commands are only functional when used in a guild.');
+			message.reply('commands are only functional when used in a guild.');
 		}
 	},
 	name: 'salt',
-	ehelp(msg: Message) {
-		return printHelp(msg);
+	ehelp(message: Message) {
+		return printHelp(message);
 	},
 	perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
 	admin: false,

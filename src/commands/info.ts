@@ -9,7 +9,7 @@ const inviteURL = 'https://discord.com/api/oauth2/authorize?client_id=3848202325
 export const inf: magibotCommand = {
 	dev: false,
 	name: 'info',
-	main: (content, msg) => {
+	main: ({ message }) => {
 		const info: Array<{
       name: string;
       value: string;
@@ -46,7 +46,7 @@ export const inf: magibotCommand = {
 			},
 		};
 
-		msg.channel.send({ embeds: [embed] });
+		message.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		return [

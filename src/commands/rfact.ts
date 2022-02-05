@@ -11,7 +11,7 @@ const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {
 };
 
 export const rfact: magibotCommand = {
-	main: async (content, msg) => {
+	main: async ({ message }) => {
 		const now = new Date();
 		const incomingFact = await axios.get<string>(
 			`http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`,
@@ -19,7 +19,7 @@ export const rfact: magibotCommand = {
 		const fact = incomingFact.data;
 
 		if (!fact) {
-			msg.channel.send('Something went wrong whilst contacting the API...');
+			message.channel.send('Something went wrong whilst contacting the API...');
 			return;
 		}
 		const embed = {
@@ -38,7 +38,7 @@ export const rfact: magibotCommand = {
 			},
 		};
 
-		msg.channel.send({ embeds: [embed] });
+		message.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		return [

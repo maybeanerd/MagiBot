@@ -10,7 +10,7 @@ import { magibotCommand } from '../types/magibot';
 
 export const stats: magibotCommand = {
 	name: 'stats',
-	main: async (content, msg) => {
+	main: async ({ message }) => {
 		const info: Array<{
       name: string;
       value: string;
@@ -65,7 +65,7 @@ export const stats: magibotCommand = {
 			value: uptime,
 			inline: false,
 		});
-		if (msg.author.id === OWNERID) {
+		if (message.author.id === OWNERID) {
 			const memInfo = await si.mem();
 			const memUsedByProccess = process.memoryUsage().rss;
 			info.push({
@@ -93,7 +93,7 @@ Used memory: ${Math.round(memInfo.used / 1048576)} MB (${Math.round(
 			},
 		};
 
-		msg.channel.send({ embeds: [embed] });
+		message.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		return [

@@ -101,29 +101,29 @@ async function printCommandChannels(guildID: string) {
 
 const userCooldowns = new Set<string>();
 
-export async function checkCommand(msg: Discord.Message) {
-	if (!(msg.author && msg.guild && msg.guild.me)) {
+export async function checkCommand(message: Discord.Message) {
+	if (!(message.author && message.guild && message.guild.me)) {
 		// check for valid message
-		console.error('Invalid message received:', msg);
+		console.error('Invalid message received:', message);
 		return;
 	}
 	// only read guild messages from non-bots
-	if (!(!msg.author.bot && msg.channel.type === 'GUILD_TEXT')) {
+	if (!(!message.author.bot && message.channel.type === 'GUILD_TEXT')) {
 		return;
 	}
 	let isMention: boolean;
 	if (
-		msg.content.startsWith(`<@${user().id}>`)
-    || msg.content.startsWith(`<@!${user().id}>`)
+		message.content.startsWith(`<@${user().id}>`)
+    || message.content.startsWith(`<@!${user().id}>`)
 	) {
 		isMention = true;
-	} else if (msg.content.startsWith(PREFIXES.get(msg.guild.id)!)) {
+	} else if (message.content.startsWith(PREFIXES.get(message.guild.id)!)) {
 		isMention = false;
 	} else {
 		return;
 	}
 	// ignore blacklisted users
-	if (await isBlacklistedUser(msg.author.id, msg.guild.id)) {
+	if (await isBlacklistedUser(message.author.id, message.guild.id)) {
 		// we dont delete the message because this would delete everything that starts with the prefix
 		/*     msg.delete(); */
 		return;
@@ -131,28 +131,28 @@ export async function checkCommand(msg: Discord.Message) {
 	let command: string;
 	let content: string;
 	if (isMention) {
-		command = msg.content.split(' ')[1]; // eslint-disable-line prefer-destructuring
-		content = msg.content
+		command = message.content.split(' ')[1]; // eslint-disable-line prefer-destructuring
+		content = message.content
 			.split(' ')
-			.splice(2, msg.content.split(' ').length)
+			.splice(2, message.content.split(' ').length)
 			.join(' ');
 		command = `.${command}`;
 	} else {
-		command = msg.content
-			.substring(PREFIXES.get(msg.guild.id)!.length, msg.content.length)
+		command = message.content
+			.substring(PREFIXES.get(message.guild.id)!.length, message.content.length)
 			.split(' ')[0]
 			.toLowerCase();
 		// delete prefix and command
-		content = msg.content.slice(
-			command.length + PREFIXES.get(msg.guild.id)!.length,
+		content = message.content.slice(
+			command.length + PREFIXES.get(message.guild.id)!.length,
 		);
 		content = content.replace(/^\s+/g, ''); // delete leading spaces
 	}
 	if (command) {
 		let commandVal: string;
 		const pre = command.charAt(0);
-		const myPerms = (msg.channel as Discord.TextChannel).permissionsFor(
-			msg.guild.me,
+		const myPerms = (message.channel as Discord.TextChannel).permissionsFor(
+			message.guild.me,
 		);
 		if (pre === '.') {
 			command = command.slice(1);
@@ -169,13 +169,13 @@ export async function checkCommand(msg: Discord.Message) {
 			if (!commands[command]) {
 				return;
 			}
-			if (!(msg.member && (await isAdmin(msg.guild.id, msg.member)))) {
+			if (!(message.member && (await isAdmin(message.guild.id, message.member)))) {
 				if (myPerms) {
 					if (myPerms.has('MANAGE_MESSAGES')) {
-						msg.delete();
+						message.delete();
 					}
 					if (myPerms.has('SEND_MESSAGES')) {
-						const reply = await msg.reply(
+						const reply = await message.reply(
 							"you're not allowed to use this command.",
 						);
 						await asyncWait(5000);
@@ -190,48 +190,48 @@ export async function checkCommand(msg: Discord.Message) {
 
 		if (
 			commands[command]
-      && (!commands[command].dev || msg.author.id === OWNERID)
+      && (!commands[command].dev || message.author.id === OWNERID)
 		) {
-			if (pre === ':' || (await commandAllowed(msg.guild.id, msg.channel.id))) {
+			if (pre === ':' || (await commandAllowed(message.guild.id, message.channel.id))) {
 				const perms = commands[command].perm;
 				if (!perms || (myPerms && myPerms.has(perms))) {
 					// cooldown for command usage
-					if (!userCooldowns.has(msg.author.id)) {
-						userCooldowns.add(msg.author.id);
+					if (!userCooldowns.has(message.author.id)) {
+						userCooldowns.add(message.author.id);
 						setTimeout(() => {
-							userCooldowns.delete(msg.author.id);
+							userCooldowns.delete(message.author.id);
 						}, 4000);
 						try {
-							Statcord.ShardingClient.postCommand(command, msg.author.id, bot);
-							await commands[command].main(content, msg);
+							Statcord.ShardingClient.postCommand(command, message.author.id, bot);
+							await commands[command].main({ content, message });
 						} catch (err) {
 							catchError(
 								err as Error,
-								msg,
-								`${PREFIXES.get(msg.guild.id)}${pre}${commandVal}`,
+								message,
+								`${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
 							);
 						}
-						usageUp(msg.author.id, msg.guild.id);
+						usageUp(message.author.id, message.guild.id);
 					} else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-						msg.reply("whoa cool down, you're using commands too quick!");
+						message.reply("whoa cool down, you're using commands too quick!");
 					}
 					// endof cooldown management
 				} else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-					msg.channel.send(
+					message.channel.send(
 						`I don't have all the permissions needed for this command: (${perms}) `,
 					);
 				}
 			} else if (myPerms && myPerms.has('SEND_MESSAGES')) {
 				if (myPerms && myPerms.has('MANAGE_MESSAGES')) {
-					msg.delete();
+					message.delete();
 				}
-				const reply = await msg.reply(
+				const reply = await message.reply(
 					`commands aren't allowed in <#${
-						msg.channel.id
+						message.channel.id
 					}>. Use them in ${await printCommandChannels(
-						msg.guild.id,
+						message.guild.id,
 					)}. If you're an admin use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}:help\` to see how you can change that.`,
 				);
 				await asyncWait(15000);
@@ -240,5 +240,5 @@ export async function checkCommand(msg: Discord.Message) {
 		}
 	}
 
-	if (DELETE_COMMANDS) msg.delete();
+	if (DELETE_COMMANDS) message.delete();
 }
