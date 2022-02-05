@@ -6,13 +6,13 @@ export const inv: magibotCommand = {
 	name: 'invite',
 	hide: false,
 	dev: false,
-	async main(bot, msg) {
+	async main({ message }) {
 		// TODO check if invite activated on server
 		// TODO let user define invite length
-		const invite = await (msg.channel as TextChannel).createInvite({
-			reason: `member ${msg.author} used invite command`,
+		const invite = await (message.channel as TextChannel).createInvite({
+			reason: `member ${message.author} used invite command`,
 		});
-		msg.channel.send(`Here's an invite link to this channel: ${invite}`);
+		message.channel.send(`Here's an invite link to this channel: ${invite}`);
 	},
 	ehelp() {
 		return [

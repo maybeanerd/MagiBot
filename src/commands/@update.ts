@@ -33,9 +33,9 @@ export const update: magibotCommand = {
 	ehelp: () => [],
 	perm: ['ADMINISTRATOR'],
 	name: 'update',
-	main: async function main(content, msg) {
+	main: async function main({ content, message }) {
 		const confirmed = await yesOrNo(
-			msg,
+			message,
 			`Do you want to send the update\n${content}`,
 			'Successfully canceled update',
 			undefined,
@@ -43,7 +43,7 @@ export const update: magibotCommand = {
 		);
 		if (confirmed) {
 			sendUpdate(content);
-			msg.channel.send(`Successfully sent:\n${content}`);
+			message.channel.send(`Successfully sent:\n${content}`);
 		}
 	},
 	admin: true,

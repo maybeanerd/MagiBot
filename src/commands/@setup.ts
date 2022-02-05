@@ -1,4 +1,4 @@
-﻿import { GuildMember, MessageEmbedOptions, User } from 'discord.js';
+﻿import { GuildMember, MessageEmbedOptions } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
 import {
 	findMember, yesOrNo, findRole, asyncWait,
@@ -162,7 +162,7 @@ function printHelp() {
 export const setup: magibotCommand = {
 	dev: false,
 	name: 'setup',
-	main: async function main(content, msg) {
+	main: async function main({ content, message }) {
 		const args = content.split(/ +/);
 		const command = args[0].toLowerCase();
 
@@ -173,46 +173,46 @@ export const setup: magibotCommand = {
 		let de;
 		switch (command) {
 		case 'ban':
-			user = (await findMember(msg.guild!, mention)).user;
+			user = (await findMember(message.guild!, mention)).user;
 			if (mention && user) {
 				if (
 					await yesOrNo(
-						msg,
+						message,
 						`Do you really want to ban ${user} from using the bot?`,
 						'Successfully canceled ban.',
 					)
 				) {
-					setBlacklistedUser(msg.guild!.id, user.id, true);
-					msg.channel.send(`Successfully banned ${user} from using the bot.`);
+					setBlacklistedUser(message.guild!.id, user.id, true);
+					message.channel.send(`Successfully banned ${user} from using the bot.`);
 				}
 			} else {
-				msg.reply('you need to mention a user you want to use this on!');
+				message.reply('you need to mention a user you want to use this on!');
 			}
 			break;
 		case 'unban':
-			user = (await findMember(msg.guild!, mention)).user;
+			user = (await findMember(message.guild!, mention)).user;
 			if (mention && user) {
 				if (
 					await yesOrNo(
-						msg,
+						message,
 						`Do you really want to reactivate bot usage for ${user}?`,
 						'Successfully canceled unban.',
 					)
 				) {
-					setBlacklistedUser(msg.guild!.id, user.id, false);
-					msg.channel.send(`Successfully banned ${user} from using the bot.`);
+					setBlacklistedUser(message.guild!.id, user.id, false);
+					message.channel.send(`Successfully banned ${user} from using the bot.`);
 				}
 			} else {
-				msg.reply('you need to mention a user you want to use this on!');
+				message.reply('you need to mention a user you want to use this on!');
 			}
 			break;
 		case 'join':
 			// eslint-disable-next-line no-case-declarations
-			if (msg.member) {
-				const voiceChannel = msg.member.voice.channel;
+			if (message.member) {
+				const voiceChannel = message.member.voice.channel;
 				if (voiceChannel) {
 					const isJoinable = await isJoinableVc(
-              msg.guild!.id,
+              message.guild!.id,
               voiceChannel.id,
 					);
 					de = '';
@@ -221,61 +221,61 @@ export const setup: magibotCommand = {
 					}
 					if (
 						await yesOrNo(
-							msg,
+							message,
 							`Do you want to ${de}activate joinsounds in **${voiceChannel.name}**?`,
 							`Cancelled ${de}activating joinsounds in **${voiceChannel.name}**.`,
 						)
 					) {
-						await setJoinChannel(msg.guild!.id, voiceChannel.id, !isJoinable);
-						msg.channel.send(
+						await setJoinChannel(message.guild!.id, voiceChannel.id, !isJoinable);
+						message.channel.send(
 							`Successfully ${de}activated joinsounds in **${voiceChannel.name}**.`,
 						);
 					}
 				} else {
-					msg.channel.send("You're connected to no voice channel!");
+					message.channel.send("You're connected to no voice channel!");
 				}
 			}
 			break;
 		case 'admin':
 			if (mention === '@everyone') {
-				msg.channel.send('You cannot use the everyone role as admin');
+				message.channel.send('You cannot use the everyone role as admin');
 				break;
 			}
 			// eslint-disable-next-line no-case-declarations
-			const rid = await findRole(msg.guild!, mention);
+			const rid = await findRole(message.guild!, mention);
 			if (mention && rid) {
-				if (!(await isAdminRole(msg.guild!.id, rid))) {
+				if (!(await isAdminRole(message.guild!.id, rid))) {
 					if (
 						await yesOrNo(
-							msg,
+							message,
 							`Do you want to set <@&${rid}> as admin role?`,
 							`Cancelled setting <@&${rid}> as admin role`,
 						)
 					) {
-						await setAdminRole(msg.guild!.id, rid, true);
-						msg.channel.send(`Successfully set <@&${rid}> as admin role!`);
+						await setAdminRole(message.guild!.id, rid, true);
+						message.channel.send(`Successfully set <@&${rid}> as admin role!`);
 					}
 				} else if (
 					await yesOrNo(
-						msg,
+						message,
 						`Do you want to remove <@&${rid}> from the admin roles?`,
 						`Cancelled removing <@&${rid}> from the admin roles`,
 					)
 				) {
-					await setAdminRole(msg.guild!.id, rid, false);
-					msg.channel.send(
+					await setAdminRole(message.guild!.id, rid, false);
+					message.channel.send(
 						`Successfully removed <@&${rid}> from the admin roles!`,
 					);
 				}
 			} else {
-				msg.channel.send('You need to mention a role!');
+				message.channel.send('You need to mention a role!');
 			}
 			break;
 		case 'command':
 			// eslint-disable-next-line no-case-declarations
 			const currentlyIsCommandChannel = await isCommandChannel(
-          msg.guild!.id,
-          msg.channel.id,
+          message.guild!.id,
+          message.channel.id,
 			);
 			de = '';
 			if (currentlyIsCommandChannel) {
@@ -283,74 +283,74 @@ export const setup: magibotCommand = {
 			}
 			if (
 				await yesOrNo(
-					msg,
-					`Do you want to ${de}activate commands in <#${msg.channel.id}>?`,
-					`Cancelled ${de}activating commands in <#${msg.channel.id}>`,
+					message,
+					`Do you want to ${de}activate commands in <#${message.channel.id}>?`,
+					`Cancelled ${de}activating commands in <#${message.channel.id}>`,
 				)
 			) {
 				await setCommandChannel(
-            msg.guild!.id,
-            msg.channel.id,
+            message.guild!.id,
+            message.channel.id,
             !currentlyIsCommandChannel,
 				);
-				msg.channel.send(
-					`Successfully ${de}activated commands in <#${msg.channel.id}>.`,
+				message.channel.send(
+					`Successfully ${de}activated commands in <#${message.channel.id}>.`,
 				);
 			}
 			break;
 		case 'notification':
 			// eslint-disable-next-line no-case-declarations
-			const isNotChann = msg.channel.id === (await getNotChannel(msg.guild!.id));
+			const isNotChann = message.channel.id === (await getNotChannel(message.guild!.id));
 
 			if (!isNotChann) {
 				if (
 					await yesOrNo(
-						msg,
-						`Do you want to activate MagiBot notifications in <#${msg.channel.id}>?`,
-						`Cancelled activating notifications in <#${msg.channel.id}>`,
+						message,
+						`Do you want to activate MagiBot notifications in <#${message.channel.id}>?`,
+						`Cancelled activating notifications in <#${message.channel.id}>`,
 					)
 				) {
-					await setNotificationChannel(msg.guild!.id, msg.channel.id);
-					const message = await msg.channel.send(
-						`Successfully activated notifications in <#${msg.channel.id}>.`,
+					await setNotificationChannel(message.guild!.id, message.channel.id);
+					const newMessage = await message.channel.send(
+						`Successfully activated notifications in <#${message.channel.id}>.`,
 					);
 					asyncWait(5000).then(() => {
-						message.delete();
+						newMessage.delete();
 					});
 				}
 			} else if (
 				await yesOrNo(
-					msg,
-					`Do you want to deactivate MagiBot notifications in <#${msg.channel.id}>?`,
-					`Cancelled deactivating notifications in <#${msg.channel.id}>`,
+					message,
+					`Do you want to deactivate MagiBot notifications in <#${message.channel.id}>?`,
+					`Cancelled deactivating notifications in <#${message.channel.id}>`,
 				)
 			) {
-				await setNotificationChannel(msg.guild!.id, undefined);
-				msg.channel.send('Successfully deactivated notifications.');
+				await setNotificationChannel(message.guild!.id, undefined);
+				message.channel.send('Successfully deactivated notifications.');
 			}
 			break;
 		case 'prefix':
 			if (mention) {
 				if (
 					await yesOrNo(
-						msg,
+						message,
 						`Do you want to change the prefix in ${
-                msg.guild!.name
-						} from \`${PREFIXES.get(msg.guild!.id)}.\` to \`${mention}.\` ?`,
+                message.guild!.name
+						} from \`${PREFIXES.get(message.guild!.id)}.\` to \`${mention}.\` ?`,
 						'Cancelled changing the prefix.',
 					)
 				) {
-					const success = await setPrefix(msg.guild!.id, mention);
+					const success = await setPrefix(message.guild!.id, mention);
 					if (success) {
-						msg.channel.send(
+						message.channel.send(
 							`Successfully changed prefix to \`${mention}.\` !`,
 						);
 					} else {
-						msg.channel.send('Something bad happened...');
+						message.channel.send('Something bad happened...');
 					}
 				}
 			} else {
-				msg.reply('you need to provide a prefix you want to use.');
+				message.reply('you need to provide a prefix you want to use.');
 			}
 			break;
 		case 'info':
@@ -360,11 +360,11 @@ export const setup: magibotCommand = {
           value: string;
           inline: boolean;
         }> = [];
-			const set = await getSettings(msg.guild!.id);
+			const set = await getSettings(message.guild!.id);
 
 			info.push({
 				name: 'Prefix',
-				value: `${await getPrefix(msg.guild!.id)}.`,
+				value: `${await getPrefix(message.guild!.id)}.`,
 				inline: false,
 			});
 
@@ -375,7 +375,7 @@ export const setup: magibotCommand = {
 			if (commandChannels.length === 0) {
 				str = 'no whitelist, so every channel is allowed';
 			} else {
-				const { guild } = msg;
+				const { guild } = message;
 				commandChannels.forEach((channel) => {
 					const chann = guild!.channels.cache.get(channel);
 					if (chann && !chann.deleted) {
@@ -413,7 +413,7 @@ export const setup: magibotCommand = {
 			if (joinChannels.length === 0) {
 				str = 'Empty';
 			} else {
-				const { guild } = msg;
+				const { guild } = message;
 				joinChannels.forEach((channel) => {
 					const chann = guild!.channels.cache.get(channel);
 					if (chann && !chann.deleted) {
@@ -497,21 +497,21 @@ export const setup: magibotCommand = {
 			/* eslint-disable camelcase */
 			const embed: MessageEmbedOptions = {
 				color: COLOR,
-				description: `Guild settings of ${msg.guild!.name}:`,
+				description: `Guild settings of ${message.guild!.name}:`,
 				fields: info,
 				footer: {
-					iconURL: msg.guild!.iconURL() || '',
-					text: msg.guild!.name,
+					iconURL: message.guild!.iconURL() || '',
+					text: message.guild!.name,
 				},
 			};
 			/* eslint-enable no-case-declarations */
 			/* eslint-enable camelcase */
-			msg.channel.send({ embeds: [embed] });
+			message.channel.send({ embeds: [embed] });
 			break;
 		default:
-			msg.reply(
+			message.reply(
 				`this command doesn't exist. Use \`${PREFIXES.get(
-            msg.guild!.id,
+            message.guild!.id,
 				)}:help setup\` for more info.`,
 			);
 			break;

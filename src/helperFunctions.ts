@@ -53,12 +53,12 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 	if (mention.length >= 3) {
 		let roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().startsWith(mention));
 		if (roleArray.size === 1) {
-			return roleArray[0].id;
+			return roleArray.first()!.id;
 		}
 		if (roleArray.size === 0) {
 			roleArray = guild.roles.cache.filter((rol) => rol.name.toLowerCase().includes(mention));
 			if (roleArray.size === 1) {
-				return roleArray[0].id;
+				return roleArray.first()!.id;
 			}
 		}
 	}
@@ -132,7 +132,9 @@ export async function yesOrNo(
 	return promise;
 }
 
-export function printError(error) {
+export function printError(error: {
+  response: { status: string; statusText: string };
+}) {
 	console.error(
 		`Errorstatus: ${error.response.status} ${error.response.statusText}`,
 	);
@@ -171,5 +173,7 @@ export async function asyncForEachFromFlint<T, F, N, O>(
 }
 
 export async function asyncWait(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }

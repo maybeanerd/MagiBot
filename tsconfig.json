@@ -2,28 +2,15 @@
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    //"target": "esnext",
     "target": "ES2020",
-    "module": "commonjs",
-    // "module": "esnext", // older node.js is not able to use esnext modules
-    "moduleResolution": "node",
     "lib": ["esnext", "esnext.asynciterable", "dom"],
-    "allowJs": true,
-    // "checkJs": true, maybe deactivating this allows us to have correct CI whilst porting..
+    "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "noImplicitAny": false,
-    //"noEmit": true,
-    // "isolatedModules": true,
+    "noImplicitAny": true,
     "strictNullChecks": true,
-    // not sure if both of these should be defined:
-    "typeRoots": ["types", "node_modules/@types"],
-    "types": ["@types/node"],
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
-    /* Additional Checks */
-    // for now lets keep this out:
-    // "noUnusedLocals": true /* Report errors on unused locals. */,
-    // "noUnusedParameters": true /* Report errors on unused parameters. */,
+    "noUnusedLocals": true /* Report errors on unused locals. */,
     "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,

@@ -6,7 +6,7 @@ import { magibotCommand } from '../types/magibot';
  returns array of throws with last index being sum,
  second last being multiplier and third last being add
  */
-function comp(s, mI, nI, fI, aI) {
+function comp(s: string, mI: string, nI: string, fI: string, aI: string) {
 	const m = parseInt(mI, 10) || 1;
 	const n = parseInt(nI, 10) || 1;
 	const f = parseInt(fI, 10);
@@ -49,15 +49,14 @@ export const roll: magibotCommand = {
 	name: 'roll',
 	hide: false,
 	dev: false,
-	main(content, msg) {
+	main({ content, message }) {
 		const args = content.split(/ +/);
 		const input = args[0];
-
 		const throws = parse(input);
 		if (!throws) {
-			msg.channel.send(
+			message.channel.send(
 				`Your inputs could not be interpreted. Use \`${PREFIXES.get(
-          msg.guild!.id,
+          message.guild!.id,
 				)}.help roll\` for more info.`,
 			);
 			return;
@@ -69,7 +68,7 @@ export const roll: magibotCommand = {
     }> = [];
 		const size = throws.length;
 		if (throws[size - 6]) {
-			msg.reply('the dungeon master can only roll 22 dice at a time!');
+			message.reply('the dungeon master can only roll 22 dice at a time!');
 		}
 		let thro = throws[size - 4] as number;
 		if (thro > 22) {
@@ -106,7 +105,7 @@ export const roll: magibotCommand = {
 		}
 		const embed = {
 			color: COLOR,
-			description: `:game_die: <@!${msg.author.id}>s dice have been rolled:`,
+			description: `:game_die: <@!${message.author.id}>s dice have been rolled:`,
 			fields: info,
 			footer: {
 				/* eslint-disable camelcase */
@@ -116,7 +115,7 @@ export const roll: magibotCommand = {
 				text: 'The real dungeon master',
 			},
 		};
-		msg.channel.send({ embeds: [embed] });
+		message.channel.send({ embeds: [embed] });
 	},
 	ehelp() {
 		const ret: Array<{ name: string; value: string }> = [];

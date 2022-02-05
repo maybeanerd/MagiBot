@@ -68,7 +68,9 @@ export async function validateJoinsound(
 	if (setDefault && user) {
 		throw new Error('Cant set default sounds for others!');
 	}
-	let sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(() => {});
+	const sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(
+		() => {},
+	);
 	if (!sound) {
 		message.reply(
 			`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
@@ -78,11 +80,12 @@ export async function validateJoinsound(
 		return;
 	}
 	// eslint-disable-next-line prefer-destructuring
-	sound = sound.streams[0];
+	const firstStream = sound.streams[0];
 	if (
-		sound.codec_name !== 'mp3'
-    && sound.codec_name !== 'pcm_s16le'
-    && sound.codec_name !== 'pcm_f32le'
+		firstStream
+    && firstStream.codec_name !== 'mp3'
+    && firstStream.codec_name !== 'pcm_s16le'
+    && firstStream.codec_name !== 'pcm_f32le'
 	) {
 		message.reply(
 			`You need to use a compatible file! For more info use \`${PREFIXES.get(
@@ -91,7 +94,13 @@ export async function validateJoinsound(
 		);
 		return;
 	}
-	if (sound.duration > 8) {
+	if (!firstStream.duration) {
+		message.reply(
+			"Failed to calculate the duration of the joinsound you're trying to add.",
+		);
+		return;
+	}
+	if (firstStream.duration > 8) {
 		message.reply(
 			"The joinsound you're trying to add is longer than 8 seconds.",
 		);
@@ -120,15 +129,15 @@ export async function validateJoinsound(
 
 export const sound: magibotCommand = {
 	name: 'sound',
-	main: async function main(content, msg) {
-		if (!msg.guild) {
+	main: async function main({ content, message }) {
+		if (!message.guild) {
 			return;
 		}
 		if (
-			isShadowBanned(msg.author.id, msg.guild.id, msg.guild.ownerId)
+			isShadowBanned(message.author.id, message.guild.id, message.guild.ownerId)
       !== shadowBannedLevel.not
 		) {
-			msg.reply('you cant do this.');
+			message.reply('you cant do this.');
 			return;
 		}
 		const args = content.split(/ +/);
@@ -136,33 +145,33 @@ export const sound: magibotCommand = {
 		if (command === 'rem') {
 			const command2 = args[1];
 			if (command2 && command2.toLowerCase() === 'default') {
-				await addGlobalSound(msg.author.id, undefined);
-				msg.reply('You successfully removed your default joinsound!');
+				await addGlobalSound(message.author.id, undefined);
+				message.reply('You successfully removed your default joinsound!');
 			} else {
-				await addSound(msg.author.id, undefined, msg.guild.id);
-				msg.reply('You successfully removed your joinsound!');
+				await addSound(message.author.id, undefined, message.guild.id);
+				message.reply('You successfully removed your joinsound!');
 			}
 		} else if (command === 'default') {
-			const file = msg.attachments.first();
+			const file = message.attachments.first();
 			const fileUrl = file ? file.url : args[1];
 			if (fileUrl) {
-				await validateJoinsound(fileUrl, msg, true);
+				await validateJoinsound(fileUrl, message, true);
 			} else {
-				msg.reply(
+				message.reply(
 					`Missing sound or sound URL. Use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help sound\` for more info.`,
 				);
 			}
 		} else {
-			const file = msg.attachments.first();
+			const file = message.attachments.first();
 			const fileUrl = file ? file.url : args[0];
 			if (fileUrl) {
-				await validateJoinsound(fileUrl, msg, false);
+				await validateJoinsound(fileUrl, message, false);
 			} else {
-				msg.reply(
+				message.reply(
 					`This is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help sound\` for more info.`,
 				);
 			}
