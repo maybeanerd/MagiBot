@@ -5,9 +5,9 @@ export const ping: magibotCommand = {
 	name: 'ping',
 	dev: false,
 	hide: false,
-	main(bot, msg) {
+	main({ message }) {
 		const start = Date.now();
-		msg.channel.send('Pong!').then((newMsg) => {
+		message.channel.send('Pong!').then((newMsg) => {
 			const stop = Date.now();
 			const diff = stop - start;
 			newMsg.edit(`Pong! \nReactiontime: \`(${diff}ms)\``);

@@ -1,14 +1,19 @@
 {
   "root": true,
   "plugins": ["@typescript-eslint", "import"],
-  "extends": ["eslint:recommended", "airbnb"],
+  "extends": ["eslint:recommended", "airbnb-base"],
+  "parser": "@typescript-eslint/parser",
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    }
+  },
   "rules": {
-    "import/no-unresolved": "error", //maybe we do not need this
     "import/prefer-default-export": "off",
     "@typescript-eslint/no-unused-vars": "error",
     "no-extra-semi": 0,
     "semi": 2,
-    "no-tabs": ["error", {"allowIndentationTabs":  true}],
+    "no-tabs": ["error", { "allowIndentationTabs": true }],
     "indent": ["warn", "tab"],
     "quotes": [
       "error",
@@ -24,18 +29,8 @@
     "no-plusplus": 0,
     "no-useless-constructor": "off", // TS has some issues with this, so we use their check
     "@typescript-eslint/no-useless-constructor": "error",
-    "import/extensions": 0
-  },
-  "parser": "@typescript-eslint/parser",
-  "settings": {
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
-    },
-    "import/resolver": {
-      // use <root>/tsconfig.json
-      "node": {},
-      "typescript": {}
-    }
+    "import/extensions": 0,
+    "import/no-unresolved": 0 // TS decides this on its own
   },
   "ignorePatterns": ["dist/*"]
 }

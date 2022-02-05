@@ -341,19 +341,3 @@ export async function isBlacklistedUser(userid: string, guildID: string) {
 	const users = settings.blacklistedUsers;
 	return users.includes(userid);
 }
-
-/* eslint-disable */
-
-// TODO some time later , blacklist @everyone in these channels
-async function getBlacklistedEveryone(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.blacklistedEveryone;
-}
-
-async function setBlacklistedEveryone(
-  guildID: string,
-  cid: string,
-  insert: boolean
-) {}
-
-/* eslint-enable */

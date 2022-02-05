@@ -4,11 +4,11 @@ import { magibotCommand } from '../types/magibot';
 export const evall: magibotCommand = {
 	name: 'eval',
 	ehelp: () => [],
-	main: async (content, msg) => {
-		msg.channel.send(`input:\n\`\`\`js\n${content}\`\`\``);
+	main: async ({ content, message }) => {
+		message.channel.send(`input:\n\`\`\`js\n${content}\`\`\``);
 		// eslint-disable-next-line no-eval
 		const evaluation = await eval(content);
-		msg.channel.send(`output:\n\`\`\`js\n${evaluation}\`\`\``);
+		message.channel.send(`output:\n\`\`\`js\n${evaluation}\`\`\``);
 	},
 	admin: true,
 	dev: true,

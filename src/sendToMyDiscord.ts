@@ -10,7 +10,8 @@ export async function catchErrorOnDiscord(message: string, shardId?: number) {
 			// I want this to never hit ratelimit, so let's take it slow
 			// eslint-disable-next-line no-await-in-loop
 			await sendException(
-				`${idx}: ${message.substring(i, i + maxMessageLength)}`, shardId,
+				`${idx}: ${message.substring(i, i + maxMessageLength)}`,
+				shardId,
 			);
 		}
 	} catch (error) {

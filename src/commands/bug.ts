@@ -6,27 +6,27 @@ import { sendBugreport } from '../webhooks';
 
 export const bug: magibotCommand = {
 	name: 'bug',
-	async main(content, msg) {
+	async main({ content, message }) {
 		if (!(content.length > 0)) {
-			msg.reply(
+			message.reply(
 				`you need to add info about the report after the command. Use \`${PREFIXES.get(
-          msg.guild!.id,
+          message.guild!.id,
 				)}.help bug\` to get more info.`,
 			);
 			return;
 		}
 		const confirmed = await yesOrNo(
-			msg,
+			message,
 			`Do you want to send this bugreport?\n${content}`,
 			'Successfully canceled bugreport.',
 		);
 		if (confirmed) {
 			await sendBugreport(
-				`**Bugreport** by ${msg.author.username} (<@${
-					msg.author.id
-				}>) on server ${msg.guild!.name}( ${msg.guild!.id} ) :\n${content}`,
+				`**Bugreport** by ${message.author.username} (<@${
+					message.author.id
+				}>) on server ${message.guild!.name}( ${message.guild!.id} ) :\n${content}`,
 			);
-			await msg.channel.send('Succesfully sent bugreport.');
+			await message.channel.send('Succesfully sent bugreport.');
 		}
 	},
 	admin: false,

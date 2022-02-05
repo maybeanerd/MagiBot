@@ -1,7 +1,7 @@
 import { MessageEmbedOptions } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { PREFIXES } from '../shared_assets';
-import { findMember, yesOrNo } from '../helperFunctions';
+import { findMember } from '../helperFunctions';
 import { magibotCommand } from '../types/magibot';
 import { SaltrankModel } from '../db';
 import { getGlobalUser, getUser } from '../dbHelpers';
@@ -20,34 +20,34 @@ async function getSalt(userid: string, guildID: string) {
 export const profile: magibotCommand = {
 	name: 'profile',
 	dev: false,
-	main: async function main(content, msg) {
-		if (msg.guild) {
+	main: async function main({ content, message }) {
+		if (message.guild) {
 			const args = content.split(/ +/);
 			const mention = args[0];
-			let { user /* , fuzzy */ } = await findMember(msg.guild, mention);
+			let { user /* , fuzzy */ } = await findMember(message.guild, mention);
 			if (!user && mention) {
-				msg.reply(
+				message.reply(
 					` you need to define the user uniquely or not mention any user. For more help use \`${PREFIXES.get(
-						msg.guild.id,
+						message.guild.id,
 					)}.help profile\``,
 				);
 				return;
 			}
 			// profile doesnt do any harm so lets just always call it without asking
 			/* if (fuzzy) {
-				const confirm = await yesOrNo(msg, `Did you mean ${user}?`);
+				const confirm = await yesOrNo(message, `Did you mean ${user}?`);
 				if (!confirm) {
 					return;
 				}
 			} */
-			const userId = user?.id || msg.author.id;
+			const userId = user?.id || message.author.id;
 			const info: Array<{
         name: string;
         value: string;
         inline: boolean;
       }> = [];
-			const salt = await getSalt(userId, msg.guild.id);
-			const { botusage, sound } = await getUser(userId, msg.guild.id);
+			const salt = await getSalt(userId, message.guild.id);
+			const { botusage, sound } = await getUser(userId, message.guild.id);
 			let joinsound = sound;
 			let isGlobalSound = false;
 			if (!joinsound) {
@@ -72,7 +72,7 @@ export const profile: magibotCommand = {
 				value: joinsound || 'Empty',
 				inline: false,
 			});
-			user = user || (await msg.guild.members.fetch(userId)!);
+			user = user || (await message.guild.members.fetch(userId)!);
 			const embed: MessageEmbedOptions = {
 				color: user.displayColor,
 				description: `Here's some info on ${user.displayName}`,
@@ -83,9 +83,9 @@ export const profile: magibotCommand = {
 					text: user.user.tag,
 				},
 			};
-			msg.channel.send({ embeds: [embed] });
+			message.channel.send({ embeds: [embed] });
 		} else {
-			msg.reply('This command is only available in guilds.');
+			message.reply('This command is only available in guilds.');
 		}
 	},
 	ehelp() {

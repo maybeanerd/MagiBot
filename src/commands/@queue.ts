@@ -372,7 +372,7 @@ function onEnd(
 	}
 	delete used[guild.id];
 	if (voiceChannel) {
-		delete queueVoiceChannels[guild.id];
+		queueVoiceChannels.delete(guild.id);
 		// remove all mutes
 		voiceChannel.members.forEach((member) => {
 			// make sure users will be unmuted even if this unmute loop
@@ -465,7 +465,7 @@ async function createQueue(
 
 	if (voiceChannel) {
 		// add the vc to the global variable so joins get muted
-		queueVoiceChannels[guild.id] = voiceChannel.id;
+		queueVoiceChannels.set(guild.id, voiceChannel.id);
 		// servermute all users in voiceChannel
 		const voiceChannelMembers = voiceChannel.members;
 		voiceChannelMembers.forEach(async (member) => {
@@ -505,7 +505,7 @@ async function createQueue(
 export const queue: magibotCommand = {
 	hide: false,
 	name: 'queue',
-	async main(content, message) {
+	async main({ message }) {
 		if (
 			!message.guild
       || !(message.channel instanceof TextChannel)
