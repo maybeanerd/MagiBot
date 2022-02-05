@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-// eslint-disable-next-line import/no-cycle
 import Statcord from 'statcord.js';
 import { vote } from './commands/vote';
 import { sound } from './commands/sound';

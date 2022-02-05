@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config(); // load .env into environment
 
 const token = process.env.TOKEN;
+const appId = process.env.APP_ID;
 const owner = process.env.OWNERID;
 const prefix = process.env.PREFIX;
 const dburl = process.env.DATABASE_URL;
@@ -19,7 +20,7 @@ try {
 	blapis = {};
 }
 
-if (!(token && owner && prefix && dburl)) {
+if (!(token && owner && prefix && dburl && appId)) {
 	throw new Error('Missing .env configuration!');
 }
 
@@ -29,4 +30,5 @@ export default {
 	prefix,
 	dburl,
 	blapis,
+	appId,
 };

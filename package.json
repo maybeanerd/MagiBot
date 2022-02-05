@@ -1,6 +1,6 @@
 {
   "name": "magibot",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
@@ -11,13 +11,14 @@
     "test": "test"
   },
   "dependencies": {
+    "@discordjs/builders": "^0.12.0",
     "@discordjs/rest": "^0.3.0",
     "@discordjs/voice": "^0.8.0",
     "@types/ffprobe-static": "^2.0.0",
     "axios": "^0.24.0",
     "blapi": "^2.2.1",
     "bufferutil": "^4.0.5",
-    "discord-api-types": "^0.24.0",
+    "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^10.0.0",
     "ffmpeg-static": "^4.4.0",

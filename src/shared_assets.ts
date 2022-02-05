@@ -4,6 +4,7 @@ import config from './configuration';
 export const OWNERID = config.owner;
 export const PREFIX = config.prefix;
 export const TOKEN = config.tk;
+export const APP_ID = config.appId;
 export const DETAILED_LOGGING = false;
 export const DELETE_COMMANDS = false;
 export const COLOR = 0x351c75;
