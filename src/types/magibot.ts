@@ -1,3 +1,4 @@
+import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v9';
 import Discord, { Message } from 'discord.js';
 import { commandCategories } from './enums';
 
@@ -18,4 +19,5 @@ export type magibotCommand = {
         content: string;
         message: Discord.Message;
       }) => void);
+			slashCommand?: RESTPostAPIApplicationCommandsJSONBody
 };

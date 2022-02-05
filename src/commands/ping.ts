@@ -1,5 +1,15 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
+
+const slashCommand = new SlashCommandBuilder()
+	.setName('ping')
+	.setDescription('Returns the round trip time between you and MagiBot!')
+	.addStringOption((option) => option
+		.setName('optional input')
+		.setDescription('Some input just for fun.')
+		.setRequired(false))
+	.toJSON();
 
 export const ping: magibotCommand = {
 	name: 'ping',
@@ -24,4 +34,5 @@ export const ping: magibotCommand = {
 	perm: 'SEND_MESSAGES',
 	admin: false,
 	category: commandCategories.misc,
+	slashCommand,
 };
