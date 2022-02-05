@@ -132,7 +132,9 @@ export async function yesOrNo(
 	return promise;
 }
 
-export function printError(error) {
+export function printError(error: {
+  response: { status: string; statusText: string };
+}) {
 	console.error(
 		`Errorstatus: ${error.response.status} ${error.response.statusText}`,
 	);
@@ -171,5 +173,7 @@ export async function asyncForEachFromFlint<T, F, N, O>(
 }
 
 export async function asyncWait(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }
