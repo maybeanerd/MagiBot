@@ -35,7 +35,8 @@ export const ping: magibotCommand = {
 		async main(interaction: CommandInteraction) {
 			const stop = new Date();
 			const diff = stop.getTime() - interaction.createdAt.getTime();
-			await interaction.reply(`Pong! \nReactiontime: \`(${diff}ms)\``);
+			await interaction.reply(`Pong! \`(${diff}ms)\`
+Your optional input: ${interaction.options.getString('optionalinput')}`);
 		},
 		definition: slashCommand.toJSON(),
 	},
