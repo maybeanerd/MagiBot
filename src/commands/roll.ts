@@ -1,4 +1,6 @@
-﻿import { COLOR, PREFIXES } from '../shared_assets';
+﻿import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction, Message } from 'discord.js';
+import { COLOR, PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
@@ -7,34 +9,39 @@ import { magibotCommand } from '../types/magibot';
  second last being multiplier and third last being add
  */
 function comp(s: string, mI: string, nI: string, fI: string, aI: string) {
-	const m = parseInt(mI, 10) || 1;
-	const n = parseInt(nI, 10) || 1;
-	const f = parseInt(fI, 10);
-	if (!f) {
+	const multiplier = parseInt(mI, 10) || 1;
+	const numberOfRolls = parseInt(nI, 10) || 1;
+	const amountOfSidesOnDie = parseInt(fI, 10);
+	if (!amountOfSidesOnDie) {
 		return false;
 	}
-	const a = typeof aI === 'string' ? parseInt(aI.replace(/\s/g, ''), 10) || 0 : 0;
+	const additionModifier = typeof aI === 'string' ? parseInt(aI.replace(/\s/g, ''), 10) || 0 : 0;
 
-	const ret: Array<number | boolean> = [];
-	let r = 0;
+	const throws: Array<number> = [];
+	let sumOfRolls = 0;
 	let overload = false;
-	for (let i = 0; i < n; i++) {
+	for (let i = 0; i < numberOfRolls; i++) {
 		if (i > 21) {
 			overload = true;
 			break;
 		}
-		const tmp = Math.floor(Math.random() * f) + 1;
-		ret.push(tmp);
-		r += tmp;
+		const tmp = Math.floor(Math.random() * amountOfSidesOnDie) + 1;
+		throws.push(tmp);
+		sumOfRolls += tmp;
 	}
-	ret.push(overload);
-	ret.push(m);
-	ret.push(n);
-	ret.push(f);
-	ret.push(a);
-	ret.push(r * m + a);
 
-	return ret;
+	const sumOfAllRollsAndModifiers = sumOfRolls * multiplier + additionModifier;
+
+	return {
+		throws,
+		overload,
+		multiplier,
+		numberOfRolls,
+		amountOfSidesOnDie,
+		additionModifier,
+		sumOfRolls,
+		sumOfAllRollsAndModifiers,
+	};
 }
 
 function parse(de: string) {
@@ -45,6 +52,85 @@ function parse(de: string) {
 	);
 }
 
+const slashCommand = new SlashCommandBuilder()
+	.setName('roll')
+	.setDescription(
+		'Roll dice with DnD syntax, e.g.: 5*2d6+1',
+	)
+	.addStringOption((option) => option
+		.setName('dice')
+		.setDescription(
+			'[multiplier]*[number of rolls]d<die number>[+ <modifier>]',
+		)
+		.setRequired(true));
+
+async function main(interaction: CommandInteraction | Message, input: string) {
+	const diceRollCalculation = parse(input);
+	if (!diceRollCalculation) {
+		interaction.reply(
+			`Your inputs could not be interpreted. Use \`${PREFIXES.get(
+        interaction.guild!.id,
+			)}.help roll\` for more info.`,
+		);
+		return;
+	}
+	const {
+		throws,
+		multiplier,
+		numberOfRolls,
+		amountOfSidesOnDie,
+		additionModifier,
+		sumOfRolls,
+		sumOfAllRollsAndModifiers,
+	} = diceRollCalculation;
+	const info: Array<{
+    name: string;
+    value: string;
+    inline: boolean;
+  }> = [];
+	if (diceRollCalculation.overload) {
+		interaction.reply('the dungeon master can only roll 22 dice at a time!');
+		return;
+	}
+	info.push({
+		name: `Sum of ${multiplier} * ${numberOfRolls}d${amountOfSidesOnDie} + ${additionModifier}`,
+		value: String(sumOfAllRollsAndModifiers),
+		inline: false,
+	});
+	info.push({
+		name: 'Average roll',
+		value: String(Math.floor(sumOfRolls / numberOfRolls)),
+		inline: false,
+	});
+	info.push({
+		name: 'Luckyness ( -50 to 50 % )',
+		value: `${String(
+			Math.floor((sumOfRolls / numberOfRolls / amountOfSidesOnDie) * 100) - 50,
+		)}%`,
+		inline: false,
+	});
+	throws.forEach((roll, i) => {
+		info.push({
+			name: `${i + 1}. roll`,
+			value: String(roll),
+			inline: true,
+		});
+	});
+	const embed = {
+		color: COLOR,
+		description: `:game_die: ${interaction.member}s dice have been rolled:`,
+		fields: info,
+		footer: {
+			/* eslint-disable camelcase */
+			icon_url:
+        'https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png',
+			/* eslint-enable camelcase */
+			text: 'The real dungeon master',
+		},
+	};
+	interaction.reply({ embeds: [embed] });
+}
+
 export const roll: magibotCommand = {
 	name: 'roll',
 	hide: false,
@@ -52,70 +138,7 @@ export const roll: magibotCommand = {
 	main({ content, message }) {
 		const args = content.split(/ +/);
 		const input = args[0];
-		const throws = parse(input);
-		if (!throws) {
-			message.channel.send(
-				`Your inputs could not be interpreted. Use \`${PREFIXES.get(
-          message.guild!.id,
-				)}.help roll\` for more info.`,
-			);
-			return;
-		}
-		const info: Array<{
-      name: string;
-      value: string;
-      inline: boolean;
-    }> = [];
-		const size = throws.length;
-		if (throws[size - 6]) {
-			message.reply('the dungeon master can only roll 22 dice at a time!');
-		}
-		let thro = throws[size - 4] as number;
-		if (thro > 22) {
-			thro = 22;
-		}
-		info.push({
-			name: `Sum of ${throws[size - 5]} * ${thro}d${throws[size - 3]} + ${
-				throws[size - 2]
-			}`,
-			value: String(throws[size - 1]),
-			inline: false,
-		});
-		info.push({
-			name: 'Average roll',
-			value: String(Math.floor((throws[size - 1] as number) / thro)),
-			inline: false,
-		});
-		info.push({
-			name: 'Luckyness ( -50 to 50 % )',
-			value: `${String(
-				Math.floor(
-					((throws[size - 1] as number) / thro / (throws[size - 3] as number))
-            * 100,
-				) - 50,
-			)}%`,
-			inline: false,
-		});
-		for (let i = 0; i < size - 6; i++) {
-			info.push({
-				name: `${i + 1}. roll`,
-				value: String(throws[i]),
-				inline: true,
-			});
-		}
-		const embed = {
-			color: COLOR,
-			description: `:game_die: <@!${message.author.id}>s dice have been rolled:`,
-			fields: info,
-			footer: {
-				/* eslint-disable camelcase */
-				icon_url:
-          'https://cdn0.iconfinder.com/data/icons/video-game-items-concepts-line-art/128/dd-dice-512.png',
-				/* eslint-enable camelcase */
-				text: 'The real dungeon master',
-			},
-		};
-		message.channel.send({ embeds: [embed] });
+		return main(message, input);
 	},
 	ehelp() {
 		const ret: Array<{ name: string; value: string }> = [];
@@ -129,4 +152,11 @@ export const roll: magibotCommand = {
 	perm: 'SEND_MESSAGES',
 	admin: false,
 	category: commandCategories.fun,
+	slashCommand: {
+		async main(interaction: CommandInteraction) {
+			const input = interaction.options.getString('dice', true);
+			return main(interaction, input);
+		},
+		definition: slashCommand.toJSON(),
+	},
 };

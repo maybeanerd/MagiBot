@@ -1,6 +1,7 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { ping } from './commands/ping';
+import { roll } from './commands/roll';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
@@ -11,6 +12,7 @@ import { isBlacklistedUser } from './dbHelpers';
 
 export const commands: { [k: string]: magibotCommand } = {
 	ping,
+	roll,
 };
 
 async function catchError(
@@ -58,7 +60,10 @@ export async function checkSlashCommand(
 			interaction.member.user.id,
 			bot,
 		);
-		await commands[interaction.commandName].slashCommand!.main(interaction);
+		const { slashCommand } = commands[interaction.commandName];
+		if (slashCommand) {
+			await slashCommand.main(interaction);
+		}
 	} catch (err) {
 		catchError(err as Error, interaction);
 	}
