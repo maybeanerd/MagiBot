@@ -6,14 +6,7 @@ if (!config.dburl) {
 }
 const url = config.dburl;
 
-// fix deprecations
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-
 mongoose.connect(`${url}/MagiBot`, {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-	poolSize: 20,
 	ssl: true,
 });
 
