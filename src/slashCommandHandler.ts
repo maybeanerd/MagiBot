@@ -2,6 +2,8 @@ import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { ping } from './commands/ping';
 import { roll } from './commands/roll';
+import { invite } from './commands/invite';
+import { bug } from './commands/bug';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
@@ -18,6 +20,8 @@ import {
 export const commands: { [k: string]: magibotCommand } = {
 	ping,
 	roll,
+	invite,
+	bug,
 };
 
 async function catchError(

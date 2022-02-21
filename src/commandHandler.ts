@@ -13,7 +13,6 @@ import { invite } from './commands/invite';
 import { ping } from './commands/ping';
 import { profile } from './commands/profile';
 import { roll } from './commands/roll';
-import { evall as _eval } from './commands/@eval';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/@queue';
 import { salt as _salt } from './commands/@salt';
@@ -41,7 +40,6 @@ import { bot } from './bot';
 import { asyncWait } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
-	_eval,
 	_queue,
 	_sound,
 	_setup,

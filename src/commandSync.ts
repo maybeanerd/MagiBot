@@ -6,12 +6,13 @@ import {
 import { ping } from './commands/ping';
 import { roll } from './commands/roll';
 import { invite } from './commands/invite';
+import { bug } from './commands/bug';
 import { APP_ID, TOKEN } from './shared_assets';
 
 const commands = [ping.slashCommand!.definition, roll.slashCommand!.definition];
 const testCommands: Array<RESTPostAPIApplicationCommandsJSONBody> = [
   invite.slashCommand!.definition,
-	// roll.slashCommand!.definition
+  bug.slashCommand!.definition,
 ];
 
 const rest = new REST({ version: '9' }).setToken(TOKEN);

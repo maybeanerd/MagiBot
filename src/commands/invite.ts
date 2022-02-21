@@ -1,13 +1,14 @@
-import { CommandInteraction, Message, TextChannel } from 'discord.js';
+import { CommandInteraction, TextChannel } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
+import { notifyAboutSlashCommand } from '../helperFunctions';
 
 const slashCommand = new SlashCommandBuilder()
 	.setName('invite')
 	.setDescription('Creates a temporary invite link to this channel');
 
-async function main(interaction: CommandInteraction | Message) {
+async function main(interaction: CommandInteraction) {
 	const invite = await (interaction.channel as TextChannel).createInvite({
 		reason: `member ${interaction.member?.user} used invite command`,
 	});
@@ -18,8 +19,8 @@ export const invite: magibotCommand = {
 	name: 'invite',
 	hide: false,
 	dev: false,
-	main({ message }) {
-		return main(message);
+	async main({ message }) {
+		return notifyAboutSlashCommand(message, 'invite');
 	},
 	ehelp() {
 		return [
