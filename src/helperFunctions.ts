@@ -173,6 +173,7 @@ export async function interactionConfirmation(
 	const time = timeoutTime || 20000;
 	const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
 	// only accept reactions from the user that created this question
+	// eslint-disable-next-line max-len
 	const filter = (intraction: MessageComponentInteraction) => intraction.user.id === interaction.member?.user.id
     && intraction.customId.startsWith(`${buttonId.yesOrNo}-${interaction.id}-`);
 	const collector = questionMessage.createMessageComponentCollector({
