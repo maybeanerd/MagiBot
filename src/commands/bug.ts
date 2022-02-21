@@ -28,7 +28,7 @@ async function main(interaction: CommandInteraction, input: string) {
 				interaction.member?.user.id
 			}>) on server ${interaction.guild!.name}( ${interaction.guild!.id} ) :\n${input}`,
 		);
-		await interaction.reply('Succesfully sent bugreport.');
+		await interaction.followUp('Succesfully sent bugreport.');
 	}
 }
 export const bug: magibotCommand = {
