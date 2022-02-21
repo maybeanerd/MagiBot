@@ -1,5 +1,6 @@
 ﻿import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
+import { notifyAboutSlashCommand } from '../helperFunctions';
 import { COLOR, PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
@@ -64,7 +65,7 @@ const slashCommand = new SlashCommandBuilder()
 		)
 		.setRequired(true));
 
-async function main(interaction: CommandInteraction | Message, input: string) {
+async function main(interaction: CommandInteraction, input: string) {
 	const diceRollCalculation = parse(input);
 	if (!diceRollCalculation) {
 		interaction.reply(
@@ -135,10 +136,8 @@ export const roll: magibotCommand = {
 	name: 'roll',
 	hide: false,
 	dev: false,
-	main({ content, message }) {
-		const args = content.split(/ +/);
-		const input = args[0];
-		return main(message, input);
+	async main({ message }) {
+		return notifyAboutSlashCommand(message, 'roll');
 	},
 	ehelp() {
 		const ret: Array<{ name: string; value: string }> = [];

@@ -9,11 +9,10 @@ import { salt } from './commands/salt';
 // eslint-disable-next-line import/no-cycle
 import { bug } from './commands/bug';
 import { inf as info } from './commands/info';
-import { inv as invite } from './commands/invite';
+import { invite } from './commands/invite';
 import { ping } from './commands/ping';
 import { profile } from './commands/profile';
 import { roll } from './commands/roll';
-import { evall as _eval } from './commands/@eval';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/@queue';
 import { salt as _salt } from './commands/@salt';
@@ -41,7 +40,6 @@ import { bot } from './bot';
 import { asyncWait } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
-	_eval,
 	_queue,
 	_sound,
 	_setup,
@@ -77,19 +75,22 @@ If you can reproduce this, consider using \`${
 }.info\`) to tell us exactly how.`);
 }
 
-async function commandAllowed(guildID: string, cid: string) {
+export async function commandAllowed(guildID: string, channelId?: string) {
+	if (!channelId) {
+		return false;
+	}
 	const channels = await getCommandChannels(guildID);
-	return channels.length === 0 || channels.includes(cid);
+	return channels.length === 0 || channels.includes(channelId);
 }
 
-async function usageUp(userid: string, guildID: string) {
+export async function usageUp(userid: string, guildID: string) {
 	const usr = await getUser(userid, guildID);
 	const updateval = usr.botusage + 1;
 	usr.botusage = updateval;
 	await usr.save();
 }
 
-async function printCommandChannels(guildID: string) {
+export async function printCommandChannels(guildID: string) {
 	const channels = await getCommandChannels(guildID);
 	let out = '';
 	channels.forEach((channel: string) => {

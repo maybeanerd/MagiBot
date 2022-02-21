@@ -1,24 +1,18 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
+import { notifyAboutSlashCommand } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 
 const slashCommand = new SlashCommandBuilder()
 	.setName('ping')
-	.setDescription('Returns the round trip time between you and MagiBot!')
-	.addStringOption((option) => option.setName('optionalinput').setDescription('Some input just for fun.'));
-
+	.setDescription('Returns the round trip time between you and MagiBot!');
 export const ping: magibotCommand = {
 	name: 'ping',
 	dev: false,
 	hide: false,
-	main({ message }) {
-		const start = Date.now();
-		message.channel.send('Pong!').then((newMsg) => {
-			const stop = Date.now();
-			const diff = stop - start;
-			newMsg.edit(`Pong! \nReactiontime: \`(${diff}ms)\``);
-		});
+	async main({ message }) {
+		return notifyAboutSlashCommand(message, 'ping');
 	},
 	ehelp() {
 		return [
@@ -35,8 +29,7 @@ export const ping: magibotCommand = {
 		async main(interaction: CommandInteraction) {
 			const stop = new Date();
 			const diff = stop.getTime() - interaction.createdAt.getTime();
-			await interaction.reply(`Pong! \`(${diff}ms)\`
-Your optional input: ${interaction.options.getString('optionalinput')}`);
+			await interaction.reply(`Pong! \`(${diff}ms)`);
 		},
 		definition: slashCommand.toJSON(),
 	},

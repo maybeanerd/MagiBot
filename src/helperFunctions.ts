@@ -1,4 +1,5 @@
 import Discord, {
+	Message,
 	MessageActionRow,
 	MessageButton,
 	MessageComponentInteraction,
@@ -132,6 +133,76 @@ export async function yesOrNo(
 	return promise;
 }
 
+export async function notifyAboutSlashCommand(
+	message: Message,
+	command: string,
+) {
+	await message.reply(`This command has been moved to application commands! You can simply use it by typing \`/${command}\`!
+If you can't find it, either you are missing permissions, or the admins of this server have not given MagiBot permission to create application commands yet.
+To do the latter, re-invite the bot by clicking the big blue button in the bot's profile!`);
+}
+
+// this is an idea to implement rather reusable confirmation processes.
+// ; abortMessage, timeoutMessage and time are optional parameters
+export async function interactionConfirmation(
+	interaction: Discord.CommandInteraction,
+	question: string,
+	abortMessage?: string,
+	timeoutMessage?: string,
+	timeoutTime?: number,
+): Promise<boolean> {
+	const row = new MessageActionRow();
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.yesOrNo}-${interaction.id}-yes`)
+			.setLabel('Yes')
+			.setStyle('SUCCESS'),
+	);
+	row.addComponents(
+		new MessageButton()
+			.setCustomId(`${buttonId.yesOrNo}-${interaction.id}-no`)
+			.setLabel('No')
+			.setStyle('DANGER'),
+	);
+	await interaction.reply({
+		content: question,
+		ephemeral: true, // TODO we can only do this if its a reply to an interaction : slash command
+		components: [row],
+	});
+	const questionMessage = (await interaction.fetchReply()) as Discord.Message;
+	const time = timeoutTime || 20000;
+	const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
+	// only accept reactions from the user that created this question
+	// eslint-disable-next-line max-len
+	const filter = (intraction: MessageComponentInteraction) => intraction.user.id === interaction.member?.user.id
+    && intraction.customId.startsWith(`${buttonId.yesOrNo}-${interaction.id}-`);
+	const collector = questionMessage.createMessageComponentCollector({
+		filter,
+		time,
+	});
+	const promise = new Promise<boolean>((resolve) => {
+		let alreadyResolved = false;
+		collector.once('collect', async (collectionInteraction) => {
+			alreadyResolved = true;
+			// load info of that button
+			const idParts = collectionInteraction.customId.split('-');
+			const isYesButton = idParts[2] === 'yes';
+			questionMessage.delete();
+			if (!isYesButton && abortMessage) {
+				questionMessage.channel.send(abortMessage).catch(doNothingOnError);
+			}
+			resolve(isYesButton);
+			collector.stop('Got an answer.');
+		});
+		collector.once('end', () => {
+			if (!alreadyResolved) {
+				interaction.followUp({ content: messageForTimeout, ephemeral: true });
+				resolve(false);
+			}
+		});
+	});
+	return promise;
+}
 export function printError(error: {
   response: { status: string; statusText: string };
 }) {
