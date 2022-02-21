@@ -2,6 +2,8 @@ import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { ping } from './commands/ping';
 import { roll } from './commands/roll';
+import { invite } from './commands/invite';
+import { bug } from './commands/bug';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
@@ -9,10 +11,17 @@ import { PREFIXES } from './shared_assets';
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { magibotCommand } from './types/magibot';
 import { isBlacklistedUser } from './dbHelpers';
+import {
+	commandAllowed,
+	printCommandChannels,
+	usageUp,
+} from './commandHandler';
 
 export const commands: { [k: string]: magibotCommand } = {
 	ping,
 	roll,
+	invite,
+	bug,
 };
 
 async function catchError(
@@ -36,8 +45,6 @@ If you can reproduce this, consider using \`${
 }.info\`) to tell us exactly how.`);
 }
 
-// TODO readd all checks and validations we might need that are existant on normal commands already
-
 export async function checkSlashCommand(
 	interaction: Discord.CommandInteraction,
 ) {
@@ -50,8 +57,7 @@ export async function checkSlashCommand(
 	if (
 		await isBlacklistedUser(interaction.member.user.id, interaction.guild.id)
 	) {
-		// we dont delete the message because this would delete everything that starts with the prefix
-		/*     msg.delete(); */
+		// do nothing
 		return;
 	}
 	try {
@@ -60,9 +66,36 @@ export async function checkSlashCommand(
 			interaction.member.user.id,
 			bot,
 		);
-		const { slashCommand } = commands[interaction.commandName];
-		if (slashCommand) {
+		const command = commands[interaction.commandName];
+		if (command && command.slashCommand) {
+			const { slashCommand, perm } = command;
+			if (
+				!(await commandAllowed(interaction.guild.id, interaction.channel?.id))
+			) {
+				await interaction.reply({
+					data: {
+						content: `commands aren't allowed in <#${
+							interaction.channel?.id
+						}>. Use them in ${await printCommandChannels(
+							interaction.guild.id,
+						)}. If you're an admin use \`/help\` to see how you can change that.`,
+					},
+					ephemeral: true,
+				});
+				return;
+			}
+			// check for all needed permissions
+			const botPermissions = (
+        interaction.channel as Discord.TextChannel
+			).permissionsFor(interaction.guild.me);
+			if (!botPermissions.has(perm)) {
+				await interaction.reply(
+					`I am missing permissions for this command. I require all of the following:\n${perm}`,
+				);
+			}
+			// actually use the command
 			await slashCommand.main(interaction);
+			await usageUp(interaction.member.user.id, interaction.guild.id);
 		}
 	} catch (err) {
 		catchError(err as Error, interaction);

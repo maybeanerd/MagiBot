@@ -1,33 +1,40 @@
-﻿import { yesOrNo } from '../helperFunctions';
-import { PREFIXES } from '../shared_assets';
+﻿import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
+import { interactionConfirmation, notifyAboutSlashCommand } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { magibotCommand } from '../types/magibot';
 import { sendBugreport } from '../webhooks';
 
+const slashCommand = new SlashCommandBuilder()
+	.setName('bugreport')
+	.setDescription('Report a bug concerning MagiBot').addStringOption(
+		(option) => option
+			.setName('description')
+			.setDescription(
+				'Describe what you did, what was expected, and what went wrong',
+			)
+			.setRequired(true),
+	);
+async function main(interaction: CommandInteraction, input: string) {
+	const confirmed = await interactionConfirmation(
+		interaction,
+		`Do you want to send this bugreport?\n${input}`,
+		'Successfully canceled bugreport.',
+	);
+	if (confirmed) {
+		await sendBugreport(
+			`**Bugreport** by ${interaction.member?.user.username
+			} (<@${
+				interaction.member?.user.id
+			}>) on server ${interaction.guild!.name}( ${interaction.guild!.id} ) :\n${input}`,
+		);
+		await interaction.reply('Succesfully sent bugreport.');
+	}
+}
 export const bug: magibotCommand = {
 	name: 'bug',
-	async main({ content, message }) {
-		if (!(content.length > 0)) {
-			message.reply(
-				`you need to add info about the report after the command. Use \`${PREFIXES.get(
-          message.guild!.id,
-				)}.help bug\` to get more info.`,
-			);
-			return;
-		}
-		const confirmed = await yesOrNo(
-			message,
-			`Do you want to send this bugreport?\n${content}`,
-			'Successfully canceled bugreport.',
-		);
-		if (confirmed) {
-			await sendBugreport(
-				`**Bugreport** by ${message.author.username} (<@${
-					message.author.id
-				}>) on server ${message.guild!.name}( ${message.guild!.id} ) :\n${content}`,
-			);
-			await message.channel.send('Succesfully sent bugreport.');
-		}
+	async main({ message }) {
+		return notifyAboutSlashCommand(message, 'bugreport');
 	},
 	admin: false,
 	ehelp() {
@@ -42,4 +49,11 @@ export const bug: magibotCommand = {
 	hide: false,
 	dev: false,
 	category: commandCategories.misc,
+	slashCommand: {
+		async main(interaction: CommandInteraction) {
+			const input = interaction.options.getString('description', true);
+			return main(interaction, input);
+		},
+		definition: slashCommand.toJSON(),
+	},
 };
