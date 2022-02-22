@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { notifyAboutSlashCommand } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { magibotCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
 	.setName('ping')

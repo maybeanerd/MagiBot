@@ -2,7 +2,7 @@
 import { commandCategories } from '../../types/enums';
 import { PREFIXES } from '../../shared_assets';
 import { findMember, yesOrNo } from '../../helperFunctions';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
 import { updateSaltKing } from '../../dbHelpers';
 import { saltUp, saltGuild } from './salt';

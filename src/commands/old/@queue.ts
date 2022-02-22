@@ -24,7 +24,7 @@ import {
 import { user, queueVoiceChannels } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { saveUsersWhoJoinedQueue } from '../../statTracking';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { isAdmin, toggleStillMuted } from '../../dbHelpers';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};

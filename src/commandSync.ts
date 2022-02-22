@@ -3,18 +3,12 @@ import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	Routes,
 } from 'discord-api-types/v9';
-import { ping } from './commands/ping';
-import { roll } from './commands/roll';
-import { invite } from './commands/invite';
-import { bugreport } from './commands/bug';
+import { applicationCommands } from './commands/applicationCommands';
 import { APP_ID, TOKEN } from './shared_assets';
 
-const commands = [
-  ping.slashCommand!.definition,
-  roll.slashCommand!.definition,
-  invite.slashCommand!.definition,
-  bugreport.slashCommand!.definition,
-];
+const commands = Object.values(applicationCommands).map(
+	(command) => command.slashCommand!.definition,
+);
 const testCommands: Array<RESTPostAPIApplicationCommandsJSONBody> = [
 	/* invite.slashCommand!.definition,
   bug.slashCommand!.definition, */
