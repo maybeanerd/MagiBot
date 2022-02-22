@@ -1,10 +1,10 @@
 import { GuildMember, Message } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getGlobalUser, getSettings, getUser } from '../dbHelpers';
-import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../shared_assets';
-import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
+import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../../shared_assets';
+import { commandCategories } from '../../types/enums';
+import { magibotCommand } from '../../types/magibot';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];

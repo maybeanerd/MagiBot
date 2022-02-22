@@ -3,7 +3,7 @@ import Statcord from 'statcord.js';
 import { ping } from './commands/ping';
 import { roll } from './commands/roll';
 import { invite } from './commands/invite';
-import { bug } from './commands/bug';
+import { bugreport } from './commands/bug';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
@@ -21,7 +21,7 @@ export const commands: { [k: string]: magibotCommand } = {
 	ping,
 	roll,
 	invite,
-	bug,
+	bugreport,
 };
 
 async function catchError(
@@ -38,9 +38,7 @@ async function catchError(
 	interaction.reply(`Something went wrong while using ${
 		interaction.commandName
 	}. The devs have been automatically notified.
-If you can reproduce this, consider using \`${
-	interaction.guild ? PREFIXES.get(interaction.guild.id) : 'k'
-}.bug <bugreport>\` or join the support discord (link via \`${
+If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
 	interaction.guild ? PREFIXES.get(interaction.guild.id) : 'k'
 }.info\`) to tell us exactly how.`);
 }
