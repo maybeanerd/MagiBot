@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { commandCategories } from '../types/enums';
-import { COLOR, user } from '../shared_assets';
-import { magibotCommand } from '../types/magibot';
+import { commandCategories } from '../../types/enums';
+import { COLOR, user } from '../../shared_assets';
+import { magibotCommand } from '../../types/magibot';
 
 // we needed to manually type this because the inferred type collided with date type later on
 const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {

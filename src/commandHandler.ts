@@ -1,27 +1,27 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
-import { vote } from './commands/vote';
-import { sound } from './commands/sound';
-import { rfact } from './commands/rfact';
+import { vote } from './commands/old/vote';
+import { sound } from './commands/old/sound';
+import { rfact } from './commands/old/rfact';
 // eslint-disable-next-line import/no-cycle
-import { stats } from './commands/stats';
-import { salt } from './commands/salt';
+import { stats } from './commands/old/stats';
+import { salt } from './commands/old/salt';
 // eslint-disable-next-line import/no-cycle
-import { bug } from './commands/bug';
-import { inf as info } from './commands/info';
+import { bugreport } from './commands/bug';
+import { inf as info } from './commands/old/info';
 import { invite } from './commands/invite';
 import { ping } from './commands/ping';
-import { profile } from './commands/profile';
+import { profile } from './commands/old/profile';
 import { roll } from './commands/roll';
 // eslint-disable-next-line import/no-cycle
-import { queue as _queue } from './commands/@queue';
-import { salt as _salt } from './commands/@salt';
-import { sound as _sound } from './commands/@sound';
-import { setup as _setup } from './commands/@setup';
+import { queue as _queue } from './commands/old/@queue';
+import { salt as _salt } from './commands/old/@salt';
+import { sound as _sound } from './commands/old/@sound';
+import { setup as _setup } from './commands/old/@setup';
 // eslint-disable-next-line import/no-cycle
-import { update as _update } from './commands/@update';
+import { update as _update } from './commands/old/@update';
 // we allow this cycle once, as the help command also needs to list itself
-import { help } from './commands/help'; // eslint-disable-line import/no-cycle
+import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
 
 import {
 	PREFIXES, OWNERID, DELETE_COMMANDS, user,
@@ -51,7 +51,7 @@ export const commands: { [k: string]: magibotCommand } = {
 	rfact,
 	sound,
 	vote,
-	bug,
+	bug: bugreport,
 	info,
 	invite,
 	ping,
@@ -68,9 +68,7 @@ async function catchError(error: Error, msg: Discord.Message, command: string) {
 	);
 
 	msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
-If you can reproduce this, consider using \`${
-	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
-}.bug <bugreport>\` or join the support discord (link via \`${
+	If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
 	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
 }.info\`) to tell us exactly how.`);
 }
@@ -169,7 +167,9 @@ export async function checkCommand(message: Discord.Message) {
 			if (!commands[command]) {
 				return;
 			}
-			if (!(message.member && (await isAdmin(message.guild.id, message.member)))) {
+			if (
+				!(message.member && (await isAdmin(message.guild.id, message.member)))
+			) {
 				if (myPerms) {
 					if (myPerms.has('MANAGE_MESSAGES')) {
 						message.delete();
@@ -192,7 +192,10 @@ export async function checkCommand(message: Discord.Message) {
 			commands[command]
       && (!commands[command].dev || message.author.id === OWNERID)
 		) {
-			if (pre === ':' || (await commandAllowed(message.guild.id, message.channel.id))) {
+			if (
+				pre === ':'
+        || (await commandAllowed(message.guild.id, message.channel.id))
+			) {
 				const perms = commands[command].perm;
 				if (!perms || (myPerms && myPerms.has(perms))) {
 					// cooldown for command usage
@@ -202,13 +205,17 @@ export async function checkCommand(message: Discord.Message) {
 							userCooldowns.delete(message.author.id);
 						}, 4000);
 						try {
-							Statcord.ShardingClient.postCommand(command, message.author.id, bot);
+							Statcord.ShardingClient.postCommand(
+								command,
+								message.author.id,
+								bot,
+							);
 							await commands[command].main({ content, message });
 						} catch (err) {
 							catchError(
-								err as Error,
-								message,
-								`${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
+                err as Error,
+                message,
+                `${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
 							);
 						}
 						usageUp(message.author.id, message.guild.id);

@@ -150,7 +150,7 @@ export async function interactionConfirmation(
 	abortMessage?: string,
 	timeoutMessage?: string,
 	timeoutTime?: number,
-): Promise<boolean> {
+): Promise<MessageComponentInteraction | null> {
 	const row = new MessageActionRow();
 	row.addComponents(
 		new MessageButton()
@@ -166,7 +166,6 @@ export async function interactionConfirmation(
 	);
 	await interaction.reply({
 		content: question,
-		ephemeral: true, // TODO we can only do this if its a reply to an interaction : slash command
 		components: [row],
 	});
 	const questionMessage = (await interaction.fetchReply()) as Discord.Message;
@@ -180,24 +179,25 @@ export async function interactionConfirmation(
 		filter,
 		time,
 	});
-	const promise = new Promise<boolean>((resolve) => {
+	const promise = new Promise<MessageComponentInteraction | null>((resolve) => {
 		let alreadyResolved = false;
 		collector.once('collect', async (collectionInteraction) => {
 			alreadyResolved = true;
 			// load info of that button
 			const idParts = collectionInteraction.customId.split('-');
 			const isYesButton = idParts[2] === 'yes';
-			questionMessage.delete();
+			await questionMessage.delete();
 			if (!isYesButton && abortMessage) {
-				questionMessage.channel.send(abortMessage).catch(doNothingOnError);
+				collectionInteraction.reply({ content: abortMessage, ephemeral: true });
 			}
-			resolve(isYesButton);
+			resolve(isYesButton ? collectionInteraction : null);
 			collector.stop('Got an answer.');
 		});
-		collector.once('end', () => {
+		collector.once('end', async () => {
 			if (!alreadyResolved) {
+				await questionMessage.delete();
 				interaction.followUp({ content: messageForTimeout, ephemeral: true });
-				resolve(false);
+				resolve(null);
 			}
 		});
 	});

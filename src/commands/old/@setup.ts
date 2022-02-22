@@ -1,10 +1,10 @@
 ﻿import { GuildMember, MessageEmbedOptions } from 'discord.js';
-import { COLOR, PREFIXES } from '../shared_assets';
+import { COLOR, PREFIXES } from '../../shared_assets';
 import {
 	findMember, yesOrNo, findRole, asyncWait,
-} from '../helperFunctions';
-import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+} from '../../helperFunctions';
+import { commandCategories } from '../../types/enums';
+import { magibotCommand } from '../../types/magibot';
 import {
 	getSettings,
 	isJoinableVc,
@@ -14,7 +14,7 @@ import {
 	getCommandChannels,
 	getPrefix,
 	setPrefix,
-} from '../dbHelpers';
+} from '../../dbHelpers';
 
 async function setBlacklistedUser(
 	userid: string,

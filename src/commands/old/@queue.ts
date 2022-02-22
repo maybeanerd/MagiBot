@@ -14,18 +14,18 @@
 	InteractionCollector,
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
-import { bot } from '../bot';
+import { bot } from '../../bot';
 import {
 	yesOrNo,
 	doNothingOnError,
 	asyncWait,
 	buttonId,
-} from '../helperFunctions';
-import { user, queueVoiceChannels } from '../shared_assets';
-import { commandCategories } from '../types/enums';
-import { saveUsersWhoJoinedQueue } from '../statTracking';
-import { magibotCommand } from '../types/magibot';
-import { isAdmin, toggleStillMuted } from '../dbHelpers';
+} from '../../helperFunctions';
+import { user, queueVoiceChannels } from '../../shared_assets';
+import { commandCategories } from '../../types/enums';
+import { saveUsersWhoJoinedQueue } from '../../statTracking';
+import { magibotCommand } from '../../types/magibot';
+import { isAdmin, toggleStillMuted } from '../../dbHelpers';
 
 const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
 
