@@ -1,28 +1,17 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
-import { ping } from './commands/ping';
-import { roll } from './commands/roll';
-import { invite } from './commands/invite';
-import { bugreport } from './commands/bug';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { magibotCommand } from './types/magibot';
 import { isBlacklistedUser } from './dbHelpers';
 import {
 	commandAllowed,
 	printCommandChannels,
 	usageUp,
 } from './commandHandler';
-
-export const commands: { [k: string]: magibotCommand } = {
-	ping,
-	roll,
-	invite,
-	bugreport,
-};
+import { applicationCommands } from './commands/applicationCommands';
 
 async function catchError(
 	error: Error,
@@ -43,7 +32,7 @@ If you can reproduce this, consider using \`/bugreport\` or join the support dis
 }.info\`) to tell us exactly how.`);
 }
 
-export async function checkSlashCommand(
+export async function checkApplicationCommand(
 	interaction: Discord.CommandInteraction,
 ) {
 	if (!(interaction.member && interaction.guild && interaction.guild.me)) {
@@ -64,7 +53,7 @@ export async function checkSlashCommand(
 			interaction.member.user.id,
 			bot,
 		);
-		const command = commands[interaction.commandName];
+		const command = applicationCommands[interaction.commandName];
 		if (command && command.slashCommand) {
 			const { slashCommand, perm } = command;
 			if (
@@ -90,6 +79,10 @@ export async function checkSlashCommand(
 				await interaction.reply(
 					`I am missing permissions for this command. I require all of the following:\n${perm}`,
 				);
+			}
+			if (slashCommand.isSlow) {
+				// allow slow commands to have more time to respond
+				await interaction.deferReply();
 			}
 			// actually use the command
 			await slashCommand.main(interaction);

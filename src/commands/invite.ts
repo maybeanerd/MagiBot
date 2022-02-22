@@ -1,7 +1,7 @@
 import { CommandInteraction, TextChannel } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { magibotCommand } from '../types/command';
 import { notifyAboutSlashCommand } from '../helperFunctions';
 
 const slashCommand = new SlashCommandBuilder()

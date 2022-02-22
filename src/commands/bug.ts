@@ -5,7 +5,7 @@ import {
 	notifyAboutSlashCommand,
 } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { magibotCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
 
 const slashCommand = new SlashCommandBuilder()

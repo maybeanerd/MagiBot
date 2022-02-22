@@ -2,7 +2,7 @@
 import { commandCategories } from '../../types/enums';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../../bot';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { asyncForEach, yesOrNo } from '../../helperFunctions';
 import { getNotChannel, setSettings } from '../../dbHelpers';
 

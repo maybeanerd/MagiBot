@@ -1,6 +1,6 @@
 ﻿import { asyncForEach, yesOrNo } from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { Vote, VoteModel } from '../../db';
 
 const reactions = [

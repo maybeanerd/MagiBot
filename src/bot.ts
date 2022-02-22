@@ -38,7 +38,7 @@ import { StillMutedModel } from './db';
 import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
-import { checkSlashCommand } from './slashCommandHandler';
+import { checkApplicationCommand } from './applicationCommandHandler';
 
 console.log(generateDependencyReport());
 
@@ -142,7 +142,7 @@ bot.on('message', async (message: Discord.Message) => {
 bot.on('interactionCreate', async (interaction) => {
 	if (!interaction.isCommand()) { return; }
 	try {
-		await checkSlashCommand(interaction);
+		await checkApplicationCommand(interaction);
 	} catch (err) {
 		console.error(err);
 	}

@@ -2,7 +2,7 @@ import { Guild, Message, MessageEmbedOptions } from 'discord.js';
 import * as cmds from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
 import { PREFIXES } from '../../shared_assets';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
 import { updateSaltKing, topSalt } from '../../dbHelpers';
 
