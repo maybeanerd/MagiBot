@@ -6,7 +6,7 @@ import {
 } from '../../shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { bot } from '../../bot';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 
 export const stats: magibotCommand = {
 	name: 'stats',

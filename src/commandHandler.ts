@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { vote } from './commands/old/vote';
 import { sound } from './commands/old/sound';
-import { rfact } from './commands/old/rfact';
+import { randomfact } from './commands/rfact';
 // eslint-disable-next-line import/no-cycle
 import { stats } from './commands/old/stats';
 import { salt } from './commands/old/salt';
@@ -28,7 +28,7 @@ import {
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { magibotCommand } from './types/magibot';
+import { magibotCommand } from './types/command';
 import {
 	isBlacklistedUser,
 	getCommandChannels,
@@ -48,7 +48,7 @@ export const commands: { [k: string]: magibotCommand } = {
 	help,
 	salt,
 	stats,
-	rfact,
+	rfact: randomfact,
 	sound,
 	vote,
 	bug: bugreport,

@@ -2,7 +2,7 @@ import { MessageEmbedOptions } from 'discord.js';
 import { commandCategories } from '../../types/enums';
 import { PREFIXES } from '../../shared_assets';
 import { findMember } from '../../helperFunctions';
-import { magibotCommand } from '../../types/magibot';
+import { magibotCommand } from '../../types/command';
 import { SaltrankModel } from '../../db';
 import { getGlobalUser, getUser } from '../../dbHelpers';
 
