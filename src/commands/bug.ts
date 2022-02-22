@@ -31,7 +31,7 @@ async function main(interaction: CommandInteraction, input: string) {
 		await interaction.followUp('Succesfully sent bugreport.');
 	}
 }
-export const bug: magibotCommand = {
+export const bugreport: magibotCommand = {
 	name: 'bug',
 	async main({ message }) {
 		return notifyAboutSlashCommand(message, 'bugreport');

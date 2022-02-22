@@ -1,10 +1,10 @@
 ﻿import { Guild } from 'discord.js';
-import { commandCategories } from '../types/enums';
-import { PREFIXES } from '../shared_assets';
-import { findMember, yesOrNo } from '../helperFunctions';
-import { magibotCommand } from '../types/magibot';
-import { SaltModel, SaltrankModel } from '../db';
-import { updateSaltKing } from '../dbHelpers';
+import { commandCategories } from '../../types/enums';
+import { PREFIXES } from '../../shared_assets';
+import { findMember, yesOrNo } from '../../helperFunctions';
+import { magibotCommand } from '../../types/magibot';
+import { SaltModel, SaltrankModel } from '../../db';
+import { updateSaltKing } from '../../dbHelpers';
 import { saltUp, saltGuild } from './salt';
 
 async function resetSalt(G: Guild) {

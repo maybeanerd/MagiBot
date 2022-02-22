@@ -1,12 +1,12 @@
 import { MessageEmbedOptions } from 'discord.js';
 import si from 'systeminformation';
-import { commandCategories } from '../types/enums';
+import { commandCategories } from '../../types/enums';
 import {
 	OWNERID, COLOR, SIGN, user,
-} from '../shared_assets';
+} from '../../shared_assets';
 // eslint-disable-next-line import/no-cycle
-import { bot } from '../bot';
-import { magibotCommand } from '../types/magibot';
+import { bot } from '../../bot';
+import { magibotCommand } from '../../types/magibot';
 
 export const stats: magibotCommand = {
 	name: 'stats',

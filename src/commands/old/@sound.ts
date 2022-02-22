@@ -1,7 +1,7 @@
-import { PREFIXES, isShadowBanned, shadowBannedLevel } from '../shared_assets';
-import { commandCategories } from '../types/enums';
-import { findMember, yesOrNo } from '../helperFunctions';
-import { magibotCommand } from '../types/magibot';
+import { PREFIXES, isShadowBanned, shadowBannedLevel } from '../../shared_assets';
+import { commandCategories } from '../../types/enums';
+import { findMember, yesOrNo } from '../../helperFunctions';
+import { magibotCommand } from '../../types/magibot';
 import { addSound, setDefaultGuildJoinsound, validateJoinsound } from './sound';
 
 function printHelp() {

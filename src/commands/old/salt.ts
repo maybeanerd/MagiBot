@@ -1,10 +1,10 @@
 import { Guild, Message, MessageEmbedOptions } from 'discord.js';
-import * as cmds from '../helperFunctions';
-import { commandCategories } from '../types/enums';
-import { PREFIXES } from '../shared_assets';
-import { magibotCommand } from '../types/magibot';
-import { SaltModel, SaltrankModel } from '../db';
-import { updateSaltKing, topSalt } from '../dbHelpers';
+import * as cmds from '../../helperFunctions';
+import { commandCategories } from '../../types/enums';
+import { PREFIXES } from '../../shared_assets';
+import { magibotCommand } from '../../types/magibot';
+import { SaltModel, SaltrankModel } from '../../db';
+import { updateSaltKing, topSalt } from '../../dbHelpers';
 
 async function saltDowntimeDone(userid1: string, userid2: string) {
 	// get newest entry in salt
