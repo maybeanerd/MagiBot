@@ -29,7 +29,7 @@
     "mongoose": "^6.2.5",
     "opusscript": "0.0.8",
     "statcord.js": "^3.4.1",
-    "systeminformation": "^5.11.6",
+    "systeminformation": "^5.11.7",
     "tweetnacl": "^1.0.3",
     "utf-8-validate": "^5.0.9"
   },
