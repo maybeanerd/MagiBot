@@ -26,7 +26,7 @@
     "ffprobe-static": "^3.0.0",
     "forever": "^4.0.3",
     "libsodium-wrappers": "^0.7.10",
-    "mongoose": "^6.2.7",
+    "mongoose": "^6.2.8",
     "opusscript": "0.0.8",
     "statcord.js": "^3.4.1",
     "systeminformation": "^5.11.9",
