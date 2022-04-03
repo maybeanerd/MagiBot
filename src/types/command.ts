@@ -14,9 +14,13 @@ export type magibotCommand = {
     content: string;
     message: Discord.Message;
   }) => Promise<void> | void;
-  slashCommand?: {
-    main: (interaction: Discord.CommandInteraction) => Promise<void> | void;
-    definition: RESTPostAPIApplicationCommandsJSONBody;
-    isSlow?: boolean;
-  };
+};
+
+export type MagibotSlashCommand = {
+  help: (commandName: string) => Array<{ name: string; value: string }>;
+  permissions: Discord.PermissionResolvable | Discord.PermissionResolvable[];
+  category: commandCategories;
+  run: (interaction: Discord.CommandInteraction) => Promise<void> | void;
+  definition: RESTPostAPIApplicationCommandsJSONBody;
+  isSlow?: boolean;
 };

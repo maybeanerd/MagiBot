@@ -7,7 +7,7 @@ import { applicationCommands } from './commands/applicationCommands';
 import { APP_ID, TOKEN } from './shared_assets';
 
 const commands = Object.values(applicationCommands).map(
-	(command) => command.slashCommand!.definition,
+	(command) => command.definition,
 );
 const testCommands: Array<RESTPostAPIApplicationCommandsJSONBody> = [
 	/* invite.slashCommand!.definition,

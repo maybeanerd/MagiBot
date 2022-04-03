@@ -2,17 +2,12 @@ import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { vote } from './commands/old/vote';
 import { sound } from './commands/old/sound';
-import { randomfact } from './commands/rfact';
 // eslint-disable-next-line import/no-cycle
 import { stats } from './commands/old/stats';
 import { salt } from './commands/old/salt';
 // eslint-disable-next-line import/no-cycle
-import { bugreport } from './commands/bug';
 import { inf as info } from './commands/old/info';
-import { invite } from './commands/invite';
-import { ping } from './commands/ping';
 import { profile } from './commands/old/profile';
-import { roll } from './commands/roll';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/old/@queue';
 import { salt as _salt } from './commands/old/@salt';
@@ -37,7 +32,7 @@ import {
 } from './dbHelpers';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
-import { asyncWait } from './helperFunctions';
+import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
 	_queue,
@@ -48,16 +43,29 @@ export const commands: { [k: string]: magibotCommand } = {
 	help,
 	salt,
 	stats,
-	rfact: randomfact,
 	sound,
 	vote,
-	bug: bugreport,
 	info,
-	invite,
-	ping,
 	profile,
-	roll,
 };
+
+const migratedCommands = new Map([
+	['rfact', 'randomfact'],
+	['bug', 'bugreport'],
+	['invite', 'invite'],
+	['ping', 'ping'],
+	['roll', 'roll'],
+]);
+
+async function sendMigrationMessageIfComandHasBeenMigrated(
+	message: Discord.Message,
+	commandName: string,
+) {
+	const migratedCommand = migratedCommands.get(commandName);
+	if (migratedCommand) {
+		await notifyAboutSlashCommand(message, migratedCommand);
+	}
+}
 
 async function catchError(error: Error, msg: Discord.Message, command: string) {
 	console.error(
@@ -165,6 +173,7 @@ export async function checkCommand(message: Discord.Message) {
 			}
 			// Check if the command exists, to not just spam k: msgs
 			if (!commands[command]) {
+				await sendMigrationMessageIfComandHasBeenMigrated(message, command);
 				return;
 			}
 			if (
@@ -187,11 +196,11 @@ export async function checkCommand(message: Discord.Message) {
 		} else {
 			return;
 		}
-
-		if (
-			commands[command]
-      && (!commands[command].dev || message.author.id === OWNERID)
-		) {
+		if (!commands[command]) {
+			await sendMigrationMessageIfComandHasBeenMigrated(message, command);
+			return;
+		}
+		if (!commands[command].dev || message.author.id === OWNERID) {
 			if (
 				pre === ':'
         || (await commandAllowed(message.guild.id, message.channel.id))
