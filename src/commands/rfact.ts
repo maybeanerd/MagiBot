@@ -3,8 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { COLOR, user } from '../shared_assets';
-import { magibotCommand } from '../types/command';
-import { notifyAboutSlashCommand } from '../helperFunctions';
+import { MagibotSlashCommand } from '../types/command';
 
 // we needed to manually type this because the inferred type collided with date type later on
 const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {
@@ -41,9 +40,8 @@ const slashCommand = new SlashCommandBuilder()
 	.setName('randomfact')
 	.setDescription('Get a random fact of the day.');
 
-export const randomfact: magibotCommand = {
-	main: async ({ message }) => notifyAboutSlashCommand(message, 'randomfact'),
-	ehelp() {
+export const randomfact: MagibotSlashCommand = {
+	help() {
 		return [
 			{
 				name: '',
@@ -51,17 +49,11 @@ export const randomfact: magibotCommand = {
 			},
 		];
 	},
-	name: 'rfact',
-	dev: false,
-	perm: 'SEND_MESSAGES',
-	admin: false,
-	hide: false,
+	permissions: 'SEND_MESSAGES',
 	category: commandCategories.fun,
-	slashCommand: {
-		async main(interaction: CommandInteraction) {
-			return main(interaction);
-		},
-		definition: slashCommand.toJSON(),
-		isSlow: true,
+	async run(interaction: CommandInteraction) {
+		return main(interaction);
 	},
+	definition: slashCommand.toJSON(),
+	isSlow: true,
 };

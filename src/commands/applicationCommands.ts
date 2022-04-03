@@ -3,12 +3,14 @@ import { roll } from './roll';
 import { invite } from './invite';
 import { bugreport } from './bug';
 import { randomfact } from './rfact';
-import { magibotCommand } from '../types/command';
+import { salt } from './salt';
+import { MagibotSlashCommand } from '../types/command';
 
-export const applicationCommands: { [k: string]: magibotCommand } = {
+export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
 	ping,
 	roll,
 	invite,
 	bugreport,
 	randomfact,
+	salt,
 };

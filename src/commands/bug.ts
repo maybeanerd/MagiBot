@@ -1,11 +1,8 @@
 ﻿import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import {
-	interactionConfirmation,
-	notifyAboutSlashCommand,
-} from '../helperFunctions';
+import { interactionConfirmation } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/command';
+import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
 
 const slashCommand = new SlashCommandBuilder()
@@ -38,13 +35,8 @@ async function main(interaction: CommandInteraction, input: string) {
 	}
 }
 
-export const bugreport: magibotCommand = {
-	name: 'bug',
-	async main({ message }) {
-		return notifyAboutSlashCommand(message, 'bugreport');
-	},
-	admin: false,
-	ehelp() {
+export const bugreport: MagibotSlashCommand = {
+	help() {
 		return [
 			{
 				name: '<bugreport with information about what you did, what was expected, and what went wrong>',
@@ -52,15 +44,11 @@ export const bugreport: magibotCommand = {
 			},
 		];
 	},
-	perm: 'SEND_MESSAGES',
-	hide: false,
-	dev: false,
+	permissions: 'SEND_MESSAGES',
 	category: commandCategories.misc,
-	slashCommand: {
-		async main(interaction: CommandInteraction) {
-			const input = interaction.options.getString('description', true);
-			return main(interaction, input);
-		},
-		definition: slashCommand.toJSON(),
+	async run(interaction: CommandInteraction) {
+		const input = interaction.options.getString('description', true);
+		return main(interaction, input);
 	},
+	definition: slashCommand.toJSON(),
 };
