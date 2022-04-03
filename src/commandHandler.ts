@@ -4,7 +4,6 @@ import { vote } from './commands/old/vote';
 import { sound } from './commands/old/sound';
 // eslint-disable-next-line import/no-cycle
 import { stats } from './commands/old/stats';
-import { salt } from './commands/old/salt';
 // eslint-disable-next-line import/no-cycle
 import { inf as info } from './commands/old/info';
 import { profile } from './commands/old/profile';
@@ -41,7 +40,6 @@ export const commands: { [k: string]: magibotCommand } = {
 	_update,
 	_salt,
 	help,
-	salt,
 	stats,
 	sound,
 	vote,
@@ -55,6 +53,7 @@ const migratedCommands = new Map([
 	['invite', 'invite'],
 	['ping', 'ping'],
 	['roll', 'roll'],
+	['salt', 'salt'],
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(

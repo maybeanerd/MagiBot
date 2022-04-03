@@ -5,7 +5,7 @@ import { findMember, yesOrNo } from '../../helperFunctions';
 import { magibotCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
 import { updateSaltKing } from '../../dbHelpers';
-import { saltUp, saltGuild } from './salt';
+import { saltUp, saltGuild } from '../salt';
 
 async function resetSalt(G: Guild) {
 	const guildID = G.id;

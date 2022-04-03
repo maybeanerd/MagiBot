@@ -137,7 +137,7 @@ export async function notifyAboutSlashCommand(
 	message: Message,
 	command: string,
 ) {
-	await message.reply(`This command has been moved to application commands! You can simply use it by typing \`/${command}\`!
+	await message.reply(`This command has been moved to /slashcommands! You can simply use it by typing \`/${command}\`!
 If you can't find it, either you are missing permissions, or the admins of this server have not given MagiBot permission to create application commands yet.
 To do the latter, re-invite the bot by clicking the big blue "Add to Server" button in the bot's profile!`);
 }
