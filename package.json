@@ -15,23 +15,23 @@
     "@discordjs/rest": "^0.3.0",
     "@discordjs/voice": "^0.8.0",
     "@types/ffprobe-static": "^2.0.1",
-    "axios": "^0.26.0",
+    "axios": "^0.26.1",
     "blapi": "^2.2.2",
     "bufferutil": "^4.0.6",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
-    "ffmpeg-static": "^4.4.1",
+    "ffmpeg-static": "^5.0.0",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
     "forever": "^4.0.3",
-    "libsodium-wrappers": "^0.7.9",
-    "mongoose": "^6.2.3",
+    "libsodium-wrappers": "^0.7.10",
+    "mongoose": "^6.2.9",
     "opusscript": "0.0.8",
     "statcord.js": "^3.4.1",
-    "systeminformation": "^5.11.4",
+    "systeminformation": "^5.11.9",
     "tweetnacl": "^1.0.3",
-    "utf-8-validate": "^5.0.8"
+    "utf-8-validate": "^5.0.9"
   },
   "optionalDependencies": {
     "@discordjs/opus": "^0.7.0",
@@ -41,13 +41,13 @@
   "devDependencies": {
     "@types/centra": "^2.2.0",
     "@types/ffprobe": "^1.1.3",
-    "@types/node": "^16.11.25",
+    "@types/node": "^16.11.26",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.33.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "prettier": "^2.5.1",
-    "typescript": "4.5.x"
+    "prettier": "^2.6.1",
+    "typescript": "4.6.x"
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
