@@ -139,7 +139,7 @@ export async function notifyAboutSlashCommand(
 ) {
 	await message.reply(`This command has been moved to application commands! You can simply use it by typing \`/${command}\`!
 If you can't find it, either you are missing permissions, or the admins of this server have not given MagiBot permission to create application commands yet.
-To do the latter, re-invite the bot by clicking the big blue button in the bot's profile!`);
+To do the latter, re-invite the bot by clicking the big blue "Add to Server" button in the bot's profile!`);
 }
 
 // this is an idea to implement rather reusable confirmation processes.
