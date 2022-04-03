@@ -54,8 +54,8 @@ export async function checkApplicationCommand(
 			bot,
 		);
 		const command = applicationCommands[interaction.commandName];
-		if (command && command.slashCommand) {
-			const { slashCommand, perm } = command;
+		if (command) {
+			const { permissions } = command;
 			if (
 				!(await commandAllowed(interaction.guild.id, interaction.channel?.id))
 			) {
@@ -75,17 +75,17 @@ export async function checkApplicationCommand(
 			const botPermissions = (
         interaction.channel as Discord.TextChannel
 			).permissionsFor(interaction.guild.me);
-			if (!botPermissions.has(perm)) {
+			if (!botPermissions.has(permissions)) {
 				await interaction.reply(
-					`I am missing permissions for this command. I require all of the following:\n${perm}`,
+					`I am missing permissions for this command. I require all of the following:\n${permissions}`,
 				);
 			}
-			if (slashCommand.isSlow) {
+			if (command.isSlow) {
 				// allow slow commands to have more time to respond
 				await interaction.deferReply();
 			}
 			// actually use the command
-			await slashCommand.main(interaction);
+			await command.run(interaction);
 			await usageUp(interaction.member.user.id, interaction.guild.id);
 		}
 	} catch (err) {

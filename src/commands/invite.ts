@@ -1,8 +1,7 @@
 import { CommandInteraction, TextChannel } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/command';
-import { notifyAboutSlashCommand } from '../helperFunctions';
+import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
 	.setName('invite')
@@ -15,14 +14,8 @@ async function main(interaction: CommandInteraction) {
 	interaction.reply(`Here's an invite link to this channel: ${invite}`);
 }
 
-export const invite: magibotCommand = {
-	name: 'invite',
-	hide: false,
-	dev: false,
-	async main({ message }) {
-		return notifyAboutSlashCommand(message, 'invite');
-	},
-	ehelp() {
+export const invite: MagibotSlashCommand = {
+	help() {
 		return [
 			{
 				name: '',
@@ -30,8 +23,8 @@ export const invite: magibotCommand = {
 			},
 		];
 	},
-	perm: ['SEND_MESSAGES', 'CREATE_INSTANT_INVITE'],
-	admin: false,
+	permissions: ['SEND_MESSAGES', 'CREATE_INSTANT_INVITE'],
 	category: commandCategories.util,
-	slashCommand: { main, definition: slashCommand.toJSON() },
+	run: main,
+	definition: slashCommand.toJSON(),
 };
