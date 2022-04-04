@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
+import { interactionMemberIsAdmin } from '../../dbHelpers';
 import {
 	MagibotAdminSlashCommand,
 	MagibotSlashCommand,
@@ -21,6 +22,17 @@ Object.values(adminApplicationCommands).forEach((command) => {
 });
 
 async function runCommand(interaction: CommandInteraction) {
+	// TODO in the future we could hide admin commands from non-admins as well?
+	if (!(await interactionMemberIsAdmin(interaction))) {
+		await interaction.reply({
+			data: {
+				content: "You're not allowed to use this command.",
+			},
+			ephemeral: true,
+		});
+		return;
+	}
+
 	const subcommandGroup = interaction.options.getSubcommandGroup(true);
 	const command = adminApplicationCommands[subcommandGroup];
 	if (command) {
