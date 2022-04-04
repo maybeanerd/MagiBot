@@ -62,7 +62,7 @@ export async function saltGuild(
 	}
 }
 
-export async function saltUp(
+async function saltUp(
 	salter: string,
 	reporter: string,
 	guild: Guild,
@@ -99,7 +99,11 @@ function printHelp() {
 	return info;
 }
 
-async function addSalt(interaction: CommandInteraction, reportedUser: User) {
+export async function addSalt(
+	interaction: CommandInteraction,
+	reportedUser: User,
+	fromAdmin = false,
+) {
 	if (reportedUser.id === interaction.user.id) {
 		return interaction.reply("You can't report yourself!");
 	}
@@ -110,6 +114,7 @@ async function addSalt(interaction: CommandInteraction, reportedUser: User) {
 		reportedUser.id,
 		interaction.user.id,
     interaction.guild!,
+    fromAdmin,
 	);
 	if (time === 0) {
 		return interaction.reply(

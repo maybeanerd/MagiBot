@@ -10,8 +10,7 @@ const commands = Object.values(applicationCommands).map(
 	(command) => command.definition,
 );
 const testCommands: Array<RESTPostAPIApplicationCommandsJSONBody> = [
-	/* invite.slashCommand!.definition,
-  bug.slashCommand!.definition, */
+	// admin.definition,
 ];
 
 const rest = new REST({ version: '9' }).setToken(TOKEN);
