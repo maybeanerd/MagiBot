@@ -4,4 +4,5 @@ export enum commandCategories {
   fun = 'Fun',
   game = 'Game',
   misc = 'Miscellaneous',
+	admin = 'Admin',
 }

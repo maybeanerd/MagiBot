@@ -4,6 +4,7 @@ import { invite } from './invite';
 import { bugreport } from './bug';
 import { randomfact } from './rfact';
 import { salt } from './salt';
+import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
 export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
@@ -13,4 +14,7 @@ export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
 	bugreport,
 	randomfact,
 	salt,
+
+	// all admin commands
+	admin,
 };
