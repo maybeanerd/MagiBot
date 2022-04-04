@@ -9,7 +9,6 @@ import { inf as info } from './commands/old/info';
 import { profile } from './commands/old/profile';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/old/@queue';
-import { salt as _salt } from './commands/old/@salt';
 import { sound as _sound } from './commands/old/@sound';
 import { setup as _setup } from './commands/old/@setup';
 // eslint-disable-next-line import/no-cycle
@@ -38,7 +37,6 @@ export const commands: { [k: string]: magibotCommand } = {
 	_sound,
 	_setup,
 	_update,
-	_salt,
 	help,
 	stats,
 	sound,
@@ -54,15 +52,17 @@ const migratedCommands = new Map([
 	['ping', 'ping'],
 	['roll', 'roll'],
 	['salt', 'salt'],
+	['_salt', 'salt'], // admin command
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(
 	message: Discord.Message,
 	commandName: string,
+	isAdminCommand = false,
 ) {
 	const migratedCommand = migratedCommands.get(commandName);
 	if (migratedCommand) {
-		await notifyAboutSlashCommand(message, migratedCommand);
+		await notifyAboutSlashCommand(message, isAdminCommand ? `admin ${migratedCommand}` : migratedCommand);
 	}
 }
 
@@ -172,7 +172,7 @@ export async function checkCommand(message: Discord.Message) {
 			}
 			// Check if the command exists, to not just spam k: msgs
 			if (!commands[command]) {
-				await sendMigrationMessageIfComandHasBeenMigrated(message, command);
+				await sendMigrationMessageIfComandHasBeenMigrated(message, command, true);
 				return;
 			}
 			if (
