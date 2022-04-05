@@ -333,14 +333,15 @@ export async function isAdmin(guildID: string, member: GuildMember) {
 export async function interactionMemberIsAdmin(
 	interaction: CommandInteraction,
 ) {
+	console.log(JSON.stringify(interaction, null, 2));
+	// Owner of bot is always admin hehe
+	if (interaction.user.id === OWNERID) {
+		return true;
+	}
 	const { member, guild } = interaction;
 	if (member instanceof GuildMember) {
 		// checks for admin and Owner, they can always use
 		if (member.permissions.has('ADMINISTRATOR', true)) {
-			return true;
-		}
-		// Owner of bot is always admin hehe
-		if (member.id === OWNERID) {
 			return true;
 		}
 		const roles = await getAdminRoles(guild!.id);
@@ -349,10 +350,6 @@ export async function interactionMemberIsAdmin(
 	if (member) {
 		// checks for admin and Owner, they can always use
 		if (interaction.memberPermissions?.has('ADMINISTRATOR', true)) {
-			return true;
-		}
-		// Owner of bot is always admin hehe
-		if (interaction.user.id === OWNERID) {
 			return true;
 		}
 	}
