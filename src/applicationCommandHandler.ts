@@ -60,13 +60,11 @@ export async function checkApplicationCommand(
 				!(await commandAllowed(interaction.guild.id, interaction.channel?.id))
 			) {
 				await interaction.reply({
-					data: {
-						content: `commands aren't allowed in <#${
-							interaction.channel?.id
-						}>. Use them in ${await printCommandChannels(
-							interaction.guild.id,
-						)}. If you're an admin use \`/help\` to see how you can change that.`,
-					},
+					content: `Commands aren't allowed in <#${
+						interaction.channel?.id
+					}>. Use them in ${await printCommandChannels(
+						interaction.guild.id,
+					)}. If you're an admin use \`/help\` to see how you can change that.`,
 					ephemeral: true,
 				});
 				return;

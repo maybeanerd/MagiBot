@@ -27,11 +27,11 @@ type MagibotSlashCommandBase = {
   run: (
     interaction: Discord.CommandInteraction
   ) => Promise<void | null> | void | null; // allow null to allow for "empty" returns
-  isSlow?: boolean;
 };
 
 export type MagibotSlashCommand = MagibotSlashCommandBase & {
   definition: RESTPostAPIApplicationCommandsJSONBody;
+  isSlow?: boolean;
 };
 
 export type MagibotAdminSlashCommand = MagibotSlashCommandBase & {
