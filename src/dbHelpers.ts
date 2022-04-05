@@ -333,13 +333,8 @@ export async function isAdmin(guildID: string, member: GuildMember) {
 export async function interactionMemberIsAdmin(
 	interaction: CommandInteraction,
 ) {
-	console.log(interaction);
 	const { member, guild } = interaction;
 	if (member instanceof GuildMember) {
-		console.log('is guildmember');
-		console.log('permissions', member.permissions);
-		console.log('roles', member.roles);
-
 		// checks for admin and Owner, they can always use
 		if (member.permissions.has('ADMINISTRATOR', true)) {
 			return true;
@@ -348,8 +343,6 @@ export async function interactionMemberIsAdmin(
 		return member.roles.cache.hasAny(...roles);
 	}
 	if (member) {
-		console.log('is apiinteractionguildmember');
-		console.log('interaction.memberPermissions', interaction.memberPermissions);
 		// checks for admin and Owner, they can always use
 		if (interaction.memberPermissions?.has('ADMINISTRATOR', true)) {
 			return true;
