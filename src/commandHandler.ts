@@ -6,7 +6,6 @@ import { sound } from './commands/old/sound';
 import { stats } from './commands/old/stats';
 // eslint-disable-next-line import/no-cycle
 import { inf as info } from './commands/old/info';
-import { profile } from './commands/old/profile';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/old/@queue';
 import { sound as _sound } from './commands/old/@sound';
@@ -42,7 +41,6 @@ export const commands: { [k: string]: magibotCommand } = {
 	sound,
 	vote,
 	info,
-	profile,
 };
 
 const migratedCommands = new Map([
@@ -52,6 +50,7 @@ const migratedCommands = new Map([
 	['ping', 'ping'],
 	['roll', 'roll'],
 	['salt', 'salt'],
+	['profile', 'profile'],
 	['_salt', 'salt'], // admin command
 ]);
 

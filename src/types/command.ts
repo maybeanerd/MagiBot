@@ -31,6 +31,7 @@ type MagibotSlashCommandBase = {
 
 export type MagibotSlashCommand = MagibotSlashCommandBase & {
   definition: RESTPostAPIApplicationCommandsJSONBody;
+	// if true, interactions are deferred: can't use .reply anymore; need to use .followUp instead
   isSlow?: boolean;
 };
 
