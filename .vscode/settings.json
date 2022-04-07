@@ -1,0 +1,32 @@
+{
+  "git.ignoreLimitWarning": true,
+  "files.eol": "\n",
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "eslint.validate": [
+    {
+      "language": "typescript",
+      "autoFix": true
+    },
+    {
+      "language": "javascript",
+      "autoFix": true
+    }
+  ],
+  "eslint.autoFixOnSave": true,
+  "editor.formatOnSave": false,
+  "vetur.validation.template": false,
+  "vetur.format.defaultFormatterOptions": {
+    "prettier": {
+      "semi": true,
+      "singleQuote": true
+    }
+  },
+  "prettier.singleQuote": true,
+  "prettier.endOfLine": "lf",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}
