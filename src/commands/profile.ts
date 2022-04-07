@@ -82,9 +82,9 @@ export const profile: MagibotSlashCommand = {
 				value: 'Get info about yourself.',
 			},
 			{
-				name: '<@user|userid|nickname>',
+				name: '@user',
 				value:
-          'Get info about a certain user. If you use the nickname you need to at least define three characters.',
+          'Get info about a certain user.',
 			},
 		];
 	},
