@@ -1,9 +1,7 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { vote } from './commands/old/vote';
-import { sound } from './commands/old/sound';
-// eslint-disable-next-line import/no-cycle
-import { stats } from './commands/old/stats';
+import { sound } from './commands/sound';
 // eslint-disable-next-line import/no-cycle
 import { inf as info } from './commands/old/info';
 // eslint-disable-next-line import/no-cycle
@@ -37,7 +35,6 @@ export const commands: { [k: string]: magibotCommand } = {
 	_setup,
 	_update,
 	help,
-	stats,
 	sound,
 	vote,
 	info,

@@ -1,10 +1,11 @@
 import { GuildMember, Message } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
-import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../../shared_assets';
-import { commandCategories } from '../../types/enums';
-import { magibotCommand } from '../../types/command';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { getGlobalUser, getSettings, getUser } from '../dbHelpers';
+import { isShadowBanned, PREFIXES, shadowBannedLevel } from '../shared_assets';
+import { commandCategories } from '../types/enums';
+import { magibotCommand, MagibotSlashCommand } from '../types/command';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -127,62 +128,73 @@ export async function validateJoinsound(
 	}
 }
 
-export const sound: magibotCommand = {
-	name: 'sound',
-	main: async function main({ content, message }) {
-		if (!message.guild) {
-			return;
-		}
-		if (
-			isShadowBanned(message.author.id, message.guild.id, message.guild.ownerId)
-      !== shadowBannedLevel.not
-		) {
-			message.reply('you cant do this.');
-			return;
-		}
-		const args = content.split(/ +/);
-		const command = args[0].toLowerCase();
-		if (command === 'rem') {
-			const command2 = args[1];
-			if (command2 && command2.toLowerCase() === 'default') {
-				await addGlobalSound(message.author.id, undefined);
-				message.reply('You successfully removed your default joinsound!');
-			} else {
-				await addSound(message.author.id, undefined, message.guild.id);
-				message.reply('You successfully removed your joinsound!');
-			}
-		} else if (command === 'default') {
-			const file = message.attachments.first();
-			const fileUrl = file ? file.url : args[1];
-			if (fileUrl) {
-				await validateJoinsound(fileUrl, message, true);
-			} else {
-				message.reply(
-					`Missing sound or sound URL. Use \`${PREFIXES.get(
-						message.guild.id,
-					)}.help sound\` for more info.`,
-				);
-			}
+async function main({ content, message }) {
+	if (!message.guild) {
+		return;
+	}
+	if (
+		isShadowBanned(message.author.id, message.guild.id, message.guild.ownerId)
+		!== shadowBannedLevel.not
+	) {
+		message.reply('you cant do this.');
+		return;
+	}
+	const args = content.split(/ +/);
+	const command = args[0].toLowerCase();
+	if (command === 'rem') {
+		const command2 = args[1];
+		if (command2 && command2.toLowerCase() === 'default') {
+			await addGlobalSound(message.author.id, undefined);
+			message.reply('You successfully removed your default joinsound!');
 		} else {
-			const file = message.attachments.first();
-			const fileUrl = file ? file.url : args[0];
-			if (fileUrl) {
-				await validateJoinsound(fileUrl, message, false);
-			} else {
-				message.reply(
-					`This is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
-						message.guild.id,
-					)}.help sound\` for more info.`,
-				);
-			}
+			await addSound(message.author.id, undefined, message.guild.id);
+			message.reply('You successfully removed your joinsound!');
 		}
-	},
-	ehelp() {
+	} else if (command === 'default') {
+		const file = message.attachments.first();
+		const fileUrl = file ? file.url : args[1];
+		if (fileUrl) {
+			await validateJoinsound(fileUrl, message, true);
+		} else {
+			message.reply(
+				`Missing sound or sound URL. Use \`${PREFIXES.get(
+					message.guild.id,
+				)}.help sound\` for more info.`,
+			);
+		}
+	} else {
+		const file = message.attachments.first();
+		const fileUrl = file ? file.url : args[0];
+		if (fileUrl) {
+			await validateJoinsound(fileUrl, message, false);
+		} else {
+			message.reply(
+				`This is not a valid command. If you tried adding a sound, remember to attach the file to the command. Use \`${PREFIXES.get(
+					message.guild.id,
+				)}.help sound\` for more info.`,
+			);
+		}
+	}
+};
+
+const slashCommand = new SlashCommandBuilder()
+	.setName('joinsound')
+	.setDescription('Manage your joinsounds.').addSubcommand((subcommand) => subcommand.setName('set').setDescription('Set your joinsound.')
+	// TODO add attachment option once it exists
+		.addAttachmentOption((option) => option
+			.setName('user')
+			.setDescription(
+				'The user you want the profile of. Leave empty to get your own.',
+			)
+			.setRequired(false)));
+
+export const sound: MagibotSlashCommand = {
+	help() {
 		return printHelp();
 	},
-	admin: false,
-	perm: 'SEND_MESSAGES',
-	hide: false,
+	permissions: 'SEND_MESSAGES',
 	category: commandCategories.fun,
-	dev: false,
+	definition: slashCommand.toJSON(),
+	run: runCommand,
+	isSlow: true,
 };

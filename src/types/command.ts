@@ -2,7 +2,7 @@ import {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v9';
+import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 import Discord, { Message } from 'discord.js';
 import { commandCategories } from './enums';
 

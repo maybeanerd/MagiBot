@@ -2,7 +2,7 @@ import { REST } from '@discordjs/rest';
 import {
 	RESTPostAPIApplicationCommandsJSONBody,
 	Routes,
-} from 'discord-api-types/v9';
+} from 'discord-api-types/v10';
 import { applicationCommands } from './commands/applicationCommands';
 import { APP_ID, TOKEN } from './shared_assets';
 
