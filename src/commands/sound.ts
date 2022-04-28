@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, Message } from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -61,7 +61,7 @@ export async function setDefaultGuildJoinsound(
 
 export async function validateJoinsound(
 	url: string,
-	message: Message,
+	interaction: CommandInteraction,
 	setDefault: boolean,
 	user?: GuildMember,
 	defaultForGuildId?: string,
@@ -73,9 +73,9 @@ export async function validateJoinsound(
 		() => {},
 	);
 	if (!sound) {
-		message.reply(
+		interaction.reply(
 			`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
-        message.guild!.id,
+        interaction.guild!.id,
 			)}.help sound\``,
 		);
 		return;
@@ -88,83 +88,43 @@ export async function validateJoinsound(
     && firstStream.codec_name !== 'pcm_s16le'
     && firstStream.codec_name !== 'pcm_f32le'
 	) {
-		message.reply(
+		interaction.reply(
 			`You need to use a compatible file! For more info use \`${PREFIXES.get(
-        message.guild!.id,
+        interaction.guild!.id,
 			)}.help sound\``,
 		);
 		return;
 	}
 	if (!firstStream.duration) {
-		message.reply(
+		interaction.reply(
 			"Failed to calculate the duration of the joinsound you're trying to add.",
 		);
 		return;
 	}
 	if (firstStream.duration > 8) {
-		message.reply(
+		interaction.reply(
 			"The joinsound you're trying to add is longer than 8 seconds.",
 		);
 		return;
 	}
-	const userId = user ? user.id : message.author.id;
+	const userId = user ? user.id : interaction.member!.user.id;
 	if (defaultForGuildId) {
 		await setDefaultGuildJoinsound(defaultForGuildId, url);
 	} else if (setDefault) {
 		await addGlobalSound(userId, url);
 	} else {
-		await addSound(userId, url, message.guild!.id);
+		await addSound(userId, url, interaction.guild!.id);
 	}
 	if (defaultForGuildId) {
-		message.reply(
+		interaction.reply(
 			'You successfully changed the default joinsound for this server!',
 		);
 	} else if (user) {
-		message.reply(`You successfully changed ${user}s joinsound!`);
+		interaction.reply(`You successfully changed ${user}s joinsound!`);
 	} else {
-		message.reply(
+		interaction.reply(
 			`You successfully changed your ${setDefault ? 'default ' : ''}joinsound!`,
 		);
-	}
-}
-
-async function main({ content, message }) {
-	if (!message.guild) {
-		return;
-	}
-	if (
-		isShadowBanned(
-			message.author.id,
-			message.guild.id,
-			message.guild.ownerId,
-		) !== shadowBannedLevel.not
-	) {
-		message.reply('you cant do this.');
-		return;
-	}
-	const args = content.split(/ +/);
-	const command = args[0].toLowerCase();
-	if (command === 'rem') {
-		const command2 = args[1];
-		if (command2 && command2.toLowerCase() === 'default') {
-			await addGlobalSound(message.author.id, undefined);
-			message.reply('You successfully removed your default joinsound!');
-		} else {
-			await addSound(message.author.id, undefined, message.guild.id);
-			message.reply('You successfully removed your joinsound!');
-		}
-	} else if (command === 'default') {
-		const file = message.attachments.first();
-		const fileUrl = file ? file.url : args[1];
-		if (fileUrl) {
-			await validateJoinsound(fileUrl, message, true);
-		} else {
-			message.reply(
-				`Missing sound or sound URL. Use \`${PREFIXES.get(
-					message.guild.id,
-				)}.help sound\` for more info.`,
-			);
-		}
 	}
 }
 
@@ -193,6 +153,7 @@ const slashCommand = new SlashCommandBuilder()
 	.addSubcommand((subcommand) => subcommand
 		.setName('remove default')
 		.setDescription('Remove your default joinsound.'));
+
 async function runCommand(interaction: CommandInteraction) {
 	const { user } = interaction.member!;
 	const guild = interaction.guild!;
@@ -211,9 +172,13 @@ async function runCommand(interaction: CommandInteraction) {
 		const fileUrl = interaction.options.getAttachementUrl(true);
 		await validateJoinsound(fileUrl, interaction, false);
 	}
+	if (subcommand === 'set default') {
+		const fileUrl = interaction.options.getAttachementUrl(true);
+		await validateJoinsound(fileUrl, interaction, true);
+	}
 	if (subcommand === 'remove') {
 		await addSound(user.id, undefined, guild.id);
-		interaction.reply('Successfully removed your default joinsound!');
+		interaction.reply('Successfully removed your joinsound!');
 	}
 	if (subcommand === 'remove default') {
 		await addGlobalSound(user.id, undefined);
