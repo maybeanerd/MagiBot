@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { CommandInteraction, User } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -63,7 +63,7 @@ export async function validateJoinsound(
 	url: string,
 	interaction: CommandInteraction,
 	setDefault: boolean,
-	user?: GuildMember,
+	user?: User,
 	defaultForGuildId?: string,
 ) {
 	if (setDefault && user) {
@@ -186,7 +186,7 @@ async function runCommand(interaction: CommandInteraction) {
 	}
 	return null;
 }
-export const sound: MagibotSlashCommand = {
+export const joinsound: MagibotSlashCommand = {
 	help() {
 		return printHelp();
 	},

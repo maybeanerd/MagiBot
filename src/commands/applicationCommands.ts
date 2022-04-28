@@ -5,6 +5,7 @@ import { bugreport } from './bug';
 import { randomfact } from './rfact';
 import { salt } from './salt';
 import { profile } from './profile';
+import { joinsound } from './joinsound';
 import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
@@ -16,6 +17,7 @@ export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
 	randomfact,
 	salt,
 	profile,
+	joinsound,
 
 	// all admin commands
 	admin,

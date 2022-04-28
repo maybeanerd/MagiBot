@@ -7,6 +7,7 @@ import {
 } from '../../types/command';
 import { commandCategories } from '../../types/enums';
 import { salt } from './salt';
+import { joinsound } from './joinsound';
 
 // TODO make this only available to admins!
 const adminApplicationCommandBase = new SlashCommandBuilder()
@@ -15,6 +16,7 @@ const adminApplicationCommandBase = new SlashCommandBuilder()
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
 	salt,
+	joinsound,
 };
 
 Object.values(adminApplicationCommands).forEach((command) => {
