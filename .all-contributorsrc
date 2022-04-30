@@ -11,7 +11,12 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/18548570?v=4",
       "profile": "http://diluz.io",
       "contributions": [
-        "code"
+        "code",
+        "ideas",
+        "review",
+        "business",
+        "infra",
+        "maintenance"
       ]
     },
     {
