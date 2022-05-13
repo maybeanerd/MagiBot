@@ -52,12 +52,12 @@ async function runCommand(interaction: CommandInteraction) {
 
 	if (subcommand === 'set') {
 		const user = interaction.options.getUser('user', true);
-		const fileUrl = interaction.options.getAttachementUrl(true);
-		return validateJoinsound(fileUrl, interaction, false, user);
+		const attachment = interaction.options.getAttachment('sound', true);
+		return validateJoinsound(attachment, interaction, false, user);
 	}
 	if (subcommand === 'set default') {
-		const fileUrl = interaction.options.getAttachementUrl(true);
-		return validateJoinsound(fileUrl, interaction, true, undefined, guild.id);
+		const attachment = interaction.options.getAttachment('sound', true);
+		return validateJoinsound(attachment, interaction, true, undefined, guild.id);
 	}
 	if (subcommand === 'remove') {
 		const user = interaction.options.getUser('user', true);
@@ -94,7 +94,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 			.addAttachmentOption((option) => option
 				.setName('sound')
 				.setDescription(
-					'The sound you want to use. Can be a mp3 or wav file with a maximum length of 8 seconds.',
+					'The sound you want to use. Mp3 or wav, max length of 8 seconds.',
 				)
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand
@@ -110,7 +110,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 			.addAttachmentOption((option) => option
 				.setName('sound')
 				.setDescription(
-					'The sound you want to use per default on this guild. Can be a mp3 or wav file with a maximum length of 8 seconds.',
+					'The sound you want to use per default on this guild. Mp3 or wav, max length of 8 seconds.',
 				)
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand

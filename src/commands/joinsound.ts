@@ -1,4 +1,4 @@
-import { CommandInteraction, User } from 'discord.js';
+import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -60,7 +60,7 @@ export async function setDefaultGuildJoinsound(
 }
 
 export async function validateJoinsound(
-	url: string,
+	attachment: MessageAttachment,
 	interaction: CommandInteraction,
 	setDefault: boolean,
 	user?: User,
@@ -69,15 +69,15 @@ export async function validateJoinsound(
 	if (setDefault && user) {
 		throw new Error('Cant set default sounds for others!');
 	}
+	// TODO validate attachment type
+	console.log('attachment.contentType', attachment.contentType);
+
+	const { url } = attachment;
 	const sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(
 		() => {},
 	);
 	if (!sound) {
-		interaction.reply(
-			`you need to use a compatible link or upload the file with the command! For more info use \`${PREFIXES.get(
-        interaction.guild!.id,
-			)}.help sound\``,
-		);
+		interaction.reply('Something went wrong when trying to load your file.');
 		return;
 	}
 	// eslint-disable-next-line prefer-destructuring
@@ -137,7 +137,7 @@ const slashCommand = new SlashCommandBuilder()
 		.addAttachmentOption((option) => option
 			.setName('sound')
 			.setDescription(
-				'The sound you want to use. Can be a mp3 or wav file with a maximum length of 8 seconds.',
+				'The sound you want to use. Mp3 or wav, max length of 8 seconds.',
 			)
 			.setRequired(true)))
 	.addSubcommand((subcommand) => subcommand.setName('remove').setDescription('Remove your joinsound.'))
@@ -147,7 +147,7 @@ const slashCommand = new SlashCommandBuilder()
 		.addAttachmentOption((option) => option
 			.setName('sound')
 			.setDescription(
-				'The sound you want to use per default in all guilds. Can be a mp3 or wav file with a maximum length of 8 seconds.',
+				'The sound you want to use per default in all guilds. Mp3 or wav, max length of 8 seconds.',
 			)
 			.setRequired(true)))
 	.addSubcommand((subcommand) => subcommand
@@ -169,12 +169,12 @@ async function runCommand(interaction: CommandInteraction) {
     | 'remove default';
 
 	if (subcommand === 'set') {
-		const fileUrl = interaction.options.getAttachementUrl(true);
-		await validateJoinsound(fileUrl, interaction, false);
+		const attachment = interaction.options.getAttachment('sound', true);
+		await validateJoinsound(attachment, interaction, false);
 	}
 	if (subcommand === 'set default') {
-		const fileUrl = interaction.options.getAttachementUrl(true);
-		await validateJoinsound(fileUrl, interaction, true);
+		const attachment = interaction.options.getAttachment('sound', true);
+		await validateJoinsound(attachment, interaction, true);
 	}
 	if (subcommand === 'remove') {
 		await addSound(user.id, undefined, guild.id);
