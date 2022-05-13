@@ -6,6 +6,7 @@ import {
 	AudioPlayerStatus,
 	createAudioPlayer,
 	createAudioResource,
+	DiscordGatewayAdapterCreator,
 	generateDependencyReport,
 	joinVoiceChannel,
 } from '@discordjs/voice';
@@ -140,7 +141,9 @@ bot.on('message', async (message: Discord.Message) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-	if (!interaction.isCommand()) { return; }
+	if (!interaction.isCommand()) {
+		return;
+	}
 	try {
 		await checkApplicationCommand(interaction);
 	} catch (err) {
@@ -265,7 +268,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						const connection = joinVoiceChannel({
 							channelId: newVc.id,
 							guildId: newVc.guild.id,
-							adapterCreator: newVc.guild.voiceAdapterCreator,
+							adapterCreator: newVc.guild
+								.voiceAdapterCreator as DiscordGatewayAdapterCreator,
 						});
 						const player = createAudioPlayer();
 						connection.subscribe(player);
@@ -277,7 +281,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
             const timeoutID = setTimeout(() => {
-            /* eslint-disable no-mixed-spaces-and-tabs */
+            	/* eslint-disable no-mixed-spaces-and-tabs */
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
