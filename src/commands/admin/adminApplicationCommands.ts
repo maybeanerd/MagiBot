@@ -49,5 +49,5 @@ export const admin: MagibotSlashCommand = {
 	category: commandCategories.admin,
 	run: runCommand,
 	definition: adminApplicationCommandBase.toJSON(),
-	isSlow: false,
+	isSlow: true,
 };

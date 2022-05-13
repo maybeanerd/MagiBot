@@ -11,8 +11,7 @@ import {
 } from '../joinsound';
 
 function printHelp() {
-	const info: Array<{ name: string; value: string }
-	> = [];
+	const info: Array<{ name: string; value: string }> = [];
 	info.push({
 		name: '<@User|userid|nickname> (and attach soundfile to this command)',
 		value:
@@ -41,43 +40,46 @@ async function runCommand(interaction: CommandInteraction) {
 		isShadowBanned(interaction.member!.user.id, guild.id, guild.ownerId)
     !== shadowBannedLevel.not
 	) {
-		return interaction.reply('You cant do this.');
+		interaction.followUp('You cant do this.');
+		return;
 	}
 
 	const subcommand = interaction.options.getSubcommand(true) as
     | 'set'
-    | 'set default'
+    | 'set-default'
     | 'remove'
-    | 'remove default';
+    | 'remove-default';
 
 	if (subcommand === 'set') {
 		const user = interaction.options.getUser('user', true);
 		const attachment = interaction.options.getAttachment('sound', true);
-		return validateJoinsound(attachment, interaction, false, user);
+		validateJoinsound(attachment, interaction, false, user);
+		return;
 	}
-	if (subcommand === 'set default') {
+	if (subcommand === 'set-default') {
 		const attachment = interaction.options.getAttachment('sound', true);
-		return validateJoinsound(attachment, interaction, true, undefined, guild.id);
+		validateJoinsound(attachment, interaction, true, undefined, guild.id);
+		return;
 	}
 	if (subcommand === 'remove') {
 		const user = interaction.options.getUser('user', true);
 		await addSound(user.id, undefined, guild.id);
-		return interaction.reply(`You successfully removed ${user}s joinsound!`);
+		interaction.followUp(`You successfully removed ${user}s joinsound!`);
+		return;
 	}
-	if (subcommand === 'remove default') {
+	if (subcommand === 'remove-default') {
 		const confirmed = await interactionConfirmation(
 			interaction,
 			'Do you want to remove the default joinsound of this server?',
 		);
 		if (!confirmed) {
-			return null;
+			return;
 		}
 		await setDefaultGuildJoinsound(guild.id, undefined);
-		return confirmed.reply(
+		confirmed.followUp(
 			'You successfully removed the default joinsound of this server!',
 		);
 	}
-	return null;
 }
 
 function registerSlashCommand(builder: SlashCommandBuilder) {
@@ -105,7 +107,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 				.setDescription('Remove the joinsound of a user on this guild.')
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand
-			.setName('set default')
+			.setName('set-default')
 			.setDescription('Set the default joinsound for this server.')
 			.addAttachmentOption((option) => option
 				.setName('sound')
@@ -114,7 +116,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 				)
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand
-			.setName('remove default')
+			.setName('remove-default')
 			.setDescription('Remove the default joinsound of this guild.')));
 }
 export const joinsound: MagibotAdminSlashCommand = {
