@@ -17,6 +17,7 @@ export async function setupLocalFolders() {
 }
 
 async function downloadFile(url: string, path: string) {
+	console.log('downloading file....');
 	get(url, (res) => {
 		const writeStream = createWriteStream(path);
 		res.pipe(writeStream);
@@ -38,8 +39,15 @@ function getFolderSize(path: string): Promise<number> {
 }
 
 const oneMegabyte = 1024 * 1024;
+const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
-async function checkIfUserHasEnoughSpace(member: GuildMember) {
+async function doesServerHaveEnoughSpace() {
+	const sizeOfFolder = await getFolderSize(basePath);
+	console.log('sizeOfServerFolder', sizeOfFolder);
+	return sizeOfFolder <= fourtyGigabyte;
+}
+
+async function doesUserHaveEnoughSpace(member: GuildMember) {
 	const path = Path.join(basePath, member.id);
 	await mkdir(path).catch((error) => {
 		// If the error is that it already exists, that's fine
@@ -56,8 +64,11 @@ export async function saveJoinsoundOfUser(
 	member: GuildMember,
 	fileUrl: string,
 ) {
-	console.log('downloading file....');
-	if (!(await checkIfUserHasEnoughSpace(member))) {
+	if (!(await doesServerHaveEnoughSpace())) {
+		// this should not happen. but if it does, we handle it to stop the server from being overloaded
+		throw new Error('Server folder is too large!');
+	}
+	if (!(await doesUserHaveEnoughSpace(member))) {
 		console.log('folder too large already!');
 		return false;
 	}
