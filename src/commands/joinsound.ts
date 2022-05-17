@@ -110,6 +110,9 @@ export async function validateJoinsound(
 		return;
 	}
 	const userId = user ? user.id : interaction.member!.user.id;
+
+	// TODO download attachment?
+
 	if (defaultForGuildId) {
 		await setDefaultGuildJoinsound(defaultForGuildId, url);
 	} else if (setDefault) {

@@ -40,6 +40,7 @@ import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
+// import { saveJoinsoundOfUser, setupLocalFolders } from './commands/joinsounds/fileManagement';
 
 console.log(generateDependencyReport());
 
@@ -325,3 +326,7 @@ bot.on('disconnect', () => {
 });
 
 bot.login(TOKEN); // connect to discord
+
+/* setupLocalFolders().then(() => {
+	saveJoinsoundOfUser({ id: 'memberId', guild: { id: 'guildId' } } as any, 'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3');
+}); */
