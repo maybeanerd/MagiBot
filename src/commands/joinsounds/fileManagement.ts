@@ -1,4 +1,3 @@
-import { GuildMember } from 'discord.js';
 import { createWriteStream } from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
 import Path from 'path';
@@ -6,6 +5,16 @@ import { get } from 'node:https';
 import fastFolderSize from 'fast-folder-size';
 
 const basePath = Path.join(__dirname, '../../../joinsounds');
+
+type JoinsoundTarget = { userId: string } & (
+  | {
+      guildId: string;
+      default: false;
+    }
+  | {
+      default: true;
+    }
+);
 
 export async function setupLocalFolders() {
 	await mkdir(basePath).catch((error) => {
@@ -17,7 +26,7 @@ export async function setupLocalFolders() {
 }
 
 async function downloadFile(url: string, path: string) {
-	console.log('downloading file....');
+	console.log('downloading file from url', url);
 	return new Promise<void>((resolve /* , reject */) => {
 		get(url, (res) => {
 			const writeStream = createWriteStream(path);
@@ -50,12 +59,13 @@ async function doesServerHaveEnoughSpace() {
 	return sizeOfFolder <= fourtyGigabyte;
 }
 
-function getMemberPath(member: GuildMember) {
-	return Path.join(basePath, `user_${member.id}`);
+function getUserPath(target: JoinsoundTarget) {
+	return Path.join(basePath, `user_${target.userId}`);
 }
 
-async function doesUserHaveEnoughSpace(member: GuildMember) {
-	const path = getMemberPath(member);
+async function doesUserHaveEnoughSpace(target: JoinsoundTarget) {
+	// TODO if the user overwrites a sound, dont count that against size here
+	const path = getUserPath(target);
 	await mkdir(path).catch((error) => {
 		// If the error is that it already exists, that's fine
 		if (error.code !== 'EEXIST') {
@@ -67,40 +77,33 @@ async function doesUserHaveEnoughSpace(member: GuildMember) {
 	return sizeOfFolder <= oneMegabyte;
 }
 
-function getFilename(member: GuildMember, isDefault: boolean) {
-	const title = isDefault ? 'default' : `guild_${member.guild.id}`;
-	return Path.join(getMemberPath(member), title);
+function getFilename(target: JoinsoundTarget) {
+	const title = target.default ? 'default' : `guild_${target.guildId}`;
+	return Path.join(getUserPath(target), title);
 }
 
 export async function storeJoinsoundOfUser(
-	member: GuildMember,
+	target: JoinsoundTarget,
 	fileUrl: string,
-	isDefault = false,
 ) {
 	if (!(await doesServerHaveEnoughSpace())) {
 		// this should not happen. but if it does, we handle it to stop the server from being overloaded
 		throw new Error('Server folder is too large!');
 	}
-	if (!(await doesUserHaveEnoughSpace(member))) {
+	if (!(await doesUserHaveEnoughSpace(target))) {
 		console.log('folder too large already!');
 		return false;
 	}
-	const filename = getFilename(member, isDefault);
+	const filename = getFilename(target);
 	await downloadFile(fileUrl, filename);
 	return true;
 }
 
-export async function removeJoinsoundOfUser(
-	member: GuildMember,
-	isDefault = false,
-) {
-	const filename = getFilename(member, isDefault);
+export async function removeJoinsoundOfUser(target: JoinsoundTarget) {
+	const filename = getFilename(target);
 	await unlink(filename);
 }
 
-export function getJoinsoundLocationOfUser(
-	member: GuildMember,
-	isDefault = false,
-) {
-	return getFilename(member, isDefault);
+export function getJoinsoundLocationOfUser(target: JoinsoundTarget) {
+	return getFilename(target);
 }

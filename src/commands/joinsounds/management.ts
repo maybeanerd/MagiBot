@@ -2,35 +2,41 @@ import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
+import { removeJoinsoundOfUser, storeJoinsoundOfUser } from './fileManagement';
 
-async function addSound(
-	userid: string,
-	surl: string | undefined,
-	guildID: string,
+async function setSound(
+	userId: string,
+	guildId: string,
+	soundUrl: string | undefined,
 ) {
-	const user = await getUser(userid, guildID);
-	user.sound = surl;
+	const user = await getUser(userId, guildId);
+	user.sound = soundUrl;
+	if (soundUrl) {
+		await storeJoinsoundOfUser({ userId, guildId, default: false }, soundUrl);
+	} else {
+		await removeJoinsoundOfUser({ userId, guildId, default: false });
+	}
 	await user.save();
 	return true;
 }
 
-export async function removeSound(
-	userid: string,
-	guildID: string,
-) {
-	return addSound(userid, undefined, guildID);
+export async function removeSound(userId: string, guildId: string) {
+	return setSound(userId, guildId, undefined);
 }
 
-async function addDefaultSound(userId: string, surl: string | undefined) {
+async function setDefaultSound(userId: string, soundUrl: string | undefined) {
 	const user = await getGlobalUser(userId);
-	user.sound = surl;
+	user.sound = soundUrl;
 	await user.save();
+	if (soundUrl) {
+		await storeJoinsoundOfUser({ userId, default: true }, soundUrl);
+	} else {
+		await removeJoinsoundOfUser({ userId, default: true });
+	}
 	return true;
 }
-export async function removeDefaultSound(
-	userid: string,
-) {
-	return addDefaultSound(userid, undefined);
+export async function removeDefaultSound(userId: string) {
+	return setDefaultSound(userId, undefined);
 }
 
 export async function setDefaultGuildJoinsound(
@@ -54,7 +60,7 @@ export async function validateAndSaveJoinsound(
 		throw new Error('Cant set-default sounds for others!');
 	}
 
-	let soundUrl:string;
+	let soundUrl: string;
 	if (typeof attachmentOrUrl === 'string') {
 		soundUrl = attachmentOrUrl;
 	} else {
@@ -70,7 +76,9 @@ export async function validateAndSaveJoinsound(
 		() => {},
 	);
 	if (!sound) {
-		interaction.followUp('Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.');
+		interaction.followUp(
+			'Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.',
+		);
 		return;
 	}
 	// eslint-disable-next-line prefer-destructuring
@@ -98,16 +106,15 @@ export async function validateAndSaveJoinsound(
 		);
 		return;
 	}
-	const userId = user ? user.id : interaction.member!.user.id;
 
-	// TODO download attachment?
+	const userId = user ? user.id : interaction.member!.user.id;
 
 	if (defaultForGuildId) {
 		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl);
 	} else if (setDefault) {
-		await addDefaultSound(userId, soundUrl);
+		await setDefaultSound(userId, soundUrl);
 	} else {
-		await addSound(userId, soundUrl, interaction.guild!.id);
+		await setSound(userId, interaction.guild!.id, soundUrl);
 	}
 	if (defaultForGuildId) {
 		interaction.followUp(
