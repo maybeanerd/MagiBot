@@ -60,7 +60,7 @@ export async function setDefaultGuildJoinsound(
 }
 
 export async function validateJoinsound(
-	attachment: MessageAttachment,
+	attachmentOrUrl: MessageAttachment | string,
 	interaction: CommandInteraction,
 	setDefault: boolean,
 	user?: User,
@@ -69,17 +69,24 @@ export async function validateJoinsound(
 	if (setDefault && user) {
 		throw new Error('Cant set-default sounds for others!');
 	}
-	const isAudioFile = attachment.contentType?.startsWith('audio/');
-	if (!isAudioFile) {
-		interaction.followUp('The file you sent is not an audio file!');
-		return;
+
+	let soundUrl:string;
+	if (typeof attachmentOrUrl === 'string') {
+		soundUrl = attachmentOrUrl;
+	} else {
+		const isAudioFile = attachmentOrUrl.contentType?.startsWith('audio/');
+		if (!isAudioFile) {
+			interaction.followUp('The file you sent is not an audio file!');
+			return;
+		}
+		soundUrl = attachmentOrUrl.url;
 	}
-	const { url } = attachment;
-	const sound = await ffprobe(url, { path: ffprobeStatic.path }).catch(
+
+	const sound = await ffprobe(soundUrl, { path: ffprobeStatic.path }).catch(
 		() => {},
 	);
 	if (!sound) {
-		interaction.followUp('Something went wrong when trying to load your file.');
+		interaction.followUp('Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.');
 		return;
 	}
 	// eslint-disable-next-line prefer-destructuring
@@ -114,11 +121,11 @@ export async function validateJoinsound(
 	// TODO download attachment?
 
 	if (defaultForGuildId) {
-		await setDefaultGuildJoinsound(defaultForGuildId, url);
+		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl);
 	} else if (setDefault) {
-		await addGlobalSound(userId, url);
+		await addGlobalSound(userId, soundUrl);
 	} else {
-		await addSound(userId, url, interaction.guild!.id);
+		await addSound(userId, soundUrl, interaction.guild!.id);
 	}
 	if (defaultForGuildId) {
 		interaction.followUp(

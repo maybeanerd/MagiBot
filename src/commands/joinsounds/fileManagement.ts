@@ -1,6 +1,6 @@
 import { GuildMember } from 'discord.js';
 import { createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, unlink } from 'node:fs/promises';
 import Path from 'path';
 import { get } from 'node:https';
 import fastFolderSize from 'fast-folder-size';
@@ -60,9 +60,15 @@ async function doesUserHaveEnoughSpace(member: GuildMember) {
 	return sizeOfFolder <= oneMegabyte;
 }
 
-export async function saveJoinsoundOfUser(
+function getFilename(member: GuildMember, global: boolean) {
+	const title = global ? 'global' : member.guild.id;
+	return Path.join(basePath, member.id, `${title}.audio`);
+}
+
+export async function storeJoinsoundOfUser(
 	member: GuildMember,
 	fileUrl: string,
+	global = false,
 ) {
 	if (!(await doesServerHaveEnoughSpace())) {
 		// this should not happen. but if it does, we handle it to stop the server from being overloaded
@@ -72,7 +78,15 @@ export async function saveJoinsoundOfUser(
 		console.log('folder too large already!');
 		return false;
 	}
-	const filename = Path.join(basePath, member.id, `${member.guild.id}.audio`);
+	const filename = getFilename(member, global);
 	await downloadFile(fileUrl, filename);
 	return true;
+}
+
+export async function removeJoinsoundOfUser(
+	member: GuildMember,
+	global = false,
+) {
+	const filename = getFilename(member, global);
+	await unlink(filename);
 }
