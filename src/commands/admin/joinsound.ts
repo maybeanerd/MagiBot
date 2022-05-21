@@ -4,7 +4,11 @@ import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
-import { removeSound, setDefaultGuildJoinsound, validateAndSaveJoinsound } from '../joinsounds/management';
+import {
+	removeDefaultGuildJoinsound,
+	removeSound,
+	validateAndSaveJoinsound,
+} from '../joinsounds/management';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -54,7 +58,13 @@ async function runCommand(interaction: CommandInteraction) {
 	}
 	if (subcommand === 'set-default') {
 		const attachment = interaction.options.getAttachment('sound', true);
-		validateAndSaveJoinsound(attachment, interaction, true, undefined, guild.id);
+		validateAndSaveJoinsound(
+			attachment,
+			interaction,
+			true,
+			undefined,
+			guild.id,
+		);
 		return;
 	}
 	if (subcommand === 'remove') {
@@ -71,7 +81,7 @@ async function runCommand(interaction: CommandInteraction) {
 		if (!confirmed) {
 			return;
 		}
-		await setDefaultGuildJoinsound(guild.id, undefined);
+		await removeDefaultGuildJoinsound(guild.id);
 		confirmed.followUp(
 			'You successfully removed the default joinsound of this server!',
 		);

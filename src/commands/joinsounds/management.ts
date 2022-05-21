@@ -8,12 +8,16 @@ async function setSound(
 	userId: string,
 	guildId: string,
 	soundUrl: string | undefined,
+	locallyStored: boolean,
 ) {
 	const user = await getUser(userId, guildId);
-	user.sound = soundUrl;
-	if (soundUrl) {
+	if (!locallyStored) {
+		user.sound = soundUrl;
+	} else if (soundUrl) {
+		user.sound = 'local';
 		await storeJoinsoundOfUser({ userId, guildId, default: false }, soundUrl);
 	} else {
+		user.sound = undefined;
 		await removeJoinsoundOfUser({ userId, guildId, default: false });
 	}
 	await user.save();
@@ -21,32 +25,48 @@ async function setSound(
 }
 
 export async function removeSound(userId: string, guildId: string) {
-	return setSound(userId, guildId, undefined);
+	return setSound(userId, guildId, undefined, true);
 }
 
-async function setDefaultSound(userId: string, soundUrl: string | undefined) {
+async function setDefaultSound(
+	userId: string,
+	soundUrl: string | undefined,
+	locallyStored: boolean,
+) {
 	const user = await getGlobalUser(userId);
-	user.sound = soundUrl;
-	await user.save();
-	if (soundUrl) {
+	if (!locallyStored) {
+		user.sound = soundUrl;
+	} else if (soundUrl) {
+		user.sound = 'local';
 		await storeJoinsoundOfUser({ userId, default: true }, soundUrl);
 	} else {
+		user.sound = undefined;
 		await removeJoinsoundOfUser({ userId, default: true });
 	}
 	return true;
 }
+
 export async function removeDefaultSound(userId: string) {
-	return setDefaultSound(userId, undefined);
+	return setDefaultSound(userId, undefined, true);
 }
 
-export async function setDefaultGuildJoinsound(
+async function setDefaultGuildJoinsound(
 	guildId: string,
 	soundUrl: string | undefined,
+	locallyStored: boolean,
 ) {
+	// TODO add option to make this locally work
+	if (locallyStored) {
+		throw new Error('Not implemented yet');
+	}
 	const guild = await getSettings(guildId);
 	guild.defaultJoinsound = soundUrl;
 	await guild.save();
 	return true;
+}
+
+export async function removeDefaultGuildJoinsound(guildId: string) {
+	return setDefaultGuildJoinsound(guildId, undefined, true);
 }
 
 export async function validateAndSaveJoinsound(
@@ -61,8 +81,10 @@ export async function validateAndSaveJoinsound(
 	}
 
 	let soundUrl: string;
+	let locallyStored = true;
 	if (typeof attachmentOrUrl === 'string') {
 		soundUrl = attachmentOrUrl;
+		locallyStored = false;
 	} else {
 		const isAudioFile = attachmentOrUrl.contentType?.startsWith('audio/');
 		if (!isAudioFile) {
@@ -110,11 +132,11 @@ export async function validateAndSaveJoinsound(
 	const userId = user ? user.id : interaction.member!.user.id;
 
 	if (defaultForGuildId) {
-		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl);
+		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl, locallyStored);
 	} else if (setDefault) {
-		await setDefaultSound(userId, soundUrl);
+		await setDefaultSound(userId, soundUrl, locallyStored);
 	} else {
-		await setSound(userId, interaction.guild!.id, soundUrl);
+		await setSound(userId, interaction.guild!.id, soundUrl, locallyStored);
 	}
 	if (defaultForGuildId) {
 		interaction.followUp(

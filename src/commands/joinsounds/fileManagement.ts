@@ -101,7 +101,12 @@ export async function storeJoinsoundOfUser(
 
 export async function removeJoinsoundOfUser(target: JoinsoundTarget) {
 	const filename = getFilename(target);
-	await unlink(filename);
+	await unlink(filename).catch((error) => {
+		// If the error is that it doesn't exists, that's fine
+		if (error.code !== 'ENOENT') {
+			throw error;
+		}
+	});
 }
 
 export function getJoinsoundLocationOfUser(target: JoinsoundTarget) {
