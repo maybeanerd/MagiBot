@@ -4,7 +4,7 @@ import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
-import { addSound, setDefaultGuildJoinsound, validateAndSaveJoinsound } from '../joinsounds/management';
+import { removeSound, setDefaultGuildJoinsound, validateAndSaveJoinsound } from '../joinsounds/management';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -59,7 +59,7 @@ async function runCommand(interaction: CommandInteraction) {
 	}
 	if (subcommand === 'remove') {
 		const user = interaction.options.getUser('user', true);
-		await addSound(user.id, undefined, guild.id);
+		await removeSound(user.id, guild.id);
 		interaction.followUp(`You successfully removed ${user}s joinsound!`);
 		return;
 	}

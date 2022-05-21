@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { isShadowBanned, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
-import { addGlobalSound, addSound, validateAndSaveJoinsound } from './joinsounds/management';
+import { removeDefaultSound, removeSound, validateAndSaveJoinsound } from './joinsounds/management';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -79,11 +79,11 @@ async function runCommand(interaction: CommandInteraction) {
 		await validateAndSaveJoinsound(attachment, interaction, true);
 	}
 	if (subcommand === 'remove') {
-		await addSound(user.id, undefined, guild.id);
+		await removeSound(user.id, guild.id);
 		interaction.followUp('Successfully removed your joinsound!');
 	}
 	if (subcommand === 'remove-default') {
-		await addGlobalSound(user.id, undefined);
+		await removeDefaultSound(user.id);
 		interaction.followUp('Successfully removed your default joinsound!');
 	}
 }

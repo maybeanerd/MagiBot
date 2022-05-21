@@ -3,7 +3,7 @@ import ffprobeStatic from 'ffprobe-static';
 import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
 
-export async function addSound(
+async function addSound(
 	userid: string,
 	surl: string | undefined,
 	guildID: string,
@@ -14,11 +14,23 @@ export async function addSound(
 	return true;
 }
 
-export async function addGlobalSound(userId: string, surl: string | undefined) {
+export async function removeSound(
+	userid: string,
+	guildID: string,
+) {
+	return addSound(userid, undefined, guildID);
+}
+
+async function addDefaultSound(userId: string, surl: string | undefined) {
 	const user = await getGlobalUser(userId);
 	user.sound = surl;
 	await user.save();
 	return true;
+}
+export async function removeDefaultSound(
+	userid: string,
+) {
+	return addDefaultSound(userid, undefined);
 }
 
 export async function setDefaultGuildJoinsound(
@@ -93,7 +105,7 @@ export async function validateAndSaveJoinsound(
 	if (defaultForGuildId) {
 		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl);
 	} else if (setDefault) {
-		await addGlobalSound(userId, soundUrl);
+		await addDefaultSound(userId, soundUrl);
 	} else {
 		await addSound(userId, soundUrl, interaction.guild!.id);
 	}
