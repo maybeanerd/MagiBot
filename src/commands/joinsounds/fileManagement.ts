@@ -97,3 +97,10 @@ export async function removeJoinsoundOfUser(
 	const filename = getFilename(member, isDefault);
 	await unlink(filename);
 }
+
+export function getJoinsoundLocationOfUser(
+	member: GuildMember,
+	isDefault = false,
+) {
+	return getFilename(member, isDefault);
+}

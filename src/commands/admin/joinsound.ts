@@ -4,11 +4,7 @@ import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
-import {
-	addSound,
-	setDefaultGuildJoinsound,
-	validateJoinsound,
-} from '../joinsound';
+import { addSound, setDefaultGuildJoinsound, validateAndSaveJoinsound } from '../joinsounds/management';
 
 function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
@@ -53,12 +49,12 @@ async function runCommand(interaction: CommandInteraction) {
 	if (subcommand === 'set') {
 		const user = interaction.options.getUser('user', true);
 		const attachment = interaction.options.getAttachment('sound', true);
-		validateJoinsound(attachment, interaction, false, user);
+		validateAndSaveJoinsound(attachment, interaction, false, user);
 		return;
 	}
 	if (subcommand === 'set-default') {
 		const attachment = interaction.options.getAttachment('sound', true);
-		validateJoinsound(attachment, interaction, true, undefined, guild.id);
+		validateAndSaveJoinsound(attachment, interaction, true, undefined, guild.id);
 		return;
 	}
 	if (subcommand === 'remove') {
