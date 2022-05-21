@@ -18,11 +18,14 @@ export async function setupLocalFolders() {
 
 async function downloadFile(url: string, path: string) {
 	console.log('downloading file....');
-	get(url, (res) => {
-		const writeStream = createWriteStream(path);
-		res.pipe(writeStream);
-		writeStream.on('finish', () => {
-			writeStream.close();
+	return new Promise<void>((resolve /* , reject */) => {
+		get(url, (res) => {
+			const writeStream = createWriteStream(path);
+			res.pipe(writeStream);
+			writeStream.on('finish', () => {
+				writeStream.close();
+				resolve();
+			});
 		});
 	});
 }
@@ -47,8 +50,12 @@ async function doesServerHaveEnoughSpace() {
 	return sizeOfFolder <= fourtyGigabyte;
 }
 
+function getMemberPath(member: GuildMember) {
+	return Path.join(basePath, `user_${member.id}`);
+}
+
 async function doesUserHaveEnoughSpace(member: GuildMember) {
-	const path = Path.join(basePath, member.id);
+	const path = getMemberPath(member);
 	await mkdir(path).catch((error) => {
 		// If the error is that it already exists, that's fine
 		if (error.code !== 'EEXIST') {
@@ -60,15 +67,15 @@ async function doesUserHaveEnoughSpace(member: GuildMember) {
 	return sizeOfFolder <= oneMegabyte;
 }
 
-function getFilename(member: GuildMember, global: boolean) {
-	const title = global ? 'global' : member.guild.id;
-	return Path.join(basePath, member.id, `${title}.audio`);
+function getFilename(member: GuildMember, isDefault: boolean) {
+	const title = isDefault ? 'default' : `guild_${member.guild.id}`;
+	return Path.join(getMemberPath(member), title);
 }
 
 export async function storeJoinsoundOfUser(
 	member: GuildMember,
 	fileUrl: string,
-	global = false,
+	isDefault = false,
 ) {
 	if (!(await doesServerHaveEnoughSpace())) {
 		// this should not happen. but if it does, we handle it to stop the server from being overloaded
@@ -78,15 +85,15 @@ export async function storeJoinsoundOfUser(
 		console.log('folder too large already!');
 		return false;
 	}
-	const filename = getFilename(member, global);
+	const filename = getFilename(member, isDefault);
 	await downloadFile(fileUrl, filename);
 	return true;
 }
 
 export async function removeJoinsoundOfUser(
 	member: GuildMember,
-	global = false,
+	isDefault = false,
 ) {
-	const filename = getFilename(member, global);
+	const filename = getFilename(member, isDefault);
 	await unlink(filename);
 }
