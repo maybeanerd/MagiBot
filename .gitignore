@@ -292,3 +292,6 @@ startForWin.txt
 dist/
 .env
 src/botlistTokens.json
+
+# locally stored joinsound files
+/joinsounds
