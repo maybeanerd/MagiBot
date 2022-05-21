@@ -9,6 +9,7 @@ import {
 	DiscordGatewayAdapterCreator,
 	generateDependencyReport,
 	joinVoiceChannel,
+	StreamType,
 } from '@discordjs/voice';
 import config from './configuration';
 import {
@@ -33,14 +34,18 @@ import {
 	isBlacklistedUser,
 	toggleStillMuted,
 	isJoinableVc,
-	getSoundOfUser,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import { asyncForEach } from './helperFunctions';
+import { asyncForEach, asyncWait } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
-// import { saveJoinsoundOfUser, setupLocalFolders } from './commands/joinsounds/fileManagement';
+import {
+	removeJoinsoundOfUser,
+	storeJoinsoundOfUser,
+	setupLocalFolders,
+} from './commands/joinsounds/fileManagement';
+import { getJoinsoundOfUser } from './commands/joinsounds/management';
 
 console.log(generateDependencyReport());
 
@@ -261,7 +266,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
 				if (perms && perms.has('CONNECT')) {
-					let sound = await getSoundOfUser(n.id, n.guild.id);
+					let sound = await getJoinsoundOfUser(n.id, n.guild.id);
 					if (shadowBanned !== shadowBannedLevel.not) {
 						sound = shadowBannedSound;
 					}
@@ -274,7 +279,11 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						});
 						const player = createAudioPlayer();
 						connection.subscribe(player);
-						const resource = createAudioResource(sound, { inlineVolume: true });
+						console.log('attempting to play sound', sound);
+						const resource = createAudioResource(sound, {
+							inlineVolume: true,
+							inputType: StreamType.Arbitrary,
+						});
 						player.play(resource);
             resource.volume!.setVolume(0.5);
             saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
@@ -282,7 +291,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
             const timeoutID = setTimeout(() => {
-            /* eslint-disable no-mixed-spaces-and-tabs */
+            	/* eslint-disable no-mixed-spaces-and-tabs */
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
@@ -327,6 +336,27 @@ bot.on('disconnect', () => {
 
 bot.login(TOKEN); // connect to discord
 
-/* setupLocalFolders().then(() => {
-	saveJoinsoundOfUser({ id: 'memberId', guild: { id: 'guildId' } } as any, 'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3');
-}); */
+setupLocalFolders().then(async () => {
+	const userSettings = {
+		userId: '166649033669083136',
+		guildId: '185865847724572672',
+	};
+	const defaultUserSettings = {
+		userId: userSettings.userId,
+		default: true as true,
+	};
+	await storeJoinsoundOfUser(
+		userSettings,
+		'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3',
+	);
+	await storeJoinsoundOfUser(
+		defaultUserSettings,
+		'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3',
+	);
+	console.log('stored joinsound');
+	await asyncWait(2000);
+	await removeJoinsoundOfUser(userSettings);
+	await removeJoinsoundOfUser(userSettings);
+	await removeJoinsoundOfUser(defaultUserSettings);
+	console.log('removed joinsound');
+});

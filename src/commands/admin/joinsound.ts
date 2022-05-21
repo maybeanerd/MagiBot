@@ -94,7 +94,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 		.setDescription('Manage joinsounds on this guild.')
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
-			.setDescription('Set someones joinsound.')
+			.setDescription('Set someones joinsound.') // TODO allow this only with URL, not attachment. otherwise admins could fill storage of other users
 			.addAttachmentOption((option) => option
 				.setName('user')
 				.setDescription('The user you want to set the sound for.')

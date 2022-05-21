@@ -2,7 +2,11 @@ import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
-import { removeJoinsoundOfUser, storeJoinsoundOfUser } from './fileManagement';
+import {
+	getJoinsoundReadableStreamOfUser,
+	removeJoinsoundOfUser,
+	storeJoinsoundOfUser,
+} from './fileManagement';
 
 async function setSound(
 	userId: string,
@@ -15,10 +19,10 @@ async function setSound(
 		user.sound = soundUrl;
 	} else if (soundUrl) {
 		user.sound = 'local';
-		await storeJoinsoundOfUser({ userId, guildId, default: false }, soundUrl);
+		await storeJoinsoundOfUser({ userId, guildId }, soundUrl);
 	} else {
 		user.sound = undefined;
-		await removeJoinsoundOfUser({ userId, guildId, default: false });
+		await removeJoinsoundOfUser({ userId, guildId });
 	}
 	await user.save();
 	return true;
@@ -34,6 +38,7 @@ async function setDefaultSound(
 	locallyStored: boolean,
 ) {
 	const user = await getGlobalUser(userId);
+
 	if (!locallyStored) {
 		user.sound = soundUrl;
 	} else if (soundUrl) {
@@ -43,6 +48,8 @@ async function setDefaultSound(
 		user.sound = undefined;
 		await removeJoinsoundOfUser({ userId, default: true });
 	}
+
+	await user.save();
 	return true;
 }
 
@@ -55,12 +62,18 @@ async function setDefaultGuildJoinsound(
 	soundUrl: string | undefined,
 	locallyStored: boolean,
 ) {
-	// TODO add option to make this locally work
-	if (locallyStored) {
-		throw new Error('Not implemented yet');
-	}
 	const guild = await getSettings(guildId);
-	guild.defaultJoinsound = soundUrl;
+
+	if (!locallyStored) {
+		guild.defaultJoinsound = soundUrl;
+	} else if (soundUrl) {
+		guild.defaultJoinsound = 'local';
+		await storeJoinsoundOfUser({ guildId, default: true }, soundUrl);
+	} else {
+		guild.defaultJoinsound = undefined;
+		await removeJoinsoundOfUser({ guildId, default: true });
+	}
+
 	await guild.save();
 	return true;
 }
@@ -149,4 +162,32 @@ export async function validateAndSaveJoinsound(
 			`You successfully changed your ${setDefault ? 'default ' : ''}joinsound!`,
 		);
 	}
+}
+
+export async function getJoinsoundOfUser(userId: string, guildId: string) {
+	const user = await getUser(userId, guildId);
+	if (user.sound && user.sound !== 'false') {
+		if (user.sound === 'local') {
+			return getJoinsoundReadableStreamOfUser({ userId, guildId });
+		}
+		return user.sound;
+	}
+	const defaultUser = await getGlobalUser(userId);
+	if (defaultUser.sound && defaultUser.sound !== 'false') {
+		if (defaultUser.sound === 'local') {
+			return getJoinsoundReadableStreamOfUser({ userId, default: true });
+		}
+		return defaultUser.sound;
+	}
+	const defaultGuildSound = await getSettings(guildId);
+	if (
+		defaultGuildSound.defaultJoinsound
+    && defaultGuildSound.defaultJoinsound !== 'false'
+	) {
+		if (defaultGuildSound.defaultJoinsound === 'local') {
+			return getJoinsoundReadableStreamOfUser({ guildId, default: true });
+		}
+		return defaultGuildSound.defaultJoinsound;
+	}
+	return null;
 }

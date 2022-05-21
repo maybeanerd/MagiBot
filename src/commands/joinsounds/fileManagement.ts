@@ -1,4 +1,4 @@
-import { createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
 import Path from 'path';
 import { get } from 'node:https';
@@ -6,15 +6,10 @@ import fastFolderSize from 'fast-folder-size';
 
 const basePath = Path.join(__dirname, '../../../joinsounds');
 
-type JoinsoundTarget = { userId: string } & (
-  | {
-      guildId: string;
-      default: false;
-    }
-  | {
-      default: true;
-    }
-);
+type JoinsoundTarget =
+  | { userId: string; guildId: string; default?: undefined }
+  | { userId: string; guildId?: undefined; default: true }
+  | { userId?: undefined; guildId: string; default: true };
 
 export async function setupLocalFolders() {
 	await mkdir(basePath).catch((error) => {
@@ -59,13 +54,16 @@ async function doesServerHaveEnoughSpace() {
 	return sizeOfFolder <= fourtyGigabyte;
 }
 
-function getUserPath(target: JoinsoundTarget) {
-	return Path.join(basePath, `user_${target.userId}`);
+function getTargetPath(target: JoinsoundTarget) {
+	return Path.join(
+		basePath,
+		target.userId ? `user_${target.userId}` : `guild_${target.guildId}`,
+	);
 }
 
 async function doesUserHaveEnoughSpace(target: JoinsoundTarget) {
 	// TODO if the user overwrites a sound, dont count that against size here
-	const path = getUserPath(target);
+	const path = getTargetPath(target);
 	await mkdir(path).catch((error) => {
 		// If the error is that it already exists, that's fine
 		if (error.code !== 'EEXIST') {
@@ -79,7 +77,7 @@ async function doesUserHaveEnoughSpace(target: JoinsoundTarget) {
 
 function getFilename(target: JoinsoundTarget) {
 	const title = target.default ? 'default' : `guild_${target.guildId}`;
-	return Path.join(getUserPath(target), title);
+	return Path.join(getTargetPath(target), title);
 }
 
 export async function storeJoinsoundOfUser(
@@ -109,6 +107,6 @@ export async function removeJoinsoundOfUser(target: JoinsoundTarget) {
 	});
 }
 
-export function getJoinsoundLocationOfUser(target: JoinsoundTarget) {
-	return getFilename(target);
+export function getJoinsoundReadableStreamOfUser(target: JoinsoundTarget) {
+	return createReadStream(getFilename(target));
 }
