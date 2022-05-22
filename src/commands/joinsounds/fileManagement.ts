@@ -11,7 +11,7 @@ type JoinsoundTarget =
   | { userId: string; guildId?: undefined; default: true }
   | { userId?: undefined; guildId: string; default: true };
 
-export async function setupLocalFolders() {
+async function setupLocalFolders() {
 	await mkdir(basePath).catch((error) => {
 		// If the error is that it already exists, that's fine
 		if (error.code !== 'EEXIST') {
@@ -19,6 +19,7 @@ export async function setupLocalFolders() {
 		}
 	});
 }
+setupLocalFolders();
 
 async function downloadFile(url: string, path: string) {
 	console.log('downloading file from url', url);

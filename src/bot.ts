@@ -35,15 +35,10 @@ import {
 	isJoinableVc,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
-import { asyncForEach, asyncWait } from './helperFunctions';
+import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
-import {
-	removeJoinsoundOfUser,
-	storeJoinsoundOfUser,
-	setupLocalFolders,
-} from './commands/joinsounds/fileManagement';
 import { getJoinsoundOfUser } from './commands/joinsounds/management';
 
 console.log(generateDependencyReport());
@@ -195,20 +190,6 @@ bot.on('error', (err) => {
 	console.error(err);
 });
 
-bot.on('interactionCreate', async (interaction) => {
-	/* if (interaction.isButton()) {
-		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
-		switch (buttonType) {
-		default:
-			console.info('Got button interaction!', buttonType);
-			break;
-		}
-	} */
-	if (!interaction.isButton()) {
-		// TODO work with interactions here
-	}
-});
-
 bot.on('voiceStateUpdate', async (o, n) => {
 	try {
 		const newVc = n.channel;
@@ -278,7 +259,6 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						});
 						const player = createAudioPlayer();
 						connection.subscribe(player);
-						console.log('attempting to play sound', sound);
 						const resource = createAudioResource(sound, {
 							inlineVolume: true,
 						});
@@ -333,28 +313,3 @@ bot.on('disconnect', () => {
 });
 
 bot.login(TOKEN); // connect to discord
-
-setupLocalFolders().then(async () => {
-	const userSettings = {
-		userId: '166649033669083136',
-		guildId: '185865847724572672',
-	};
-	const defaultUserSettings = {
-		userId: userSettings.userId,
-		default: true as true,
-	};
-	await storeJoinsoundOfUser(
-		userSettings,
-		'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3',
-	);
-	await storeJoinsoundOfUser(
-		defaultUserSettings,
-		'https://cdn.discordapp.com/attachments/198764451132997632/525319583293243392/OopsieDoopsie.mp3',
-	);
-	console.log('stored joinsound');
-	await asyncWait(2000);
-	await removeJoinsoundOfUser(userSettings);
-	await removeJoinsoundOfUser(userSettings);
-	await removeJoinsoundOfUser(defaultUserSettings);
-	console.log('removed joinsound');
-});
