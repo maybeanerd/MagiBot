@@ -9,7 +9,6 @@ import {
 	DiscordGatewayAdapterCreator,
 	generateDependencyReport,
 	joinVoiceChannel,
-	StreamType,
 } from '@discordjs/voice';
 import config from './configuration';
 import {
@@ -282,7 +281,6 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						console.log('attempting to play sound', sound);
 						const resource = createAudioResource(sound, {
 							inlineVolume: true,
-							inputType: StreamType.Arbitrary,
 						});
 						player.play(resource);
             resource.volume!.setVolume(0.5);
@@ -290,8 +288,8 @@ bot.on('voiceStateUpdate', async (o, n) => {
             // 8 seconds is max play time:
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
+            /* eslint-disable no-mixed-spaces-and-tabs */
             const timeoutID = setTimeout(() => {
-            	/* eslint-disable no-mixed-spaces-and-tabs */
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();
