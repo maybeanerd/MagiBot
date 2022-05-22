@@ -1,5 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, unlink } from 'node:fs/promises';
+import { mkdir, unlink, stat } from 'node:fs/promises';
 import Path from 'path';
 import { get } from 'node:https';
 import fastFolderSize from 'fast-folder-size';
@@ -57,7 +57,6 @@ const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
 async function doesServerHaveEnoughSpace() {
 	const sizeOfFolder = await getFolderSize(basePath);
-	console.log('sizeOfServerFolder', sizeOfFolder);
 	return sizeOfFolder <= fourtyGigabyte;
 }
 
@@ -68,7 +67,7 @@ function getTargetPath(target: JoinsoundTarget) {
 	);
 }
 
-async function doesUserHaveEnoughSpace(target: JoinsoundTarget) {
+async function doesUserHaveEnoughSpace(target: JoinsoundTarget, targetFileName : string) {
 	// TODO if the user overwrites a sound, dont count that against size here
 	const path = getTargetPath(target);
 	await mkdir(path).catch((error) => {
@@ -78,8 +77,15 @@ async function doesUserHaveEnoughSpace(target: JoinsoundTarget) {
 		}
 	});
 	const sizeOfFolder = await getFolderSize(path);
-	console.log('sizeOfFolder', sizeOfFolder);
-	return sizeOfFolder <= oneMegabyte;
+	const statsOfExistingFile = await stat(targetFileName).catch((error) => {
+		console.error(error);
+		// If the error is that it doesn't exists, that's fine
+		if (error.code !== 'ENOENT') {
+			throw error;
+		}
+	});
+	const sizeOfExistingFile = statsOfExistingFile?.size || 0;
+	return (sizeOfFolder - sizeOfExistingFile) <= oneMegabyte;
 }
 
 function getFilename(target: JoinsoundTarget) {
@@ -95,11 +101,11 @@ export async function storeJoinsoundOfTarget(
 		// this should not happen. but if it does, we handle it to stop the server from being overloaded
 		return JoinsoundStoreError.noStorageLeftOnServer;
 	}
-	if (!(await doesUserHaveEnoughSpace(target))) {
+	const filename = getFilename(target);
+	if (!(await doesUserHaveEnoughSpace(target, filename))) {
 		console.log('folder too large already!');
 		return JoinsoundStoreError.noStorageLeftForUser;
 	}
-	const filename = getFilename(target);
 	await downloadFile(fileUrl, filename);
 	return null;
 }
