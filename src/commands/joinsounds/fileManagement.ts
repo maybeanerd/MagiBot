@@ -28,7 +28,6 @@ async function setupLocalFolders() {
 setupLocalFolders();
 
 async function downloadFile(url: string, path: string) {
-	console.log('downloading file from url', url);
 	return new Promise<void>((resolve /* , reject */) => {
 		get(url, (res) => {
 			const writeStream = createWriteStream(path);
@@ -101,7 +100,6 @@ export async function storeJoinsoundOfTarget(
 	}
 	const filename = getFilename(target);
 	if (!(await doesUserHaveEnoughSpace(target, filename))) {
-		console.log('folder too large already!');
 		return JoinsoundStoreError.noStorageLeftForUser;
 	}
 	await downloadFile(fileUrl, filename);
