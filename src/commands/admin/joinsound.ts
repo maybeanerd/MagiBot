@@ -52,13 +52,19 @@ async function runCommand(interaction: CommandInteraction) {
     | 'remove-default';
 
 	if (subcommand === 'set') {
-		const user = interaction.options.getUser('user', true);
-		const attachment = interaction.options.getAttachment('sound', true);
+		const user = interaction.options.getUser(JoinsoundOptions.user, true);
+		const attachment = interaction.options.getString(
+			JoinsoundOptions.directUrl,
+			true,
+		);
 		validateAndSaveJoinsound(attachment, interaction, false, user);
 		return;
 	}
 	if (subcommand === 'set-default') {
-		const attachment = interaction.options.getAttachment('sound', true);
+		const attachment = interaction.options.getAttachment(
+			JoinsoundOptions.soundFile,
+			true,
+		);
 		validateAndSaveJoinsound(
 			attachment,
 			interaction,
@@ -69,7 +75,7 @@ async function runCommand(interaction: CommandInteraction) {
 		return;
 	}
 	if (subcommand === 'remove') {
-		const user = interaction.options.getUser('user', true);
+		const user = interaction.options.getUser(JoinsoundOptions.user, true);
 		await removeSound(user.id, guild.id);
 		interaction.followUp(`You successfully removed ${user}s joinsound!`);
 		return;
@@ -95,15 +101,15 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 		.setDescription('Manage joinsounds on this guild.')
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
-			.setDescription('Set someones joinsound.') // TODO allow this only with URL, not attachment. otherwise admins could fill storage of other users
+			.setDescription('Set someones joinsound.')
 			.addAttachmentOption((option) => option
 				.setName(JoinsoundOptions.user)
 				.setDescription('The user you want to set the sound for.')
 				.setRequired(true))
 			.addAttachmentOption((option) => option
-				.setName(JoinsoundOptions.soundFile)
+				.setName(JoinsoundOptions.directUrl)
 				.setDescription(
-					'The sound you want to use. Mp3 or wav, max length of 8 seconds.',
+					'A direct link to the sound you want to use. Max length of 8 seconds.',
 				)
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand
