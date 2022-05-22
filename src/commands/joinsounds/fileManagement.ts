@@ -68,7 +68,6 @@ function getTargetPath(target: JoinsoundTarget) {
 }
 
 async function doesUserHaveEnoughSpace(target: JoinsoundTarget, targetFileName : string) {
-	// TODO if the user overwrites a sound, dont count that against size here
 	const path = getTargetPath(target);
 	await mkdir(path).catch((error) => {
 		// If the error is that it already exists, that's fine
@@ -78,7 +77,6 @@ async function doesUserHaveEnoughSpace(target: JoinsoundTarget, targetFileName :
 	});
 	const sizeOfFolder = await getFolderSize(path);
 	const statsOfExistingFile = await stat(targetFileName).catch((error) => {
-		console.error(error);
 		// If the error is that it doesn't exists, that's fine
 		if (error.code !== 'ENOENT') {
 			throw error;
