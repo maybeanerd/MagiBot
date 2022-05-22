@@ -81,7 +81,7 @@ function getFilename(target: JoinsoundTarget) {
 	return Path.join(getTargetPath(target), title);
 }
 
-export async function storeJoinsoundOfUser(
+export async function storeJoinsoundOfTarget(
 	target: JoinsoundTarget,
 	fileUrl: string,
 ) {
@@ -98,7 +98,7 @@ export async function storeJoinsoundOfUser(
 	return true;
 }
 
-export async function removeJoinsoundOfUser(target: JoinsoundTarget) {
+export async function removeLocallyStoredJoinsoundOfTarget(target: JoinsoundTarget) {
 	const filename = getFilename(target);
 	await unlink(filename).catch((error) => {
 		// If the error is that it doesn't exists, that's fine

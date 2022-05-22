@@ -4,9 +4,16 @@ import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
 import {
 	getJoinsoundReadableStreamOfUser,
-	removeJoinsoundOfUser,
-	storeJoinsoundOfUser,
+	removeLocallyStoredJoinsoundOfTarget,
+	storeJoinsoundOfTarget,
 } from './fileManagement';
+
+// eslint-disable-next-line no-shadow
+export enum JoinsoundOptions {
+  'soundFile' = 'sound-file',
+  'directUrl' = 'direct-url',
+  'user' = 'user',
+}
 
 async function setSound(
 	userId: string,
@@ -17,12 +24,16 @@ async function setSound(
 	const user = await getUser(userId, guildId);
 	if (!locallyStored) {
 		user.sound = soundUrl;
+		await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
 	} else if (soundUrl) {
 		user.sound = 'local';
-		await storeJoinsoundOfUser({ userId, guildId }, soundUrl);
+		const success = await storeJoinsoundOfTarget({ userId, guildId }, soundUrl);
+		if (!success) {
+			return false;
+		}
 	} else {
 		user.sound = undefined;
-		await removeJoinsoundOfUser({ userId, guildId });
+		await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
 	}
 	await user.save();
 	return true;
@@ -41,12 +52,19 @@ async function setDefaultSound(
 
 	if (!locallyStored) {
 		user.sound = soundUrl;
+		await removeLocallyStoredJoinsoundOfTarget({ userId, default: true });
 	} else if (soundUrl) {
 		user.sound = 'local';
-		await storeJoinsoundOfUser({ userId, default: true }, soundUrl);
+		const success = await storeJoinsoundOfTarget(
+			{ userId, default: true },
+			soundUrl,
+		);
+		if (!success) {
+			return false;
+		}
 	} else {
 		user.sound = undefined;
-		await removeJoinsoundOfUser({ userId, default: true });
+		await removeLocallyStoredJoinsoundOfTarget({ userId, default: true });
 	}
 
 	await user.save();
@@ -66,12 +84,19 @@ async function setDefaultGuildJoinsound(
 
 	if (!locallyStored) {
 		guild.defaultJoinsound = soundUrl;
+		await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
 	} else if (soundUrl) {
 		guild.defaultJoinsound = 'local';
-		await storeJoinsoundOfUser({ guildId, default: true }, soundUrl);
+		const success = await storeJoinsoundOfTarget(
+			{ guildId, default: true },
+			soundUrl,
+		);
+		if (!success) {
+			return false;
+		}
 	} else {
 		guild.defaultJoinsound = undefined;
-		await removeJoinsoundOfUser({ guildId, default: true });
+		await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
 	}
 
 	await guild.save();
@@ -151,6 +176,7 @@ export async function validateAndSaveJoinsound(
 	} else {
 		await setSound(userId, interaction.guild!.id, soundUrl, locallyStored);
 	}
+	// TODO differentiate errors here
 	if (defaultForGuildId) {
 		interaction.followUp(
 			'You successfully changed the default joinsound for this server!',

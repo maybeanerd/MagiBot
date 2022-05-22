@@ -5,6 +5,7 @@ import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import {
+	JoinsoundOptions,
 	removeDefaultGuildJoinsound,
 	removeSound,
 	validateAndSaveJoinsound,
@@ -96,11 +97,11 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 			.setName('set')
 			.setDescription('Set someones joinsound.') // TODO allow this only with URL, not attachment. otherwise admins could fill storage of other users
 			.addAttachmentOption((option) => option
-				.setName('user')
+				.setName(JoinsoundOptions.user)
 				.setDescription('The user you want to set the sound for.')
 				.setRequired(true))
 			.addAttachmentOption((option) => option
-				.setName('sound')
+				.setName(JoinsoundOptions.soundFile)
 				.setDescription(
 					'The sound you want to use. Mp3 or wav, max length of 8 seconds.',
 				)
@@ -109,14 +110,14 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 			.setName('remove')
 			.setDescription('Remove someones joinsound.')
 			.addUserOption((option) => option
-				.setName('user')
+				.setName(JoinsoundOptions.user)
 				.setDescription('Remove the joinsound of a user on this guild.')
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set-default')
 			.setDescription('Set the default joinsound for this server.')
 			.addAttachmentOption((option) => option
-				.setName('sound')
+				.setName(JoinsoundOptions.soundFile)
 				.setDescription(
 					'The sound you want to use per default on this guild. Mp3 or wav, max length of 8 seconds.',
 				)

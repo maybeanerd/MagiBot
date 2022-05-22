@@ -9,7 +9,7 @@ import { commandCategories } from '../../types/enums';
 import { salt } from './salt';
 import { joinsound } from './joinsound';
 
-// TODO make this only available to admins!
+// TODO make this only available to admins? might be possible to adjust visibility of commands
 const adminApplicationCommandBase = new SlashCommandBuilder()
 	.setName('admin')
 	.setDescription('Admin only commands.');
