@@ -1,14 +1,10 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
 import { vote } from './commands/old/vote';
-import { sound } from './commands/old/sound';
-// eslint-disable-next-line import/no-cycle
-import { stats } from './commands/old/stats';
 // eslint-disable-next-line import/no-cycle
 import { inf as info } from './commands/old/info';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/old/@queue';
-import { sound as _sound } from './commands/old/@sound';
 import { setup as _setup } from './commands/old/@setup';
 // eslint-disable-next-line import/no-cycle
 import { update as _update } from './commands/old/@update';
@@ -33,12 +29,9 @@ import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
 	_queue,
-	_sound,
 	_setup,
 	_update,
 	help,
-	stats,
-	sound,
 	vote,
 	info,
 };
@@ -52,6 +45,8 @@ const migratedCommands = new Map([
 	['salt', 'salt'],
 	['profile', 'profile'],
 	['_salt', 'salt'], // admin command
+	['_sound', 'joinsound'], // admin command
+	['sound', 'joinsound'],
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(
@@ -61,7 +56,10 @@ async function sendMigrationMessageIfComandHasBeenMigrated(
 ) {
 	const migratedCommand = migratedCommands.get(commandName);
 	if (migratedCommand) {
-		await notifyAboutSlashCommand(message, isAdminCommand ? `admin ${migratedCommand}` : migratedCommand);
+		await notifyAboutSlashCommand(
+			message,
+			isAdminCommand ? `admin ${migratedCommand}` : migratedCommand,
+		);
 	}
 }
 
@@ -171,7 +169,11 @@ export async function checkCommand(message: Discord.Message) {
 			}
 			// Check if the command exists, to not just spam k: msgs
 			if (!commands[command]) {
-				await sendMigrationMessageIfComandHasBeenMigrated(message, command, true);
+				await sendMigrationMessageIfComandHasBeenMigrated(
+					message,
+					command,
+					true,
+				);
 				return;
 			}
 			if (

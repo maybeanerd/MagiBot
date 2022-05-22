@@ -91,25 +91,6 @@ export async function getSettings(guildID: string) {
 	return result;
 }
 
-export async function getSoundOfUser(userId: string, guildId: string) {
-	const user = await getUser(userId, guildId);
-	if (user.sound && user.sound !== 'false') {
-		return user.sound;
-	}
-	const defaultUser = await getGlobalUser(userId);
-	if (defaultUser.sound && defaultUser.sound !== 'false') {
-		return defaultUser.sound;
-	}
-	const defaultGuildSound = await getSettings(guildId);
-	if (
-		defaultGuildSound.defaultJoinsound
-    && defaultGuildSound.defaultJoinsound !== 'false'
-	) {
-		return defaultGuildSound.defaultJoinsound;
-	}
-	return null;
-}
-
 export async function checkGuild(id: string) {
 	// create settings
 	if (await getSettings(id)) {

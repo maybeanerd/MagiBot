@@ -77,13 +77,13 @@ async function resetSaltOfGuild(interaction: CommandInteraction) {
 	if (confirmation) {
 		const guild = interaction.guild!;
 		await resetSalt(guild);
-		confirmation.reply(`Successfully reset all salt on **${guild.name}**!`);
+		confirmation.followUp(`Successfully reset all salt on **${guild.name}**!`);
 	}
 }
 
 async function clearAllSaltOfUser(interaction: CommandInteraction, user: User) {
 	if (user.bot) {
-		interaction.reply('Bots are never salty!');
+		interaction.followUp('Bots are never salty!');
 		return;
 	}
 	const confirm = await interactionConfirmation(
@@ -92,13 +92,13 @@ async function clearAllSaltOfUser(interaction: CommandInteraction, user: User) {
 	);
 	if (confirm) {
 		await clearSaltOfUser(user.id, interaction.guild!);
-		confirm.reply(`Successfully cleared all salt from ${user}!`);
+		confirm.followUp(`Successfully cleared all salt from ${user}!`);
 	}
 }
 
 async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
 	if (user.bot) {
-		interaction.reply('Bots are never salty!');
+		interaction.followUp('Bots are never salty!');
 		return;
 	}
 	const confirm = await interactionConfirmation(
@@ -107,9 +107,9 @@ async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
 	);
 	if (confirm) {
 		if (await removeOldestSaltOfUser(user.id, interaction.guild!)) {
-			confirm.reply(`Successfully removed the oldest salt from ${user}!`);
+			confirm.followUp(`Successfully removed the oldest salt from ${user}!`);
 		} else {
-			confirm.reply(`${user} has no salt that could be removed!`);
+			confirm.followUp(`${user} has no salt that could be removed!`);
 		}
 	}
 }

@@ -97,7 +97,6 @@ export async function yesOrNo(
 	);
 	const questionMessage = await msg.channel.send({
 		content: question,
-		// ephemeral: true, // TODO we can only do this if its a reply to an interaction : slash command
 		components: [row],
 	});
 	const time = timeoutTime || 20000;

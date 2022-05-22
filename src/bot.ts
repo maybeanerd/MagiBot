@@ -6,6 +6,7 @@ import {
 	AudioPlayerStatus,
 	createAudioPlayer,
 	createAudioResource,
+	DiscordGatewayAdapterCreator,
 	generateDependencyReport,
 	joinVoiceChannel,
 } from '@discordjs/voice';
@@ -32,13 +33,13 @@ import {
 	isBlacklistedUser,
 	toggleStillMuted,
 	isJoinableVc,
-	getSoundOfUser,
 } from './dbHelpers';
 import { StillMutedModel } from './db';
 import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
+import { getJoinsoundOfUser } from './commands/joinsounds/management';
 
 console.log(generateDependencyReport());
 
@@ -140,7 +141,9 @@ bot.on('message', async (message: Discord.Message) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-	if (!interaction.isCommand()) { return; }
+	if (!interaction.isCommand()) {
+		return;
+	}
 	try {
 		await checkApplicationCommand(interaction);
 	} catch (err) {
@@ -185,20 +188,6 @@ bot.on('guildDelete', async (guild) => {
 
 bot.on('error', (err) => {
 	console.error(err);
-});
-
-bot.on('interactionCreate', async (interaction) => {
-	/* if (interaction.isButton()) {
-		const buttonType: buttonId = interaction.customId.split('-')[0] as any;
-		switch (buttonType) {
-		default:
-			console.info('Got button interaction!', buttonType);
-			break;
-		}
-	} */
-	if (!interaction.isButton()) {
-		// TODO work with interactions here
-	}
 });
 
 bot.on('voiceStateUpdate', async (o, n) => {
@@ -257,7 +246,7 @@ bot.on('voiceStateUpdate', async (o, n) => {
 			) {
 				const perms = newVc.permissionsFor(n.guild.me);
 				if (perms && perms.has('CONNECT')) {
-					let sound = await getSoundOfUser(n.id, n.guild.id);
+					let sound = await getJoinsoundOfUser(n.id, n.guild.id);
 					if (shadowBanned !== shadowBannedLevel.not) {
 						sound = shadowBannedSound;
 					}
@@ -265,19 +254,22 @@ bot.on('voiceStateUpdate', async (o, n) => {
 						const connection = joinVoiceChannel({
 							channelId: newVc.id,
 							guildId: newVc.guild.id,
-							adapterCreator: newVc.guild.voiceAdapterCreator,
+							adapterCreator: newVc.guild
+								.voiceAdapterCreator as DiscordGatewayAdapterCreator,
 						});
 						const player = createAudioPlayer();
 						connection.subscribe(player);
-						const resource = createAudioResource(sound, { inlineVolume: true });
+						const resource = createAudioResource(sound, {
+							inlineVolume: true,
+						});
 						player.play(resource);
             resource.volume!.setVolume(0.5);
             saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
             // 8 seconds is max play time:
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
-            const timeoutID = setTimeout(() => {
             /* eslint-disable no-mixed-spaces-and-tabs */
+            const timeoutID = setTimeout(() => {
             	connection.disconnect();
             	player.removeAllListeners(); // To be sure noone listens to this anymore
             	player.stop();

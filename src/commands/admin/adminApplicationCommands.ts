@@ -7,14 +7,16 @@ import {
 } from '../../types/command';
 import { commandCategories } from '../../types/enums';
 import { salt } from './salt';
+import { joinsound } from './joinsound';
 
-// TODO make this only available to admins!
+// TODO make this only available to admins? might be possible to adjust visibility of commands
 const adminApplicationCommandBase = new SlashCommandBuilder()
 	.setName('admin')
 	.setDescription('Admin only commands.');
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
 	salt,
+	joinsound,
 };
 
 Object.values(adminApplicationCommands).forEach((command) => {
@@ -47,5 +49,5 @@ export const admin: MagibotSlashCommand = {
 	category: commandCategories.admin,
 	run: runCommand,
 	definition: adminApplicationCommandBase.toJSON(),
-	isSlow: false,
+	isSlow: true,
 };
