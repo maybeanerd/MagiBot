@@ -4,12 +4,13 @@ import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
 import {
 	getJoinsoundReadableStreamOfUser,
+	JoinsoundStoreError,
 	removeLocallyStoredJoinsoundOfTarget,
 	storeJoinsoundOfTarget,
 } from './fileManagement';
 
 // eslint-disable-next-line no-shadow
-export enum JoinsoundOptions {
+export const enum JoinsoundOptions {
   'soundFile' = 'sound-file',
   'directUrl' = 'direct-url',
   'user' = 'user',
@@ -20,23 +21,23 @@ async function setSound(
 	guildId: string,
 	soundUrl: string | undefined,
 	locallyStored: boolean,
-) {
+): Promise<JoinsoundStoreError | null> {
 	const user = await getUser(userId, guildId);
 	if (!locallyStored) {
 		user.sound = soundUrl;
 		await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
 	} else if (soundUrl) {
 		user.sound = 'local';
-		const success = await storeJoinsoundOfTarget({ userId, guildId }, soundUrl);
-		if (!success) {
-			return false;
+		const error = await storeJoinsoundOfTarget({ userId, guildId }, soundUrl);
+		if (error) {
+			return error;
 		}
 	} else {
 		user.sound = undefined;
 		await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
 	}
 	await user.save();
-	return true;
+	return null;
 }
 
 export async function removeSound(userId: string, guildId: string) {
@@ -47,7 +48,7 @@ async function setDefaultSound(
 	userId: string,
 	soundUrl: string | undefined,
 	locallyStored: boolean,
-) {
+): Promise<JoinsoundStoreError | null> {
 	const user = await getGlobalUser(userId);
 
 	if (!locallyStored) {
@@ -55,12 +56,12 @@ async function setDefaultSound(
 		await removeLocallyStoredJoinsoundOfTarget({ userId, default: true });
 	} else if (soundUrl) {
 		user.sound = 'local';
-		const success = await storeJoinsoundOfTarget(
+		const error = await storeJoinsoundOfTarget(
 			{ userId, default: true },
 			soundUrl,
 		);
-		if (!success) {
-			return false;
+		if (error) {
+			return error;
 		}
 	} else {
 		user.sound = undefined;
@@ -68,7 +69,7 @@ async function setDefaultSound(
 	}
 
 	await user.save();
-	return true;
+	return null;
 }
 
 export async function removeDefaultSound(userId: string) {
@@ -79,7 +80,7 @@ async function setDefaultGuildJoinsound(
 	guildId: string,
 	soundUrl: string | undefined,
 	locallyStored: boolean,
-) {
+): Promise<JoinsoundStoreError | null> {
 	const guild = await getSettings(guildId);
 
 	if (!locallyStored) {
@@ -87,12 +88,12 @@ async function setDefaultGuildJoinsound(
 		await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
 	} else if (soundUrl) {
 		guild.defaultJoinsound = 'local';
-		const success = await storeJoinsoundOfTarget(
+		const error = await storeJoinsoundOfTarget(
 			{ guildId, default: true },
 			soundUrl,
 		);
-		if (!success) {
-			return false;
+		if (error) {
+			return error;
 		}
 	} else {
 		guild.defaultJoinsound = undefined;
@@ -100,7 +101,7 @@ async function setDefaultGuildJoinsound(
 	}
 
 	await guild.save();
-	return true;
+	return null;
 }
 
 export async function removeDefaultGuildJoinsound(guildId: string) {
@@ -169,25 +170,53 @@ export async function validateAndSaveJoinsound(
 
 	const userId = user ? user.id : interaction.member!.user.id;
 
+	let error: JoinsoundStoreError | null;
+
 	if (defaultForGuildId) {
-		await setDefaultGuildJoinsound(defaultForGuildId, soundUrl, locallyStored);
+		error = await setDefaultGuildJoinsound(
+			defaultForGuildId,
+			soundUrl,
+			locallyStored,
+		);
 	} else if (setDefault) {
-		await setDefaultSound(userId, soundUrl, locallyStored);
+		error = await setDefaultSound(userId, soundUrl, locallyStored);
 	} else {
-		await setSound(userId, interaction.guild!.id, soundUrl, locallyStored);
+		error = await setSound(
+			userId,
+      interaction.guild!.id,
+      soundUrl,
+      locallyStored,
+		);
 	}
-	// TODO differentiate errors here
+	if (error) {
+		if (error === JoinsoundStoreError.noStorageLeftForUser) {
+			interaction.followUp(
+				`**You already have more than 1MB (1 MegaByte) worth of joinsounds!**
+In general this is enough to store about 5 different joinsounds.
+To add new joinsounds you either need to delete some of your old ones, or upload your new ones using the direct-url option, since that will not count towards your storage limit.`,
+			);
+			return;
+		}
+		if (error === JoinsoundStoreError.noStorageLeftOnServer) {
+			interaction.followUp(
+				'This is embarassing. It seems like the server has reached its maximum storage capacity. Feel free to notify the developers about this by using `/bugreport` or on the discord server found in `/info`.',
+			);
+			return;
+		}
+	}
 	if (defaultForGuildId) {
 		interaction.followUp(
 			'You successfully changed the default joinsound for this server!',
 		);
-	} else if (user) {
-		interaction.followUp(`You successfully changed ${user}s joinsound!`);
-	} else {
-		interaction.followUp(
-			`You successfully changed your ${setDefault ? 'default ' : ''}joinsound!`,
-		);
+		return;
 	}
+	if (user) {
+		interaction.followUp(`You successfully changed ${user}s joinsound!`);
+		return;
+	}
+	interaction.followUp(
+		`You successfully changed your ${setDefault ? 'default ' : ''}joinsound!`,
+	);
 }
 
 export async function getJoinsoundOfUser(userId: string, guildId: string) {

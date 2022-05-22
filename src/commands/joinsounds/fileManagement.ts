@@ -11,6 +11,12 @@ type JoinsoundTarget =
   | { userId: string; guildId?: undefined; default: true }
   | { userId?: undefined; guildId: string; default: true };
 
+// eslint-disable-next-line no-shadow
+export const enum JoinsoundStoreError {
+  noStorageLeftOnServer = 0x1000,
+  noStorageLeftForUser = 0x1001,
+}
+
 async function setupLocalFolders() {
 	await mkdir(basePath).catch((error) => {
 		// If the error is that it already exists, that's fine
@@ -87,18 +93,20 @@ export async function storeJoinsoundOfTarget(
 ) {
 	if (!(await doesServerHaveEnoughSpace())) {
 		// this should not happen. but if it does, we handle it to stop the server from being overloaded
-		throw new Error('Server folder is too large!');
+		return JoinsoundStoreError.noStorageLeftOnServer;
 	}
 	if (!(await doesUserHaveEnoughSpace(target))) {
 		console.log('folder too large already!');
-		return false;
+		return JoinsoundStoreError.noStorageLeftForUser;
 	}
 	const filename = getFilename(target);
 	await downloadFile(fileUrl, filename);
-	return true;
+	return null;
 }
 
-export async function removeLocallyStoredJoinsoundOfTarget(target: JoinsoundTarget) {
+export async function removeLocallyStoredJoinsoundOfTarget(
+	target: JoinsoundTarget,
+) {
 	const filename = getFilename(target);
 	await unlink(filename).catch((error) => {
 		// If the error is that it doesn't exists, that's fine
