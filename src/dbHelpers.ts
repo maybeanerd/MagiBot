@@ -1,4 +1,9 @@
-import { TextChannel, Guild, GuildMember } from 'discord.js';
+import {
+	TextChannel,
+	Guild,
+	GuildMember,
+	CommandInteraction,
+} from 'discord.js';
 import {
 	SettingsModel,
 	UserModel,
@@ -84,25 +89,6 @@ export async function getSettings(guildID: string) {
 		result = await firstSettings(guildID);
 	}
 	return result;
-}
-
-export async function getSoundOfUser(userId: string, guildId: string) {
-	const user = await getUser(userId, guildId);
-	if (user.sound && user.sound !== 'false') {
-		return user.sound;
-	}
-	const defaultUser = await getGlobalUser(userId);
-	if (defaultUser.sound && defaultUser.sound !== 'false') {
-		return defaultUser.sound;
-	}
-	const defaultGuildSound = await getSettings(guildId);
-	if (
-		defaultGuildSound.defaultJoinsound
-    && defaultGuildSound.defaultJoinsound !== 'false'
-	) {
-		return defaultGuildSound.defaultJoinsound;
-	}
-	return null;
 }
 
 export async function checkGuild(id: string) {
@@ -322,13 +308,33 @@ export async function isAdmin(guildID: string, member: GuildMember) {
 		return true;
 	}
 	const roles = await getAdminRoles(guildID);
-	let ret = false;
-	roles.forEach((role) => {
-		if (member.roles.cache.has(role)) {
-			ret = true;
+	return member.roles.cache.hasAny(...roles);
+}
+
+export async function interactionMemberIsAdmin(
+	interaction: CommandInteraction,
+) {
+	const { member, guild } = interaction;
+	if (member instanceof GuildMember) {
+		// checks for admin and Owner, they can always use
+		if (member.permissions.has('ADMINISTRATOR', true)) {
+			return true;
 		}
-	});
-	return ret;
+		const roles = await getAdminRoles(guild!.id);
+		return member.roles.cache.hasAny(...roles);
+	}
+	if (member) {
+		// checks for admin and Owner, they can always use
+		if (interaction.memberPermissions?.has('ADMINISTRATOR', true)) {
+			return true;
+		}
+	}
+	// Owner of bot is always admin hehe
+	if (interaction.user.id === OWNERID) {
+		return true;
+	}
+	// default: no admin
+	return false;
 }
 
 export async function getCommandChannels(guildID: string) {

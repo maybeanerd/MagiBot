@@ -1,35 +1,22 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
-import { vote } from './commands/vote';
-import { sound } from './commands/sound';
-import { rfact } from './commands/rfact';
+import { vote } from './commands/old/vote';
 // eslint-disable-next-line import/no-cycle
-import { stats } from './commands/stats';
-import { salt } from './commands/salt';
+import { inf as info } from './commands/old/info';
 // eslint-disable-next-line import/no-cycle
-import { bug } from './commands/bug';
-import { inf as info } from './commands/info';
-import { inv as invite } from './commands/invite';
-import { ping } from './commands/ping';
-import { profile } from './commands/profile';
-import { roll } from './commands/roll';
-import { evall as _eval } from './commands/@eval';
+import { queue as _queue } from './commands/old/@queue';
+import { setup as _setup } from './commands/old/@setup';
 // eslint-disable-next-line import/no-cycle
-import { queue as _queue } from './commands/@queue';
-import { salt as _salt } from './commands/@salt';
-import { sound as _sound } from './commands/@sound';
-import { setup as _setup } from './commands/@setup';
-// eslint-disable-next-line import/no-cycle
-import { update as _update } from './commands/@update';
+import { update as _update } from './commands/old/@update';
 // we allow this cycle once, as the help command also needs to list itself
-import { help } from './commands/help'; // eslint-disable-line import/no-cycle
+import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
 
 import {
 	PREFIXES, OWNERID, DELETE_COMMANDS, user,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { magibotCommand } from './types/magibot';
+import { magibotCommand } from './types/command';
 import {
 	isBlacklistedUser,
 	getCommandChannels,
@@ -38,28 +25,43 @@ import {
 } from './dbHelpers';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
-import { asyncWait } from './helperFunctions';
+import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
-	_eval,
 	_queue,
-	_sound,
 	_setup,
 	_update,
-	_salt,
 	help,
-	salt,
-	stats,
-	rfact,
-	sound,
 	vote,
-	bug,
 	info,
-	invite,
-	ping,
-	profile,
-	roll,
 };
+
+const migratedCommands = new Map([
+	['rfact', 'randomfact'],
+	['bug', 'bugreport'],
+	['invite', 'invite'],
+	['ping', 'ping'],
+	['roll', 'roll'],
+	['salt', 'salt'],
+	['profile', 'profile'],
+	['_salt', 'salt'], // admin command
+	['_sound', 'joinsound'], // admin command
+	['sound', 'joinsound'],
+]);
+
+async function sendMigrationMessageIfComandHasBeenMigrated(
+	message: Discord.Message,
+	commandName: string,
+	isAdminCommand = false,
+) {
+	const migratedCommand = migratedCommands.get(commandName);
+	if (migratedCommand) {
+		await notifyAboutSlashCommand(
+			message,
+			isAdminCommand ? `admin ${migratedCommand}` : migratedCommand,
+		);
+	}
+}
 
 async function catchError(error: Error, msg: Discord.Message, command: string) {
 	console.error(
@@ -70,26 +72,27 @@ async function catchError(error: Error, msg: Discord.Message, command: string) {
 	);
 
 	msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
-If you can reproduce this, consider using \`${
-	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
-}.bug <bugreport>\` or join the support discord (link via \`${
+	If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
 	msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
 }.info\`) to tell us exactly how.`);
 }
 
-async function commandAllowed(guildID: string, cid: string) {
+export async function commandAllowed(guildID: string, channelId?: string) {
+	if (!channelId) {
+		return false;
+	}
 	const channels = await getCommandChannels(guildID);
-	return channels.length === 0 || channels.includes(cid);
+	return channels.length === 0 || channels.includes(channelId);
 }
 
-async function usageUp(userid: string, guildID: string) {
+export async function usageUp(userid: string, guildID: string) {
 	const usr = await getUser(userid, guildID);
 	const updateval = usr.botusage + 1;
 	usr.botusage = updateval;
 	await usr.save();
 }
 
-async function printCommandChannels(guildID: string) {
+export async function printCommandChannels(guildID: string) {
 	const channels = await getCommandChannels(guildID);
 	let out = '';
 	channels.forEach((channel: string) => {
@@ -166,9 +169,16 @@ export async function checkCommand(message: Discord.Message) {
 			}
 			// Check if the command exists, to not just spam k: msgs
 			if (!commands[command]) {
+				await sendMigrationMessageIfComandHasBeenMigrated(
+					message,
+					command,
+					true,
+				);
 				return;
 			}
-			if (!(message.member && (await isAdmin(message.guild.id, message.member)))) {
+			if (
+				!(message.member && (await isAdmin(message.guild.id, message.member)))
+			) {
 				if (myPerms) {
 					if (myPerms.has('MANAGE_MESSAGES')) {
 						message.delete();
@@ -186,12 +196,15 @@ export async function checkCommand(message: Discord.Message) {
 		} else {
 			return;
 		}
-
-		if (
-			commands[command]
-      && (!commands[command].dev || message.author.id === OWNERID)
-		) {
-			if (pre === ':' || (await commandAllowed(message.guild.id, message.channel.id))) {
+		if (!commands[command]) {
+			await sendMigrationMessageIfComandHasBeenMigrated(message, command);
+			return;
+		}
+		if (!commands[command].dev || message.author.id === OWNERID) {
+			if (
+				pre === ':'
+        || (await commandAllowed(message.guild.id, message.channel.id))
+			) {
 				const perms = commands[command].perm;
 				if (!perms || (myPerms && myPerms.has(perms))) {
 					// cooldown for command usage
@@ -201,13 +214,17 @@ export async function checkCommand(message: Discord.Message) {
 							userCooldowns.delete(message.author.id);
 						}, 4000);
 						try {
-							Statcord.ShardingClient.postCommand(command, message.author.id, bot);
+							Statcord.ShardingClient.postCommand(
+								command,
+								message.author.id,
+								bot,
+							);
 							await commands[command].main({ content, message });
 						} catch (err) {
 							catchError(
-								err as Error,
-								message,
-								`${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
+                err as Error,
+                message,
+                `${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
 							);
 						}
 						usageUp(message.author.id, message.guild.id);

@@ -1,23 +1,26 @@
-import { Guild, Message, MessageEmbedOptions } from 'discord.js';
-import * as cmds from '../helperFunctions';
+import {
+	CommandInteraction,
+	Guild,
+	MessageEmbedOptions,
+	User,
+} from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
-import { PREFIXES } from '../shared_assets';
-import { magibotCommand } from '../types/magibot';
+import { MagibotSlashCommand } from '../types/command';
 import { SaltModel, SaltrankModel } from '../db';
 import { updateSaltKing, topSalt } from '../dbHelpers';
 
-async function saltDowntimeDone(userid1: string, userid2: string) {
+async function saltDowntimeDone(salterUserId: string, reporterUserId: string) {
 	// get newest entry in salt
-	const d2 = await SaltModel.find({
-		salter: userid1,
-		reporter: userid2,
+	const saltEntry = await SaltModel.find({
+		salter: salterUserId,
+		reporter: reporterUserId,
 	})
 		.sort({ date: -1 })
 		.limit(1);
-	if (d2[0]) {
-		const d1 = new Date();
-		const ret = (d1.getTime() - d2[0].date.getTime()) / 1000 / 60 / 60;
-		return ret;
+	if (saltEntry[0]) {
+		const now = new Date();
+		return (now.getTime() - saltEntry[0].date.getTime()) / 1000 / 60 / 60;
 	}
 	return 2;
 }
@@ -59,7 +62,7 @@ export async function saltGuild(
 	}
 }
 
-export async function saltUp(
+async function saltUp(
 	salter: string,
 	reporter: string,
 	guild: Guild,
@@ -82,127 +85,132 @@ export async function saltUp(
 	return time;
 }
 
-// TODO we might want to add even more of the DB logic into here
-
-function printHelp(message: Message) {
+function printHelp() {
 	const info: Array<{ name: string; value: string }> = [];
 	info.push({
-		name: 'add <@user|userid|nickname>',
+		name: 'report @User',
 		value:
       'Report a user being salty. If you use nickname it has to be at least three characters long and unique.\nThis has a 1h cooldown for reporting the same user.',
 	});
 	info.push({
-		name: 'top',
-		value: `Displays the top 5 salter in ${message.guild!.name}`,
+		name: 'ranking',
+		value: 'Displays the top 5 salter of this server.',
 	});
 	return info;
 }
 
-export const salt: magibotCommand = {
-	main: async function main({ content, message }) {
-		const args = content.split(/ +/);
-		const command = args[0].toLowerCase();
-		if (message.guild) {
-			switch (command) {
-			case 'add':
-				/* eslint-disable no-case-declarations */
-				const mention = args[1];
-				const { user, fuzzy } = await cmds.findMember(message.guild, mention);
-				/* eslint-enable no-case-declarations */
-				if (mention && user) {
-					if (user.id === message.author.id) {
-						message.reply("you can't report yourself!");
-						return;
-					}
-					if (user.user.bot) {
-						message.reply("you can't report bots!");
-						return;
-					}
-					if (fuzzy) {
-						const confirm = await cmds.yesOrNo(
-							message,
-							`Do you want to report ${user} for being a salty bitch?`,
-						);
-						if (!confirm) {
-							return;
-						}
-					}
-					const time = await saltUp(user.id, message.author.id, message.guild);
-					if (time === 0) {
-						message.channel.send(
-							`Successfully reported ${user} for being a salty bitch!`,
-						);
-					} else {
-						message.reply(
-							`you can report ${user} again in ${
-								59 - Math.floor((time * 60) % 60)
-							} min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
-						);
-					}
-				} else {
-					message.reply('you need to mention a user you want to report!');
-				}
-				break;
-			case 'top':
-				/* eslint-disable no-case-declarations */
-				const salters = await topSalt(message.guild.id);
-				const info: Array<{
-            name: string;
-            value: string;
-            inline: boolean;
-          }> = [];
-				/* eslint-enable no-case-declarations */
-				for (let i = 0; i < 5; i++) {
-					let mname = 'User left guild';
-					if (salters[i]) {
-						// eslint-disable-next-line no-await-in-loop
-						const member = await message.guild.members
-							.fetch(salters[i].salter)
-							.catch(() => {});
-						if (member) {
-							mname = member.displayName;
-						}
-						info.push({
-							name: `${i + 1}. place: ${mname}`,
-							value: `${salters[i].salt} salt`,
-							inline: false,
-						});
-					} else {
-						break;
-					}
-				}
-				/* eslint-disable no-case-declarations */
-				const embed: MessageEmbedOptions = {
-					color: 0xffffff,
-					description: `Top 5 salter in ${message.guild.name}:`,
-					fields: info,
-					footer: {
-						iconURL: message.guild.iconURL() || '',
-						text: message.guild.name,
-					},
-				};
-				/* eslint-enable no-case-declarations */
-				message.channel.send({ embeds: [embed] });
-				break;
-			default:
-				message.reply(
-					`this command doesn't exist. Use \`${PREFIXES.get(
-						message.guild.id,
-					)}.help salt\` for more info.`,
-				);
-				break;
-			}
+export async function addSalt(
+	interaction: CommandInteraction,
+	reportedUser: User,
+	fromAdmin = false,
+) {
+	if (reportedUser.id === interaction.user.id) {
+		return interaction.reply("You can't report yourself!");
+	}
+	if (reportedUser.bot) {
+		return interaction.reply("You can't report bots!");
+	}
+	const time = await saltUp(
+		reportedUser.id,
+		interaction.user.id,
+    interaction.guild!,
+    fromAdmin,
+	);
+	if (time === 0) {
+		return interaction.reply(
+			`Successfully reported ${reportedUser} for being a salty bitch!`,
+		);
+	}
+	return interaction.reply(
+		`You can report ${reportedUser} again in ${
+			59 - Math.floor((time * 60) % 60)
+		} min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
+	);
+}
+
+async function getMemberSaltInfo(
+	guild: Guild,
+	salter: string,
+	index: number,
+	salt: number,
+) {
+	let memberName = 'User left guild';
+	const member = await guild.members.fetch(salter).catch(() => {});
+	if (member) {
+		memberName = member.displayName;
+	}
+	return {
+		name: `${index + 1}. place: ${memberName}`,
+		value: `${salt} salt`,
+		inline: false,
+	};
+}
+
+async function getTopSalters(interaction: CommandInteraction) {
+	const guild = interaction.guild!;
+	const salters = await topSalt(guild.id);
+	const info: Array<
+    Promise<{
+      name: string;
+      value: string;
+      inline: boolean;
+    }>
+  > = [];
+	for (let i = 0; i < 5; i++) {
+		if (salters[i]) {
+			info.push(
+				getMemberSaltInfo(guild, salters[i].salter, i, salters[i].salt),
+			);
 		} else {
-			message.reply('commands are only functional when used in a guild.');
+			break;
 		}
+	}
+	const embed: MessageEmbedOptions = {
+		color: 0xffffff,
+		description: `Top 5 salter in ${guild.name}:`,
+		fields: await Promise.all(info),
+		footer: {
+			iconURL: guild.iconURL() || '',
+			text: guild.name,
+		},
+	};
+	return interaction.reply({ embeds: [embed] });
+}
+
+const slashCommand = new SlashCommandBuilder()
+	.setName('salt')
+	.setDescription('Interact with the salt ranking of this server!')
+	.addSubcommand((subcommand) => subcommand
+		.setName('report')
+		.setDescription('Report a user being salty.')
+		.addUserOption((option) => option
+			.setName('user')
+			.setDescription('The user you want to report.')
+			.setRequired(true)))
+	.addSubcommand((subcommand) => subcommand
+		.setName('ranking')
+		.setDescription('Get the current ranking of saltyness on this server.'));
+
+async function runCommand(interaction: CommandInteraction) {
+	const subcommand = interaction.options.getSubcommand(true) as
+    | 'report'
+    | 'ranking';
+	if (subcommand === 'report') {
+		const user = interaction.options.getUser('user', true);
+		return addSalt(interaction, user);
+	}
+	if (subcommand === 'ranking') {
+		return getTopSalters(interaction);
+	}
+	return null;
+}
+
+export const salt: MagibotSlashCommand = {
+	help() {
+		return printHelp();
 	},
-	name: 'salt',
-	ehelp(message: Message) {
-		return printHelp(message);
-	},
-	perm: ['SEND_MESSAGES', 'EMBED_LINKS'],
-	admin: false,
-	hide: false,
+	permissions: ['SEND_MESSAGES', 'EMBED_LINKS'],
 	category: commandCategories.fun,
-	dev: false,
+	run: runCommand,
+	definition: slashCommand.toJSON(),
 };

@@ -1,8 +1,8 @@
 ﻿import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Message } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { MagibotSlashCommand } from '../types/command';
 
 /**  definition of calculation of dice, use parse(input)
  returns array of throws with last index being sum,
@@ -64,7 +64,7 @@ const slashCommand = new SlashCommandBuilder()
 		)
 		.setRequired(true));
 
-async function main(interaction: CommandInteraction | Message, input: string) {
+async function runCommand(interaction: CommandInteraction, input: string) {
 	const diceRollCalculation = parse(input);
 	if (!diceRollCalculation) {
 		interaction.reply(
@@ -131,16 +131,8 @@ async function main(interaction: CommandInteraction | Message, input: string) {
 	interaction.reply({ embeds: [embed] });
 }
 
-export const roll: magibotCommand = {
-	name: 'roll',
-	hide: false,
-	dev: false,
-	main({ content, message }) {
-		const args = content.split(/ +/);
-		const input = args[0];
-		return main(message, input);
-	},
-	ehelp() {
+export const roll: MagibotSlashCommand = {
+	help() {
 		const ret: Array<{ name: string; value: string }> = [];
 		ret.push({
 			name: '[multiplier]*[number of rolls]d<die number>[+ <modifier>]',
@@ -149,14 +141,11 @@ export const roll: magibotCommand = {
 		});
 		return ret;
 	},
-	perm: 'SEND_MESSAGES',
-	admin: false,
+	permissions: 'SEND_MESSAGES',
 	category: commandCategories.fun,
-	slashCommand: {
-		async main(interaction: CommandInteraction) {
-			const input = interaction.options.getString('dice', true);
-			return main(interaction, input);
-		},
-		definition: slashCommand.toJSON(),
+	async run(interaction: CommandInteraction) {
+		const input = interaction.options.getString('dice', true);
+		return runCommand(interaction, input);
 	},
+	definition: slashCommand.toJSON(),
 };

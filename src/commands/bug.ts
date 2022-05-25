@@ -1,36 +1,42 @@
-﻿import { yesOrNo } from '../helperFunctions';
-import { PREFIXES } from '../shared_assets';
+﻿import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
+import { interactionConfirmation } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
-import { magibotCommand } from '../types/magibot';
+import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
 
-export const bug: magibotCommand = {
-	name: 'bug',
-	async main({ content, message }) {
-		if (!(content.length > 0)) {
-			message.reply(
-				`you need to add info about the report after the command. Use \`${PREFIXES.get(
-          message.guild!.id,
-				)}.help bug\` to get more info.`,
-			);
-			return;
-		}
-		const confirmed = await yesOrNo(
-			message,
-			`Do you want to send this bugreport?\n${content}`,
-			'Successfully canceled bugreport.',
+const slashCommand = new SlashCommandBuilder()
+	.setName('bugreport')
+	.setDescription('Report a bug concerning MagiBot')
+	.addStringOption((option) => option
+		.setName('description')
+		.setDescription(
+			'Describe what you did, what was expected, and what went wrong',
+		)
+		.setRequired(true));
+
+async function main(interaction: CommandInteraction, input: string) {
+	const confirmed = await interactionConfirmation(
+		interaction,
+		`Do you want to send this bugreport?\n${input}`,
+		'Successfully cancelled bugreport.',
+	);
+	if (confirmed) {
+		await sendBugreport(
+			`**Bugreport** by ${interaction.member?.user.username} (<@${
+				interaction.member?.user.id
+			}>) on server ${interaction.guild!.name}( ${
+        interaction.guild!.id
+			} ) :\n${input}`,
 		);
-		if (confirmed) {
-			await sendBugreport(
-				`**Bugreport** by ${message.author.username} (<@${
-					message.author.id
-				}>) on server ${message.guild!.name}( ${message.guild!.id} ) :\n${content}`,
-			);
-			await message.channel.send('Succesfully sent bugreport.');
-		}
-	},
-	admin: false,
-	ehelp() {
+		await confirmed.reply({
+			content: `Successfully sent bugreport:\n${input}`,
+		});
+	}
+}
+
+export const bugreport: MagibotSlashCommand = {
+	help() {
 		return [
 			{
 				name: '<bugreport with information about what you did, what was expected, and what went wrong>',
@@ -38,8 +44,11 @@ export const bug: magibotCommand = {
 			},
 		];
 	},
-	perm: 'SEND_MESSAGES',
-	hide: false,
-	dev: false,
+	permissions: 'SEND_MESSAGES',
 	category: commandCategories.misc,
+	async run(interaction: CommandInteraction) {
+		const input = interaction.options.getString('description', true);
+		return main(interaction, input);
+	},
+	definition: slashCommand.toJSON(),
 };

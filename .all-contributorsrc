@@ -1,0 +1,40 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "T0TProduction",
+      "name": "Sebastian Di Luzio",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18548570?v=4",
+      "profile": "http://diluz.io",
+      "contributions": [
+        "code",
+        "ideas",
+        "review",
+        "business",
+        "infra",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "spthiel",
+      "name": "spthiel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17518682?v=4",
+      "profile": "https://github.com/spthiel",
+      "contributions": [
+        "code",
+        "ideas",
+        "review"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "MagiBot",
+  "projectOwner": "T0TProduction",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

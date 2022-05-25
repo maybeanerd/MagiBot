@@ -1,10 +1,10 @@
 ﻿import { TextChannel } from 'discord.js';
-import { commandCategories } from '../types/enums';
+import { commandCategories } from '../../types/enums';
 // eslint-disable-next-line import/no-cycle
-import { bot } from '../bot';
-import { magibotCommand } from '../types/magibot';
-import { asyncForEach, yesOrNo } from '../helperFunctions';
-import { getNotChannel, setSettings } from '../dbHelpers';
+import { bot } from '../../bot';
+import { magibotCommand } from '../../types/command';
+import { asyncForEach, yesOrNo } from '../../helperFunctions';
+import { getNotChannel, setSettings } from '../../dbHelpers';
 
 async function sendUpdate(update: string) {
 	await asyncForEach(bot.guilds.cache, async (G) => {
