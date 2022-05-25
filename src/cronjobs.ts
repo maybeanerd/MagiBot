@@ -17,6 +17,8 @@ if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
 }
 
+const allowDeletions = false;
+
 // automatic deletion of reports:
 async function hourlyCleanup(bot: Client, isFirst: boolean) {
 	const now = new Date();
@@ -117,15 +119,22 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 		// eslint-disable-next-line no-underscore-dangle
 		const guildID = guild._id;
 		try {
-			await sendJoinEvent(
-				`:wastebasket: Deleting all information from guild with ID ${guildID} because they removed me more than seven days ago.`,
-				bot.shard?.ids[0],
-			);
-			// ignore salt and saltrank, as they are removed after 7 days anyways
-			await StillMutedModel.deleteMany({ guildid: guildID });
-			await UserModel.deleteMany({ guildID });
-			await VoteModel.deleteMany({ guildid: guildID });
-			await SettingsModel.deleteOne({ _id: guildID });
+			if (allowDeletions) {
+				await sendJoinEvent(
+					`:wastebasket: Deleting all information from guild with ID ${guildID} because they removed me more than seven days ago.`,
+					bot.shard?.ids[0],
+				);
+				// ignore salt and saltrank, as they are removed after 7 days anyways
+				await StillMutedModel.deleteMany({ guildid: guildID });
+				await UserModel.deleteMany({ guildID });
+				await VoteModel.deleteMany({ guildid: guildID });
+				await SettingsModel.deleteOne({ _id: guildID });
+			} else {
+				await sendJoinEvent(
+					`:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
+					bot.shard?.ids[0],
+				);
+			}
 		} catch (error) {
 			sendException(
 				`Failed deleting all information releated to guild with ID ${guildID} : ${error}`,
