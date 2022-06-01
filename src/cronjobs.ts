@@ -17,7 +17,7 @@ if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
 }
 
-const allowDeletions = false;
+const allowDeletions = true;
 
 // automatic deletion of reports:
 async function hourlyCleanup(bot: Client, isFirst: boolean) {
@@ -107,12 +107,8 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 	});
 
 	// find all guilds that have not connected for a week
-	// or dont have the lastConnected attribute at all
 	const guilds2 = await SettingsModel.find({
-		$or: [
-			{ lastConnected: { $lt: sevenDaysAgo } },
-			{ lastConnected: { $exists: false } },
-		],
+		lastConnected: { $lt: sevenDaysAgo },
 	});
 	// remove all data saved for those guilds
 	await asyncForEach(guilds2, async (guild) => {
@@ -128,7 +124,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 				await StillMutedModel.deleteMany({ guildid: guildID });
 				await UserModel.deleteMany({ guildID });
 				await VoteModel.deleteMany({ guildid: guildID });
-				await SettingsModel.deleteOne({ _id: guildID });
+				await SettingsModel.deleteMany({ _id: guildID });
 			} else {
 				await sendJoinEvent(
 					`:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
