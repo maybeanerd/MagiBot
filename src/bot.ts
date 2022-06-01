@@ -2,44 +2,25 @@ import Discord, {
 	Client, DiscordAPIError, Guild, Intents,
 } from 'discord.js';
 import { handle } from 'blapi';
-import {
-	AudioPlayerStatus,
-	createAudioPlayer,
-	createAudioResource,
-	DiscordGatewayAdapterCreator,
-	generateDependencyReport,
-	joinVoiceChannel,
-} from '@discordjs/voice';
+import { generateDependencyReport } from '@discordjs/voice';
 import config from './configuration';
 import {
 	PREFIX,
 	PREFIXES,
 	TOKEN,
-	queueVoiceChannels,
 	setUser,
 	resetPrefixes,
-	shadowBannedSound,
-	isShadowBanned,
-	shadowBannedLevel,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { saveJoinsoundsPlayedOfShard } from './statTracking';
-import {
-	checkGuild,
-	getPrefix,
-	isBlacklistedUser,
-	toggleStillMuted,
-	isJoinableVc,
-} from './dbHelpers';
-import { StillMutedModel } from './db';
+import { checkGuild, getPrefix } from './dbHelpers';
 import { asyncForEach } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
-import { getJoinsoundOfUser } from './commands/joinsounds/management';
+import { onVoiceStateChange } from './voiceChannelManager';
 
 console.log(generateDependencyReport());
 
@@ -49,14 +30,6 @@ async function initializePrefixes(bot: Client) {
 	asyncForEach(guilds, async (G) => {
 		PREFIXES.set(G.id, await getPrefix(G.id));
 	});
-}
-
-async function isStillMuted(userID: string, guildID: string) {
-	const find = await StillMutedModel.findOne({
-		userid: userID,
-		guildid: guildID,
-	});
-	return Boolean(find);
 }
 
 const intents = [
@@ -190,123 +163,7 @@ bot.on('error', (err) => {
 	console.error(err);
 });
 
-bot.on('voiceStateUpdate', async (o, n) => {
-	try {
-		const newVc = n.channel;
-		// check if voice channel actually changed, don't mute bots
-		if (
-			n.member
-      && !n.member.user.bot
-      && (!o.channel || !newVc || o.channel.id !== newVc.id)
-		) {
-			// is muted and joined a vc? maybe still muted from queue
-			if (n.serverMute && (await isStillMuted(n.id, n.guild.id))) {
-				n.setMute(
-					false,
-					'was still muted from a queue which user disconnected from',
-				);
-				toggleStillMuted(n.id, n.guild.id, false);
-			} else if (
-				!n.serverMute
-        && newVc
-        && queueVoiceChannels.has(n.guild.id)
-        && queueVoiceChannels.get(n.guild.id) === newVc.id
-			) {
-				// user joined a muted channel
-				n.setMute(true, 'joined active queue voice channel');
-			} else if (
-				o.serverMute
-        && o.channel
-        && queueVoiceChannels.has(o.guild.id)
-        && queueVoiceChannels.get(o.guild.id) === o.channel.id
-			) {
-				// user left a muted channel
-				if (newVc) {
-					n.setMute(false, 'left active queue voice channel');
-				} else {
-					// save the unmute for later
-					toggleStillMuted(n.id, n.guild.id, true);
-				}
-			}
-			// TODO remove/rework mute logic before this comment
-			const shadowBanned = isShadowBanned(
-				n.member.id,
-				n.guild.id,
-				n.guild.ownerId,
-			);
-			if (
-				newVc
-        && n.guild.me
-        && !n.guild.me.voice.channel
-        && n.id !== bot.user!.id
-        && newVc.joinable // checks vc size
-        && !(await isBlacklistedUser(n.id, n.guild.id))
-        && ((await isJoinableVc(n.guild.id, newVc.id)) // checks magibot settings
-          || shadowBanned === shadowBannedLevel.guild)
-			) {
-				const perms = newVc.permissionsFor(n.guild.me);
-				if (perms && perms.has('CONNECT')) {
-					let sound = await getJoinsoundOfUser(n.id, n.guild.id);
-					if (shadowBanned !== shadowBannedLevel.not) {
-						sound = shadowBannedSound;
-					}
-					if (sound) {
-						const connection = joinVoiceChannel({
-							channelId: newVc.id,
-							guildId: newVc.guild.id,
-							adapterCreator: newVc.guild
-								.voiceAdapterCreator as DiscordGatewayAdapterCreator,
-						});
-						const player = createAudioPlayer();
-						connection.subscribe(player);
-						const resource = createAudioResource(sound, {
-							inlineVolume: true,
-						});
-						player.play(resource);
-            resource.volume!.setVolume(0.5);
-            saveJoinsoundsPlayedOfShard(bot.shard!.ids[0]);
-            // 8 seconds is max play time:
-            // so when something goes wrong this will time out latest 4 seconds after;
-            // this also gives the bot 4 seconds to connect and start playing when it actually works
-            /* eslint-disable no-mixed-spaces-and-tabs */
-            const timeoutID = setTimeout(() => {
-            	connection.disconnect();
-            	player.removeAllListeners(); // To be sure noone listens to this anymore
-            	player.stop();
-            }, 12 * 1000);
-            player.on('stateChange', (state) => {
-            	if (state.status === AudioPlayerStatus.Playing) {
-            		if (state.playbackDuration > 0) {
-            			// this occurrs *after* the sound has finished
-            			clearTimeout(timeoutID);
-            			connection.disconnect();
-            			player.removeAllListeners(); // To be sure noone listens to this anymore
-            			player.stop();
-            		}
-            	}
-            });
-            player.on('error', (err) => {
-            	clearTimeout(timeoutID);
-            	connection.disconnect();
-            	player.removeAllListeners(); // To be sure noone listens to this anymore
-            	player.stop();
-            	catchErrorOnDiscord(
-            		`**Dispatcher Error (${
-            			(err.toString && err.toString()) || 'NONE'
-            		}):**\n\`\`\`
-                ${err.stack || 'NO STACK'}
-                \`\`\``,
-            	);
-            	/* eslint-enable no-mixed-spaces-and-tabs */
-            });
-					}
-				}
-			}
-		}
-	} catch (err) {
-		console.error(err);
-	}
-});
+bot.on('voiceStateUpdate', onVoiceStateChange);
 
 bot.on('disconnect', () => {
 	console.log('Disconnected!');
