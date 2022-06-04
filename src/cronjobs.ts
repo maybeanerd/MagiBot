@@ -12,6 +12,7 @@ import {
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
+import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
 
 if (!config.dburl) {
 	throw new Error('Missing DB connection URL');
@@ -123,6 +124,9 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
 				// ignore salt and saltrank, as they are removed after 7 days anyways
 				await StillMutedModel.deleteMany({ guildid: guildID });
 				await UserModel.deleteMany({ guildID });
+				// doing this per guild instead of with a list of guilds is less efficient
+				// but now it happens at the same time as the rest of deletion
+				await removeLocallyStoredJoinsoundsOfGuild(guildID);
 				await VoteModel.deleteMany({ guildid: guildID });
 				await SettingsModel.deleteMany({ _id: guildID });
 			} else {
