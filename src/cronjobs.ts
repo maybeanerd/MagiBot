@@ -13,6 +13,7 @@ import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
 import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
+import { reactions } from './commands/vote';
 
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
@@ -147,29 +148,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
   setTimeout(() => hourlyCleanup(bot, false), timeoutForNextHour);
 }
 
-const reactions = [
-  '🇦',
-  '🇧',
-  '🇨',
-  '🇩',
-  '🇪',
-  '🇫',
-  '🇬',
-  '🇭',
-  '🇮',
-  '🇯',
-  '🇰',
-  '🇱',
-  '🇲',
-  '🇳',
-  '🇴',
-  '🇵',
-  '🇶',
-  '🇷',
-  '🇸',
-  '🇹',
-];
-
+// TODO rework this once the vote command is reworked
 // this should take care of everything that needs to be done when a vote ends
 async function endVote(vote: Vote, bot: Client) {
   try {

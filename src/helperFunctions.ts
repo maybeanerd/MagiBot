@@ -164,10 +164,17 @@ export async function interactionConfirmation(
       .setLabel('No')
       .setStyle('DANGER'),
   );
-  await interaction.reply({
+  const messageContent = {
     content: question,
     components: [row],
-  });
+  };
+
+  const needToFollowup = interaction.deferred || interaction.replied;
+  if (needToFollowup) {
+    await interaction.followUp(messageContent);
+  } else {
+    await interaction.reply(messageContent);
+  }
   const questionMessage = (await interaction.fetchReply()) as Discord.Message;
   const time = timeoutTime || 20000;
   const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
