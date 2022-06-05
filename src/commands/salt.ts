@@ -209,7 +209,7 @@ export const salt: MagibotSlashCommand = {
   help() {
     return printHelp();
   },
-  permissions: ['SEND_MESSAGES', 'EMBED_LINKS'],
+  permissions: [],
   category: commandCategories.fun,
   run: runCommand,
   definition: slashCommand.toJSON(),

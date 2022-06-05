@@ -23,7 +23,7 @@ export const invite: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: ['SEND_MESSAGES', 'CREATE_INSTANT_INVITE'],
+  permissions: ['CREATE_INSTANT_INVITE'],
   category: commandCategories.util,
   run: main,
   definition: slashCommand.toJSON(),

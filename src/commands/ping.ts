@@ -16,7 +16,7 @@ export const ping: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.misc,
   async run(interaction: CommandInteraction) {
     const stop = new Date();

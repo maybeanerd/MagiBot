@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, Message } from 'discord.js';
 import { asyncForEach, interactionConfirmation } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
-import { MagibotSlashCommand } from '../types/command';
+import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
 
 export const reactions = [
@@ -99,7 +99,7 @@ async function main(interaction: CommandInteraction) {
       0,
     );
 
-    const reply = await interaction.followUp(
+    const reply = await wantsToStartVote.followUp(
       `**${topic}**\n*by ${interaction.member}, ends on ${date}*\n\n${optionsString}`,
     );
     if (reply instanceof Message) {
@@ -159,9 +159,10 @@ export const vote: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
+  permissions: [],
   definition: slashCommand.toJSON(),
   run: main,
   category: commandCategories.util,
-  isSlow: true,
+  // TODO find out if we can do this and still have the vote in the end be public
+  defer: DeferReply.ephemeral,
 };

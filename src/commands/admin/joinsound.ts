@@ -136,7 +136,7 @@ export const joinsound: MagibotAdminSlashCommand = {
   help() {
     return printHelp();
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.util,
   run: runCommand,
   registerSlashCommand,

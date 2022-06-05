@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { commandCategories } from '../types/enums';
 import { COLOR, user } from '../shared_assets';
-import { MagibotSlashCommand } from '../types/command';
+import { DeferReply, MagibotSlashCommand } from '../types/command';
 
 // we needed to manually type this because the inferred type collided with date type later on
 const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {
@@ -49,11 +49,11 @@ export const randomfact: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.fun,
   async run(interaction: CommandInteraction) {
     return main(interaction);
   },
   definition: slashCommand.toJSON(),
-  isSlow: true,
+  defer: DeferReply.public,
 };
