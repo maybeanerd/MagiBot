@@ -136,7 +136,7 @@ const slashCommand = new SlashCommandBuilder()
   .addStringOption((option) => option
     .setName('duration')
     .setDescription(
-      'Duration of the vote.U use d h m format, e.g.: `2d 3h 5m`',
+      'Duration of the vote. Use d h m format, e.g.: `2d 3h 5m`',
     )
     .setRequired(true));
 
