@@ -1,6 +1,6 @@
 import {
-	SlashCommandBuilder,
-	SlashCommandSubcommandsOnlyBuilder,
+  SlashCommandBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
 import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 import Discord, { Message } from 'discord.js';
@@ -31,7 +31,7 @@ type MagibotSlashCommandBase = {
 
 export type MagibotSlashCommand = MagibotSlashCommandBase & {
   definition: RESTPostAPIApplicationCommandsJSONBody;
-	// if true, interactions are deferred: can't use .reply anymore; need to use .followUp instead
+  // if true, interactions are deferred: can't use .reply anymore; need to use .followUp instead
   isSlow?: boolean;
 };
 
