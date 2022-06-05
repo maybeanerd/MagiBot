@@ -57,7 +57,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "startforever": "forever start dist/index.js",
-    "stopforever": "forever stop dist/index.js"
+    "stopforever": "forever stop dist/index.js",
+    "release:heroku": "git push heroku main"
   },
   "repository": {
     "type": "git",
