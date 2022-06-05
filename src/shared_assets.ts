@@ -17,57 +17,57 @@ export const PREFIXES: Map<string, string> = new Map();
 export const queueVoiceChannels: Map<string, string> = new Map();
 
 export function sendNotification(
-	info: string,
-	type: string,
-	msg: Discord.Message,
+  info: string,
+  type: string,
+  msg: Discord.Message,
 ) {
-	let icolor: number | undefined;
+  let icolor: number | undefined;
 
-	if (type === 'success') {
-		icolor = SUCCESS_COLOR;
-	} else if (type === 'error') {
-		icolor = ERROR_COLOR;
-	} else if (type === 'info') {
-		icolor = INFO_COLOR;
-	} else {
-		icolor = COLOR;
-	}
+  if (type === 'success') {
+    icolor = SUCCESS_COLOR;
+  } else if (type === 'error') {
+    icolor = ERROR_COLOR;
+  } else if (type === 'info') {
+    icolor = INFO_COLOR;
+  } else {
+    icolor = COLOR;
+  }
 
-	const embed = {
-		color: icolor,
-		description: info,
-	};
-	msg.channel.send({ embeds: [embed] });
+  const embed = {
+    color: icolor,
+    description: info,
+  };
+  msg.channel.send({ embeds: [embed] });
 }
 
 let bot_user: ClientUser;
 
 export function setUser(usr: ClientUser) {
-	bot_user = usr;
+  bot_user = usr;
 }
 
 export function user() {
-	return bot_user;
+  return bot_user;
 }
 
 export function resetPrefixes() {
-	PREFIXES.clear();
+  PREFIXES.clear();
 }
 
 // for shadowbanned servers we want do deny
 const shadowbannedGuilds = new Map([
-	// rik and stefans server
-	['859803064537186334', true],
-	// test: teabots : seems to work!
-	// ['380669498014957569', true],
+  // rik and stefans server
+  ['859803064537186334', true],
+  // test: teabots : seems to work!
+  // ['380669498014957569', true],
 ]);
 const shadowbannedUsers = new Map([
-	// rik
-	['206502772533624832', true],
-	// stefan
-	['223967778615459842', true],
-	// test nico
-	// ['185845248163840002', true],
+  // rik
+  ['206502772533624832', true],
+  // stefan
+  ['223967778615459842', true],
+  // test nico
+  // ['185845248163840002', true],
 ]);
 
 // eslint-disable-next-line no-shadow
@@ -78,16 +78,16 @@ export const enum shadowBannedLevel {
 }
 
 export function isShadowBanned(
-	userid: string,
-	guildid: string,
-	guildOwnerId: string,
+  userid: string,
+  guildid: string,
+  guildOwnerId: string,
 ) {
-	if (shadowbannedGuilds.get(guildid) || shadowbannedUsers.get(guildOwnerId)) {
-		return shadowBannedLevel.guild;
-	}
-	if (shadowbannedUsers.get(userid)) {
-		return shadowBannedLevel.member;
-	}
-	return shadowBannedLevel.not;
+  if (shadowbannedGuilds.get(guildid) || shadowbannedUsers.get(guildOwnerId)) {
+    return shadowBannedLevel.guild;
+  }
+  if (shadowbannedUsers.get(userid)) {
+    return shadowBannedLevel.member;
+  }
+  return shadowBannedLevel.not;
 }
 export const shadowBannedSound = 'https://www.myinstants.com/media/sounds/wet-fart_1.mp3';

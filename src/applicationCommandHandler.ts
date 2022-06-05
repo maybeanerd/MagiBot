@@ -7,86 +7,86 @@ import { PREFIXES } from './shared_assets';
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { isBlacklistedUser } from './dbHelpers';
 import {
-	commandAllowed,
-	printCommandChannels,
-	usageUp,
+  commandAllowed,
+  printCommandChannels,
+  usageUp,
 } from './commandHandler';
 import { applicationCommands } from './commands/applicationCommands';
 
 async function catchError(
-	error: Error,
-	interaction: Discord.CommandInteraction,
+  error: Error,
+  interaction: Discord.CommandInteraction,
 ) {
-	console.error(
-		`Caught:\n${error.stack}\nin command ${interaction.commandName} ${interaction.options}`,
-	);
-	await catchErrorOnDiscord(
-		`**Command:** ${interaction.commandName} ${interaction.options}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
-	);
+  console.error(
+    `Caught:\n${error.stack}\nin command ${interaction.commandName} ${interaction.options}`,
+  );
+  await catchErrorOnDiscord(
+    `**Command:** ${interaction.commandName} ${interaction.options}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
+  );
 
-	interaction.reply(`Something went wrong while using ${
-		interaction.commandName
-	}. The devs have been automatically notified.
+  interaction.reply(`Something went wrong while using ${
+    interaction.commandName
+  }. The devs have been automatically notified.
 If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
-	interaction.guild ? PREFIXES.get(interaction.guild.id) : 'k'
+  interaction.guild ? PREFIXES.get(interaction.guild.id) : 'k'
 }.info\`) to tell us exactly how.`);
 }
 
 export async function checkApplicationCommand(
-	interaction: Discord.CommandInteraction,
+  interaction: Discord.CommandInteraction,
 ) {
-	if (!(interaction.member && interaction.guild && interaction.guild.me)) {
-		// check for valid message
-		console.error('Invalid interaction received:', interaction);
-		return;
-	}
-	// ignore blacklisted users
-	if (
-		await isBlacklistedUser(interaction.member.user.id, interaction.guild.id)
-	) {
-		// do nothing
-		return;
-	}
-	try {
-		Statcord.ShardingClient.postCommand(
-			interaction.commandName,
-			interaction.member.user.id,
-			bot,
-		);
-		const command = applicationCommands[interaction.commandName];
-		if (command) {
-			const { permissions } = command;
-			if (
-				!(await commandAllowed(interaction.guild.id, interaction.channel?.id))
-			) {
-				await interaction.reply({
-					content: `Commands aren't allowed in <#${
-						interaction.channel?.id
-					}>. Use them in ${await printCommandChannels(
-						interaction.guild.id,
-					)}. If you're an admin use \`/help\` to see how you can change that.`,
-					ephemeral: true,
-				});
-				return;
-			}
-			// check for all needed permissions
-			const botPermissions = (
+  if (!(interaction.member && interaction.guild && interaction.guild.me)) {
+    // check for valid message
+    console.error('Invalid interaction received:', interaction);
+    return;
+  }
+  // ignore blacklisted users
+  if (
+    await isBlacklistedUser(interaction.member.user.id, interaction.guild.id)
+  ) {
+    // do nothing
+    return;
+  }
+  try {
+    Statcord.ShardingClient.postCommand(
+      interaction.commandName,
+      interaction.member.user.id,
+      bot,
+    );
+    const command = applicationCommands[interaction.commandName];
+    if (command) {
+      const { permissions } = command;
+      if (
+        !(await commandAllowed(interaction.guild.id, interaction.channel?.id))
+      ) {
+        await interaction.reply({
+          content: `Commands aren't allowed in <#${
+            interaction.channel?.id
+          }>. Use them in ${await printCommandChannels(
+            interaction.guild.id,
+          )}. If you're an admin use \`/help\` to see how you can change that.`,
+          ephemeral: true,
+        });
+        return;
+      }
+      // check for all needed permissions
+      const botPermissions = (
         interaction.channel as Discord.TextChannel
-			).permissionsFor(interaction.guild.me);
-			if (!botPermissions.has(permissions)) {
-				await interaction.reply(
-					`I am missing permissions for this command. I require all of the following:\n${permissions}`,
-				);
-			}
-			if (command.isSlow) {
-				// allow slow commands to have more time to respond
-				await interaction.deferReply();
-			}
-			// actually use the command
-			await command.run(interaction);
-			await usageUp(interaction.member.user.id, interaction.guild.id);
-		}
-	} catch (err) {
-		catchError(err as Error, interaction);
-	}
+      ).permissionsFor(interaction.guild.me);
+      if (!botPermissions.has(permissions)) {
+        await interaction.reply(
+          `I am missing permissions for this command. I require all of the following:\n${permissions}`,
+        );
+      }
+      if (command.isSlow) {
+        // allow slow commands to have more time to respond
+        await interaction.deferReply();
+      }
+      // actually use the command
+      await command.run(interaction);
+      await usageUp(interaction.member.user.id, interaction.guild.id);
+    }
+  } catch (err) {
+    catchError(err as Error, interaction);
+  }
 }

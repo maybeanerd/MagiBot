@@ -1,6 +1,6 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import {
-	mkdir, unlink, stat, readdir, rmdir,
+  mkdir, unlink, stat, readdir, rmdir,
 } from 'node:fs/promises';
 import Path from 'path';
 import { get } from 'node:https';
@@ -21,139 +21,139 @@ export const enum JoinsoundStoreError {
 }
 
 async function setupLocalFolders() {
-	await mkdir(basePath).catch((error) => {
-		// If the error is that it already exists, that's fine
-		if (error.code !== 'EEXIST') {
-			throw error;
-		}
-	});
+  await mkdir(basePath).catch((error) => {
+    // If the error is that it already exists, that's fine
+    if (error.code !== 'EEXIST') {
+      throw error;
+    }
+  });
 }
 setupLocalFolders();
 
 async function downloadFile(url: string, path: string) {
-	return new Promise<void>((resolve /* , reject */) => {
-		get(url, (res) => {
-			const writeStream = createWriteStream(path);
-			res.pipe(writeStream);
-			writeStream.on('finish', () => {
-				writeStream.close();
-				resolve();
-			});
-		});
-	});
+  return new Promise<void>((resolve /* , reject */) => {
+    get(url, (res) => {
+      const writeStream = createWriteStream(path);
+      res.pipe(writeStream);
+      writeStream.on('finish', () => {
+        writeStream.close();
+        resolve();
+      });
+    });
+  });
 }
 
 function getFolderSize(path: string): Promise<number> {
-	return new Promise((resolve, reject) => {
-		fastFolderSize(path, (err, bytes) => {
-			if (err) {
-				reject(err);
-			}
-			resolve(bytes !== undefined ? bytes : 9999999);
-		});
-	});
+  return new Promise((resolve, reject) => {
+    fastFolderSize(path, (err, bytes) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(bytes !== undefined ? bytes : 9999999);
+    });
+  });
 }
 
 const oneMegabyte = 1024 * 1024;
 const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
 async function doesServerHaveEnoughSpace() {
-	const sizeOfFolder = await getFolderSize(basePath);
-	return sizeOfFolder <= fourtyGigabyte;
+  const sizeOfFolder = await getFolderSize(basePath);
+  return sizeOfFolder <= fourtyGigabyte;
 }
 
 const userPrefix = 'user_';
 const guildPrefix = 'guild_';
 
 function getTargetPath(target: JoinsoundTarget) {
-	return Path.join(
-		basePath,
-		target.userId
-			? `${userPrefix}${target.userId}`
-			: `${guildPrefix}${target.guildId}`,
-	);
+  return Path.join(
+    basePath,
+    target.userId
+      ? `${userPrefix}${target.userId}`
+      : `${guildPrefix}${target.guildId}`,
+  );
 }
 
 // eslint-disable-next-line no-undef
 function gracefullyCatchENOENT(error: NodeJS.ErrnoException) {
-	// If the error is that it doesn't exists, that's fine
-	if (error.code !== 'ENOENT') {
-		throw error;
-	}
+  // If the error is that it doesn't exists, that's fine
+  if (error.code !== 'ENOENT') {
+    throw error;
+  }
 }
 
 async function doesUserHaveEnoughSpace(
-	target: JoinsoundTarget,
-	targetFileName: string,
+  target: JoinsoundTarget,
+  targetFileName: string,
 ) {
-	const path = getTargetPath(target);
-	await mkdir(path).catch((error) => {
-		// If the error is that it already exists, that's fine
-		if (error.code !== 'EEXIST') {
-			throw error;
-		}
-	});
-	const sizeOfFolder = await getFolderSize(path);
-	const statsOfExistingFile = await stat(targetFileName).catch(
-		gracefullyCatchENOENT,
-	);
-	const sizeOfExistingFile = statsOfExistingFile?.size || 0;
-	return sizeOfFolder - sizeOfExistingFile <= oneMegabyte;
+  const path = getTargetPath(target);
+  await mkdir(path).catch((error) => {
+    // If the error is that it already exists, that's fine
+    if (error.code !== 'EEXIST') {
+      throw error;
+    }
+  });
+  const sizeOfFolder = await getFolderSize(path);
+  const statsOfExistingFile = await stat(targetFileName).catch(
+    gracefullyCatchENOENT,
+  );
+  const sizeOfExistingFile = statsOfExistingFile?.size || 0;
+  return sizeOfFolder - sizeOfExistingFile <= oneMegabyte;
 }
 
 function getFilename(target: JoinsoundTarget) {
-	const title = target.default ? 'default' : `${guildPrefix}${target.guildId}`;
-	return Path.join(getTargetPath(target), title);
+  const title = target.default ? 'default' : `${guildPrefix}${target.guildId}`;
+  return Path.join(getTargetPath(target), title);
 }
 
 export async function storeJoinsoundOfTarget(
-	target: JoinsoundTarget,
-	fileUrl: string,
+  target: JoinsoundTarget,
+  fileUrl: string,
 ) {
-	if (!(await doesServerHaveEnoughSpace())) {
-		// this should not happen. but if it does, we handle it to stop the server from being overloaded
-		return JoinsoundStoreError.noStorageLeftOnServer;
-	}
-	const filename = getFilename(target);
-	if (!(await doesUserHaveEnoughSpace(target, filename))) {
-		return JoinsoundStoreError.noStorageLeftForUser;
-	}
-	await downloadFile(fileUrl, filename);
-	return null;
+  if (!(await doesServerHaveEnoughSpace())) {
+    // this should not happen. but if it does, we handle it to stop the server from being overloaded
+    return JoinsoundStoreError.noStorageLeftOnServer;
+  }
+  const filename = getFilename(target);
+  if (!(await doesUserHaveEnoughSpace(target, filename))) {
+    return JoinsoundStoreError.noStorageLeftForUser;
+  }
+  await downloadFile(fileUrl, filename);
+  return null;
 }
 
 export async function removeLocallyStoredJoinsoundOfTarget(
-	target: JoinsoundTarget,
+  target: JoinsoundTarget,
 ) {
-	const filename = getFilename(target);
-	await unlink(filename).catch(gracefullyCatchENOENT);
+  const filename = getFilename(target);
+  await unlink(filename).catch(gracefullyCatchENOENT);
 }
 
 async function getExistingUserFolders() {
-	const folders = await readdir(basePath, { withFileTypes: true });
-	return folders
-		.filter(
-			(directory) => directory.isDirectory() && directory.name.startsWith(userPrefix),
-		)
-		.map((directory) => directory.name.substring(userPrefix.length));
+  const folders = await readdir(basePath, { withFileTypes: true });
+  return folders
+    .filter(
+      (directory) => directory.isDirectory() && directory.name.startsWith(userPrefix),
+    )
+    .map((directory) => directory.name.substring(userPrefix.length));
 }
 
 export async function removeLocallyStoredJoinsoundsOfGuild(guildId: string) {
-	// remove default server sound
-	await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
+  // remove default server sound
+  await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
 
-	// remove server folder
-	await rmdir(Path.join(basePath, `${guildPrefix}${guildId}`)).catch(
-		gracefullyCatchENOENT,
-	);
+  // remove server folder
+  await rmdir(Path.join(basePath, `${guildPrefix}${guildId}`)).catch(
+    gracefullyCatchENOENT,
+  );
 
-	// remove sounds of all users in server
-	const userIds = await getExistingUserFolders();
-	await asyncForEach(userIds, async (userId) => {
-		await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
-	});
+  // remove sounds of all users in server
+  const userIds = await getExistingUserFolders();
+  await asyncForEach(userIds, async (userId) => {
+    await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
+  });
 }
 
 export function getJoinsoundReadableStreamOfUser(target: JoinsoundTarget) {
-	return createReadStream(getFilename(target));
+  return createReadStream(getFilename(target));
 }

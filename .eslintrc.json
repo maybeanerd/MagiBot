@@ -13,8 +13,7 @@
     "@typescript-eslint/no-unused-vars": "error",
     "no-extra-semi": 0,
     "semi": 2,
-    "no-tabs": ["error", { "allowIndentationTabs": true }],
-    "indent": ["warn", "tab"],
+    "indent": ["error", 2],
     "quotes": [
       "error",
       "single",
