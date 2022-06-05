@@ -169,6 +169,7 @@ export async function interactionConfirmation(
     components: [row],
   };
 
+  // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
   const needToFollowup = interaction.deferred || interaction.replied;
   if (needToFollowup) {
     await interaction.followUp(messageContent);
