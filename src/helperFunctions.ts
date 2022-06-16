@@ -71,7 +71,6 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 export const enum buttonInteractionId {
   'yesOrNo' = 0x0001,
   'queue' = 0x1001,
-  'vote' = 0x1002,
 }
 
 // this is an idea to implement rather reusable confirmation processes.
