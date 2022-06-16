@@ -13,7 +13,6 @@ import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
 import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
-import { reactions } from './commands/vote';
 
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
@@ -158,9 +157,9 @@ async function endVote(vote: Vote, bot: Client) {
     if (voteChannel) {
       const msg = await voteChannel.messages.fetch(vote.messageID);
       if (msg) {
-        const reacts = msg.reactions;
-        let finalReact: Array<{ reaction: number; count: number }> = [];
-        reactions.forEach((x, i) => {
+        // const reacts = msg.reactions;
+        const finalReact: Array<{ reaction: number; count: number }> = [];
+        /* reactions.forEach((x, i) => {
           if (i >= vote.options.length) {
             return;
           }
@@ -182,7 +181,7 @@ async function endVote(vote: Vote, bot: Client) {
               }
             }
           }
-        });
+        }); */
         if (finalReact[0]) {
           if (finalReact.length > 1) {
             let str = `**${vote.topic}** ended.\n\nThere was a tie between `;

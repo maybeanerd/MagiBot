@@ -1,32 +1,19 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Message } from 'discord.js';
-import { asyncForEach, interactionConfirmation } from '../helperFunctions';
+import {
+  CommandInteraction,
+  Message,
+  MessageActionRow,
+  MessageButton,
+} from 'discord.js';
+import {
+  buttonInteractionId,
+  interactionConfirmation,
+} from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
 
-export const reactions = [
-  '🇦',
-  '🇧',
-  '🇨',
-  '🇩',
-  '🇪',
-  '🇫',
-  '🇬',
-  '🇭',
-  '🇮',
-  '🇯',
-  '🇰',
-  '🇱',
-  '🇲',
-  '🇳',
-  '🇴',
-  '🇵',
-  '🇶',
-  '🇷',
-  '🇸',
-  '🇹',
-];
+const maxButtonLabelLength = 80;
 
 function getTime(content: string) {
   const regex = /^(?:(\d+)d\s*?)?(?:(\d+)h\s*?)?(?:(\d+)m\s*?)?$/;
@@ -48,6 +35,12 @@ async function addVote(vote: Vote) {
   await voteCreated.save();
   return voteCreated.toObject();
 }
+
+const maximumAmountOfButtonsPerRow = 5;
+// technically 5, but we want to keep at least 5 parameters open for things like topic, etc.
+const maximumAmountOfRowsPerMessage = 4;
+const maximumAmountOfOptions = maximumAmountOfButtonsPerRow * maximumAmountOfRowsPerMessage;
+
 async function main(interaction: CommandInteraction) {
   const authorID = interaction.member!.user.id;
   const topic = interaction.options.getString('topic', true);
@@ -63,13 +56,19 @@ async function main(interaction: CommandInteraction) {
     );
     return;
   }
-  const options = reactions
-    .map((reaction, index) => interaction.options.getString(`option-${index + 1}`))
-    .filter((option) => option !== null) as Array<string>;
+
+  const options: Array<string> = [];
+  for (let index = 0; index < maximumAmountOfOptions; index++) {
+    const option = interaction.options.getString(`option-${index + 1}`);
+    if (option !== null) {
+      options.push(option);
+    }
+    // no break as users can use random order of options
+  }
 
   let optionsString = '';
   options.forEach((value, index) => {
-    optionsString += `${reactions[index]} ${value}\n`;
+    optionsString += `${index + 1}. : ${value}\n`;
   });
 
   let timeString = '';
@@ -99,14 +98,38 @@ async function main(interaction: CommandInteraction) {
       0,
     );
 
-    const reply = await wantsToStartVote.followUp(
-      `**${topic}**\n*by ${interaction.member}, ends on ${date}*\n\n${optionsString}`,
-    );
+    const components = [new MessageActionRow()];
+    for (let index = 1; index < maximumAmountOfRowsPerMessage; ++index) {
+      if (options.length > index * maximumAmountOfButtonsPerRow) {
+        components.push(new MessageActionRow());
+      } else {
+        break;
+      }
+    }
+
+    options.forEach(async (value, index) => {
+      const position = Math.floor(index / maximumAmountOfButtonsPerRow);
+      const row = components[position];
+
+      row.addComponents(
+        new MessageButton()
+          .setCustomId(`${buttonInteractionId.vote}-${interaction.id}-${index}`)
+          .setLabel(value.substring(0, maxButtonLabelLength - 1))
+          .setStyle('PRIMARY'),
+      );
+    });
+
+    const content = `**${topic}**\n*by ${interaction.member}, ends on ${date}*`;
+    const messageContent = {
+      content,
+      components,
+    };
+
+    // TODO do something with the buttons.
+    // TODO Also, store state to reload when bot restarts during vote.
+
+    const reply = await wantsToStartVote.followUp(messageContent);
     if (reply instanceof Message) {
-      asyncForEach(options, async (value, index) => {
-        await reply.react(reactions[index as number]);
-      });
-      // vote structure
       // TODO validate if this is what we still need/can even use!
       const vote: Vote = {
         messageID: reply.id,
@@ -127,7 +150,7 @@ async function main(interaction: CommandInteraction) {
 const slashCommand = new SlashCommandBuilder()
   .setName('vote')
   .setDescription(
-    'Start a vote with up to 20 options that can last up to a week.',
+    `Start a vote with up to ${maximumAmountOfOptions} options that can last up to a week.`,
   )
   .addStringOption((option) => option
     .setName('topic')
@@ -140,14 +163,14 @@ const slashCommand = new SlashCommandBuilder()
     )
     .setRequired(true));
 
-// Add place for all twenty options
-reactions.forEach((reaction, index) => {
+// Add place for all options
+for (let index = 0; index < maximumAmountOfOptions; index++) {
   slashCommand.addStringOption((option) => option
     .setName(`option-${index + 1}`)
     .setDescription('An option users can vote for.')
   // make at least two options required
     .setRequired(index < 2));
-});
+}
 
 export const vote: MagibotSlashCommand = {
   help() {
