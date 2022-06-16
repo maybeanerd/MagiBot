@@ -159,7 +159,7 @@ export const vote: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: [],
+  permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY'], // TODO find out if it needs anything else
   definition: slashCommand.toJSON(),
   run: main,
   category: commandCategories.util,
