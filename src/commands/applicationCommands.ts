@@ -7,6 +7,7 @@ import { salt } from './salt';
 import { profile } from './profile';
 import { joinsound } from './joinsound';
 import { info } from './info';
+import { vote } from './vote';
 import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
@@ -20,6 +21,7 @@ export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
   profile,
   joinsound,
   info,
+  vote,
 
   // all admin commands
   admin,

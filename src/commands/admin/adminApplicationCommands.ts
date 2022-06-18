@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { interactionMemberIsAdmin } from '../../dbHelpers';
 import {
+  DeferReply,
   MagibotAdminSlashCommand,
   MagibotSlashCommand,
 } from '../../types/command';
@@ -45,9 +46,9 @@ export const admin: MagibotSlashCommand = {
     // TODO compile from help of all admin commands?
     return [];
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.admin,
   run: runCommand,
   definition: adminApplicationCommandBase.toJSON(),
-  isSlow: true,
+  defer: DeferReply.public,
 };

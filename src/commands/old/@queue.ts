@@ -19,7 +19,7 @@ import {
   yesOrNo,
   doNothingOnError,
   asyncWait,
-  buttonId,
+  buttonInteractionId,
 } from '../../helperFunctions';
 import { user, queueVoiceChannels } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
@@ -429,26 +429,26 @@ async function createQueue(
   const row = new MessageActionRow();
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.next}`)
+      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`)
       .setLabel('Next User')
       .setStyle('PRIMARY'),
   );
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.end}`)
+      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`)
       .setLabel('End Queue')
       .setStyle('SECONDARY'),
   );
   const rowTwo = new MessageActionRow();
   rowTwo.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.join}`)
+      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`)
       .setLabel('Join Queue')
       .setStyle('SUCCESS'),
   );
   rowTwo.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.queue}-${guild.id}-${typeOfQueueAction.leave}`)
+      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`)
       .setLabel('Leave Queue')
       .setStyle('SECONDARY'),
   );
@@ -477,7 +477,7 @@ async function createQueue(
     });
   }
 
-  const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonId.queue}-${guild.id}-`);
+  const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonInteractionId.queue}-${guild.id}-`);
   const collector = topicMessage.createMessageComponentCollector({
     filter,
     time,
@@ -563,7 +563,7 @@ export const queue: magibotCommand = {
     ];
   },
   admin: true,
-  perm: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
+  perm: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'], // TODO validate if this is what we need
   dev: false,
   category: commandCategories.util,
 };

@@ -12,6 +12,7 @@ import {
   usageUp,
 } from './commandHandler';
 import { applicationCommands } from './commands/applicationCommands';
+import { DeferReply } from './types/command';
 
 async function catchError(
   error: Error,
@@ -78,9 +79,9 @@ export async function checkApplicationCommand(
           `I am missing permissions for this command. I require all of the following:\n${permissions}`,
         );
       }
-      if (command.isSlow) {
+      if (command.defer) {
         // allow slow commands to have more time to respond
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: command.defer === DeferReply.ephemeral });
       }
       // actually use the command
       await command.run(interaction);

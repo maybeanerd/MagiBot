@@ -1,6 +1,5 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
-import { vote } from './commands/old/vote';
 // eslint-disable-next-line import/no-cycle
 import { queue as _queue } from './commands/old/@queue';
 import { setup as _setup } from './commands/old/@setup';
@@ -28,7 +27,6 @@ export const commands: { [k: string]: magibotCommand } = {
   _setup,
 
   help,
-  vote,
 };
 
 const migratedCommands = new Map([
@@ -43,6 +41,7 @@ const migratedCommands = new Map([
   ['_sound', 'joinsound'], // admin command
   ['sound', 'joinsound'],
   ['info', 'info'],
+  ['vote', 'vote'],
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(

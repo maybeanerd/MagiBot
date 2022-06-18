@@ -13,6 +13,7 @@ import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
 import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
+import { reactions } from './commands/vote';
 
 if (!config.dburl) {
   throw new Error('Missing DB connection URL');
@@ -147,30 +148,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
   setTimeout(() => hourlyCleanup(bot, false), timeoutForNextHour);
 }
 
-const reactions = [
-  '🇦',
-  '🇧',
-  '🇨',
-  '🇩',
-  '🇪',
-  '🇫',
-  '🇬',
-  '🇭',
-  '🇮',
-  '🇯',
-  '🇰',
-  '🇱',
-  '🇲',
-  '🇳',
-  '🇴',
-  '🇵',
-  '🇶',
-  '🇷',
-  '🇸',
-  '🇹',
-];
-
-// this should take care of everything that needs to be done when a vote ends
+// this takes care of everything that needs to be done when a vote ends
 async function endVote(vote: Vote, bot: Client) {
   try {
     const voteChannel = (await bot.channels.fetch(
@@ -240,7 +218,10 @@ async function endVote(vote: Vote, bot: Client) {
           }
           await msg.edit(str);
         }
-        await msg.reactions.removeAll();
+        // only possible with manage messages permission.
+        // If this were the only part where we need it, we should not require that permission
+        // TODO go back here once all other permissions are decided to see if we can use it
+        // await msg.reactions.removeAll();
       }
     }
   } catch (error) {

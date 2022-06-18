@@ -141,7 +141,7 @@ export const roll: MagibotSlashCommand = {
     });
     return ret;
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.fun,
   async run(interaction: CommandInteraction) {
     const input = interaction.options.getString('dice', true);

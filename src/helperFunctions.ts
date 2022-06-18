@@ -68,7 +68,7 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 
 // for some reason eslint doesnt get this...
 // eslint-disable-next-line no-shadow
-export const enum buttonId {
+export const enum buttonInteractionId {
   'yesOrNo' = 0x0001,
   'queue' = 0x1001,
 }
@@ -85,13 +85,13 @@ export async function yesOrNo(
   const row = new MessageActionRow();
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.yesOrNo}-${msg.id}-yes`)
+      .setCustomId(`${buttonInteractionId.yesOrNo}-${msg.id}-yes`)
       .setLabel('Yes')
       .setStyle('SUCCESS'),
   );
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.yesOrNo}-${msg.id}-no`)
+      .setCustomId(`${buttonInteractionId.yesOrNo}-${msg.id}-no`)
       .setLabel('No')
       .setStyle('DANGER'),
   );
@@ -103,7 +103,7 @@ export async function yesOrNo(
   const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
   // only accept reactions from the user that created this question
   const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
-    && interaction.customId.startsWith(`${buttonId.yesOrNo}-${msg.id}-`);
+    && interaction.customId.startsWith(`${buttonInteractionId.yesOrNo}-${msg.id}-`);
   const collector = questionMessage.createMessageComponentCollector({
     filter,
     time,
@@ -142,42 +142,52 @@ If you can't find it, either you are missing permissions, or the admins of this 
 To do the latter, re-invite the bot by clicking the big blue "Add to Server" button in the bot's profile!`);
 }
 
+const ephemeral = true;
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
   interaction: Discord.CommandInteraction,
   question: string,
-  abortMessage?: string,
-  timeoutMessage?: string,
-  timeoutTime?: number,
+  abortMessage: string = 'Cancelled.',
+  timeoutMessage: string = 'Timeouted.',
+  timeoutTime: number = 20000,
 ): Promise<MessageComponentInteraction | null> {
   const row = new MessageActionRow();
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.yesOrNo}-${interaction.id}-yes`)
+      .setCustomId(`${buttonInteractionId.yesOrNo}-${interaction.id}-yes`)
       .setLabel('Yes')
       .setStyle('SUCCESS'),
   );
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonId.yesOrNo}-${interaction.id}-no`)
+      .setCustomId(`${buttonInteractionId.yesOrNo}-${interaction.id}-no`)
       .setLabel('No')
       .setStyle('DANGER'),
   );
-  await interaction.reply({
+  const messageContent = {
     content: question,
     components: [row],
-  });
+    ephemeral,
+  };
+
+  // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
+  const needToFollowup = interaction.deferred || interaction.replied;
+  if (needToFollowup) {
+    await interaction.followUp(messageContent);
+  } else {
+    await interaction.reply(messageContent);
+  }
   const questionMessage = (await interaction.fetchReply()) as Discord.Message;
-  const time = timeoutTime || 20000;
   const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
   // only accept reactions from the user that created this question
   // eslint-disable-next-line max-len
   const filter = (intraction: MessageComponentInteraction) => intraction.user.id === interaction.member?.user.id
-    && intraction.customId.startsWith(`${buttonId.yesOrNo}-${interaction.id}-`);
+    && intraction.customId.startsWith(`${buttonInteractionId.yesOrNo}-${interaction.id}-`);
   const collector = questionMessage.createMessageComponentCollector({
     filter,
-    time,
+    time: timeoutTime,
   });
   const promise = new Promise<MessageComponentInteraction | null>((resolve) => {
     let alreadyResolved = false;
@@ -186,17 +196,19 @@ export async function interactionConfirmation(
       // load info of that button
       const idParts = collectionInteraction.customId.split('-');
       const isYesButton = idParts[2] === 'yes';
-      await questionMessage.delete();
-      if (!isYesButton && abortMessage) {
-        collectionInteraction.reply({ content: abortMessage, ephemeral: true });
+
+      if (!isYesButton) {
+        await collectionInteraction.reply({ content: abortMessage, ephemeral });
+      } else {
+        await collectionInteraction.deferReply();
       }
       resolve(isYesButton ? collectionInteraction : null);
       collector.stop('Got an answer.');
     });
     collector.once('end', async () => {
       if (!alreadyResolved) {
-        await questionMessage.delete();
-        interaction.followUp({ content: messageForTimeout, ephemeral: true });
+        // await questionMessage.delete();
+        interaction.followUp({ content: messageForTimeout, ephemeral });
         resolve(null);
       }
     });

@@ -29,7 +29,7 @@ async function main(interaction: CommandInteraction, input: string) {
         interaction.guild!.id
       } ) :\n${input}`,
     );
-    await confirmed.reply({
+    await confirmed.followUp({
       content: `Successfully sent bugreport:\n${input}`,
     });
   }
@@ -44,7 +44,7 @@ export const bugreport: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.misc,
   async run(interaction: CommandInteraction) {
     const input = interaction.options.getString('description', true);

@@ -1,7 +1,7 @@
 import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
-import { MagibotSlashCommand } from '../types/command';
+import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { SaltrankModel } from '../db';
 import { getGlobalUser, getUser } from '../dbHelpers';
 
@@ -88,9 +88,9 @@ export const profile: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: ['SEND_MESSAGES', 'EMBED_LINKS'],
+  permissions: [],
   category: commandCategories.util,
   definition: slashCommand.toJSON(),
   run: runCommand,
-  isSlow: true,
+  defer: DeferReply.public,
 };

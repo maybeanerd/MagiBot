@@ -2,7 +2,7 @@ import { CommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { isShadowBanned, shadowBannedLevel } from '../shared_assets';
 import { commandCategories } from '../types/enums';
-import { MagibotSlashCommand } from '../types/command';
+import { DeferReply, MagibotSlashCommand } from '../types/command';
 import {
   JoinsoundOptions,
   removeDefaultSound,
@@ -125,9 +125,9 @@ export const joinsound: MagibotSlashCommand = {
   help() {
     return printHelp();
   },
-  permissions: 'SEND_MESSAGES',
+  permissions: [],
   category: commandCategories.fun,
   definition: slashCommand.toJSON(),
   run: runCommand,
-  isSlow: true,
+  defer: DeferReply.public,
 };

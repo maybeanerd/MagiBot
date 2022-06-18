@@ -59,6 +59,6 @@ export const info: MagibotSlashCommand = {
   },
   run: main,
   definition: slashCommand.toJSON(),
-  permissions: ['SEND_MESSAGES', 'EMBED_LINKS'],
+  permissions: [],
   category: commandCategories.misc,
 };
