@@ -1,6 +1,9 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+﻿import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, Message } from 'discord.js';
-import { asyncForEach, interactionConfirmation } from '../helperFunctions';
+import {
+  asyncForEach,
+  interactionConfirmation,
+} from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
@@ -159,7 +162,7 @@ export const vote: MagibotSlashCommand = {
       },
     ];
   },
-  permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY'], // TODO find out if it needs anything else
+  permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   definition: slashCommand.toJSON(),
   run: main,
   category: commandCategories.util,

@@ -563,7 +563,7 @@ export const queue: magibotCommand = {
     ];
   },
   admin: true,
-  perm: ['SEND_MESSAGES', 'MANAGE_MESSAGES'],
+  perm: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'], // TODO validate if this is what we need
   dev: false,
   category: commandCategories.util,
 };
