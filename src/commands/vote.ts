@@ -166,6 +166,5 @@ export const vote: MagibotSlashCommand = {
   definition: slashCommand.toJSON(),
   run: main,
   category: commandCategories.util,
-  // TODO find out if we can do this and still have the vote in the end be public
   defer: DeferReply.ephemeral,
 };

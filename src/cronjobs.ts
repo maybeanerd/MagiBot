@@ -148,8 +148,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
   setTimeout(() => hourlyCleanup(bot, false), timeoutForNextHour);
 }
 
-// TODO rework this once the vote command is reworked
-// this should take care of everything that needs to be done when a vote ends
+// this takes care of everything that needs to be done when a vote ends
 async function endVote(vote: Vote, bot: Client) {
   try {
     const voteChannel = (await bot.channels.fetch(
