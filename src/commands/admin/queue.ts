@@ -123,7 +123,6 @@ async function onQueueAction(
   sharedQueueData: { activeUser: User | null },
   collector: InteractionCollector<MessageComponentInteraction>,
 ) {
-  await interaction.deferReply();
   const typeOfAction = interaction.customId.split('-')[2] as typeOfQueueAction;
   const actionUser = interaction.user;
   switch (typeOfAction) {
