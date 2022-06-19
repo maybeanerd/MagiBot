@@ -51,33 +51,6 @@ function messageEdit(
   return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
-function askQuestion(
-  channel: TextChannel,
-  authorID: Snowflake,
-  question: string,
-) {
-  return channel.send(question).then((questionMessage) => channel
-    .awaitMessages({
-      filter: (message) => message.author.id === authorID,
-      max: 1,
-      time: 60000,
-    })
-    .then((collected) => {
-      questionMessage.delete().catch(doNothingOnError);
-      const firstCollected = collected.first();
-      if (firstCollected) {
-        firstCollected.delete().catch(doNothingOnError);
-      } else {
-        channel
-          .send('Cancelled queue creation due to timeout.')
-          .catch(doNothingOnError);
-        delete runningQueues[channel.guild!.id];
-        return null;
-      }
-      return collected;
-    }));
-}
-
 async function getQueueTopic(
   guild: Guild,
   channel: TextChannel,
@@ -104,36 +77,6 @@ async function getQueueTopic(
   });
 }
 
-async function getQueueTimeout(
-  guild: Guild,
-  channel: TextChannel,
-  author: GuildMember,
-): Promise<null | number> {
-  return askQuestion(
-    channel,
-    author.id,
-    'How long is this queue supposed to last? *(in minutes, maximum of 120)*',
-  ).then((collected) => {
-    if (!collected) {
-      return null;
-    }
-    let time = parseInt(collected.first()!.content, 10);
-    if (!time) {
-      channel.send(
-        "That's not a real number duh. Cancelled queue creation, try again.",
-      );
-      delete runningQueues[guild!.id];
-      return null;
-    }
-    if (time > 120) {
-      time = 120;
-    } else if (time < 1) {
-      time = 1;
-    }
-    return time;
-  });
-}
-
 async function startQueue(
   guild: Guild,
   channel: TextChannel,
@@ -142,10 +85,11 @@ async function startQueue(
   topic: string,
   time: number,
 ) {
-  let voiceChannel: VoiceChannel | StageChannel | null | undefined = author.voice.channel;
+  const voiceChannel: VoiceChannel | StageChannel | null | undefined = author.voice.channel;
   let remMessage: Message;
   if (voiceChannel) {
-    const botMember = await guild!.members.fetch(user());
+    // TODO rework the muting by adjusting channel permissions instead of user permissions.
+    /* const botMember = await guild!.members.fetch(user());
     if (!botMember.permissions.has('MUTE_MEMBERS')) {
       remMessage = await channel.send(
         'If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.',
@@ -165,7 +109,7 @@ async function startQueue(
         `Deactivated automatic (un)muting in ${voiceChannel}.`,
       );
       voiceChannel = null;
-    }
+    } */
   } else {
     remMessage = await message.channel.send(
       'If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.',
@@ -371,7 +315,7 @@ function onEnd(
   if (debugMessage) {
     debugMessage.delete().catch(doNothingOnError);
   }
-  delete runningQueues[guild.id];
+  runningQueues.delete(guild.id);
   if (voiceChannel) {
     queueVoiceChannels.delete(guild.id);
     // remove all mutes
@@ -389,6 +333,8 @@ function onEnd(
     .catch(doNothingOnError);
 }
 
+const defaultQueueLengthInMinutes = 120;
+
 async function createQueue(
   guild: Guild,
   channel: TextChannel,
@@ -400,10 +346,7 @@ async function createQueue(
     return;
   }
 
-  let time = await getQueueTimeout(guild, channel, author);
-  if (!time) {
-    return;
-  }
+  let timeUntilEnd = defaultQueueLengthInMinutes;
 
   const startQueueValue = await startQueue(
     guild,
@@ -411,13 +354,13 @@ async function createQueue(
     message,
     author,
     topic,
-    time,
+    timeUntilEnd,
   );
   if (startQueueValue === false) {
     return;
   }
   const voiceChannel = startQueueValue as VoiceChannel | null;
-  time *= 60000;
+  timeUntilEnd *= 60000;
 
   const debugMessage: Message | null = null;
   // TODO maybe readd this with webhooks? but honestly just not needed atm.
@@ -459,7 +402,7 @@ async function createQueue(
     components: [row, rowTwo],
   });
   runningQueues[guild.id] = {
-    date: new Date(Date.now() + time),
+    date: new Date(Date.now() + timeUntilEnd),
     cid: topicMessage.channel.id,
     msg: topicMessage.id,
   };
@@ -481,7 +424,7 @@ async function createQueue(
   const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonInteractionId.queue}-${guild.id}-`);
   const collector = topicMessage.createMessageComponentCollector({
     filter,
-    time,
+    time: timeUntilEnd,
   });
   const sharedQueueData: { activeUser: User | null } = { activeUser: null };
   const queuedUsers: Array<User> = [];
