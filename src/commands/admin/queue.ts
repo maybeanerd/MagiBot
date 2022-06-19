@@ -14,20 +14,18 @@ import {
   InteractionCollector,
   CommandInteraction,
 } from 'discord.js';
-// eslint-disable-next-line import/no-cycle
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { bot } from '../../botbot';
+import { bot } from '../../bot';
 import {
   yesOrNo,
   doNothingOnError,
   asyncWait,
   buttonInteractionId,
-} from '../../helperFunctionsons';
-import { user, queueVoiceChannels } from '../../shared_assetsets';
-import { commandCategories } from '../../types/enumsums';
-import { saveUsersWhoJoinedQueue } from '../../statTrackinging';
-import { MagibotSlashCommand } from '../../types/commandand';
-import { isAdmin, toggleStillMuted } from '../../dbHelpersers';
+} from '../../helperFunctions';
+import { user, queueVoiceChannels } from '../../shared_assets';
+import { commandCategories } from '../../types/enums';
+import { saveUsersWhoJoinedQueue } from '../../statTracking';
+import { isAdmin, toggleStillMuted } from '../../dbHelpers';
 import { MagibotAdminSlashCommand } from '../../types/command';
 
 const runningQueues = new Map<string, { endDate: Date; interactionId: string; }>();
