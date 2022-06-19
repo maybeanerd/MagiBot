@@ -1,12 +1,9 @@
 import {
-  TextChannel,
   VoiceChannel,
   User,
   Message,
   Guild,
-  Snowflake,
   GuildMember,
-  StageChannel,
   ButtonInteraction,
   MessageActionRow,
   MessageButton,
@@ -17,18 +14,20 @@ import {
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { bot } from '../../bot';
 import {
-  yesOrNo,
   doNothingOnError,
   asyncWait,
   buttonInteractionId,
 } from '../../helperFunctions';
-import { user, queueVoiceChannels } from '../../shared_assets';
+import { queueVoiceChannels } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { saveUsersWhoJoinedQueue } from '../../statTracking';
 import { isAdmin, toggleStillMuted } from '../../dbHelpers';
 import { MagibotAdminSlashCommand } from '../../types/command';
 
-const runningQueues = new Map<string, { endDate: Date; interactionId: string; }>();
+const runningQueues = new Map<
+  string,
+  { endDate: Date; interactionId: string }
+>();
 
 function messageEdit(
   voiceChannel: VoiceChannel | null | undefined,
@@ -51,33 +50,7 @@ function messageEdit(
   return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
-async function getQueueTopic(
-  guild: Guild,
-  channel: TextChannel,
-  authorID: Snowflake,
-): Promise<string | null> {
-  return askQuestion(
-    channel,
-    authorID,
-    'What do you want the queue to be about?',
-  ).then((collected) => {
-    if (!collected) {
-      return null;
-    }
-    const topic = collected.first()!.content;
-    collected.first()!.delete().catch(doNothingOnError);
-    if (topic.length > 1000) {
-      channel.send(
-        'Oops, your topic seems to be larger than 1000 characters. Discord message sizes are limited, so please shorten your topic.',
-      );
-      delete runningQueues[guild!.id];
-      return null;
-    }
-    return topic;
-  });
-}
-
-async function startQueue(
+/* async function startQueueOld(
   guild: Guild,
   channel: TextChannel,
   message: Message,
@@ -86,13 +59,15 @@ async function startQueue(
   time: number,
 ) {
   const voiceChannel: VoiceChannel | StageChannel | null | undefined = author.voice.channel;
-  let remMessage: Message;
+  // let remMessage: Message;
   if (voiceChannel) {
     // TODO rework the muting by adjusting channel permissions instead of user permissions.
-    /* const botMember = await guild!.members.fetch(user());
+     const botMember = await guild!.members.fetch(user());
     if (!botMember.permissions.has('MUTE_MEMBERS')) {
       remMessage = await channel.send(
-        'If i had MUTE_MEMBERS permission i would be able to (un)mute users in the voice channel automatically. If you want to use that feature restart the command after giving me the additional permissions.',
+        'If i had MUTE_MEMBERS permission i would be able to (un)mute users in
+ the voice channel automatically. If you want to use that feature restart the
+command after giving me the additional permissions.',
       );
       voiceChannel = null;
     } else if (
@@ -102,17 +77,19 @@ async function startQueue(
       )
     ) {
       remMessage = await message.channel.send(
-        `Automatically (un)muting users in ${voiceChannel}. This means everyone except users that are considered admin by MagiBot is muted by default.`,
+        `Automatically (un)muting users in ${voiceChannel}. This means everyone except
+users that are considered admin by MagiBot is muted by default.`,
       );
     } else {
       remMessage = await message.channel.send(
         `Deactivated automatic (un)muting in ${voiceChannel}.`,
       );
       voiceChannel = null;
-    } */
+    }
   } else {
-    remMessage = await message.channel.send(
-      'If you were in a voice channel while setting this up i could automatically (un)mute users. Restart the whole process to do so, if you wish to.',
+     remMessage = await message.channel.send(
+      'If you were in a voice channel while setting this up i could automatically (un)mute users.
+ Restart the whole process to do so, if you wish to.',
     );
   }
   const wantsToStartQueue = await yesOrNo(
@@ -121,13 +98,12 @@ async function startQueue(
     `Successfully canceled queue **${topic}**`,
     `Cancelled queue creation of **${topic}** due to timeout.`,
   );
-  remMessage.delete().catch(doNothingOnError);
+  // remMessage.delete().catch(doNothingOnError);
   if (!wantsToStartQueue) {
-    delete runningQueues[guild!.id];
     return false;
   }
   return voiceChannel;
-}
+} */
 
 // eslint being stupid again
 // eslint-disable-next-line no-shadow
@@ -140,33 +116,34 @@ const enum typeOfQueueAction {
 
 async function onQueueAction(
   interaction: ButtonInteraction,
-  channel: TextChannel,
   voiceChannel: VoiceChannel | null,
   topicMessage: Message,
   topic: string,
   queuedUsers: Array<User>,
   sharedQueueData: { activeUser: User | null },
   collector: InteractionCollector<MessageComponentInteraction>,
-  author: GuildMember,
 ) {
-  const typeOfAction: typeOfQueueAction = interaction.customId.split(
-    '-',
-  )[2] as any;
+  await interaction.deferReply();
+  const typeOfAction = interaction.customId.split('-')[2] as typeOfQueueAction;
   const actionUser = interaction.user;
   switch (typeOfAction) {
   case typeOfQueueAction.join:
     // eslint-disable-next-line no-case-declarations
     const indexOfUser = queuedUsers.indexOf(actionUser);
-    if (indexOfUser === -1 && actionUser !== sharedQueueData.activeUser) {
+    if (
+      indexOfUser === -1
+        && (!sharedQueueData.activeUser
+          || actionUser.id !== sharedQueueData.activeUser.id)
+    ) {
       saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
       if (sharedQueueData.activeUser) {
         queuedUsers.push(actionUser);
       } else {
         // eslint-disable-next-line no-param-reassign
         sharedQueueData.activeUser = actionUser;
-        const message = await channel.send(
+        const message = (await interaction.followUp(
           `It's your turn ${sharedQueueData.activeUser}!`,
-        );
+        )) as Message;
         asyncWait(1000).then(() => message.delete());
         if (voiceChannel) {
           // TODO rework muting in here
@@ -191,20 +168,15 @@ async function onQueueAction(
           ),
         )
         .catch(doNothingOnError);
-      interaction.reply({
+      interaction.followUp({
         content: `Successfully joined the queue! Your position is: ${queuedUsers.length}`,
         ephemeral: true,
       });
     } else if (indexOfUser !== -1) {
-      interaction.reply({
+      interaction.followUp({
         content: `You were already in the queue! Your current position is: ${
           indexOfUser + 1
         }`,
-        ephemeral: true,
-      });
-    } else {
-      interaction.reply({
-        content: "It's your turn!",
         ephemeral: true,
       });
     }
@@ -223,20 +195,29 @@ async function onQueueAction(
           ),
         )
         .catch(doNothingOnError);
-      interaction.reply({
+      interaction.followUp({
         content: 'Successfully left the queue!',
         ephemeral: true,
       });
     } else {
-      interaction.reply({
+      interaction.followUp({
         content: 'You are not in the queue anyways!',
         ephemeral: true,
       });
     }
     break;
   case typeOfQueueAction.next:
-    // only creator of queue is allowed to do this
-    if (author.id !== interaction.member?.user.id) {
+    // only admins of guild are allowed to do this
+    if (
+      !(await isAdmin(
+          interaction.guild!.id,
+          interaction.member as GuildMember,
+      ))
+    ) {
+      interaction.followUp({
+        content: 'You are not allowed to use this!',
+        ephemeral: true,
+      });
       return;
     }
     if (queuedUsers[0]) {
@@ -263,9 +244,9 @@ async function onQueueAction(
           ),
         )
         .catch(doNothingOnError);
-      const message = await channel.send(
+      const message = (await interaction.followUp(
         `It's your turn ${sharedQueueData.activeUser}!`,
-      );
+      )) as Message;
       asyncWait(1000).then(() => message.delete());
       if (voiceChannel) {
         // unmute currentUser
@@ -278,23 +259,32 @@ async function onQueueAction(
             .catch(doNothingOnError);
         }
       }
-      interaction.reply({
+      interaction.followUp({
         content: 'Successfully moved the queue to the next user!',
         ephemeral: true,
       });
     } else {
-      interaction.reply({
+      interaction.followUp({
         content: 'There are no users left in the queue!',
         ephemeral: true,
       });
     }
     break;
   case typeOfQueueAction.end:
-    // only creator of queue is allowed to do this
-    if (author.id !== interaction.member?.user.id) {
+    // only admins of guild are allowed to do this
+    if (
+      !(await isAdmin(
+          interaction.guild!.id,
+          interaction.member as GuildMember,
+      ))
+    ) {
+      interaction.followUp({
+        content: 'You are not allowed to use this!',
+        ephemeral: true,
+      });
       return;
     }
-    interaction.reply({
+    interaction.followUp({
       content: 'Successfully ended the queue!',
       ephemeral: true,
     });
@@ -335,32 +325,22 @@ function onEnd(
 
 const defaultQueueLengthInMinutes = 120;
 
-async function createQueue(
-  guild: Guild,
-  channel: TextChannel,
-  message: Message,
-  author: GuildMember,
-) {
-  const topic = await getQueueTopic(guild, channel, author.id);
-  if (!topic) {
+async function startQueue(interaction: CommandInteraction, topic: string) {
+  const guild = interaction.guild!;
+
+  if (runningQueues.has(guild.id)) {
+    interaction.followUp(
+      "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
+    );
     return;
   }
 
-  let timeUntilEnd = defaultQueueLengthInMinutes;
+  // TODO continue reworking from here on
 
-  const startQueueValue = await startQueue(
-    guild,
-    channel,
-    message,
-    author,
-    topic,
-    timeUntilEnd,
-  );
-  if (startQueueValue === false) {
-    return;
-  }
-  const voiceChannel = startQueueValue as VoiceChannel | null;
-  timeUntilEnd *= 60000;
+  // TODO get a voice channel? take a look at "startQueueOld"
+
+  const voiceChannel = null as VoiceChannel | null;
+  const millisecondsUntilEnd = defaultQueueLengthInMinutes * 60000;
 
   const debugMessage: Message | null = null;
   // TODO maybe readd this with webhooks? but honestly just not needed atm.
@@ -373,41 +353,50 @@ async function createQueue(
   const row = new MessageActionRow();
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`)
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
+      )
       .setLabel('Next User')
       .setStyle('PRIMARY'),
   );
   row.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`)
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
+      )
       .setLabel('End Queue')
       .setStyle('SECONDARY'),
   );
   const rowTwo = new MessageActionRow();
   rowTwo.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`)
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
+      )
       .setLabel('Join Queue')
       .setStyle('SUCCESS'),
   );
   rowTwo.addComponents(
     new MessageButton()
-      .setCustomId(`${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`)
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
+      )
       .setLabel('Leave Queue')
       .setStyle('SECONDARY'),
   );
 
-  const topicMessage = await channel.send({
+  const topicMessage = (await interaction.followUp({
     content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
     components: [row, rowTwo],
+  })) as Message;
+  runningQueues.set(guild.id, {
+    endDate: new Date(Date.now() + millisecondsUntilEnd),
+    interactionId: interaction.id,
+    // TODO do we need anything else?
   });
-  runningQueues[guild.id] = {
-    date: new Date(Date.now() + timeUntilEnd),
-    cid: topicMessage.channel.id,
-    msg: topicMessage.id,
-  };
 
   if (voiceChannel) {
+    // TODO rework
     // add the vc to the global variable so joins get muted
     queueVoiceChannels.set(guild.id, voiceChannel.id);
     // servermute all users in voiceChannel
@@ -421,24 +410,23 @@ async function createQueue(
     });
   }
 
-  const filter = (interaction: MessageComponentInteraction) => interaction.customId.startsWith(`${buttonInteractionId.queue}-${guild.id}-`);
   const collector = topicMessage.createMessageComponentCollector({
-    filter,
-    time: timeUntilEnd,
+    filter: (buttonInteraction) => buttonInteraction.customId.startsWith(
+      `${buttonInteractionId.queue}-${guild.id}-`,
+    ),
+    time: millisecondsUntilEnd,
   });
   const sharedQueueData: { activeUser: User | null } = { activeUser: null };
   const queuedUsers: Array<User> = [];
-  collector.on('collect', async (interaction) => {
+  collector.on('collect', async (buttonInteraction) => {
     await onQueueAction(
-      interaction as ButtonInteraction,
-      channel,
+      buttonInteraction as ButtonInteraction,
       voiceChannel,
       topicMessage,
       topic,
       queuedUsers,
       sharedQueueData,
       collector,
-      author,
     );
   });
   collector.once('end', (/* collected */) => {
@@ -446,86 +434,47 @@ async function createQueue(
   });
 }
 
-async function main({ message }) {
-  if (
-    !message.guild
-		|| !(message.channel instanceof TextChannel)
-		|| !message.member
-  ) {
-    return;
-  }
-  const { guild, member: author, channel } = message;
-  if (runningQueues[guild.id]) {
-    const d = new Date();
-    if (d.getTime() - runningQueues[guild.id].date.getTime() <= 0) {
-      // check if its already 2hours old
-      if (runningQueues[guild.id].msg && runningQueues[guild.id].cid) {
-        const previousChannel = guild.channels.cache.get(runningQueues[guild.id].cid);
-        if (
-          previousChannel
-					&& (await (previousChannel as TextChannel).messages
-					  .fetch(runningQueues[guild.id].msg)
-					  .catch(doNothingOnError))
-        ) {
-          channel
-            .send(
-              "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
-            )
-            .catch(doNothingOnError);
-          return;
-        }
-      } else {
-        channel
-          .send(
-            "There's currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.",
-          )
-          .catch(doNothingOnError);
-        return;
-      }
-    }
-  }
-  runningQueues[guild.id] = {
-    date: new Date(Date.now() + 3600000),
-    msg: '',
-    cid: '',
-  };
-
-  message.delete().catch(doNothingOnError);
-
-  await createQueue(guild, channel, message, author);
-}
-
 function registerSlashCommand(builder: SlashCommandBuilder) {
-  return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup.setName('queue')
-    .setDescription('Manage queues for events such as karaoke or playing view viewers.')
-    .addSubcommand((subcommand) => subcommand.setName('start')
+  return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
+    .setName('queue')
+    .setDescription(
+      'Manage queues for events such as karaoke or playing view viewers.',
+    )
+    .addSubcommand((subcommand) => subcommand
+      .setName('start')
       .setDescription('Start a queue that can last up to 2h.')
       .addStringOption((option) => option
         .setName('topic')
-        .setDescription(
-          'The topic the queue is about.',
-        )
+        .setDescription('The topic of the queue.')
         .setRequired(true)))
-    .addSubcommand((subcommand) => subcommand.setName('stop')
+    .addSubcommand((subcommand) => subcommand
+      .setName('stop')
       .setDescription('Stop the running queue of this server.'))
-    .addSubcommand((subcommand) => subcommand.setName('extend')
+    .addSubcommand((subcommand) => subcommand
+      .setName('extend')
       .setDescription('Extend the running queue of this server.')));
 }
 
 async function runCommand(interaction: CommandInteraction) {
-  const subcommand = interaction.options.getSubcommand(true) as'start'|'stop'|'extend';
+  const subcommand = interaction.options.getSubcommand(true) as
+    | 'start'
+    | 'stop'
+    | 'extend';
 
   // TODO migrate actual functionality of the main function
 
   if (subcommand === 'start') {
-    console.log('start');
+    const topic = interaction.options.getString('topic', true);
+    await startQueue(interaction, topic);
     return;
   }
   if (subcommand === 'stop') {
+    // TODO do we actually want to allow this?
     console.log('stop');
     return;
   }
   if (subcommand === 'extend') {
+    // TODO do we actually want to allow this?
     console.log('extend');
   }
 }
