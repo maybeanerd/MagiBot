@@ -335,11 +335,9 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
   if (runningQueues.has(guild.id)) {
-    interaction.followUp({
-      content:
-        "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
-      ephemeral: true,
-    });
+    interaction.followUp(
+      "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
+    );
     return;
   }
 
