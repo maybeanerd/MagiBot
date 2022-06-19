@@ -12,22 +12,25 @@ import {
   MessageButton,
   MessageComponentInteraction,
   InteractionCollector,
+  CommandInteraction,
 } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
-import { bot } from '../../bot';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { bot } from '../../botbot';
 import {
   yesOrNo,
   doNothingOnError,
   asyncWait,
   buttonInteractionId,
-} from '../../helperFunctions';
-import { user, queueVoiceChannels } from '../../shared_assets';
-import { commandCategories } from '../../types/enums';
-import { saveUsersWhoJoinedQueue } from '../../statTracking';
-import { magibotCommand } from '../../types/command';
-import { isAdmin, toggleStillMuted } from '../../dbHelpers';
+} from '../../helperFunctionsons';
+import { user, queueVoiceChannels } from '../../shared_assetsets';
+import { commandCategories } from '../../types/enumsums';
+import { saveUsersWhoJoinedQueue } from '../../statTrackinging';
+import { MagibotSlashCommand } from '../../types/commandand';
+import { isAdmin, toggleStillMuted } from '../../dbHelpersers';
+import { MagibotAdminSlashCommand } from '../../types/command';
 
-const used: { [k: string]: { date: Date; msg: string; cid: string } } = {};
+const runningQueues = new Map<string, { endDate: Date; interactionId: string; }>();
 
 function messageEdit(
   voiceChannel: VoiceChannel | null | undefined,
@@ -70,7 +73,7 @@ function askQuestion(
         channel
           .send('Cancelled queue creation due to timeout.')
           .catch(doNothingOnError);
-        delete used[channel.guild!.id];
+        delete runningQueues[channel.guild!.id];
         return null;
       }
       return collected;
@@ -96,7 +99,7 @@ async function getQueueTopic(
       channel.send(
         'Oops, your topic seems to be larger than 1000 characters. Discord message sizes are limited, so please shorten your topic.',
       );
-      delete used[guild!.id];
+      delete runningQueues[guild!.id];
       return null;
     }
     return topic;
@@ -121,7 +124,7 @@ async function getQueueTimeout(
       channel.send(
         "That's not a real number duh. Cancelled queue creation, try again.",
       );
-      delete used[guild!.id];
+      delete runningQueues[guild!.id];
       return null;
     }
     if (time > 120) {
@@ -178,7 +181,7 @@ async function startQueue(
   );
   remMessage.delete().catch(doNothingOnError);
   if (!wantsToStartQueue) {
-    delete used[guild!.id];
+    delete runningQueues[guild!.id];
     return false;
   }
   return voiceChannel;
@@ -370,7 +373,7 @@ function onEnd(
   if (debugMessage) {
     debugMessage.delete().catch(doNothingOnError);
   }
-  delete used[guild.id];
+  delete runningQueues[guild.id];
   if (voiceChannel) {
     queueVoiceChannels.delete(guild.id);
     // remove all mutes
@@ -457,7 +460,7 @@ async function createQueue(
     content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
     components: [row, rowTwo],
   });
-  used[guild.id] = {
+  runningQueues[guild.id] = {
     date: new Date(Date.now() + time),
     cid: topicMessage.channel.id,
     msg: topicMessage.id,
@@ -502,68 +505,102 @@ async function createQueue(
   });
 }
 
-export const queue: magibotCommand = {
-  hide: false,
-  name: 'queue',
-  async main({ message }) {
-    if (
-      !message.guild
-      || !(message.channel instanceof TextChannel)
-      || !message.member
-    ) {
-      return;
-    }
-    const { guild, member: author, channel } = message;
-    if (used[guild.id]) {
-      const d = new Date();
-      if (d.getTime() - used[guild.id].date.getTime() <= 0) {
-        // check if its already 2hours old
-        if (used[guild.id].msg && used[guild.id].cid) {
-          const previousChannel = guild.channels.cache.get(used[guild.id].cid);
-          if (
-            previousChannel
-            && (await (previousChannel as TextChannel).messages
-              .fetch(used[guild.id].msg)
-              .catch(doNothingOnError))
-          ) {
-            channel
-              .send(
-                "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
-              )
-              .catch(doNothingOnError);
-            return;
-          }
-        } else {
+async function main({ message }) {
+  if (
+    !message.guild
+		|| !(message.channel instanceof TextChannel)
+		|| !message.member
+  ) {
+    return;
+  }
+  const { guild, member: author, channel } = message;
+  if (runningQueues[guild.id]) {
+    const d = new Date();
+    if (d.getTime() - runningQueues[guild.id].date.getTime() <= 0) {
+      // check if its already 2hours old
+      if (runningQueues[guild.id].msg && runningQueues[guild.id].cid) {
+        const previousChannel = guild.channels.cache.get(runningQueues[guild.id].cid);
+        if (
+          previousChannel
+					&& (await (previousChannel as TextChannel).messages
+					  .fetch(runningQueues[guild.id].msg)
+					  .catch(doNothingOnError))
+        ) {
           channel
             .send(
-              "There's currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.",
+              "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
             )
             .catch(doNothingOnError);
           return;
         }
+      } else {
+        channel
+          .send(
+            "There's currently a queue being created on this guild. For performance reasons only one queue per guild is allowed.",
+          )
+          .catch(doNothingOnError);
+        return;
       }
     }
-    used[guild.id] = {
-      date: new Date(Date.now() + 3600000),
-      msg: '',
-      cid: '',
-    };
+  }
+  runningQueues[guild.id] = {
+    date: new Date(Date.now() + 3600000),
+    msg: '',
+    cid: '',
+  };
 
-    message.delete().catch(doNothingOnError);
+  message.delete().catch(doNothingOnError);
 
-    await createQueue(guild, channel, message, author);
-  },
-  ehelp() {
+  await createQueue(guild, channel, message, author);
+}
+
+function registerSlashCommand(builder: SlashCommandBuilder) {
+  return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup.setName('queue')
+    .setDescription('Manage queues for events such as karaoke or playing view viewers.')
+    .addSubcommand((subcommand) => subcommand.setName('start')
+      .setDescription('Start a queue that can last up to 2h.')
+      .addStringOption((option) => option
+        .setName('topic')
+        .setDescription(
+          'The topic the queue is about.',
+        )
+        .setRequired(true)))
+    .addSubcommand((subcommand) => subcommand.setName('stop')
+      .setDescription('Stop the running queue of this server.'))
+    .addSubcommand((subcommand) => subcommand.setName('extend')
+      .setDescription('Extend the running queue of this server.')));
+}
+
+async function runCommand(interaction: CommandInteraction) {
+  const subcommand = interaction.options.getSubcommand(true) as'start'|'stop'|'extend';
+
+  // TODO migrate actual functionality of the main function
+
+  if (subcommand === 'start') {
+    console.log('start');
+    return;
+  }
+  if (subcommand === 'stop') {
+    console.log('stop');
+    return;
+  }
+  if (subcommand === 'extend') {
+    console.log('extend');
+  }
+}
+
+export const queue: MagibotAdminSlashCommand = {
+  help() {
     return [
       {
         name: '',
         value:
-          'Start a queue that can last up to 2h. There is only a single queue allowed per guild.\nYou can activate an optional voicemode which will automatically (un)mute users if you start the queue while connected to a voicechannel.\nYou get all the setup instructions when using the command.',
+          'Start a queue that can last up to 2h. There is only a single queue allowed per guild.',
       },
     ];
   },
-  admin: true,
-  perm: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'], // TODO validate if this is what we need
-  dev: false,
+  permissions: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'], // TODO validate if this is what we need
   category: commandCategories.util,
+  run: runCommand,
+  registerSlashCommand,
 };

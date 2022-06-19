@@ -1,7 +1,5 @@
 import Discord from 'discord.js';
 import Statcord from 'statcord.js';
-// eslint-disable-next-line import/no-cycle
-import { queue as _queue } from './commands/old/@queue';
 import { setup as _setup } from './commands/old/@setup';
 // we allow this cycle once, as the help command also needs to list itself
 import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
@@ -23,7 +21,6 @@ import { bot } from './bot';
 import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
-  _queue,
   _setup,
 
   help,
@@ -42,6 +39,7 @@ const migratedCommands = new Map([
   ['sound', 'joinsound'],
   ['info', 'info'],
   ['vote', 'vote'],
+  ['_queue', 'queue'], // admin command
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(
