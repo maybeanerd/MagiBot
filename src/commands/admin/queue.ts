@@ -123,7 +123,9 @@ async function onQueueAction(
   sharedQueueData: { activeUser: User | null },
   collector: InteractionCollector<MessageComponentInteraction>,
 ) {
-  const typeOfAction = buttonInteraction.customId.split('-')[2] as typeOfQueueAction;
+  const typeOfAction = buttonInteraction.customId.split(
+    '-',
+  )[2] as typeOfQueueAction;
   const actionUser = buttonInteraction.user;
   switch (typeOfAction) {
   case typeOfQueueAction.join:
@@ -139,9 +141,10 @@ async function onQueueAction(
       if (isFirstInQueue) {
         // eslint-disable-next-line no-param-reassign
         sharedQueueData.activeUser = actionUser;
-        const message = (await buttonInteraction.reply(
-          { fetchReply: true, content: `It's your turn ${sharedQueueData.activeUser}!` },
-        )) as Message;
+        const message = (await buttonInteraction.reply({
+          fetchReply: true,
+          content: `It's your turn ${sharedQueueData.activeUser}!`,
+        })) as Message;
         asyncWait(1000).then(() => message.delete());
         if (voiceChannel) {
           // TODO rework muting in here
@@ -246,9 +249,10 @@ async function onQueueAction(
           ),
         )
         .catch(doNothingOnError);
-      const message = (await buttonInteraction.reply(
-        { fetchReply: true, content: `It's your turn ${sharedQueueData.activeUser}!` },
-      )) as Message;
+      const message = (await buttonInteraction.reply({
+        fetchReply: true,
+        content: `It's your turn ${sharedQueueData.activeUser}!`,
+      })) as Message;
       asyncWait(1000).then(() => message.delete());
       if (voiceChannel) {
         // unmute currentUser
@@ -331,9 +335,11 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
   if (runningQueues.has(guild.id)) {
-    interaction.followUp(
-      "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
-    );
+    interaction.followUp({
+      content:
+        "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
+      ephemeral: true,
+    });
     return;
   }
 
