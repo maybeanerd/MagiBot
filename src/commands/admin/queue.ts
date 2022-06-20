@@ -26,7 +26,7 @@ import { MagibotAdminSlashCommand } from '../../types/command';
 
 const runningQueues = new Map<
   string,
-  { endDate: Date; interactionId: string }
+  { endDate: Date; interactionId: string; end:() => void } | null
 >();
 
 function messageEdit(
@@ -341,6 +341,9 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     return;
   }
 
+  // reserve the spot
+  runningQueues.set(guild.id, null);
+
   // TODO continue reworking from here on
 
   // TODO get a voice channel? take a look at "startQueueOld"
@@ -395,11 +398,6 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
     components: [row, rowTwo],
   })) as Message;
-  runningQueues.set(guild.id, {
-    endDate: new Date(Date.now() + millisecondsUntilEnd),
-    interactionId: interaction.id,
-    // TODO do we need anything else?
-  });
 
   if (voiceChannel) {
     // TODO rework
@@ -438,6 +436,23 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   collector.once('end', (/* collected */) => {
     onEnd(guild, voiceChannel, debugMessage, topicMessage, topic);
   });
+  runningQueues.set(guild.id, {
+    endDate: new Date(Date.now() + millisecondsUntilEnd),
+    interactionId: interaction.id,
+    end: () => {
+      collector.stop('Ended by user.');
+    },
+  });
+}
+
+async function stopRunningQueue(interaction: CommandInteraction) {
+  const guildId = interaction.guild!.id;
+  const runningQueue = runningQueues.get(guildId);
+  if (runningQueue) {
+    runningQueue.end(); // should trigger everything needed because of onEnd
+  } else {
+    await interaction.followUp("There's no ongoing queue on this guild.");
+  }
 }
 
 function registerSlashCommand(builder: SlashCommandBuilder) {
@@ -475,8 +490,7 @@ async function runCommand(interaction: CommandInteraction) {
     return;
   }
   if (subcommand === 'stop') {
-    // TODO do we actually want to allow this?
-    console.log('stop');
+    await stopRunningQueue(interaction);
     return;
   }
   if (subcommand === 'extend') {
