@@ -9,7 +9,7 @@ import {
   removeDefaultGuildJoinsound,
   removeSound,
   validateAndSaveJoinsound,
-} from '../joinsounds/management';
+} from '../joinsound/management';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];

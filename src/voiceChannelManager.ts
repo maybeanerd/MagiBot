@@ -8,7 +8,7 @@ import {
   VoiceConnection,
 } from '@discordjs/voice';
 import { VoiceState } from 'discord.js';
-import { getJoinsoundOfUser } from './commands/joinsounds/management';
+import { getJoinsoundOfUser } from './commands/joinsound/management';
 import { StillMutedModel } from './db';
 import { isBlacklistedUser, isJoinableVc, toggleStillMuted } from './dbHelpers';
 import { catchErrorOnDiscord } from './sendToMyDiscord';

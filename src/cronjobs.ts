@@ -12,7 +12,7 @@ import {
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
-import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
+import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsound/fileManagement';
 import { reactions } from './commands/vote';
 
 if (!config.dburl) {
