@@ -265,10 +265,6 @@ async function onQueueAction(
             .catch(doNothingOnError);
         }
       }
-      buttonInteraction.reply({
-        content: 'Successfully moved the queue to the next user!',
-        ephemeral: true,
-      });
     } else {
       buttonInteraction.reply({
         content: 'There are no users left in the queue!',
