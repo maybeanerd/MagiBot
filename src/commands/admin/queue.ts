@@ -450,6 +450,7 @@ async function stopRunningQueue(interaction: CommandInteraction) {
   const runningQueue = runningQueues.get(guildId);
   if (runningQueue) {
     runningQueue.end(); // should trigger everything needed because of onEnd
+    await interaction.followUp('Successfully stopped the ongoing queue on this guild.');
   } else {
     await interaction.followUp("There's no ongoing queue on this guild.");
   }
