@@ -12,17 +12,17 @@ import {
   CommandInteraction,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { bot } from '../../bot';
+import { bot } from '../../../bot';
 import {
   doNothingOnError,
   asyncWait,
   buttonInteractionId,
-} from '../../helperFunctions';
-import { queueVoiceChannels } from '../../shared_assets';
-import { commandCategories } from '../../types/enums';
-import { saveUsersWhoJoinedQueue } from '../../statTracking';
-import { isAdmin, toggleStillMuted } from '../../dbHelpers';
-import { MagibotAdminSlashCommand } from '../../types/command';
+} from '../../../helperFunctions';
+import { queueVoiceChannels } from '../../../shared_assets';
+import { commandCategories } from '../../../types/enums';
+import { saveUsersWhoJoinedQueue } from '../../../statTracking';
+import { isAdmin, toggleStillMuted } from '../../../dbHelpers';
+import { MagibotAdminSlashCommand } from '../../../types/command';
 
 const runningQueues = new Map<
   string,
