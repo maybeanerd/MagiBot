@@ -24,7 +24,7 @@
     "fast-folder-size": "1.7.0",
     "ffmpeg-static": "^5.0.0",
     "ffprobe": "^1.1.2",
-    "ffprobe-static": "^3.0.0",
+    "ffprobe-static": "^3.1.0",
     "forever": "^4.0.3",
     "libsodium-wrappers": "^0.7.10",
     "mongoose": "^6.4.0",
