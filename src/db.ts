@@ -320,23 +320,12 @@ voteSchema.index({
 });
 export const VoteModel = mongoose.model<Vote>('votes', voteSchema);
 
-type QueuedUser = { name: string; id: string };
 type OngoingQueue = {
   guildId: string;
   interactionId: string;
   endDate: Date;
-  queuedUsers: Array<QueuedUser>;
+  queuedUsers: Array<string>;
 };
-const QueuedUserSchema = new mongoose.Schema<QueuedUser>({
-  name: {
-    type: String,
-    required: true,
-  },
-  id: {
-    type: String,
-    required: true,
-  },
-});
 const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
   {
     guildId: {
@@ -352,7 +341,7 @@ const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
       required: true,
     },
     queuedUsers: {
-      type: [QueuedUserSchema],
+      type: [String],
       required: true,
     },
   },
