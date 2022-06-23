@@ -348,7 +348,7 @@ const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
   { collection: 'ongoingQueue' },
 );
 ongoingQueueSchema.index({
-  guildId: 1, interactionId: 1,
+  guildId: 1, interactionId: 1, endDate: 1,
 });
 export const OngoingQueueModel = mongoose.model<OngoingQueue>(
   'ongoingQueue',
