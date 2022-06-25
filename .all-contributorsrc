@@ -29,6 +29,15 @@
         "ideas",
         "review"
       ]
+    },
+    {
+      "login": "7crmbs2",
+      "name": "crmbs",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51399053?v=4",
+      "profile": "https://github.com/7crmbs2",
+      "contributions": [
+        "userTesting"
+      ]
     }
   ],
   "contributorsPerLine": 7,
