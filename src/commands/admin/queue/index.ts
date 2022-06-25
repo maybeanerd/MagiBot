@@ -23,32 +23,7 @@ import { commandCategories } from '../../../types/enums';
 import { saveUsersWhoJoinedQueue } from '../../../statTracking';
 import { isAdmin, toggleStillMuted } from '../../../dbHelpers';
 import { MagibotAdminSlashCommand } from '../../../types/command';
-
-const runningQueues = new Map<
-  string,
-  { endDate: Date; interactionId: string; end:() => void } | null
->();
-
-function messageEdit(
-  voiceChannel: VoiceChannel | null | undefined,
-  activeUser: User | null,
-  queuedUsers: Array<User>,
-  topic: string,
-) {
-  let msg = `Queue: **${topic}**`;
-  if (voiceChannel) {
-    msg += `\n*with voicemode activated in* ${voiceChannel}`;
-  }
-  let nextUsers = '\n';
-  if (queuedUsers.length > 0) {
-    for (let i = 0; i < 10 && i < queuedUsers.length; i++) {
-      nextUsers += `- ${queuedUsers[i]}\n`;
-    }
-  } else {
-    nextUsers = ' no more queued users\n';
-  }
-  return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${activeUser}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
-}
+import { removeQueue, tryToCreateQueue } from './stateManager';
 
 /* async function startQueueOld(
   guild: Guild,
@@ -114,190 +89,7 @@ const enum typeOfQueueAction {
   leave = 'leave',
 }
 
-async function onQueueAction(
-  buttonInteraction: ButtonInteraction,
-  voiceChannel: VoiceChannel | null,
-  topicMessage: Message,
-  topic: string,
-  queuedUsers: Array<User>,
-  sharedQueueData: { activeUser: User | null },
-  collector: InteractionCollector<MessageComponentInteraction>,
-) {
-  const typeOfAction = buttonInteraction.customId.split(
-    '-',
-  )[2] as typeOfQueueAction;
-  const actionUser = buttonInteraction.user;
-  switch (typeOfAction) {
-  case typeOfQueueAction.join:
-    // eslint-disable-next-line no-case-declarations
-    const indexOfUser = queuedUsers.indexOf(actionUser);
-    if (
-      indexOfUser === -1
-        && (!sharedQueueData.activeUser
-          || actionUser.id !== sharedQueueData.activeUser.id)
-    ) {
-      saveUsersWhoJoinedQueue(bot.shard!.ids[0]);
-      const isFirstInQueue = sharedQueueData.activeUser === null;
-      if (isFirstInQueue) {
-        // eslint-disable-next-line no-param-reassign
-        sharedQueueData.activeUser = actionUser;
-        const message = (await buttonInteraction.reply({
-          fetchReply: true,
-          content: `It's your turn ${sharedQueueData.activeUser}!`,
-        })) as Message;
-        asyncWait(1000).then(() => message.delete());
-        if (voiceChannel) {
-          // TODO rework muting in here
-          // unmute currentUser
-          const currentMember = await buttonInteraction.guild!.members.fetch(
-            actionUser,
-          );
-          if (currentMember) {
-            currentMember.voice
-              .setMute(false, 'Its their turn in the queue')
-              .catch(doNothingOnError);
-          }
-        }
-      } else {
-        queuedUsers.push(actionUser);
-      }
-      topicMessage
-        .edit(
-          messageEdit(
-            voiceChannel,
-            sharedQueueData.activeUser,
-            queuedUsers,
-            topic,
-          ),
-        )
-        .catch(doNothingOnError);
-      if (!isFirstInQueue) {
-        buttonInteraction.reply({
-          content: `Successfully joined the queue! Your position is: ${queuedUsers.length}`,
-          ephemeral: true,
-        });
-      }
-    } else if (indexOfUser !== -1) {
-      buttonInteraction.reply({
-        content: `You were already in the queue! Your current position is: ${
-          indexOfUser + 1
-        }`,
-        ephemeral: true,
-      });
-    }
-    break;
-  case typeOfQueueAction.leave:
-    if (queuedUsers.includes(actionUser)) {
-      const ind = queuedUsers.findIndex((obj) => obj.id === actionUser.id);
-      queuedUsers.splice(ind, 1);
-      topicMessage
-        .edit(
-          messageEdit(
-            voiceChannel,
-            sharedQueueData.activeUser,
-            queuedUsers,
-            topic,
-          ),
-        )
-        .catch(doNothingOnError);
-      buttonInteraction.reply({
-        content: 'Successfully left the queue!',
-        ephemeral: true,
-      });
-    } else {
-      buttonInteraction.reply({
-        content: 'You are not in the queue anyways!',
-        ephemeral: true,
-      });
-    }
-    break;
-  case typeOfQueueAction.next:
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-          buttonInteraction.guild!.id,
-          buttonInteraction.member as GuildMember,
-      ))
-    ) {
-      buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
-        ephemeral: true,
-      });
-      return;
-    }
-    if (queuedUsers[0]) {
-      if (voiceChannel) {
-        // mute old current user
-        if (sharedQueueData.activeUser) {
-          const currentMember = await buttonInteraction.guild!.members.fetch(
-            sharedQueueData.activeUser,
-          );
-          currentMember.voice
-            .setMute(true, 'its not your turn in the queue anymore')
-            .catch(doNothingOnError);
-        }
-      }
-      // eslint-disable-next-line no-param-reassign
-      sharedQueueData.activeUser = queuedUsers.shift()!;
-      topicMessage
-        .edit(
-          messageEdit(
-            voiceChannel,
-            sharedQueueData.activeUser,
-            queuedUsers,
-            topic,
-          ),
-        )
-        .catch(doNothingOnError);
-      const message = (await buttonInteraction.reply({
-        fetchReply: true,
-        content: `It's your turn ${sharedQueueData.activeUser}!`,
-      })) as Message;
-      asyncWait(1000).then(() => message.delete());
-      if (voiceChannel) {
-        // unmute currentUser
-        const currentMember = await buttonInteraction.guild!.members.fetch(
-          sharedQueueData.activeUser,
-        );
-        if (currentMember) {
-          currentMember.voice
-            .setMute(false, 'Its their turn in the queue')
-            .catch(doNothingOnError);
-        }
-      }
-    } else {
-      buttonInteraction.reply({
-        content: 'There are no users left in the queue!',
-        ephemeral: true,
-      });
-    }
-    break;
-  case typeOfQueueAction.end:
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-          buttonInteraction.guild!.id,
-          buttonInteraction.member as GuildMember,
-      ))
-    ) {
-      buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
-        ephemeral: true,
-      });
-      return;
-    }
-    buttonInteraction.reply({
-      content: 'Successfully ended the queue!',
-      ephemeral: true,
-    });
-    collector.stop('Ended by user.');
-    break;
-  default:
-    break;
-  }
-}
-
-function onEnd(
+async function onEnd(
   guild: Guild,
   voiceChannel: VoiceChannel | null,
   debugMessage: Message | null,
@@ -307,7 +99,7 @@ function onEnd(
   if (debugMessage) {
     debugMessage.delete().catch(doNothingOnError);
   }
-  runningQueues.delete(guild.id);
+  await removeQueue(guild.id);
   if (voiceChannel) {
     queueVoiceChannels.delete(guild.id);
     // remove all mutes
@@ -330,22 +122,21 @@ const defaultQueueLengthInMinutes = 120;
 async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
-  if (runningQueues.has(guild.id)) {
+  const millisecondsUntilEnd = defaultQueueLengthInMinutes * 60000;
+  const endDate = new Date(Date.now() + millisecondsUntilEnd), ;
+
+  const createdQueue = await tryToCreateQueue(guild.id, interaction.id, endDate);
+
+  if (!createdQueue) {
     interaction.followUp(
       "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
     );
     return;
   }
 
-  // reserve the spot
-  runningQueues.set(guild.id, null);
-
-  // TODO continue reworking from here on
-
   // TODO get a voice channel? take a look at "startQueueOld"
 
   const voiceChannel = null as VoiceChannel | null;
-  const millisecondsUntilEnd = defaultQueueLengthInMinutes * 60000;
 
   const debugMessage: Message | null = null;
   // TODO maybe readd this with webhooks? but honestly just not needed atm.
@@ -410,6 +201,7 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     });
   }
 
+  // TODO move this logic away from here
   const collector = topicMessage.createMessageComponentCollector({
     filter: (buttonInteraction) => buttonInteraction.customId.startsWith(
       `${buttonInteractionId.queue}-${guild.id}-`,
@@ -431,13 +223,6 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   });
   collector.once('end', (/* collected */) => {
     onEnd(guild, voiceChannel, debugMessage, topicMessage, topic);
-  });
-  runningQueues.set(guild.id, {
-    endDate: new Date(Date.now() + millisecondsUntilEnd),
-    interactionId: interaction.id,
-    end: () => {
-      collector.stop('Ended by user.');
-    },
   });
 }
 

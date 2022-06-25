@@ -4,7 +4,21 @@ async function getQueue(guildId: string) {
   return OngoingQueueModel.findOne({ where: { guildId } });
 }
 
-export async function tryToCreateQueue(guildId: string, interactionId: string, endDate: Date) {
+// let's see if we can work without this
+/* export async function getQueueData(guildId:string) {
+  const queue = await getQueue(guildId);
+  if (!queue) {
+    return null;
+  }
+  return queue.toObject();
+} */
+
+export async function tryToCreateQueue(
+  guildId: string,
+  interactionId: string,
+  topic: string,
+  endDate: Date,
+) {
   const existingQueue = await getQueue(guildId);
   if (existingQueue !== null) {
     return null;
@@ -12,6 +26,7 @@ export async function tryToCreateQueue(guildId: string, interactionId: string, e
   return OngoingQueueModel.create({
     guildId,
     interactionId,
+    topic,
     endDate,
     queuedUsers: [],
   });
@@ -22,23 +37,33 @@ export async function addUserToQueue(guildId: string, userId: string) {
   if (queue === null) {
     return null;
   }
-  if (!queue.queuedUsers.includes(userId)) {
-    return false;
+  const indexOfUser = queue.queuedUsers.indexOf(userId);
+  if (indexOfUser !== -1) {
+    return { addedToQueue: false, position: indexOfUser + 1 };
   }
   queue.queuedUsers.push(userId);
   await queue.save();
-  return true;
+  const isActiveUser = queue.queuedUsers.length === 1;
+  return {
+    addedToQueue: true, isActiveUser, position: queue.queuedUsers.length, topic: queue.topic,
+  };
 }
 
-export async function getNextUserOfQueue(guildId: string) {
+export async function goToNextUserOfQueue(guildId: string) {
   const queue = await getQueue(guildId);
   if (queue === null) {
     return null;
   }
-  if (queue.queuedUsers.length === 0) {
+  queue.queuedUsers.shift();
+  return queue.queuedUsers.at(0) || null;
+}
+
+export async function getCurrenUserOfQueue(guildId: string) {
+  const queue = await getQueue(guildId);
+  if (queue === null) {
     return null;
   }
-  return queue.queuedUsers.shift();
+  return queue.queuedUsers.at(0) || null;
 }
 
 export async function removeUserFromQueue(guildId: string, userId: string) {

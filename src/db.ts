@@ -323,6 +323,7 @@ export const VoteModel = mongoose.model<Vote>('votes', voteSchema);
 type OngoingQueue = {
   guildId: string;
   interactionId: string;
+  topic: string;
   endDate: Date;
   queuedUsers: Array<string>;
 };
@@ -333,6 +334,10 @@ const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
       required: true,
     },
     interactionId: {
+      type: String,
+      required: true,
+    },
+    topic: {
       type: String,
       required: true,
     },
