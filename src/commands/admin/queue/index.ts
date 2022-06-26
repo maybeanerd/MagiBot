@@ -21,15 +21,9 @@ export const enum typeOfQueueAction {
   leave = 'leave',
 }
 
-const defaultQueueLengthInMinutes = 120;
-
 async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
-
-  const millisecondsUntilEnd = defaultQueueLengthInMinutes * 60000;
-  const endDate = new Date(Date.now() + millisecondsUntilEnd);
-
-  const createdQueue = await tryToCreateQueue(guild.id, interaction.id, topic, endDate);
+  const createdQueue = await tryToCreateQueue(guild.id, topic);
 
   if (!createdQueue) {
     interaction.followUp(
@@ -113,26 +107,20 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
     )
     .addSubcommand((subcommand) => subcommand
       .setName('start')
-      .setDescription('Start a queue that can last up to 2h.')
+      .setDescription('Start a queue. Only one active queue per guild is allowed.')
       .addStringOption((option) => option
         .setName('topic')
         .setDescription('The topic of the queue.')
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('stop')
-      .setDescription('Stop running queue. Queue message won\'t be adjusted this way though.'))
-    .addSubcommand((subcommand) => subcommand
-      .setName('extend')
-      .setDescription('Extend the running queue of this server.')));
+      .setDescription('Stop running queue. Queue message won\'t be adjusted this way though.')));
 }
 
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'start'
-    | 'stop'
-    | 'extend';
-
-  // TODO migrate actual functionality of the main function
+    | 'stop';
 
   if (subcommand === 'start') {
     const topic = interaction.options.getString('topic', true);
@@ -141,11 +129,6 @@ async function runCommand(interaction: CommandInteraction) {
   }
   if (subcommand === 'stop') {
     await stopRunningQueue(interaction);
-    return;
-  }
-  if (subcommand === 'extend') {
-    // TODO do we actually want to allow this?
-    console.log('extend');
   }
 }
 
@@ -159,7 +142,7 @@ export const queue: MagibotAdminSlashCommand = {
       },
     ];
   },
-  permissions: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'], // TODO validate if this is what we need
+  permissions: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   category: commandCategories.util,
   run: runCommand,
   registerSlashCommand,

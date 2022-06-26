@@ -1,7 +1,11 @@
-import { OngoingQueueModel } from '../../../db';
+import { OngoingQueue, OngoingQueueModel } from '../../../db';
 
 async function getQueue(guildId: string) {
   return OngoingQueueModel.findOne({ where: { guildId } });
+}
+
+function getActiveUserOfQueue(queue: OngoingQueue) {
+  return queue.queuedUsers.at(0) || null;
 }
 
 // let's see if we can work without this
@@ -15,9 +19,7 @@ async function getQueue(guildId: string) {
 
 export async function tryToCreateQueue(
   guildId: string,
-  interactionId: string,
   topic: string,
-  endDate: Date,
 ) {
   const existingQueue = await getQueue(guildId);
   if (existingQueue !== null) {
@@ -25,9 +27,7 @@ export async function tryToCreateQueue(
   }
   return OngoingQueueModel.create({
     guildId,
-    interactionId,
     topic,
-    endDate,
     queuedUsers: [],
   });
 }
@@ -57,18 +57,10 @@ export async function goToNextUserOfQueue(guildId: string) {
   const oldUser = queue.queuedUsers.shift();
   return {
     oldUser,
-    activeUser: queue.queuedUsers.at(0),
+    activeUser: getActiveUserOfQueue(queue),
     queuedUsers: queue.queuedUsers,
     topic: queue.topic,
   } || null;
-}
-
-export async function getCurrenUserOfQueue(guildId: string) {
-  const queue = await getQueue(guildId);
-  if (queue === null) {
-    return null;
-  }
-  return queue.queuedUsers.at(0) || null;
 }
 
 export async function removeUserFromQueue(guildId: string, userId: string) {
@@ -82,7 +74,7 @@ export async function removeUserFromQueue(guildId: string, userId: string) {
   queue.queuedUsers = queue.queuedUsers.filter((u) => u !== userId);
   await queue.save();
   return {
-    activeUser: queue.queuedUsers.at(0) || null,
+    activeUser: getActiveUserOfQueue(queue),
     queuedUsers: queue.queuedUsers,
     topic: queue.topic,
   };
@@ -95,18 +87,4 @@ export async function removeQueue(guildId: string) {
   }
   await queue.remove();
   return { topic: queue.topic };
-}
-
-export async function removeOutdatedQueues() {
-  const now = new Date();
-  const queues = await OngoingQueueModel.find({
-    where: { endDate: { lte: now } },
-  });
-  const deletedQueues = await OngoingQueueModel.deleteMany({
-    where: { endDate: { lte: now } },
-  });
-  if (deletedQueues.acknowledged) {
-    return queues;
-  }
-  return false;
 }

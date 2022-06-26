@@ -1,6 +1,7 @@
 import { Client, TextChannel } from 'discord.js';
 import { asyncForEach } from './helperFunctions';
 import {
+  OngoingQueueModel,
   SaltModel,
   SaltrankModel,
   SettingsModel,
@@ -130,6 +131,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
         await removeLocallyStoredJoinsoundsOfGuild(guildID);
         await VoteModel.deleteMany({ guildid: guildID });
         await SettingsModel.deleteMany({ _id: guildID });
+        await OngoingQueueModel.deleteMany({ guildid: guildID });
       } else {
         await sendJoinEvent(
           `:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
