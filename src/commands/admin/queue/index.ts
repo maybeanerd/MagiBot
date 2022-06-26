@@ -120,7 +120,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('stop')
-      .setDescription('Stop the running queue of this server.'))
+      .setDescription('Stop running queue. Queue message won\'t be adjusted this way though.'))
     .addSubcommand((subcommand) => subcommand
       .setName('extend')
       .setDescription('Extend the running queue of this server.')));
