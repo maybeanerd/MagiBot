@@ -1,9 +1,12 @@
-// TODO migrate button interactions from /admin/queue.ts here
-// to use them in global interaction lsitener
-
-import { ButtonInteraction, Message, VoiceChannel } from 'discord.js';
+import {
+  ButtonInteraction, GuildMember, Message,
+} from 'discord.js';
+import { onQueueEnd, typeOfQueueAction } from '.';
+import { isAdmin } from '../../../dbHelpers';
 import { asyncWait, buttonInteractionId, doNothingOnError } from '../../../helperFunctions';
-import { addUserToQueue } from './stateManager';
+import {
+  addUserToQueue, goToNextUserOfQueue, removeUserFromQueue,
+} from './stateManager';
 
 function isInteractionQueueRelated(interaction: ButtonInteraction) {
   return interaction.customId.startsWith(
@@ -12,15 +15,11 @@ function isInteractionQueueRelated(interaction: ButtonInteraction) {
 }
 
 function messageEdit(
-  voiceChannel: VoiceChannel | null | undefined,
   activeUser: string | null,
   queuedUsers: Array<string>,
   topic: string,
 ) {
-  let msg = `Queue: **${topic}**`;
-  if (voiceChannel) {
-    msg += `\n*with voicemode activated in* ${voiceChannel}`;
-  }
+  const msg = `Queue: **${topic}**`;
   let nextUsers = '\n';
   if (queuedUsers.length > 0) {
     for (let i = 0; i < 10 && i < queuedUsers.length; i++) {
@@ -34,15 +33,6 @@ function messageEdit(
   return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **<@${activeUser}>**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
-// eslint being stupid again
-// eslint-disable-next-line no-shadow
-const enum typeOfQueueAction {
-  next = 'next',
-  end = 'end',
-  join = 'join',
-  leave = 'leave',
-}
-
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
   const typeOfAction = buttonInteraction.customId.split(
     '-',
@@ -51,11 +41,7 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
   const guildId = buttonInteraction.guildId!;
   const topicMessage = buttonInteraction.message as Message;
 
-  const voiceChannel : null | VoiceChannel = null; // for now let's not have VC yet
-
-  switch (typeOfAction) {
-  case typeOfQueueAction.join:
-    // eslint-disable-next-line no-case-declarations
+  if (typeOfAction === typeOfQueueAction.join) {
     const addUserResponse = await addUserToQueue(guildId, actionUserId);
     if (addUserResponse) {
       if (addUserResponse.addedToQueue) {
@@ -66,22 +52,9 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
             content: `It's your turn ${buttonInteraction.user}!`,
           })) as Message;
           asyncWait(1000).then(() => message.delete());
-          if (voiceChannel) {
-          // TODO rework muting in here
-          // unmute currentUser
-            const currentMember = await buttonInteraction.guild!.members.fetch(
-              actionUserId,
-            );
-            if (currentMember) {
-              currentMember.voice
-                .setMute(false, 'Its their turn in the queue')
-                .catch(doNothingOnError);
-            }
-          }
           topicMessage
             .edit(
               messageEdit(
-                voiceChannel,
                 actionUserId,
                 [],
                 addUserResponse.topic,
@@ -104,18 +77,15 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
         });
       }
     }
-    break;
-  case typeOfQueueAction.leave:
-    if (queuedUsers.includes(actionUserId)) {
-      const ind = queuedUsers.findIndex((obj) => obj.id === actionUserId.id);
-      queuedUsers.splice(ind, 1);
+  } else if (typeOfAction === typeOfQueueAction.leave) {
+    const userLeftQueue = await removeUserFromQueue(guildId, actionUserId);
+    if (userLeftQueue) {
       topicMessage
         .edit(
           messageEdit(
-            voiceChannel,
-            sharedQueueData.activeUser,
-            queuedUsers,
-            topic,
+            userLeftQueue.activeUser,
+            userLeftQueue.queuedUsers,
+            userLeftQueue.topic,
           ),
         )
         .catch(doNothingOnError);
@@ -129,8 +99,7 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
         ephemeral: true,
       });
     }
-    break;
-  case typeOfQueueAction.next:
+  } else if (typeOfAction === typeOfQueueAction.next) {
     // only admins of guild are allowed to do this
     if (
       !(await isAdmin(
@@ -144,54 +113,30 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
       });
       return;
     }
-    if (queuedUsers[0]) {
-      if (voiceChannel) {
-        // mute old current user
-        if (sharedQueueData.activeUser) {
-          const currentMember = await buttonInteraction.guild!.members.fetch(
-            sharedQueueData.activeUser,
-          );
-          currentMember.voice
-            .setMute(true, 'its not your turn in the queue anymore')
-            .catch(doNothingOnError);
-        }
-      }
-      // eslint-disable-next-line no-param-reassign
-      sharedQueueData.activeUser = queuedUsers.shift()!;
+    const wentToNextUser = await goToNextUserOfQueue(guildId);
+    if (wentToNextUser && wentToNextUser.activeUser) {
       topicMessage
         .edit(
           messageEdit(
-            voiceChannel,
-            sharedQueueData.activeUser,
-            queuedUsers,
-            topic,
+            wentToNextUser.activeUser,
+            wentToNextUser.queuedUsers,
+            wentToNextUser.topic,
           ),
         )
         .catch(doNothingOnError);
       const message = (await buttonInteraction.reply({
         fetchReply: true,
-        content: `It's your turn ${sharedQueueData.activeUser}!`,
+        // TODO validate mention!
+        content: `It's your turn <@${wentToNextUser.activeUser}>!`,
       })) as Message;
       asyncWait(1000).then(() => message.delete());
-      if (voiceChannel) {
-        // unmute currentUser
-        const currentMember = await buttonInteraction.guild!.members.fetch(
-          sharedQueueData.activeUser,
-        );
-        if (currentMember) {
-          currentMember.voice
-            .setMute(false, 'Its their turn in the queue')
-            .catch(doNothingOnError);
-        }
-      }
     } else {
       buttonInteraction.reply({
         content: 'There are no users left in the queue!',
         ephemeral: true,
       });
     }
-    break;
-  case typeOfQueueAction.end:
+  } else if (typeOfAction === typeOfQueueAction.end) {
     // only admins of guild are allowed to do this
     if (
       !(await isAdmin(
@@ -209,10 +154,7 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
       content: 'Successfully ended the queue!',
       ephemeral: true,
     });
-    collector.stop('Ended by user.');
-    break;
-  default:
-    break;
+    await onQueueEnd(guildId, topicMessage);
   }
 }
 
@@ -222,6 +164,5 @@ export async function onInteraction(interaction: ButtonInteraction) {
     return false;
   }
   await onQueueAction(interaction);
-  // TODO implement queue logic
   return true;
 }

@@ -21,6 +21,7 @@ import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
+import { onInteraction } from './commands/admin/queue/buttonInteractions';
 
 console.log(generateDependencyReport());
 
@@ -114,13 +115,20 @@ bot.on('message', async (message: Discord.Message) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) {
-    return;
+  // handle button interactions
+  if (interaction.isButton()) {
+    if (await onInteraction(interaction)) {
+      return;
+    }
+    // more handlers could be added here
   }
-  try {
-    await checkApplicationCommand(interaction);
-  } catch (err) {
-    console.error(err);
+  // handle command interactions
+  if (interaction.isCommand()) {
+    try {
+      await checkApplicationCommand(interaction);
+    } catch (err) {
+      console.error(err);
+    }
   }
 });
 
