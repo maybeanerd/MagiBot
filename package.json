@@ -51,7 +51,7 @@
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
-    "dev": "tsc && node dist/index.js",
+    "dev": "npm run build && node dist/index.js",
     "lint": "eslint \"src/**/*\"",
     "lint:fix": "eslint \"src/**/*\" --fix",
     "build": "tsc",
