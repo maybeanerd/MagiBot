@@ -5,7 +5,7 @@ import { onQueueEnd, typeOfQueueAction } from '.';
 import { isAdmin } from '../../../dbHelpers';
 import { asyncWait, buttonInteractionId, doNothingOnError } from '../../../helperFunctions';
 import {
-  addUserToQueue, goToNextUserOfQueue, removeUserFromQueue,
+  addUserToQueue, goToNextUserOfQueue, maximumQueueLength, removeUserFromQueue,
 } from './stateManager';
 
 function isInteractionQueueRelated(interaction: ButtonInteraction) {
@@ -68,11 +68,17 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
             });
           }
         }
-      } else {
+      } else if (addUserResponse.position !== null) {
         buttonInteraction.reply({
           content: `You were already in the queue! Your current position is: ${
             addUserResponse.position
           }`,
+          ephemeral: true,
+        });
+      } else {
+        buttonInteraction.reply({
+          content: `Couldn't join the queue because the maximum amount of ${maximumQueueLength} users has been reached.
+Try again later!`,
           ephemeral: true,
         });
       }

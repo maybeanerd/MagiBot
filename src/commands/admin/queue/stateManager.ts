@@ -32,6 +32,8 @@ export async function tryToCreateQueue(
   });
 }
 
+export const maximumQueueLength = 100;
+
 export async function addUserToQueue(guildId: string, userId: string) {
   const queue = await getQueue(guildId);
   if (queue === null) {
@@ -40,6 +42,10 @@ export async function addUserToQueue(guildId: string, userId: string) {
   const indexOfUser = queue.queuedUsers.indexOf(userId);
   if (indexOfUser !== -1) {
     return { addedToQueue: false, position: indexOfUser + 1 };
+  }
+  // limit the length of queues
+  if (queue.queuedUsers.length >= maximumQueueLength) {
+    return { addedToQueue: false, position: null };
   }
   queue.queuedUsers.push(userId);
   await queue.save();
