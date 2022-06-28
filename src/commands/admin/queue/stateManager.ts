@@ -8,15 +8,6 @@ function getActiveUserOfQueue(queue: OngoingQueue) {
   return queue.queuedUsers.at(0) || null;
 }
 
-// let's see if we can work without this
-/* export async function getQueueData(guildId:string) {
-  const queue = await getQueue(guildId);
-  if (!queue) {
-    return null;
-  }
-  return queue.toObject();
-} */
-
 export async function tryToCreateQueue(
   guildId: string,
   topic: string,
@@ -51,7 +42,12 @@ export async function addUserToQueue(guildId: string, userId: string) {
   await queue.save();
   const isActiveUser = queue.queuedUsers.length === 1;
   return {
-    addedToQueue: true, isActiveUser, position: queue.queuedUsers.length, topic: queue.topic,
+    addedToQueue: true,
+    isActiveUser,
+    position: queue.queuedUsers.length,
+    topic: queue.topic,
+    queuedUsers: queue.queuedUsers,
+    activeUser: getActiveUserOfQueue(queue),
   };
 }
 
@@ -61,6 +57,7 @@ export async function goToNextUserOfQueue(guildId: string) {
     return null;
   }
   const oldUser = queue.queuedUsers.shift();
+  await queue.save();
   return {
     oldUser,
     activeUser: getActiveUserOfQueue(queue),

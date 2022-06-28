@@ -23,16 +23,14 @@ function messageEdit(
 ) {
   const msg = `Queue: **${topic}**`;
   let nextUsers = '\n';
-  if (queuedUsers.length > 0) {
-    for (let i = 0; i < 10 && i < queuedUsers.length; i++) {
-      // TODO validate user mentioning
+  if (queuedUsers.length > 1) {
+    for (let i = 1; i <= 10 && i < queuedUsers.length; i++) {
       nextUsers += `- ${getUserMention(queuedUsers[i])}\n`;
     }
   } else {
     nextUsers = ' no more queued users\n';
   }
-  // TODO validate user mentioning
-  return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
+  return `${msg}\n*${queuedUsers.length - 1} queued users left*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
@@ -54,22 +52,21 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
             content: `It's your turn ${buttonInteraction.user}!`,
           })) as Message;
           asyncWait(1000).then(() => message.delete());
-          topicMessage
-            .edit(
-              messageEdit(
-                actionUserId,
-                [],
-                addUserResponse.topic,
-              ),
-            )
-            .catch(doNothingOnError);
-          if (!isActiveUser) {
-            buttonInteraction.reply({
-              content: `Successfully joined the queue! Your position is: ${addUserResponse.position}`,
-              ephemeral: true,
-            });
-          }
+        } else {
+          buttonInteraction.reply({
+            content: `Successfully joined the queue! Your position is: ${addUserResponse.position}`,
+            ephemeral: true,
+          });
         }
+        topicMessage
+          .edit(
+            messageEdit(
+              addUserResponse.activeUser!, // TODO type this cleaner
+              addUserResponse.queuedUsers!, // TODO type this cleaner
+              addUserResponse.topic!, // TODO type this cleaner
+            ),
+          )
+          .catch(doNothingOnError);
       } else if (addUserResponse.position !== null) {
         buttonInteraction.reply({
           content: `You were already in the queue! Your current position is: ${
@@ -134,7 +131,6 @@ Try again later!`,
         .catch(doNothingOnError);
       const message = (await buttonInteraction.reply({
         fetchReply: true,
-        // TODO validate mention!
         content: `It's your turn ${getUserMention(wentToNextUser.activeUser)}!`,
       })) as Message;
       asyncWait(1000).then(() => message.delete());
