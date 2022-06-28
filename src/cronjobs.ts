@@ -1,5 +1,5 @@
 import { Client, TextChannel } from 'discord.js';
-import { asyncForEach } from './helperFunctions';
+import { asyncForEach, getUserMention } from './helperFunctions';
 import {
   OngoingQueueModel,
   SaltModel,
@@ -188,7 +188,7 @@ async function endVote(vote: Vote, bot: Client) {
           if (finalReact.length > 1) {
             let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
             if (vote.authorID) {
-              str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
+              str = `**${vote.topic}** by ${getUserMention(vote.authorID)} ended.\n\nThere was a tie between `;
             }
             finalReact.forEach((react, i) => {
               str += `**${vote.options[react.reaction]}**`;
@@ -205,9 +205,9 @@ async function endVote(vote: Vote, bot: Client) {
               vote.options[finalReact[0].reaction]
             }** with **${finalReact[0].count - 1}** votes.`;
             if (vote.authorID) {
-              str = `**${vote.topic}** by <@${
-                vote.authorID
-              }> ended.\n\nThe result is **${
+              str = `**${vote.topic}** by ${
+                getUserMention(vote.authorID)
+              } ended.\n\nThe result is **${
                 vote.options[finalReact[0].reaction]
               }** with **${finalReact[0].count - 1}** votes.`;
             }
@@ -216,7 +216,7 @@ async function endVote(vote: Vote, bot: Client) {
         } else {
           let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
           if (vote.authorID) {
-            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nCould not compute a result.`;
+            str = `**${vote.topic}** by ${getUserMention(vote.authorID)} ended.\n\nCould not compute a result.`;
           }
           await msg.edit(str);
         }

@@ -3,7 +3,9 @@ import {
 } from 'discord.js';
 import { onQueueEnd, typeOfQueueAction } from '.';
 import { isAdmin } from '../../../dbHelpers';
-import { asyncWait, buttonInteractionId, doNothingOnError } from '../../../helperFunctions';
+import {
+  asyncWait, buttonInteractionId, doNothingOnError, getUserMention,
+} from '../../../helperFunctions';
 import {
   addUserToQueue, goToNextUserOfQueue, maximumQueueLength, removeUserFromQueue,
 } from './stateManager';
@@ -24,13 +26,13 @@ function messageEdit(
   if (queuedUsers.length > 0) {
     for (let i = 0; i < 10 && i < queuedUsers.length; i++) {
       // TODO validate user mentioning
-      nextUsers += `- <@${queuedUsers[i]}>\n`;
+      nextUsers += `- ${getUserMention(queuedUsers[i])}\n`;
     }
   } else {
     nextUsers = ' no more queued users\n';
   }
   // TODO validate user mentioning
-  return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **<@${activeUser}>**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
+  return `${msg}\n*${queuedUsers.length} queued users left*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
@@ -133,7 +135,7 @@ Try again later!`,
       const message = (await buttonInteraction.reply({
         fetchReply: true,
         // TODO validate mention!
-        content: `It's your turn <@${wentToNextUser.activeUser}>!`,
+        content: `It's your turn ${getUserMention(wentToNextUser.activeUser)}!`,
       })) as Message;
       asyncWait(1000).then(() => message.delete());
     } else {
