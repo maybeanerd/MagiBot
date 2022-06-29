@@ -76,6 +76,10 @@ export async function removeUserFromQueue(guildId: string, userId: string) {
   if (!queue.queuedUsers.includes(userId)) {
     return false;
   }
+  // can't leave queue if you're the only one left
+  if (queue.queuedUsers.length === 1) {
+    return false;
+  }
   queue.queuedUsers = queue.queuedUsers.filter((u) => u !== userId);
   await queue.save();
   return {

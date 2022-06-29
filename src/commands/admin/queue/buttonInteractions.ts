@@ -30,7 +30,7 @@ function messageEdit(
   } else {
     nextUsers = ' no more queued users\n';
   }
-  return `${msg}\n*${queuedUsers.length - 1} queued users left*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
+  return `${msg}\n*${queuedUsers.length - 1}/99 users queued*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
