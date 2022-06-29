@@ -61,9 +61,9 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
         topicMessage
           .edit(
             messageEdit(
-              addUserResponse.activeUser!, // TODO type this cleaner
-              addUserResponse.queuedUsers!, // TODO type this cleaner
-              addUserResponse.topic!, // TODO type this cleaner
+              addUserResponse.activeUser,
+              addUserResponse.queuedUsers,
+              addUserResponse.topic,
             ),
           )
           .catch(doNothingOnError);

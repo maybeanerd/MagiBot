@@ -8,10 +8,7 @@ function getActiveUserOfQueue(queue: OngoingQueue) {
   return queue.queuedUsers.at(0) || null;
 }
 
-export async function tryToCreateQueue(
-  guildId: string,
-  topic: string,
-) {
+export async function tryToCreateQueue(guildId: string, topic: string) {
   const existingQueue = await getQueue(guildId);
   if (existingQueue !== null) {
     return null;
@@ -25,7 +22,21 @@ export async function tryToCreateQueue(
 
 export const maximumQueueLength = 100;
 
-export async function addUserToQueue(guildId: string, userId: string) {
+export async function addUserToQueue(
+  guildId: string,
+  userId: string,
+): Promise<
+  | null
+  | { addedToQueue: false; position: number | null }
+  | {
+      addedToQueue: true;
+      isActiveUser: boolean;
+      position: number;
+      topic: string;
+      queuedUsers: Array<string>;
+      activeUser: string | null;
+    }
+> {
   const queue = await getQueue(guildId);
   if (queue === null) {
     return null;
