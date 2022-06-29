@@ -56,14 +56,16 @@ export async function goToNextUserOfQueue(guildId: string) {
   if (queue === null) {
     return null;
   }
-  const oldUser = queue.queuedUsers.shift();
+  if (queue.queuedUsers.length <= 1) {
+    return false;
+  }
+  queue.queuedUsers.shift();
   await queue.save();
   return {
-    oldUser,
     activeUser: getActiveUserOfQueue(queue),
     queuedUsers: queue.queuedUsers,
     topic: queue.topic,
-  } || null;
+  };
 }
 
 export async function removeUserFromQueue(guildId: string, userId: string) {
