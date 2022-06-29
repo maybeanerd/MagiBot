@@ -23,6 +23,8 @@ export const enum typeOfQueueAction {
 
 async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
+  // TODO create a dummy followup here and edit the message later
+  // therefore we can store the message ID and edit the queue message on queue end command!
   const createdQueue = await tryToCreateQueue(guild.id, topic);
 
   if (!createdQueue) {
