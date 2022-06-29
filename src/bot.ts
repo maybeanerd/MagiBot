@@ -16,7 +16,7 @@ import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { checkGuild, getPrefix } from './dbHelpers';
-import { asyncForEach } from './helperFunctions';
+import { asyncForEach, getUserMention } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
@@ -154,7 +154,7 @@ bot.on('guildCreate', async (guild) => {
         .catch(() => {});
     }
     await sendJoinEvent(
-      `:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerId}> (ID: ${guild.ownerId})`,
+      `:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: ${getUserMention(guild.ownerId)} (ID: ${guild.ownerId})`,
     );
   }
 });
