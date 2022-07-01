@@ -158,7 +158,7 @@ Try again later!`,
       content: 'Successfully ended the queue!',
       ephemeral: true,
     });
-    await onQueueEnd(guildId, topicMessage);
+    await onQueueEnd(buttonInteraction.guild!);
   }
 }
 

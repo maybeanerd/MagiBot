@@ -8,13 +8,20 @@ function getActiveUserOfQueue(queue: OngoingQueue) {
   return queue.queuedUsers.at(0) || null;
 }
 
-export async function tryToCreateQueue(guildId: string, topic: string) {
+export async function tryToCreateQueue(
+  guildId: string,
+  channelId: string,
+  messageId: string,
+  topic: string,
+) {
   const existingQueue = await getQueue(guildId);
   if (existingQueue !== null) {
     return null;
   }
   return OngoingQueueModel.create({
     guildId,
+    channelId,
+    messageId,
     topic,
     queuedUsers: [],
   });
@@ -106,5 +113,5 @@ export async function removeQueue(guildId: string) {
     return null;
   }
   await queue.remove();
-  return { topic: queue.topic };
+  return { topic: queue.topic, channelId: queue.channelId, messageId: queue.messageId };
 }

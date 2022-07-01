@@ -2,11 +2,14 @@ import {
   MessageActionRow,
   MessageButton,
   CommandInteraction,
+  Guild,
+  TextChannel,
   Message,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
-  buttonInteractionId, doNothingOnError,
+  buttonInteractionId,
+  doNothingOnError,
 } from '../../../helperFunctions';
 import { commandCategories } from '../../../types/enums';
 import { MagibotAdminSlashCommand } from '../../../types/command';
@@ -23,12 +26,18 @@ export const enum typeOfQueueAction {
 
 async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
-  // TODO create a dummy followup here and edit the message later
-  // therefore we can store the message ID and edit the queue message on queue end command!
-  const createdQueue = await tryToCreateQueue(guild.id, topic);
+
+  const originalMessage = (await interaction.followUp('Creating Queue...'))as Message;
+
+  const createdQueue = await tryToCreateQueue(
+    guild.id,
+    interaction.channelId,
+    originalMessage.id,
+    topic,
+  );
 
   if (!createdQueue) {
-    interaction.followUp(
+    originalMessage.edit(
       "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
     );
     return;
@@ -69,33 +78,38 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
       .setStyle('SECONDARY'),
   );
 
-  await interaction.followUp({
+  await originalMessage.edit({
     content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
     components: [row, rowTwo],
   });
 }
 
 export async function onQueueEnd(
-  guildId: string,
-  topicMessage?: Message,
+  guild: Guild,
 ) {
-  const queueEnded = await removeQueue(guildId);
-  if (queueEnded) {
-    if (topicMessage) {
-      topicMessage
-        .edit({ content: `**${queueEnded.topic}** ended.`, components: [] })
-        .catch(doNothingOnError);
+  const queue = await removeQueue(guild.id);
+  if (queue) {
+    const channel = await guild.channels.fetch(queue.channelId);
+    if (channel) {
+      const topicMessage = await (channel as TextChannel).messages.fetch(queue.messageId);
+      if (topicMessage) {
+        topicMessage
+          .edit({ content: `**${queue.topic}** ended.`, components: [] })
+          .catch(doNothingOnError);
+      }
+      return true;
     }
-    return true;
   }
   return false;
 }
 
 async function stopRunningQueue(interaction: CommandInteraction) {
-  const guildId = interaction.guild!.id;
-  const runningQueue = await onQueueEnd(guildId);
+  const guild = interaction.guild!;
+  const runningQueue = await onQueueEnd(guild);
   if (runningQueue) {
-    await interaction.followUp('Successfully stopped the ongoing queue on this guild.');
+    await interaction.followUp(
+      'Successfully stopped the ongoing queue on this guild.',
+    );
   } else {
     await interaction.followUp("There's no ongoing queue on this guild.");
   }
@@ -109,14 +123,18 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
     )
     .addSubcommand((subcommand) => subcommand
       .setName('start')
-      .setDescription('Start a queue. Only one active queue per guild is allowed.')
+      .setDescription(
+        'Start a queue. Only one active queue per guild is allowed.',
+      )
       .addStringOption((option) => option
         .setName('topic')
         .setDescription('The topic of the queue.')
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('stop')
-      .setDescription('Stop running queue. Queue message won\'t be adjusted this way though.')));
+      .setDescription(
+        'Stop the running queue on this guild.',
+      )));
 }
 
 async function runCommand(interaction: CommandInteraction) {
