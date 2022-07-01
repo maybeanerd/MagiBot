@@ -320,6 +320,44 @@ voteSchema.index({
 });
 export const VoteModel = mongoose.model<Vote>('votes', voteSchema);
 
+export type OngoingQueue = {
+  guildId: string;
+  channelId: string;
+  messageId: string;
+  topic: string;
+  queuedUsers: Array<string>;
+};
+const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
+  {
+    guildId: {
+      type: String,
+      required: true,
+    },
+    channelId: {
+      type: String,
+      required: true,
+    },
+    messageId: {
+      type: String,
+      required: true,
+    },
+    topic: {
+      type: String,
+      required: true,
+    },
+    queuedUsers: {
+      type: [String],
+      required: true,
+    },
+  },
+  { collection: 'ongoingQueue' },
+);
+ongoingQueueSchema.index({ guildId: 1 });
+export const OngoingQueueModel = mongoose.model<OngoingQueue>(
+  'ongoingQueue',
+  ongoingQueueSchema,
+);
+
 // one entry per user per guild
 // deprecated, we want to remove this system?
 type StillMuted = { userid: string; guildid: string };

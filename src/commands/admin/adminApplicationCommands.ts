@@ -9,6 +9,7 @@ import {
 import { commandCategories } from '../../types/enums';
 import { salt } from './salt';
 import { joinsound } from './joinsound';
+import { queue } from './queue';
 
 // TODO make this only available to admins? might be possible to adjust visibility of commands
 const adminApplicationCommandBase = new SlashCommandBuilder()
@@ -18,6 +19,7 @@ const adminApplicationCommandBase = new SlashCommandBuilder()
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
   salt,
   joinsound,
+  queue,
 };
 
 Object.values(adminApplicationCommands).forEach((command) => {
@@ -27,7 +29,7 @@ Object.values(adminApplicationCommands).forEach((command) => {
 async function runCommand(interaction: CommandInteraction) {
   // TODO in the future we could hide admin commands from non-admins as well?
   if (!(await interactionMemberIsAdmin(interaction))) {
-    await interaction.reply({
+    await interaction.followUp({
       content: "You're not allowed to use this command.",
       ephemeral: true,
     });

@@ -260,3 +260,14 @@ export async function asyncWait(ms: number) {
     setTimeout(resolve, ms);
   });
 }
+
+export function getUserMention(userId:string | null | undefined) {
+  if (!userId) {
+    return '';
+  }
+  return `<@${userId}>`;
+}
+
+export function getRoleMention(roleId: string) {
+  return `<@&${roleId}>`;
+}

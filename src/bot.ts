@@ -16,11 +16,12 @@ import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { checkGuild, getPrefix } from './dbHelpers';
-import { asyncForEach } from './helperFunctions';
+import { asyncForEach, getUserMention } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
+import { onInteraction } from './commands/admin/queue/buttonInteractions';
 
 console.log(generateDependencyReport());
 
@@ -114,13 +115,20 @@ bot.on('message', async (message: Discord.Message) => {
 });
 
 bot.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) {
-    return;
+  // handle button interactions
+  if (interaction.isButton()) {
+    if (await onInteraction(interaction)) {
+      return;
+    }
+    // more handlers could be added here
   }
-  try {
-    await checkApplicationCommand(interaction);
-  } catch (err) {
-    console.error(err);
+  // handle command interactions
+  if (interaction.isCommand()) {
+    try {
+      await checkApplicationCommand(interaction);
+    } catch (err) {
+      console.error(err);
+    }
   }
 });
 
@@ -146,7 +154,7 @@ bot.on('guildCreate', async (guild) => {
         .catch(() => {});
     }
     await sendJoinEvent(
-      `:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: <@${guild.ownerId}> (ID: ${guild.ownerId})`,
+      `:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: ${getUserMention(guild.ownerId)} (ID: ${guild.ownerId})`,
     );
   }
 });

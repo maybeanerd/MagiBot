@@ -5,6 +5,8 @@ import {
   yesOrNo,
   findRole,
   asyncWait,
+  getRoleMention,
+  getUserMention,
 } from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
 import { magibotCommand } from '../../types/command';
@@ -259,25 +261,25 @@ export const setup: magibotCommand = {
           if (
             await yesOrNo(
               message,
-              `Do you want to set <@&${rid}> as admin role?`,
-              `Cancelled setting <@&${rid}> as admin role`,
+              `Do you want to set ${getRoleMention(rid)} as admin role?`,
+              `Cancelled setting ${getRoleMention(rid)} as admin role`,
             )
           ) {
             await setAdminRole(message.guild!.id, rid, true);
             message.channel.send(
-              `Successfully set <@&${rid}> as admin role!`,
+              `Successfully set ${getRoleMention(rid)} as admin role!`,
             );
           }
         } else if (
           await yesOrNo(
             message,
-            `Do you want to remove <@&${rid}> from the admin roles?`,
-            `Cancelled removing <@&${rid}> from the admin roles`,
+            `Do you want to remove ${getRoleMention(rid)} from the admin roles?`,
+            `Cancelled removing ${getRoleMention(rid)} from the admin roles`,
           )
         ) {
           await setAdminRole(message.guild!.id, rid, false);
           message.channel.send(
-            `Successfully removed <@&${rid}> from the admin roles!`,
+            `Successfully removed ${getRoleMention(rid)} from the admin roles!`,
           );
         }
       } else {
@@ -413,7 +415,7 @@ export const setup: magibotCommand = {
         str = 'Empty';
       } else {
         adminRoles.forEach((role) => {
-          str += `<@&${role}> `;
+          str += `${getRoleMention(role)} `;
         });
       }
       info.push({
@@ -452,7 +454,7 @@ export const setup: magibotCommand = {
         str = 'Empty';
       } else {
         blacklistedUsers.forEach((userId) => {
-          str += `<@!${userId}>, `;
+          str += `${getUserMention(userId)}, `;
         });
         str = str.substring(0, str.length - 2);
       }
@@ -481,7 +483,7 @@ export const setup: magibotCommand = {
       if (!set.saltKing) {
         str = 'Empty';
       } else {
-        str = `<@${set.saltKing}>`;
+        str = getUserMention(set.saltKing);
       }
       info.push({
         name: 'SaltKing',
@@ -491,7 +493,7 @@ export const setup: magibotCommand = {
       if (!set.saltRole) {
         str = 'Empty';
       } else {
-        str = `<@&${set.saltRole}>`;
+        str = getRoleMention(set.saltRole);
       }
       info.push({
         name: 'SaltKing role',

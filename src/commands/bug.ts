@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import { interactionConfirmation } from '../helperFunctions';
+import { getUserMention, interactionConfirmation } from '../helperFunctions';
 import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
@@ -23,9 +23,9 @@ async function main(interaction: CommandInteraction, input: string) {
   );
   if (confirmed) {
     await sendBugreport(
-      `**Bugreport** by ${interaction.member?.user.username} (<@${
-        interaction.member?.user.id
-      }>) on server ${interaction.guild!.name}( ${
+      `**Bugreport** by ${interaction.member?.user.username} (${
+        getUserMention(interaction.member?.user.id)
+      }) on server ${interaction.guild!.name}( ${
         interaction.guild!.id
       } ) :\n${input}`,
     );

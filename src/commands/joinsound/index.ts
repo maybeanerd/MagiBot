@@ -1,14 +1,14 @@
 import { CommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { isShadowBanned, shadowBannedLevel } from '../shared_assets';
-import { commandCategories } from '../types/enums';
-import { DeferReply, MagibotSlashCommand } from '../types/command';
+import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
+import { commandCategories } from '../../types/enums';
+import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
   JoinsoundOptions,
   removeDefaultSound,
   removeSound,
   validateAndSaveJoinsound,
-} from './joinsounds/management';
+} from './management';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];

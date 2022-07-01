@@ -15,6 +15,7 @@ import {
 import { OWNERID, PREFIXES } from './shared_assets';
 import config from './configuration';
 import { sendJoinEvent } from './webhooks';
+import { getRoleMention } from './helperFunctions';
 
 export async function getUser(userid: string, guildID: string) {
   const result = await UserModel.findOneAndUpdate(
@@ -219,7 +220,7 @@ export async function updateSaltKing(G: Guild) {
             if (perms && perms.has('SEND_MESSAGES')) {
               const owner = await G.fetchOwner();
               (chan as TextChannel).send(
-                `Hey there ${owner}!\nI regret to inform you that my highest role is beneath <@&${SaltRole}>, which has the effect that i cannot give or take if from users.`,
+                `Hey there ${owner}!\nI regret to inform you that my highest role is beneath ${getRoleMention(SaltRole)}, which has the effect that i cannot give or take if from users.`,
               );
             }
           }

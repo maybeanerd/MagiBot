@@ -8,13 +8,12 @@ import {
   VoiceConnection,
 } from '@discordjs/voice';
 import { VoiceState } from 'discord.js';
-import { getJoinsoundOfUser } from './commands/joinsounds/management';
+import { getJoinsoundOfUser } from './commands/joinsound/management';
 import { StillMutedModel } from './db';
 import { isBlacklistedUser, isJoinableVc, toggleStillMuted } from './dbHelpers';
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import {
   isShadowBanned,
-  queueVoiceChannels,
   shadowBannedLevel,
   shadowBannedSound,
 } from './shared_assets';
@@ -62,30 +61,9 @@ export async function onVoiceStateChange(
     ) {
       newState.setMute(
         false,
-        'was still muted from a queue which user disconnected from',
+        'was still muted from old queue system',
       );
       toggleStillMuted(newState.id, newState.guild.id, false);
-    } else if (
-      !newState.serverMute
-      && newVc
-      && queueVoiceChannels.has(newState.guild.id)
-      && queueVoiceChannels.get(newState.guild.id) === newVc.id
-    ) {
-      // user joined a muted channel
-      newState.setMute(true, 'joined active queue voice channel');
-    } else if (
-      oldState.serverMute
-      && oldState.channel
-      && queueVoiceChannels.has(oldState.guild.id)
-      && queueVoiceChannels.get(oldState.guild.id) === oldState.channel.id
-    ) {
-      // user left a muted channel
-      if (newVc) {
-        newState.setMute(false, 'left active queue voice channel');
-      } else {
-        // save the unmute for later
-        toggleStillMuted(newState.id, newState.guild.id, true);
-      }
     }
     // TODO remove/rework mute logic before this comment
     const shadowBanned = isShadowBanned(

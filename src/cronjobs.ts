@@ -1,6 +1,7 @@
 import { Client, TextChannel } from 'discord.js';
-import { asyncForEach } from './helperFunctions';
+import { asyncForEach, getUserMention } from './helperFunctions';
 import {
+  OngoingQueueModel,
   SaltModel,
   SaltrankModel,
   SettingsModel,
@@ -12,7 +13,7 @@ import {
 import { checkGuild } from './dbHelpers';
 import config from './configuration';
 import { sendException, sendJoinEvent, sendStartupEvent } from './webhooks';
-import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsounds/fileManagement';
+import { removeLocallyStoredJoinsoundsOfGuild } from './commands/joinsound/fileManagement';
 import { reactions } from './commands/vote';
 
 if (!config.dburl) {
@@ -130,6 +131,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
         await removeLocallyStoredJoinsoundsOfGuild(guildID);
         await VoteModel.deleteMany({ guildid: guildID });
         await SettingsModel.deleteMany({ _id: guildID });
+        await OngoingQueueModel.deleteMany({ guildid: guildID });
       } else {
         await sendJoinEvent(
           `:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
@@ -186,7 +188,7 @@ async function endVote(vote: Vote, bot: Client) {
           if (finalReact.length > 1) {
             let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
             if (vote.authorID) {
-              str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nThere was a tie between `;
+              str = `**${vote.topic}** by ${getUserMention(vote.authorID)} ended.\n\nThere was a tie between `;
             }
             finalReact.forEach((react, i) => {
               str += `**${vote.options[react.reaction]}**`;
@@ -203,9 +205,9 @@ async function endVote(vote: Vote, bot: Client) {
               vote.options[finalReact[0].reaction]
             }** with **${finalReact[0].count - 1}** votes.`;
             if (vote.authorID) {
-              str = `**${vote.topic}** by <@${
-                vote.authorID
-              }> ended.\n\nThe result is **${
+              str = `**${vote.topic}** by ${
+                getUserMention(vote.authorID)
+              } ended.\n\nThe result is **${
                 vote.options[finalReact[0].reaction]
               }** with **${finalReact[0].count - 1}** votes.`;
             }
@@ -214,7 +216,7 @@ async function endVote(vote: Vote, bot: Client) {
         } else {
           let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
           if (vote.authorID) {
-            str = `**${vote.topic}** by <@${vote.authorID}> ended.\n\nCould not compute a result.`;
+            str = `**${vote.topic}** by ${getUserMention(vote.authorID)} ended.\n\nCould not compute a result.`;
           }
           await msg.edit(str);
         }

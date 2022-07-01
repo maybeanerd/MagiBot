@@ -110,8 +110,6 @@ async function main(interaction: CommandInteraction) {
       asyncForEach(options, async (value, index) => {
         await reply.react(reactions[index as number]);
       });
-      // vote structure
-      // TODO validate if this is what we still need/can even use!
       const vote: Vote = {
         messageID: reply.id,
         channelID: reply.channel.id,
