@@ -1,13 +1,17 @@
-import {
-  ButtonInteraction, GuildMember, Message,
-} from 'discord.js';
+import { ButtonInteraction, GuildMember, Message } from 'discord.js';
 import { onQueueEnd, typeOfQueueAction } from '.';
 import { isAdmin } from '../../../dbHelpers';
 import {
-  asyncWait, buttonInteractionId, doNothingOnError, getUserMention,
+  asyncWait,
+  buttonInteractionId,
+  doNothingOnError,
+  getUserMention,
 } from '../../../helperFunctions';
 import {
-  addUserToQueue, goToNextUserOfQueue, maximumQueueLength, removeUserFromQueue,
+  addUserToQueue,
+  goToNextUserOfQueue,
+  maximumQueueLength,
+  removeUserFromQueue,
 } from './stateManager';
 
 function isInteractionQueueRelated(interaction: ButtonInteraction) {
@@ -30,7 +34,11 @@ function messageEdit(
   } else {
     nextUsers = ' no more queued users\n';
   }
-  return `${msg}\n*${queuedUsers.length - 1}/99 users queued*\n\nCurrent user: **${getUserMention(activeUser)}**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
+  return `${msg}\n*${
+    queuedUsers.length
+  }/${maximumQueueLength} users queued*\n\nCurrent user: **${
+    activeUser ? getUserMention(activeUser) : 'Nobody'
+  }**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
@@ -69,9 +77,7 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
           .catch(doNothingOnError);
       } else if (addUserResponse.position !== null) {
         buttonInteraction.reply({
-          content: `You were already in the queue! Your current position is: ${
-            addUserResponse.position
-          }`,
+          content: `You were already in the queue! Your current position is: ${addUserResponse.position}`,
           ephemeral: true,
         });
       } else {
@@ -108,8 +114,8 @@ Try again later!`,
     // only admins of guild are allowed to do this
     if (
       !(await isAdmin(
-          buttonInteraction.guild!.id,
-          buttonInteraction.member as GuildMember,
+        buttonInteraction.guild!.id,
+        buttonInteraction.member as GuildMember,
       ))
     ) {
       buttonInteraction.reply({
@@ -119,7 +125,8 @@ Try again later!`,
       return;
     }
     const wentToNextUser = await goToNextUserOfQueue(guildId);
-    if (wentToNextUser && wentToNextUser.activeUser) {
+
+    if (wentToNextUser) {
       topicMessage
         .edit(
           messageEdit(
@@ -129,6 +136,9 @@ Try again later!`,
           ),
         )
         .catch(doNothingOnError);
+    }
+
+    if (wentToNextUser && wentToNextUser.activeUser) {
       const message = (await buttonInteraction.reply({
         fetchReply: true,
         content: `It's your turn ${getUserMention(wentToNextUser.activeUser)}!`,
@@ -144,8 +154,8 @@ Try again later!`,
     // only admins of guild are allowed to do this
     if (
       !(await isAdmin(
-          buttonInteraction.guild!.id,
-          buttonInteraction.member as GuildMember,
+        buttonInteraction.guild!.id,
+        buttonInteraction.member as GuildMember,
       ))
     ) {
       buttonInteraction.reply({

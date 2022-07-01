@@ -74,7 +74,7 @@ export async function goToNextUserOfQueue(guildId: string) {
   if (queue === null) {
     return null;
   }
-  if (queue.queuedUsers.length <= 1) {
+  if (queue.queuedUsers.length === 0) {
     return false;
   }
   queue.queuedUsers.shift();
@@ -92,10 +92,6 @@ export async function removeUserFromQueue(guildId: string, userId: string) {
     return null;
   }
   if (!queue.queuedUsers.includes(userId)) {
-    return false;
-  }
-  // can't leave queue if you're the only one left
-  if (queue.queuedUsers.length === 1) {
     return false;
   }
   queue.queuedUsers = queue.queuedUsers.filter((u) => u !== userId);
