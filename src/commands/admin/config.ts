@@ -9,7 +9,11 @@ import { COLOR } from '../../shared_assets';
 import { getRoleMention, getUserMention } from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
 import { MagibotAdminSlashCommand } from '../../types/command';
-import { getConfiguration, getAdminRoles, setConfiguration } from '../../dbHelpers';
+import {
+  getConfiguration,
+  getAdminRoles,
+  setConfiguration,
+} from '../../dbHelpers';
 
 async function setBlacklistedUser(
   userid: string,
@@ -17,18 +21,15 @@ async function setBlacklistedUser(
   insert: boolean,
 ) {
   const configuration = await getConfiguration(guildId);
-  const { blacklistedUsers } = configuration;
   if (insert) {
-    if (!blacklistedUsers.includes(userid)) {
-      blacklistedUsers.push(userid);
+    if (!configuration.blacklistedUsers.includes(userid)) {
+      configuration.blacklistedUsers.push(userid);
     }
   } else {
-    const index = blacklistedUsers.indexOf(userid);
-    if (index > -1) {
-      blacklistedUsers.splice(index, 1);
-    }
+    configuration.blacklistedUsers = configuration.blacklistedUsers.filter(
+      (user) => user !== userid,
+    );
   }
-  configuration.blacklistedUsers = blacklistedUsers;
   await configuration.save();
 }
 
@@ -225,13 +226,17 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
 
   info.push({
     name: 'SaltKing',
-    value: configuration.saltKing ? getUserMention(configuration.saltKing) : 'None',
+    value: configuration.saltKing
+      ? getUserMention(configuration.saltKing)
+      : 'None',
     inline: false,
   });
 
   info.push({
     name: 'SaltKing role',
-    value: configuration.saltRole ? getRoleMention(configuration.saltRole) : 'None',
+    value: configuration.saltRole
+      ? getRoleMention(configuration.saltRole)
+      : 'None',
     inline: false,
   });
 
