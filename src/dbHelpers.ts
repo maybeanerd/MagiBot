@@ -1,13 +1,12 @@
 import {
-  TextChannel,
   Guild,
   GuildMember,
   CommandInteraction,
 } from 'discord.js';
 import {
-  SettingsModel,
+  ConfigurationModel,
   UserModel,
-  Settings,
+  Configuration,
   SaltrankModel,
   StillMutedModel,
   GlobalUserDataModel,
@@ -15,7 +14,6 @@ import {
 import { OWNERID, PREFIXES } from './shared_assets';
 import config from './configuration';
 import { sendJoinEvent } from './webhooks';
-import { getRoleMention } from './helperFunctions';
 
 export async function getUser(userid: string, guildID: string) {
   const result = await UserModel.findOneAndUpdate(
@@ -58,8 +56,8 @@ export async function getGlobalUser(userId: string) {
   return result;
 }
 
-async function firstSettings(guildID: string) {
-  const settings = new SettingsModel({
+async function createFirstConfiguration(guildID: string) {
+  const configuration = new ConfigurationModel({
     _id: guildID,
     commandChannels: [],
     adminRoles: [],
@@ -72,66 +70,61 @@ async function firstSettings(guildID: string) {
     prefix: config.prefix,
     lastConnected: new Date(),
   });
-  await settings.save();
-  return settings;
+  await configuration.save();
+  return configuration;
 }
 
-export async function getSettings(guildID: string) {
-  let result = await SettingsModel.findById(guildID);
+export async function getConfiguration(guildID: string) {
+  let result = await ConfigurationModel.findById(guildID);
   if (!result) {
     await sendJoinEvent(
-      `:wastebasket: couldn't find settings for guild ${guildID} , resetting/setting empty state. Found this:${JSON.stringify(
+      `:wastebasket: couldn't find configuration for guild ${guildID} , resetting/setting empty state. Found this:${JSON.stringify(
         result,
         null,
         2,
       )}`,
     );
 
-    result = await firstSettings(guildID);
+    result = await createFirstConfiguration(guildID);
   }
   return result;
 }
 
 export async function checkGuild(id: string) {
-  // create settings
-  if (await getSettings(id)) {
+  // create configuration
+  if (await getConfiguration(id)) {
     return true;
   }
   return false;
 }
 
-export async function setSettings(
+export async function setConfiguration(
   guildID: string,
   // this was difficult to find, but is awesome
-  update: { [Property in keyof Settings]?: Settings[Property] },
+  update: { [Property in keyof Configuration]?: Configuration[Property] },
 ) {
-  if (await getSettings(guildID)) {
-    await SettingsModel.updateOne({ _id: guildID }, { $set: update });
+  if (await getConfiguration(guildID)) {
+    await ConfigurationModel.updateOne({ _id: guildID }, { $set: update });
   }
   return true;
 }
 
 async function getSaltKing(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.saltKing;
+  const configuration = await getConfiguration(guildID);
+  return configuration.saltKing;
 }
 
 async function getSaltRole(guildID: string) {
-  const set = await getSettings(guildID);
+  const set = await getConfiguration(guildID);
   return set.saltRole;
 }
 
 async function setSaltRole(guildID: string, roleID: string) {
-  await setSettings(guildID, { saltRole: roleID });
-}
-
-export async function getNotChannel(guildID: string) {
-  const set = await getSettings(guildID);
-  return set.notChannel;
+  await setConfiguration(guildID, { saltRole: roleID });
 }
 
 function setSaltKing(guildID: string, userID: string) {
-  return setSettings(guildID, { saltKing: userID });
+  return setConfiguration(guildID, { saltKing: userID });
 }
 
 // top 5 salty people
@@ -168,19 +161,7 @@ export async function updateSaltKing(G: Guild) {
               SaltRole = role.id;
             });
         } else {
-          const channel = await getNotChannel(G.id);
-          if (channel) {
-            const chan = G.channels.cache.get(channel);
-            if (chan) {
-              const perms = chan.permissionsFor(G.me);
-              if (perms && perms.has('SEND_MESSAGES')) {
-                const owner = await G.fetchOwner();
-                (chan as TextChannel).send(
-                  `Hey there ${owner}!\nI regret to inform you that this server has 250 roles and I therefore can't add SaltKing. If you want to manage the role yourself delete one and then just change the settings of the role i create automatically.`,
-                );
-              }
-            }
-          }
+          // TODO what do we do if we are missing permissions now?
           return;
         }
       }
@@ -212,45 +193,21 @@ export async function updateSaltKing(G: Guild) {
           }
         }
       } else {
-        const channel = await getNotChannel(G.id);
-        if (channel) {
-          const chan = G.channels.cache.get(channel);
-          if (chan) {
-            const perms = chan.permissionsFor(G.me);
-            if (perms && perms.has('SEND_MESSAGES')) {
-              const owner = await G.fetchOwner();
-              (chan as TextChannel).send(
-                `Hey there ${owner}!\nI regret to inform you that my highest role is beneath ${getRoleMention(SaltRole)}, which has the effect that i cannot give or take if from users.`,
-              );
-            }
-          }
-        }
+        // TODO what do we do if we are missing permissions now?
       }
     } else {
-      const channel = await getNotChannel(G.id);
-      if (channel) {
-        const chan = G.channels.cache.get(channel);
-        if (chan) {
-          const perms = chan.permissionsFor(G.me);
-          if (perms && perms.has('SEND_MESSAGES')) {
-            const owner = await G.fetchOwner();
-            (chan as TextChannel).send(
-              `Hey there ${owner}!\nI regret to inform you that i have no permission to manage roles and therefore can't manage the SaltKing role.`,
-            );
-          }
-        }
-      }
+      // TODO what do we do if we are missing permissions now?
     }
   }
 }
 
 export async function isJoinableVc(guildID: string, channelID: string) {
-  const settings = await getSettings(guildID);
-  return settings.joinChannels.includes(channelID);
+  const configuration = await getConfiguration(guildID);
+  return configuration.joinChannels.includes(channelID);
 }
 
 export async function setPrefix(guildID: string, prefix: string) {
-  const success = await setSettings(guildID, {
+  const success = await setConfiguration(guildID, {
     prefix,
   });
   if (success) {
@@ -260,8 +217,8 @@ export async function setPrefix(guildID: string, prefix: string) {
 }
 
 export async function getPrefix(guildID: string) {
-  const settings = await getSettings(guildID);
-  const { prefix } = settings;
+  const configuration = await getConfiguration(guildID);
+  const { prefix } = configuration;
   if (!prefix) {
     await setPrefix(guildID, config.prefix);
     return config.prefix;
@@ -295,8 +252,8 @@ export async function toggleStillMuted(
 }
 
 export async function getAdminRoles(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.adminRoles;
+  const configuration = await getConfiguration(guildID);
+  return configuration.adminRoles;
 }
 
 export async function isAdmin(guildID: string, member: GuildMember) {
@@ -339,12 +296,12 @@ export async function interactionMemberIsAdmin(
 }
 
 export async function getCommandChannels(guildID: string) {
-  const settings = await getSettings(guildID);
-  return settings.commandChannels;
+  const configuration = await getConfiguration(guildID);
+  return configuration.commandChannels;
 }
 
 export async function isBlacklistedUser(userid: string, guildID: string) {
-  const settings = await getSettings(guildID);
-  const users = settings.blacklistedUsers;
+  const configuration = await getConfiguration(guildID);
+  const users = configuration.blacklistedUsers;
   return users.includes(userid);
 }

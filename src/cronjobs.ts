@@ -4,7 +4,7 @@ import {
   OngoingQueueModel,
   SaltModel,
   SaltrankModel,
-  SettingsModel,
+  ConfigurationModel,
   StillMutedModel,
   UserModel,
   Vote,
@@ -48,7 +48,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
     const localCounter = ++counter;
     await checkGuild(guildID);
     // update the guild settings entry so that it does NOT get deleted
-    await SettingsModel.updateOne(
+    await ConfigurationModel.updateOne(
       { _id: guildID },
       { $set: { lastConnected: now } },
     );
@@ -110,7 +110,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
   });
 
   // find all guilds that have not connected for a week
-  const guilds2 = await SettingsModel.find({
+  const guilds2 = await ConfigurationModel.find({
     lastConnected: { $lt: sevenDaysAgo },
   });
   // remove all data saved for those guilds
@@ -130,7 +130,7 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
         // but now it happens at the same time as the rest of deletion
         await removeLocallyStoredJoinsoundsOfGuild(guildID);
         await VoteModel.deleteMany({ guildid: guildID });
-        await SettingsModel.deleteMany({ _id: guildID });
+        await ConfigurationModel.deleteMany({ _id: guildID });
         await OngoingQueueModel.deleteMany({ guildid: guildID });
       } else {
         await sendJoinEvent(

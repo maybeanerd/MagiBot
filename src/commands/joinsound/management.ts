@@ -1,7 +1,7 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { CommandInteraction, MessageAttachment, User } from 'discord.js';
-import { getGlobalUser, getSettings, getUser } from '../../dbHelpers';
+import { getGlobalUser, getConfiguration, getUser } from '../../dbHelpers';
 import {
   getJoinsoundReadableStreamOfUser,
   JoinsoundStoreError,
@@ -81,7 +81,7 @@ async function setDefaultGuildJoinsound(
   soundUrl: string | undefined,
   locallyStored: boolean,
 ): Promise<JoinsoundStoreError | null> {
-  const guild = await getSettings(guildId);
+  const guild = await getConfiguration(guildId);
 
   if (!locallyStored) {
     guild.defaultJoinsound = soundUrl;
@@ -234,7 +234,7 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
     }
     return defaultUser.sound;
   }
-  const defaultGuildSound = await getSettings(guildId);
+  const defaultGuildSound = await getConfiguration(guildId);
   if (
     defaultGuildSound.defaultJoinsound
     && defaultGuildSound.defaultJoinsound !== 'false'
