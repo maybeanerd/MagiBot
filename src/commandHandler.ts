@@ -9,12 +9,7 @@ import {
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { magibotCommand } from './types/command';
-import {
-  isBlacklistedUser,
-  getCommandChannels,
-  getUser,
-  isAdmin,
-} from './dbHelpers';
+import { getCommandChannels, getUser, isAdmin } from './dbHelpers';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot';
 import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
@@ -113,12 +108,6 @@ export async function checkCommand(message: Discord.Message) {
   } else if (message.content.startsWith(PREFIXES.get(message.guild.id)!)) {
     isMention = false;
   } else {
-    return;
-  }
-  // ignore blacklisted users
-  if (await isBlacklistedUser(message.author.id, message.guild.id)) {
-    // we dont delete the message because this would delete everything that starts with the prefix
-    /*     msg.delete(); */
     return;
   }
   let command: string;

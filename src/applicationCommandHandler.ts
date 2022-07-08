@@ -5,7 +5,6 @@ import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { isBlacklistedUser } from './dbHelpers';
 import {
   commandAllowed,
   printCommandChannels,
@@ -39,13 +38,6 @@ export async function checkApplicationCommand(
   if (!(interaction.member && interaction.guild && interaction.guild.me)) {
     // check for valid message
     console.error('Invalid interaction received:', interaction);
-    return;
-  }
-  // ignore blacklisted users
-  if (
-    await isBlacklistedUser(interaction.member.user.id, interaction.guild.id)
-  ) {
-    // do nothing
     return;
   }
   try {

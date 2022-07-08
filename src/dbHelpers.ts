@@ -299,9 +299,3 @@ export async function getCommandChannels(guildID: string) {
   const configuration = await getConfiguration(guildID);
   return configuration.commandChannels;
 }
-
-export async function isBlacklistedUser(userid: string, guildID: string) {
-  const configuration = await getConfiguration(guildID);
-  const users = configuration.blacklistedUsers;
-  return users.includes(userid);
-}

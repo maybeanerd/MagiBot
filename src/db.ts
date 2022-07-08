@@ -19,7 +19,6 @@ export type Configuration = {
   commandChannels: Array<string>;
   adminRoles: Array<string>;
   joinChannels: Array<string>;
-  blacklistedUsers: Array<string>;
   saltKing?: string;
   saltRole?: string;
   prefix: string; // deprecated
@@ -42,10 +41,6 @@ const configurationSchema = new mongoose.Schema<Configuration>(
       required: true,
     },
     joinChannels: {
-      type: [String],
-      required: true,
-    },
-    blacklistedUsers: {
       type: [String],
       required: true,
     },

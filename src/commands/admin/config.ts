@@ -2,7 +2,6 @@ import {
   CommandInteraction,
   GuildMember,
   MessageEmbedOptions,
-  User,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { COLOR } from '../../shared_assets';
@@ -14,24 +13,6 @@ import {
   getAdminRoles,
   setConfiguration,
 } from '../../dbHelpers';
-
-async function setBlacklistedUser(
-  userid: string,
-  guildId: string,
-  insert: boolean,
-) {
-  const configuration = await getConfiguration(guildId);
-  if (insert) {
-    if (!configuration.blacklistedUsers.includes(userid)) {
-      configuration.blacklistedUsers.push(userid);
-    }
-  } else {
-    configuration.blacklistedUsers = configuration.blacklistedUsers.filter(
-      (user) => user !== userid,
-    );
-  }
-  await configuration.save();
-}
 
 async function setJoinChannel(
   guildId: string,
@@ -108,17 +89,6 @@ function printHelp() {
   });
 
   return info;
-}
-
-async function banUser(
-  interaction: CommandInteraction,
-  user: User,
-  ban: boolean,
-) {
-  await setBlacklistedUser(interaction.guildId!, user.id, ban);
-  interaction.followUp(
-    `Successfully ${ban ? '' : 'un'}banned ${user} from using the bot.`,
-  );
 }
 
 async function toggleJoinsoundChannel(
@@ -205,25 +175,6 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
     inline: false,
   });
 
-  let stringifiedBannedUsers = '';
-  const { blacklistedUsers } = configuration;
-  if (blacklistedUsers.length === 0) {
-    stringifiedBannedUsers = 'None';
-  } else {
-    blacklistedUsers.forEach((userId) => {
-      stringifiedBannedUsers += `${getUserMention(userId)}, `;
-    });
-    stringifiedBannedUsers = stringifiedBannedUsers.substring(
-      0,
-      stringifiedBannedUsers.length - 2,
-    );
-  }
-  info.push({
-    name: 'Banned users',
-    value: stringifiedBannedUsers,
-    inline: false,
-  });
-
   info.push({
     name: 'SaltKing',
     value: configuration.saltKing
@@ -255,20 +206,10 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
 
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
-    | 'ban' // TODO move this to their own entire admin command ?
-    | 'unban' // TODO move this to their own entire admin command ?
     | 'joinsound-channel' // TODO move this to admin/joinsound ?
     | 'adminrole' // TODO move this to their own entire admin command ?
     | 'view'; // TODO make this the entirety of the "config" command?
 
-  if (subcommand === 'ban') {
-    const user = interaction.options.getUser('user', true);
-    return banUser(interaction, user, true);
-  }
-  if (subcommand === 'unban') {
-    const user = interaction.options.getUser('user', true);
-    return banUser(interaction, user, false);
-  }
   if (subcommand === 'joinsound-channel') {
     const activate = interaction.options.getBoolean('activate', true);
     return toggleJoinsoundChannel(interaction, activate);
@@ -288,20 +229,6 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
   return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
     .setName('config')
     .setDescription('View, change and reset configuration of the bot.')
-    .addSubcommand((subcommand) => subcommand
-      .setName('ban')
-      .setDescription('Ban a user from using MagiBot on this guild.')
-      .addUserOption((option) => option
-        .setName('user')
-        .setDescription('User to ban.')
-        .setRequired(true)))
-    .addSubcommand((subcommand) => subcommand
-      .setName('unban')
-      .setDescription('Allow a user to use MagiBot on this guild again.')
-      .addUserOption((option) => option
-        .setName('user')
-        .setDescription('User to unban.')
-        .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('joinsound-channel')
       .setDescription(
