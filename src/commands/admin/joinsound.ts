@@ -41,21 +41,25 @@ export async function setJoinChannel(
   guildId: string,
   cid: string,
   setActive: boolean,
-) {
+): Promise<boolean> {
   const configuration = await getConfiguration(guildId);
   const { joinChannels } = configuration;
+  let successful = false;
   if (setActive) {
     if (!joinChannels.includes(cid)) {
       joinChannels.push(cid);
+      successful = true;
     }
   } else {
     const index = joinChannels.indexOf(cid);
     if (index > -1) {
       joinChannels.splice(index, 1);
+      successful = true;
     }
   }
   configuration.joinChannels = joinChannels;
   await configuration.save();
+  return successful;
 }
 
 async function toggleJoinsoundChannel(
@@ -64,12 +68,24 @@ async function toggleJoinsoundChannel(
 ) {
   const voiceChannel = (interaction.member as GuildMember).voice.channel;
   if (voiceChannel) {
-    await setJoinChannel(interaction.guildId!, voiceChannel.id, activate);
-    interaction.followUp(
-      `Successfully ${activate ? '' : 'de'}activated joinsounds in **${
-        voiceChannel.name
-      }**.`,
+    const success = await setJoinChannel(
+      interaction.guildId!,
+      voiceChannel.id,
+      activate,
     );
+    if (success) {
+      interaction.followUp(
+        `Successfully ${activate ? '' : 'de'}activated joinsounds in **${
+          voiceChannel.name
+        }**.`,
+      );
+    } else {
+      interaction.followUp(
+        `**${voiceChannel.name}** already has joinsounds ${
+          activate ? 'active' : 'disabled'
+        }.`,
+      );
+    }
   } else {
     interaction.followUp("You're not connected to a voice channel!");
   }

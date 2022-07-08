@@ -1,8 +1,4 @@
-import {
-  Guild,
-  GuildMember,
-  CommandInteraction,
-} from 'discord.js';
+import { Guild, GuildMember, CommandInteraction } from 'discord.js';
 import {
   ConfigurationModel,
   UserModel,
@@ -203,7 +199,10 @@ export async function updateSaltKing(G: Guild) {
 
 export async function isJoinableVc(guildID: string, channelID: string) {
   const configuration = await getConfiguration(guildID);
-  return configuration.joinChannels.includes(channelID);
+  return (
+    configuration.joinChannels.length === 0
+    || configuration.joinChannels.includes(channelID)
+  );
 }
 
 export async function setPrefix(guildID: string, prefix: string) {
