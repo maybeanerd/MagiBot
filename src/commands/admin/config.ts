@@ -1,8 +1,4 @@
-import {
-  CommandInteraction,
-  GuildMember,
-  MessageEmbedOptions,
-} from 'discord.js';
+import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { COLOR } from '../../shared_assets';
@@ -14,27 +10,7 @@ import {
   getAdminRoles,
   setConfiguration,
 } from '../../dbHelpers';
-
-async function setJoinChannel(
-  guildId: string,
-  cid: string,
-  setActive: boolean,
-) {
-  const configuration = await getConfiguration(guildId);
-  const { joinChannels } = configuration;
-  if (setActive) {
-    if (!joinChannels.includes(cid)) {
-      joinChannels.push(cid);
-    }
-  } else {
-    const index = joinChannels.indexOf(cid);
-    if (index > -1) {
-      joinChannels.splice(index, 1);
-    }
-  }
-  configuration.joinChannels = joinChannels;
-  await configuration.save();
-}
+import { setJoinChannel } from './joinsound';
 
 async function setAdminRole(guildId: string, roleID: string, insert: boolean) {
   const roles = await getAdminRoles(guildId);
@@ -90,23 +66,6 @@ function printHelp() {
   });
 
   return info;
-}
-
-async function toggleJoinsoundChannel(
-  interaction: CommandInteraction,
-  activate: boolean,
-) {
-  const voiceChannel = (interaction.member as GuildMember).voice.channel;
-  if (voiceChannel) {
-    await setJoinChannel(interaction.guildId!, voiceChannel.id, activate);
-    interaction.followUp(
-      `Successfully ${activate ? '' : 'de'}activated joinsounds in **${
-        voiceChannel.name
-      }**.`,
-    );
-  } else {
-    interaction.followUp("You're not connected to a voice channel!");
-  }
 }
 
 async function toggleAdminRole(
@@ -223,25 +182,11 @@ const adminRoleCommandChoices: Array<
   { name: 'remove from admins', value: 'remove' },
 ];
 
-const acticateJoinsoundsInChannelChoices: Array<
-  APIApplicationCommandOptionChoice<string>
-> = [
-  { name: 'activate joinsounds', value: 'activate' },
-  { name: 'disable joinsounds', value: 'disable' },
-];
-
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
-    | 'joinsound-channel' // TODO move this to admin/joinsound ?
     | 'adminrole'
     | 'view';
 
-  if (subcommand === 'joinsound-channel') {
-    const action = interaction.options.getString('action', true) as
-      | 'activate'
-      | 'disable';
-    return toggleJoinsoundChannel(interaction, action === 'activate');
-  }
   if (subcommand === 'adminrole') {
     const role = interaction.options.getRole('role', true);
     const makeAdmin = interaction.options.getString('action', true) as
@@ -259,16 +204,6 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
   return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
     .setName('config')
     .setDescription('Adjust or view this guilds configuration of the bot.')
-    .addSubcommand((subcommand) => subcommand
-      .setName('joinsound-channel')
-      .setDescription(
-        "Manage joinsounds for the voice channel you're connected to.",
-      )
-      .addStringOption((option) => option
-        .setName('action')
-        .setDescription('If you want to activate or disable it.')
-        .setChoices(...acticateJoinsoundsInChannelChoices)
-        .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('adminrole')
       .setDescription(
