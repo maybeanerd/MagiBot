@@ -19,8 +19,8 @@ export type Configuration = {
   commandChannels: Array<string>;
   adminRoles: Array<string>;
   joinChannels: Array<string>;
-  saltKing?: string;
-  saltRole?: string;
+  saltKing?: string; // deprecated
+  saltRole?: string; // deprecated
   prefix: string; // deprecated
   lastConnected: Date;
   defaultJoinsound?: string;
@@ -45,10 +45,12 @@ const configurationSchema = new mongoose.Schema<Configuration>(
       required: true,
     },
     saltKing: {
+      // deprecated
       type: String,
       required: false,
     },
     saltRole: {
+      // deprecated
       type: String,
       required: false,
     },

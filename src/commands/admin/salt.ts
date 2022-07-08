@@ -4,14 +4,12 @@ import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
-import { updateSaltKing } from '../../dbHelpers';
 import { saltGuild, addSalt } from '../salt';
 
 async function resetSalt(G: Guild) {
   const guildID = G.id;
   await SaltrankModel.deleteMany({ guild: guildID });
   await SaltModel.deleteMany({ guild: guildID });
-  await updateSaltKing(G);
 }
 
 async function removeOldestSaltOfUser(userid: string, G: Guild) {
@@ -26,7 +24,6 @@ async function removeOldestSaltOfUser(userid: string, G: Guild) {
     // eslint-disable-next-line no-underscore-dangle
     await SaltModel.deleteOne({ _id: id[0]._id });
     saltGuild(userid, guildID, -1);
-    updateSaltKing(G);
     return true;
   }
   return false;
@@ -39,7 +36,6 @@ async function clearSaltOfUser(userid: string, G: Guild) {
     salter: userid,
   });
   await saltGuild(userid, guildID, 1, true);
-  await updateSaltKing(G);
 }
 
 function printHelp() {

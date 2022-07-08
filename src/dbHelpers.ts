@@ -1,4 +1,4 @@
-import { Guild, GuildMember, CommandInteraction } from 'discord.js';
+import { GuildMember, CommandInteraction } from 'discord.js';
 import {
   ConfigurationModel,
   UserModel,
@@ -105,24 +105,6 @@ export async function setConfiguration(
   return true;
 }
 
-async function getSaltKing(guildID: string) {
-  const configuration = await getConfiguration(guildID);
-  return configuration.saltKing;
-}
-
-async function getSaltRole(guildID: string) {
-  const set = await getConfiguration(guildID);
-  return set.saltRole;
-}
-
-async function setSaltRole(guildID: string, roleID: string) {
-  await setConfiguration(guildID, { saltRole: roleID });
-}
-
-function setSaltKing(guildID: string, userID: string) {
-  return setConfiguration(guildID, { saltKing: userID });
-}
-
 // top 5 salty people
 export async function topSalt(guildID: string) {
   const result = await SaltrankModel.find({ guild: guildID })
@@ -132,69 +114,6 @@ export async function topSalt(guildID: string) {
     return [];
   }
   return result;
-}
-
-export async function updateSaltKing(G: Guild) {
-  if (G.available && G.me) {
-    if (G.me.permissions.has('MANAGE_ROLES', true)) {
-      const SaltKing = await getSaltKing(G.id);
-      let SaltRole = await getSaltRole(G.id);
-      const groles = G.roles;
-      if (!SaltRole || !groles.cache.has(SaltRole)) {
-        if (G.roles.cache.size < 250) {
-          await G.roles
-            .create({
-              name: 'SaltKing',
-              color: '#FFFFFF',
-              position: 0,
-              permissions: [],
-              mentionable: true,
-              reason:
-                'SaltKing role needed for Saltranking to work. You can adjust this role if you like.',
-            })
-            .then(async (role) => {
-              await setSaltRole(G.id, role.id);
-              SaltRole = role.id;
-            });
-        } else {
-          // TODO what do we do if we are missing permissions now?
-          return;
-        }
-      }
-      const sltID = await topSalt(G.id);
-      let saltID: string | undefined;
-      if (sltID[0]) {
-        saltID = sltID[0].salter;
-      }
-      if (!SaltRole) {
-        throw new Error('For some reason, there was no SaltRole.');
-      }
-      const role = await groles.fetch(SaltRole);
-      if (role && role.position < G.me.roles.highest.position) {
-        if (SaltKing && saltID !== SaltKing) {
-          const user = await G.members.fetch(SaltKing).catch(() => {});
-          if (user) {
-            user.roles.remove(SaltRole, 'Is not as salty anymore');
-          }
-        }
-        if (saltID) {
-          const nuser = await G.members.fetch(saltID).catch(() => {});
-          if (nuser) {
-            if (!nuser.roles.cache.has(SaltRole)) {
-              await nuser.roles.add(SaltRole, 'Saltiest user');
-            }
-          }
-          if (saltID !== SaltKing) {
-            await setSaltKing(G.id, saltID);
-          }
-        }
-      } else {
-        // TODO what do we do if we are missing permissions now?
-      }
-    } else {
-      // TODO what do we do if we are missing permissions now?
-    }
-  }
 }
 
 export async function isJoinableVc(guildID: string, channelID: string) {

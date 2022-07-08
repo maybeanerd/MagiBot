@@ -8,7 +8,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 import { SaltModel, SaltrankModel } from '../db';
-import { updateSaltKing, topSalt } from '../dbHelpers';
+import { topSalt } from '../dbHelpers';
 
 async function saltDowntimeDone(salterUserId: string, reporterUserId: string) {
   // get newest entry in salt
@@ -79,7 +79,6 @@ async function saltUp(
     });
     await myobj.save();
     await saltGuild(salter, guild.id, 1);
-    await updateSaltKing(guild);
     return 0;
   }
   return time;
@@ -118,7 +117,7 @@ export async function addSalt(
   );
   if (time === 0) {
     return interaction.reply(
-      `Successfully reported ${reportedUser} for being a salty bitch!`,
+      `Successfully reported ${reportedUser} for being salty!`,
     );
   }
   return interaction.reply(
@@ -139,8 +138,11 @@ async function getMemberSaltInfo(
   if (member) {
     memberName = member.displayName;
   }
+  const name = `${
+    index === 0 ? 'Monarch of Salt' : `${index + 1}. place`
+  }: ${memberName}`;
   return {
-    name: `${index + 1}. place: ${memberName}`,
+    name,
     value: `${salt} salt`,
     inline: false,
   };

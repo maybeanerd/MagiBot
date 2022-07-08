@@ -2,7 +2,7 @@ import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { COLOR } from '../../shared_assets';
-import { getRoleMention, getUserMention } from '../../helperFunctions';
+import { getRoleMention } from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import {
@@ -161,22 +161,6 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   info.push({
     name: 'Default guild joinsound',
     value: stringifiedDefaultJoinsound,
-    inline: false,
-  });
-
-  info.push({
-    name: 'SaltKing',
-    value: configuration.saltKing
-      ? getUserMention(configuration.saltKing)
-      : 'None',
-    inline: false,
-  });
-
-  info.push({
-    name: 'SaltKing role',
-    value: configuration.saltRole
-      ? getRoleMention(configuration.saltRole)
-      : 'None',
     inline: false,
   });
 
