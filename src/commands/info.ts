@@ -1,7 +1,6 @@
 import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { COLOR, user, SIGN } from '../shared_assets';
-import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 
 const inviteURL = 'https://discord.com/api/oauth2/authorize?client_id=384820232583249921&permissions=276131153&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot';
@@ -48,17 +47,7 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription('Get some info about the bot and official resources.');
 
 export const info: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value:
-          'Get some info about the bot as well as links to official MagiBot stuff.',
-      },
-    ];
-  },
   run: main,
   definition: slashCommand.toJSON(),
   permissions: [],
-  category: commandCategories.misc,
 };

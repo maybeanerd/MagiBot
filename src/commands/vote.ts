@@ -1,10 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, Message } from 'discord.js';
-import {
-  asyncForEach,
-  interactionConfirmation,
-} from '../helperFunctions';
-import { commandCategories } from '../types/enums';
+import { asyncForEach, interactionConfirmation } from '../helperFunctions';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
 
@@ -152,17 +148,8 @@ reactions.forEach((reaction, index) => {
 });
 
 export const vote: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value: `Start a vote with up to ${reactions.length} different options. The maximum duration is 7 days.`,
-      },
-    ];
-  },
   permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   definition: slashCommand.toJSON(),
   run: main,
-  category: commandCategories.util,
   defer: DeferReply.ephemeral,
 };

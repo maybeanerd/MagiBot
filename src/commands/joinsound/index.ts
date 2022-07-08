@@ -1,7 +1,6 @@
 import { CommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
-import { commandCategories } from '../../types/enums';
 import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
   JoinsoundOptions,
@@ -9,30 +8,6 @@ import {
   removeSound,
   validateAndSaveJoinsound,
 } from './management';
-
-function printHelp() {
-  const info: Array<{ name: string; value: string }> = [];
-  info.push({
-    name: '(and attach soundfile to this command)',
-    value:
-      'Set up a joinsound for yourself. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
-  });
-  info.push({
-    name: 'default (and attach soundfile to this command)',
-    value:
-      'Set up a default joinsound for yourself. This will play for you on every server MagiBot is on, until you override it with a sound there.\nOnly .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
-  });
-  info.push({
-    name: 'rem',
-    value: 'Remove your joinsound',
-  });
-  info.push({
-    name: 'rem default',
-    value: 'Remove your default joinsound',
-  });
-
-  return info;
-}
 
 const slashCommand = new SlashCommandBuilder()
   .setName('joinsound')
@@ -122,11 +97,7 @@ async function runCommand(interaction: CommandInteraction) {
   }
 }
 export const joinsound: MagibotSlashCommand = {
-  help() {
-    return printHelp();
-  },
   permissions: [],
-  category: commandCategories.fun,
   definition: slashCommand.toJSON(),
   run: runCommand,
   defer: DeferReply.public,

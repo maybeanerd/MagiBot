@@ -1,21 +1,12 @@
 import Discord from 'discord.js';
-import Statcord from 'statcord.js';
-// we allow this cycle once, as the help command also needs to list itself
-import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
-
-import {
-  PREFIXES, OWNERID, DELETE_COMMANDS, user,
-} from './shared_assets';
-// eslint-disable-next-line import/no-cycle
-import { catchErrorOnDiscord } from './sendToMyDiscord';
+// import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
+import { PREFIXES, user } from './shared_assets';
 import { magibotCommand } from './types/command';
-import { getCommandChannels, getUser, isAdmin } from './dbHelpers';
-// eslint-disable-next-line import/no-cycle
-import { bot } from './bot';
-import { asyncWait, notifyAboutSlashCommand } from './helperFunctions';
+import { getCommandChannels, getUser } from './dbHelpers';
+import { notifyAboutSlashCommand } from './helperFunctions';
 
 export const commands: { [k: string]: magibotCommand } = {
-  help,
+  // help,
 };
 
 const migratedCommands = new Map([
@@ -33,6 +24,7 @@ const migratedCommands = new Map([
   ['vote', 'vote'],
   ['_queue', 'queue'], // admin command
   ['_setup', 'config'], // admin command
+  ['help', 'help'],
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(
@@ -47,20 +39,6 @@ async function sendMigrationMessageIfComandHasBeenMigrated(
       isAdminCommand ? `admin ${migratedCommand}` : migratedCommand,
     );
   }
-}
-
-async function catchError(error: Error, msg: Discord.Message, command: string) {
-  console.error(
-    `Caught:\n${error.stack}\nin command ${command} ${msg.content}`,
-  );
-  await catchErrorOnDiscord(
-    `**Command:** ${command} ${msg.content}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
-  );
-
-  msg.reply(`something went wrong while using ${command}. The devs have been automatically notified.
-If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
-  msg.guild ? PREFIXES.get(msg.guild.id) : 'k'
-}.info\`) to tell us exactly how.`);
 }
 
 export async function commandAllowed(guildID: string, channelId?: string) {
@@ -87,8 +65,6 @@ export async function printCommandChannels(guildID: string) {
   return out;
 }
 
-const userCooldowns = new Set<string>();
-
 export async function checkCommand(message: Discord.Message) {
   if (!(message.author && message.guild && message.guild.me)) {
     // check for valid message
@@ -111,37 +87,22 @@ export async function checkCommand(message: Discord.Message) {
     return;
   }
   let command: string;
-  let content: string;
   if (isMention) {
     command = message.content.split(' ')[1]; // eslint-disable-line prefer-destructuring
-    content = message.content
-      .split(' ')
-      .splice(2, message.content.split(' ').length)
-      .join(' ');
     command = `.${command}`;
   } else {
     command = message.content
       .substring(PREFIXES.get(message.guild.id)!.length, message.content.length)
       .split(' ')[0]
       .toLowerCase();
-    // delete prefix and command
-    content = message.content.slice(
-      command.length + PREFIXES.get(message.guild.id)!.length,
-    );
-    content = content.replace(/^\s+/g, ''); // delete leading spaces
   }
   if (command) {
-    let commandVal: string;
     const pre = command.charAt(0);
-    const myPerms = (message.channel as Discord.TextChannel).permissionsFor(
-      message.guild.me,
-    );
+
     if (pre === '.') {
       command = command.slice(1);
-      commandVal = command;
     } else if (pre === ':') {
       command = `_${command.slice(1)}`;
-      commandVal = command.slice(1);
       // Check if its an admin command
       // if not you're allowed to use the normal version as admin (in any channel)
       if (!commands[command]) {
@@ -154,87 +115,13 @@ export async function checkCommand(message: Discord.Message) {
           command,
           true,
         );
-        return;
       }
-      if (
-        !(message.member && (await isAdmin(message.guild.id, message.member)))
-      ) {
-        if (myPerms) {
-          if (myPerms.has('MANAGE_MESSAGES')) {
-            message.delete();
-          }
-          if (myPerms.has('SEND_MESSAGES')) {
-            const reply = await message.reply(
-              "you're not allowed to use this command.",
-            );
-            await asyncWait(5000);
-            await reply.delete();
-          }
-        }
-        return;
-      }
+      return;
     } else {
       return;
     }
     if (!commands[command]) {
       await sendMigrationMessageIfComandHasBeenMigrated(message, command);
-      return;
-    }
-    if (!commands[command].dev || message.author.id === OWNERID) {
-      if (
-        pre === ':'
-        || (await commandAllowed(message.guild.id, message.channel.id))
-      ) {
-        const perms = commands[command].perm;
-        if (!perms || (myPerms && myPerms.has(perms))) {
-          // cooldown for command usage
-          if (!userCooldowns.has(message.author.id)) {
-            userCooldowns.add(message.author.id);
-            setTimeout(() => {
-              userCooldowns.delete(message.author.id);
-            }, 4000);
-            try {
-              Statcord.ShardingClient.postCommand(
-                command,
-                message.author.id,
-                bot,
-              );
-              await commands[command].main({ content, message });
-            } catch (err) {
-              catchError(
-                err as Error,
-                message,
-                `${PREFIXES.get(message.guild.id)}${pre}${commandVal}`,
-              );
-            }
-            usageUp(message.author.id, message.guild.id);
-          } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-            message.reply("whoa cool down, you're using commands too quick!");
-          }
-          // endof cooldown management
-        } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-          message.channel.send(
-            `I don't have all the permissions needed for this command: (${perms}) `,
-          );
-        }
-      } else if (myPerms && myPerms.has('SEND_MESSAGES')) {
-        if (myPerms && myPerms.has('MANAGE_MESSAGES')) {
-          message.delete();
-        }
-        const reply = await message.reply(
-          `commands aren't allowed in <#${
-            message.channel.id
-          }>. Use them in ${await printCommandChannels(
-            message.guild.id,
-          )}. If you're an admin use \`${PREFIXES.get(
-            message.guild.id,
-          )}:help\` to see how you can change that.`,
-        );
-        await asyncWait(15000);
-        await reply.delete();
-      }
     }
   }
-
-  if (DELETE_COMMANDS) message.delete();
 }

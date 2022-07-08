@@ -2,7 +2,6 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, GuildMember } from 'discord.js';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
-import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import {
@@ -12,30 +11,6 @@ import {
   validateAndSaveJoinsound,
 } from '../joinsound/management';
 import { getConfiguration } from '../../dbHelpers';
-
-function printHelp() {
-  const info: Array<{ name: string; value: string }> = [];
-  info.push({
-    name: '<@User|userid|nickname> (and attach soundfile to this command)',
-    value:
-      'Set up a joinsound for another user. Only .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
-  });
-  info.push({
-    name: 'default (and attach soundfile to this command)',
-    value:
-      'Set up a default joinsound for users on this server. They can override it by setting their own sound.\nOnly .mp3 and .wav are being supported at the moment.\nRemember to attach the sound file to the message you use this command in.',
-  });
-  info.push({
-    name: 'rem <@User|userid|nickname>',
-    value:
-      'Remove the joinsound of a user. If you use nickname it has to be at least three characters long',
-  });
-  info.push({
-    name: 'rem default',
-    value: 'Remove the default joinsound of this server.',
-  });
-  return info;
-}
 
 export async function setJoinChannel(
   guildId: string,
@@ -213,11 +188,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setRequired(true))));
 }
 export const joinsound: MagibotAdminSlashCommand = {
-  help() {
-    return printHelp();
-  },
   permissions: [],
-  category: commandCategories.util,
   run: runCommand,
   registerSlashCommand,
 };

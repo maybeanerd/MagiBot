@@ -11,7 +11,6 @@ import {
   buttonInteractionId,
   doNothingOnError,
 } from '../../../helperFunctions';
-import { commandCategories } from '../../../types/enums';
 import { MagibotAdminSlashCommand } from '../../../types/command';
 import { removeQueue, tryToCreateQueue } from './stateManager';
 
@@ -27,7 +26,9 @@ export const enum typeOfQueueAction {
 async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
-  const originalMessage = (await interaction.followUp('Creating Queue...'))as Message;
+  const originalMessage = (await interaction.followUp(
+    'Creating Queue...',
+  )) as Message;
 
   const createdQueue = await tryToCreateQueue(
     guild.id,
@@ -84,14 +85,14 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   });
 }
 
-export async function onQueueEnd(
-  guild: Guild,
-) {
+export async function onQueueEnd(guild: Guild) {
   const queue = await removeQueue(guild.id);
   if (queue) {
     const channel = await guild.channels.fetch(queue.channelId);
     if (channel) {
-      const topicMessage = await (channel as TextChannel).messages.fetch(queue.messageId);
+      const topicMessage = await (channel as TextChannel).messages.fetch(
+        queue.messageId,
+      );
       if (topicMessage) {
         topicMessage
           .edit({ content: `**${queue.topic}** ended.`, components: [] })
@@ -132,9 +133,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('stop')
-      .setDescription(
-        'Stop the running queue on this guild.',
-      )));
+      .setDescription('Stop the running queue on this guild.')));
 }
 
 async function runCommand(interaction: CommandInteraction) {
@@ -153,17 +152,7 @@ async function runCommand(interaction: CommandInteraction) {
 }
 
 export const queue: MagibotAdminSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value:
-          'Start a queue that can last up to 2h. There is only a single queue allowed per guild.',
-      },
-    ];
-  },
-  permissions: ['SEND_MESSAGES', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
-  category: commandCategories.util,
+  permissions: ['READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   run: runCommand,
   registerSlashCommand,
 };

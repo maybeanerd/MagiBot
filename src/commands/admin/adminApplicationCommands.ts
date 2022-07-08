@@ -6,7 +6,6 @@ import {
   MagibotAdminSlashCommand,
   MagibotSlashCommand,
 } from '../../types/command';
-import { commandCategories } from '../../types/enums';
 import { salt } from './salt';
 import { joinsound } from './joinsound';
 import { queue } from './queue';
@@ -46,12 +45,7 @@ async function runCommand(interaction: CommandInteraction) {
   }
 }
 export const admin: MagibotSlashCommand = {
-  help() {
-    // TODO compile from help of all admin commands?
-    return [];
-  },
   permissions: [],
-  category: commandCategories.admin,
   run: runCommand,
   definition: adminApplicationCommandBase.toJSON(),
   defer: DeferReply.public,

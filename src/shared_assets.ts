@@ -6,7 +6,6 @@ export const PREFIX = config.prefix;
 export const TOKEN = config.tk;
 export const APP_ID = config.appId;
 export const DETAILED_LOGGING = false;
-export const DELETE_COMMANDS = false;
 export const COLOR = 0x351c75;
 export const SUCCESS_COLOR = 0x00ff00;
 export const ERROR_COLOR = 0x0000ff;
