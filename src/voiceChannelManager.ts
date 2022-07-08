@@ -10,7 +10,7 @@ import {
 import { VoiceState } from 'discord.js';
 import { getJoinsoundOfUser } from './commands/joinsound/management';
 import { StillMutedModel } from './db';
-import { isBlacklistedUser, isJoinableVc, toggleStillMuted } from './dbHelpers';
+import { isJoinableVc, toggleStillMuted } from './dbHelpers';
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import {
   isShadowBanned,
@@ -59,10 +59,7 @@ export async function onVoiceStateChange(
       newState.serverMute
       && (await isStillMuted(newState.id, newState.guild.id))
     ) {
-      newState.setMute(
-        false,
-        'was still muted from old queue system',
-      );
+      newState.setMute(false, 'was still muted from old queue system');
       toggleStillMuted(newState.id, newState.guild.id, false);
     }
     // TODO remove/rework mute logic before this comment
@@ -76,9 +73,8 @@ export async function onVoiceStateChange(
       && newState.guild.me
       && !newState.guild.me.voice.channel
       && newState.id !== newState.guild.me.user.id
-      && newVc.joinable // checks vc size
-      && !(await isBlacklistedUser(newState.id, newState.guild.id))
-      && ((await isJoinableVc(newState.guild.id, newVc.id)) // checks magibot settings
+      && newVc.joinable
+      && ((await isJoinableVc(newState.guild.id, newVc.id))
         || shadowBanned === shadowBannedLevel.guild)
     ) {
       const perms = newVc.permissionsFor(newState.guild.me);

@@ -13,22 +13,19 @@ mongoose.connect(`${url}/MagiBot`, {
 // const mongooseConnction = mongoose.connection;
 
 // define types and Models of DB. later on we will move them out of here and just import them
-// settings per guild
-export type Settings = {
+// configurations per guild
+export type Configuration = {
   _id: string;
   commandChannels: Array<string>;
   adminRoles: Array<string>;
   joinChannels: Array<string>;
-  blacklistedUsers: Array<string>;
-  blacklistedEveryone: Array<string>;
   saltKing?: string;
   saltRole?: string;
-  notChannel?: string;
-  prefix: string;
+  prefix: string; // deprecated
   lastConnected: Date;
   defaultJoinsound?: string;
 };
-const settingsSchema = new mongoose.Schema<Settings>(
+const configurationSchema = new mongoose.Schema<Configuration>(
   {
     _id: {
       // _id is auto indexed and unique
@@ -47,14 +44,6 @@ const settingsSchema = new mongoose.Schema<Settings>(
       type: [String],
       required: true,
     },
-    blacklistedUsers: {
-      type: [String],
-      required: true,
-    },
-    blacklistedEveryone: {
-      type: [String],
-      required: true,
-    },
     saltKing: {
       type: String,
       required: false,
@@ -63,11 +52,8 @@ const settingsSchema = new mongoose.Schema<Settings>(
       type: String,
       required: false,
     },
-    notChannel: {
-      type: String,
-      required: false,
-    },
     prefix: {
+      // deprecated
       type: String,
       required: true,
     },
@@ -80,11 +66,11 @@ const settingsSchema = new mongoose.Schema<Settings>(
       required: false,
     },
   },
-  { collection: 'settings' },
+  { collection: 'settings' }, // outdated name
 );
-export const SettingsModel = mongoose.model<Settings>(
-  'settings',
-  settingsSchema,
+export const ConfigurationModel = mongoose.model<Configuration>(
+  'settings', // outdated name
+  configurationSchema,
 );
 
 // saltrank per user

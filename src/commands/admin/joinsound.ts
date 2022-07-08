@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
+import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
@@ -10,6 +11,7 @@ import {
   removeSound,
   validateAndSaveJoinsound,
 } from '../joinsound/management';
+import { getConfiguration } from '../../dbHelpers';
 
 function printHelp() {
   const info: Array<{ name: string; value: string }> = [];
@@ -35,6 +37,67 @@ function printHelp() {
   return info;
 }
 
+export async function setJoinChannel(
+  guildId: string,
+  cid: string,
+  setActive: boolean,
+): Promise<boolean> {
+  const configuration = await getConfiguration(guildId);
+  const { joinChannels } = configuration;
+  let successful = false;
+  if (setActive) {
+    if (!joinChannels.includes(cid)) {
+      joinChannels.push(cid);
+      successful = true;
+    }
+  } else {
+    const index = joinChannels.indexOf(cid);
+    if (index > -1) {
+      joinChannels.splice(index, 1);
+      successful = true;
+    }
+  }
+  configuration.joinChannels = joinChannels;
+  await configuration.save();
+  return successful;
+}
+
+async function toggleJoinsoundChannel(
+  interaction: CommandInteraction,
+  activate: boolean,
+) {
+  const voiceChannel = (interaction.member as GuildMember).voice.channel;
+  if (voiceChannel) {
+    const success = await setJoinChannel(
+      interaction.guildId!,
+      voiceChannel.id,
+      activate,
+    );
+    if (success) {
+      interaction.followUp(
+        `Successfully ${activate ? '' : 'de'}activated joinsounds in **${
+          voiceChannel.name
+        }**.`,
+      );
+    } else {
+      interaction.followUp(
+        `**${voiceChannel.name}** already has joinsounds ${
+          activate ? 'active' : 'disabled'
+        }.`,
+      );
+    }
+  } else {
+    interaction.followUp("You're not connected to a voice channel!");
+  }
+}
+
+const acticateJoinsoundsInChannelChoices: Array<
+  APIApplicationCommandOptionChoice<string>
+> = [
+  { name: 'activate joinsounds', value: 'activate' },
+  { name: 'disable joinsounds', value: 'disable' },
+];
+
 async function runCommand(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   if (
@@ -49,7 +112,8 @@ async function runCommand(interaction: CommandInteraction) {
     | 'set'
     | 'set-default'
     | 'remove'
-    | 'remove-default';
+    | 'remove-default'
+    | 'voicechannel';
 
   if (subcommand === 'set') {
     const user = interaction.options.getUser(JoinsoundOptions.user, true);
@@ -93,6 +157,12 @@ async function runCommand(interaction: CommandInteraction) {
       'You successfully removed the default joinsound of this server!',
     );
   }
+  if (subcommand === 'voicechannel') {
+    const action = interaction.options.getString('action', true) as
+      | 'activate'
+      | 'disable';
+    await toggleJoinsoundChannel(interaction, action === 'activate');
+  }
 }
 
 function registerSlashCommand(builder: SlashCommandBuilder) {
@@ -130,7 +200,17 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('remove-default')
-      .setDescription('Remove the default joinsound of this guild.')));
+      .setDescription('Remove the default joinsound of this guild.'))
+    .addSubcommand((subcommand) => subcommand
+      .setName('voicechannel')
+      .setDescription(
+        "(De-)Activate joinsounds for the voice channel you're connected to.",
+      )
+      .addStringOption((option) => option
+        .setName('action')
+        .setDescription('If you want to activate or disable it.')
+        .setChoices(...acticateJoinsoundsInChannelChoices)
+        .setRequired(true))));
 }
 export const joinsound: MagibotAdminSlashCommand = {
   help() {
