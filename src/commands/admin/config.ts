@@ -4,6 +4,7 @@ import {
   MessageEmbedOptions,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { COLOR } from '../../shared_assets';
 import { getRoleMention, getUserMention } from '../../helperFunctions';
 import { commandCategories } from '../../types/enums';
@@ -154,7 +155,7 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   let stringifiedJoinsoundChannels = '';
   const { joinChannels } = configuration;
   if (joinChannels.length === 0) {
-    stringifiedJoinsoundChannels = 'None';
+    stringifiedJoinsoundChannels = 'All';
   } else {
     joinChannels.forEach((channel) => {
       const voiceChannel = guild!.channels.cache.get(channel);
@@ -172,6 +173,17 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   info.push({
     name: 'Joinsound channels',
     value: stringifiedJoinsoundChannels,
+    inline: false,
+  });
+
+  let stringifiedDefaultJoinsound = 'None';
+  const { defaultJoinsound } = configuration;
+  if (defaultJoinsound) {
+    stringifiedDefaultJoinsound = 'Active';
+  }
+  info.push({
+    name: 'Default guild joinsound',
+    value: stringifiedDefaultJoinsound,
     inline: false,
   });
 
@@ -204,20 +216,38 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   interaction.followUp({ embeds: [embed] });
 }
 
+const adminRoleCommandChoices: Array<
+  APIApplicationCommandOptionChoice<string>
+> = [
+  { name: 'add to admins', value: 'add' },
+  { name: 'remove from admins', value: 'remove' },
+];
+
+const acticateJoinsoundsInChannelChoices: Array<
+  APIApplicationCommandOptionChoice<string>
+> = [
+  { name: 'activate joinsounds', value: 'activate' },
+  { name: 'disable joinsounds', value: 'disable' },
+];
+
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'joinsound-channel' // TODO move this to admin/joinsound ?
-    | 'adminrole' // TODO move this to their own entire admin command ?
-    | 'view'; // TODO make this the entirety of the "config" command?
+    | 'adminrole'
+    | 'view';
 
   if (subcommand === 'joinsound-channel') {
-    const activate = interaction.options.getBoolean('activate', true);
-    return toggleJoinsoundChannel(interaction, activate);
+    const action = interaction.options.getString('action', true) as
+      | 'activate'
+      | 'disable';
+    return toggleJoinsoundChannel(interaction, action === 'activate');
   }
   if (subcommand === 'adminrole') {
     const role = interaction.options.getRole('role', true);
-    const makeAdmin = interaction.options.getBoolean('add', true);
-    return toggleAdminRole(interaction, role.id, makeAdmin);
+    const makeAdmin = interaction.options.getString('action', true) as
+      | 'add'
+      | 'remove';
+    return toggleAdminRole(interaction, role.id, makeAdmin === 'add');
   }
   if (subcommand === 'view') {
     return viewCurrentConfiguration(interaction);
@@ -228,15 +258,16 @@ async function runCommand(interaction: CommandInteraction) {
 function registerSlashCommand(builder: SlashCommandBuilder) {
   return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
     .setName('config')
-    .setDescription('View, change and reset configuration of the bot.')
+    .setDescription('Adjust or view this guilds configuration of the bot.')
     .addSubcommand((subcommand) => subcommand
       .setName('joinsound-channel')
       .setDescription(
-        "Activate or deactivate joinsounds for the voice channel you're connected to",
+        "Manage joinsounds for the voice channel you're connected to.",
       )
-      .addBooleanOption((option) => option
-        .setName('activate')
-        .setDescription('If you want to activate or deactivate it.')
+      .addStringOption((option) => option
+        .setName('action')
+        .setDescription('If you want to activate or disable it.')
+        .setChoices(...acticateJoinsoundsInChannelChoices)
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('adminrole')
@@ -247,13 +278,14 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setName('role')
         .setDescription('The role you want to add or remove.')
         .setRequired(true))
-      .addBooleanOption((option) => option
-        .setName('add')
+      .addStringOption((option) => option
+        .setName('action')
         .setDescription('If you want to add the role, or remove it.')
+        .setChoices(...adminRoleCommandChoices)
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('view')
-      .setDescription('View the current configuration.')));
+      .setDescription('View this guilds configuration of the bot.')));
 }
 export const config: MagibotAdminSlashCommand = {
   help() {
