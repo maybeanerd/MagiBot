@@ -12,20 +12,28 @@ import {
 } from '../../dbHelpers';
 import { setJoinChannel } from './joinsound';
 
-async function setAdminRole(guildId: string, roleID: string, insert: boolean) {
+async function setAdminRole(
+  guildId: string,
+  roleID: string,
+  insert: boolean,
+): Promise<boolean> {
   const roles = await getAdminRoles(guildId);
+  let successful = false;
   if (insert) {
     if (!roles.includes(roleID)) {
       roles.push(roleID);
+      successful = true;
     }
   } else {
     const index = roles.indexOf(roleID);
     if (index > -1) {
       roles.splice(index, 1);
+      successful = true;
     }
   }
   const configuration = { adminRoles: roles };
-  return setConfiguration(guildId, configuration);
+  await setConfiguration(guildId, configuration);
+  return successful;
 }
 
 function printHelp() {
@@ -73,14 +81,24 @@ async function toggleAdminRole(
   roleId: string,
   makeAdmin: boolean,
 ) {
-  await setAdminRole(interaction.guildId!, roleId, makeAdmin);
+  const success = await setAdminRole(interaction.guildId!, roleId, makeAdmin);
   if (makeAdmin) {
+    if (success) {
+      interaction.followUp(
+        `Successfully set ${getRoleMention(roleId)} as admin role!`,
+      );
+    } else {
+      interaction.followUp(
+        `${getRoleMention(roleId)} is already an admin role!`,
+      );
+    }
+  } else if (success) {
     interaction.followUp(
-      `Successfully set ${getRoleMention(roleId)} as admin role!`,
+      `Successfully removed ${getRoleMention(roleId)} from the admin roles!`,
     );
   } else {
     interaction.followUp(
-      `Successfully removed ${getRoleMention(roleId)} from the admin roles!`,
+      `${getRoleMention(roleId)} wasn't an admin role to begin with!`,
     );
   }
 }
