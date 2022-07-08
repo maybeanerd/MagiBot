@@ -103,7 +103,9 @@ export async function yesOrNo(
   const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
   // only accept reactions from the user that created this question
   const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
-    && interaction.customId.startsWith(`${buttonInteractionId.yesOrNo}-${msg.id}-`);
+    && interaction.customId.startsWith(
+      `${buttonInteractionId.yesOrNo}-${msg.id}-`,
+    );
   const collector = questionMessage.createMessageComponentCollector({
     filter,
     time,
@@ -136,10 +138,14 @@ export async function notifyAboutSlashCommand(
   message: Message,
   command: string,
 ) {
-  await message.reply(`This command has been moved to application (/) commands! You can simply use it by typing \`/${command}\`!
+  try {
+    await message.reply(`This command has been moved to application (/) commands! You can use it via \`/${command}\`!
 
 If you can't find it, either you are missing permissions, or the admins of this server have not given MagiBot permission to create application commands yet.
 To do the latter, re-invite the bot by clicking the big blue "Add to Server" button in the bot's profile!`);
+  } catch (error) {
+    console.error('Failed sending command has moved message:', error);
+  }
 }
 
 const ephemeral = true;
@@ -184,7 +190,9 @@ export async function interactionConfirmation(
   // only accept reactions from the user that created this question
   // eslint-disable-next-line max-len
   const filter = (intraction: MessageComponentInteraction) => intraction.user.id === interaction.member?.user.id
-    && intraction.customId.startsWith(`${buttonInteractionId.yesOrNo}-${interaction.id}-`);
+    && intraction.customId.startsWith(
+      `${buttonInteractionId.yesOrNo}-${interaction.id}-`,
+    );
   const collector = questionMessage.createMessageComponentCollector({
     filter,
     time: timeoutTime,
@@ -261,7 +269,7 @@ export async function asyncWait(ms: number) {
   });
 }
 
-export function getUserMention(userId:string | null | undefined) {
+export function getUserMention(userId: string | null | undefined) {
   if (!userId) {
     return '';
   }

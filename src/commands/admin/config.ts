@@ -3,7 +3,6 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { COLOR } from '../../shared_assets';
 import { getRoleMention } from '../../helperFunctions';
-import { commandCategories } from '../../types/enums';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import {
   getConfiguration,
@@ -34,46 +33,6 @@ async function setAdminRole(
   const configuration = { adminRoles: roles };
   await setConfiguration(guildId, configuration);
   return successful;
-}
-
-function printHelp() {
-  const info: Array<{ name: string; value: string }> = [];
-
-  info.push({
-    name: 'ban <@User>',
-    value: 'Deactivate all functions of the bot for a user',
-  });
-  info.push({
-    name: 'unban <@User>',
-    value: 'Reactivate all functions of the bot for a user',
-  });
-  info.push({
-    name: 'join',
-    value: "(De)activate joinsounds for the voicechannel you're connected to",
-  });
-  info.push({
-    name: 'admin <@Role>',
-    value: '(Un)set a role to be considered admin by the bot',
-  });
-  info.push({
-    name: 'command',
-    value:
-      "(De)activate bot commands for the text channel you're sending this in",
-  });
-  info.push({
-    name: 'notification',
-    value: '(Un)set a textchannel to be notification channel',
-  });
-  info.push({
-    name: 'info',
-    value: 'Displays current configuration',
-  });
-  info.push({
-    name: 'prefix <prefix>',
-    value: 'Set a custom character or string as prefix',
-  });
-
-  return info;
 }
 
 async function toggleAdminRole(
@@ -225,11 +184,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
       .setDescription('View this guilds configuration of the bot.')));
 }
 export const config: MagibotAdminSlashCommand = {
-  help() {
-    return printHelp();
-  },
   permissions: [],
-  category: commandCategories.util,
   run: runCommand,
   registerSlashCommand,
 };

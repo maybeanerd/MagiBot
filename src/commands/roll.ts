@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { COLOR, PREFIXES } from '../shared_assets';
-import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 
 /**  definition of calculation of dice, use parse(input)
@@ -54,9 +53,7 @@ function parse(de: string) {
 
 const slashCommand = new SlashCommandBuilder()
   .setName('roll')
-  .setDescription(
-    'Roll dice with DnD syntax, e.g.: 5*2d6+1',
-  )
+  .setDescription('Roll dice with DnD syntax, e.g.: 5*2d6+1')
   .addStringOption((option) => option
     .setName('dice')
     .setDescription(
@@ -132,17 +129,7 @@ async function runCommand(interaction: CommandInteraction, input: string) {
 }
 
 export const roll: MagibotSlashCommand = {
-  help() {
-    const ret: Array<{ name: string; value: string }> = [];
-    ret.push({
-      name: '[multiplier]*[number of rolls]d<die number>[+ <modifier>]',
-      value:
-        'Roll dice with standard DnD syntax.\nExamples:\n`5*2d6+1`,`3d6 + 12`, `4*d12 + 3`, `d100`',
-    });
-    return ret;
-  },
   permissions: [],
-  category: commandCategories.fun,
   async run(interaction: CommandInteraction) {
     const input = interaction.options.getString('dice', true);
     return runCommand(interaction, input);

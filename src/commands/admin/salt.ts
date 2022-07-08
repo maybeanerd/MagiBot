@@ -1,6 +1,5 @@
 import { CommandInteraction, Guild, User } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { commandCategories } from '../../types/enums';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
@@ -36,32 +35,6 @@ async function clearSaltOfUser(userid: string, G: Guild) {
     salter: userid,
   });
   await saltGuild(userid, guildID, 1, true);
-}
-
-function printHelp() {
-  const info: Array<{ name: string; value: string }> = [];
-
-  info.push({
-    name: 'report @user',
-    value: 'Report a user for being salty',
-  });
-
-  info.push({
-    name: 'remove @user',
-    value: 'Remove the oldest salt report of a user',
-  });
-
-  info.push({
-    name: 'clear @user',
-    value: 'Clear all salt of a user',
-  });
-
-  info.push({
-    name: 'reset',
-    value: 'Reset all salt of this guild. Use with caution',
-  });
-
-  return info;
 }
 
 async function resetSaltOfGuild(interaction: CommandInteraction) {
@@ -165,11 +138,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
 }
 
 export const salt: MagibotAdminSlashCommand = {
-  help() {
-    return printHelp();
-  },
   permissions: [],
-  category: commandCategories.util,
   run: runCommand,
   registerSlashCommand,
 };

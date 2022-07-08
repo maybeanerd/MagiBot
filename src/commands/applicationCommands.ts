@@ -8,6 +8,7 @@ import { profile } from './profile';
 import { joinsound } from './joinsound';
 import { info } from './info';
 import { vote } from './vote';
+import { help } from './help';
 import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
@@ -22,6 +23,7 @@ export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
   joinsound,
   info,
   vote,
+  help,
 
   // all admin commands
   admin,

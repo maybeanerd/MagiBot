@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { getUserMention, interactionConfirmation } from '../helperFunctions';
-import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
 
@@ -23,9 +22,9 @@ async function main(interaction: CommandInteraction, input: string) {
   );
   if (confirmed) {
     await sendBugreport(
-      `**Bugreport** by ${interaction.member?.user.username} (${
-        getUserMention(interaction.member?.user.id)
-      }) on server ${interaction.guild!.name}( ${
+      `**Bugreport** by ${interaction.member?.user.username} (${getUserMention(
+        interaction.member?.user.id,
+      )}) on server ${interaction.guild!.name}( ${
         interaction.guild!.id
       } ) :\n${input}`,
     );
@@ -36,16 +35,7 @@ async function main(interaction: CommandInteraction, input: string) {
 }
 
 export const bugreport: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '<bugreport with information about what you did, what was expected, and what went wrong>',
-        value: 'Report a bug concerning MagiBot',
-      },
-    ];
-  },
   permissions: [],
-  category: commandCategories.misc,
   async run(interaction: CommandInteraction) {
     const input = interaction.options.getString('description', true);
     return main(interaction, input);

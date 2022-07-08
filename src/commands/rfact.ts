@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import { commandCategories } from '../types/enums';
 import { COLOR, user } from '../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 
@@ -41,16 +40,7 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription('Get a random fact of the day.');
 
 export const randomfact: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value: 'Get a random fact about the current date.',
-      },
-    ];
-  },
   permissions: [],
-  category: commandCategories.fun,
   async run(interaction: CommandInteraction) {
     return main(interaction);
   },

@@ -1,6 +1,5 @@
 import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { commandCategories } from '../types/enums';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { SaltrankModel } from '../db';
 import { getGlobalUser, getUser } from '../dbHelpers';
@@ -75,21 +74,7 @@ const slashCommand = new SlashCommandBuilder()
     .setRequired(false));
 
 export const profile: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value: 'Get info about yourself.',
-      },
-      {
-        name: '@user',
-        value:
-          'Get info about a certain user.',
-      },
-    ];
-  },
   permissions: [],
-  category: commandCategories.util,
   definition: slashCommand.toJSON(),
   run: runCommand,
   defer: DeferReply.public,

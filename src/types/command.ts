@@ -21,9 +21,7 @@ export type magibotCommand = {
 };
 
 type MagibotSlashCommandBase = {
-  help: (commandName: string) => Array<{ name: string; value: string }>;
   permissions: Discord.PermissionResolvable | Discord.PermissionResolvable[];
-  category: commandCategories;
   run: (
     interaction: Discord.CommandInteraction
   ) => Promise<void | null> | void | null; // allow null to allow for "empty" returns

@@ -1,6 +1,5 @@
 import { CommandInteraction, TextChannel } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { commandCategories } from '../types/enums';
 import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
@@ -15,16 +14,7 @@ async function main(interaction: CommandInteraction) {
 }
 
 export const invite: MagibotSlashCommand = {
-  help() {
-    return [
-      {
-        name: '',
-        value: 'Create and get an invite link to the guild.',
-      },
-    ];
-  },
   permissions: ['CREATE_INSTANT_INVITE'],
-  category: commandCategories.util,
   run: main,
   definition: slashCommand.toJSON(),
 };
