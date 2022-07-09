@@ -44,7 +44,8 @@ async function main(interaction: CommandInteraction) {
 
 const slashCommand = new SlashCommandBuilder()
   .setName('info')
-  .setDescription('Get some info about the bot and official resources.');
+  .setDescription('Get some info about the bot and official resources.')
+  .setDMPermission(false);
 
 export const info: MagibotSlashCommand = {
   run: main,

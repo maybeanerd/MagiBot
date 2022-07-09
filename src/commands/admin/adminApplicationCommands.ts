@@ -14,7 +14,8 @@ import { adminDeferralType } from '../../shared_assets';
 // TODO make this only available to admins? might be possible to adjust visibility of commands
 const adminApplicationCommandBase = new SlashCommandBuilder()
   .setName('admin')
-  .setDescription('Admin only commands.');
+  .setDescription('Admin only commands.')
+  .setDMPermission(false);
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
   salt,

@@ -4,7 +4,8 @@ import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
   .setName('ping')
-  .setDescription('Returns the round trip time between you and MagiBot!');
+  .setDescription('Returns the round trip time between you and MagiBot!')
+  .setDMPermission(false);
 
 export const ping: MagibotSlashCommand = {
   permissions: [],

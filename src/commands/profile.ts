@@ -53,6 +53,7 @@ async function runCommand(interaction: CommandInteraction) {
 const slashCommand = new SlashCommandBuilder()
   .setName('profile')
   .setDescription('Get the MagiBot profile of a user.')
+  .setDMPermission(false)
   .addUserOption((option) => option
     .setName('user')
     .setDescription(

@@ -13,7 +13,7 @@ const testCommands: Array<RESTPostAPIApplicationCommandsJSONBody> = [
   // admin.definition,
 ];
 
-const rest = new REST({ version: '9' }).setToken(TOKEN);
+const rest = new REST({ version: '10' }).setToken(TOKEN);
 
 const teabotsGuildId = '380669498014957569';
 

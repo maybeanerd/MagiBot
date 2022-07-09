@@ -30,6 +30,7 @@ async function getSoundFromInteraction(interaction: CommandInteraction) {
 const slashCommand = new SlashCommandBuilder()
   .setName('joinsound')
   .setDescription('Manage your joinsounds.')
+  .setDMPermission(false)
   .addSubcommand((subcommand) => subcommand
     .setName('set')
     .setDescription('Set your joinsound.')

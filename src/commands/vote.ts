@@ -130,6 +130,7 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription(
     `Start a vote with up to ${reactions.length} options that can last up to a week.`,
   )
+  .setDMPermission(false)
   .addStringOption((option) => option
     .setName('topic')
     .setDescription('The topic of the vote.')

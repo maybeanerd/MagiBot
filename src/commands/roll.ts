@@ -54,6 +54,7 @@ function parse(de: string) {
 const slashCommand = new SlashCommandBuilder()
   .setName('roll')
   .setDescription('Roll dice with DnD syntax, e.g.: 5*2d6+1')
+  .setDMPermission(false)
   .addStringOption((option) => option
     .setName('dice')
     .setDescription(

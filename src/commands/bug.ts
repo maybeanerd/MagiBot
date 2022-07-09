@@ -7,6 +7,7 @@ import { sendBugreport } from '../webhooks';
 const slashCommand = new SlashCommandBuilder()
   .setName('bugreport')
   .setDescription('Report a bug concerning MagiBot')
+  .setDMPermission(false)
   .addStringOption((option) => option
     .setName('description')
     .setDescription(

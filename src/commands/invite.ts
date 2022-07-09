@@ -4,7 +4,8 @@ import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
   .setName('invite')
-  .setDescription('Creates a temporary invite link to this channel');
+  .setDescription('Creates a temporary invite link to this channel')
+  .setDMPermission(false);
 
 async function main(interaction: CommandInteraction) {
   const invite = await (interaction.channel as TextChannel).createInvite({

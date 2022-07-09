@@ -4,7 +4,8 @@ import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
   .setName('help')
-  .setDescription('Need some help?');
+  .setDescription('Need some help?')
+  .setDMPermission(false);
 
 export const help: MagibotSlashCommand = {
   permissions: [],

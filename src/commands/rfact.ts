@@ -37,7 +37,8 @@ async function main(interaction: CommandInteraction) {
 }
 const slashCommand = new SlashCommandBuilder()
   .setName('randomfact')
-  .setDescription('Get a random fact of the day.');
+  .setDescription('Get a random fact of the day.')
+  .setDMPermission(false);
 
 export const randomfact: MagibotSlashCommand = {
   permissions: [],

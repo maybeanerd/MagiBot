@@ -167,6 +167,7 @@ async function getTopSalters(interaction: CommandInteraction) {
 const slashCommand = new SlashCommandBuilder()
   .setName('salt')
   .setDescription('Interact with the salt ranking of this server!')
+  .setDMPermission(false)
   .addSubcommand((subcommand) => subcommand
     .setName('report')
     .setDescription('Report a user being salty.')
