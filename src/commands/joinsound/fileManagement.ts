@@ -30,14 +30,29 @@ async function setupLocalFolders() {
 }
 setupLocalFolders();
 
-async function downloadFile(url: string, path: string) {
-  return new Promise<void>((resolve /* , reject */) => {
+// eslint-disable-next-line no-undef
+function gracefullyCatchENOENT(error: NodeJS.ErrnoException) {
+  // If the error is that it doesn't exists, that's fine
+  if (error.code !== 'ENOENT') {
+    throw error;
+  }
+}
+
+async function downloadFile(url: string, path: string, bytesAvailable: number) {
+  return new Promise<boolean>((resolve) => {
     get(url, (res) => {
       const writeStream = createWriteStream(path);
       res.pipe(writeStream);
-      writeStream.on('finish', () => {
+      writeStream.on('finish', async () => {
         writeStream.close();
-        resolve();
+        if (writeStream.bytesWritten > bytesAvailable) {
+          // there seems no easy way to notice beforehand how large the stream might be
+          // so the option for now is to just delete the file if it's too large
+          await unlink(path).catch(gracefullyCatchENOENT);
+          resolve(false);
+        } else {
+          resolve(true);
+        }
       });
     });
   });
@@ -58,6 +73,7 @@ const oneMegabyte = 1024 * 1024;
 const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
 export const joinsoundStorageUserLimit = oneMegabyte;
+const joinsoundStorageGuildLimit = oneMegabyte / 2; // 500KB
 
 async function doesServerHaveEnoughSpace() {
   const sizeOfFolder = await getFolderSize(basePath);
@@ -76,14 +92,6 @@ function getTargetPath(target: JoinsoundTarget) {
   );
 }
 
-// eslint-disable-next-line no-undef
-function gracefullyCatchENOENT(error: NodeJS.ErrnoException) {
-  // If the error is that it doesn't exists, that's fine
-  if (error.code !== 'ENOENT') {
-    throw error;
-  }
-}
-
 export async function getSpaceUsedByTarget(target: JoinsoundTarget) {
   const path = getTargetPath(target);
   await mkdir(path).catch((error) => {
@@ -95,7 +103,7 @@ export async function getSpaceUsedByTarget(target: JoinsoundTarget) {
   return getFolderSize(path);
 }
 
-async function doesUserHaveEnoughSpace(
+async function spaceUserHasLeft(
   target: JoinsoundTarget,
   targetFileName: string,
 ) {
@@ -104,9 +112,10 @@ async function doesUserHaveEnoughSpace(
     gracefullyCatchENOENT,
   );
   const sizeOfExistingFile = statsOfExistingFile?.size || 0;
-  // TODO also count in the size of the file we are about to download!
-  // This just makes sure we don't already go over the limit
-  return sizeOfFolder - sizeOfExistingFile <= joinsoundStorageUserLimit;
+  const sizeLimit = target.userId
+    ? joinsoundStorageUserLimit
+    : joinsoundStorageGuildLimit;
+  return sizeLimit - (sizeOfFolder - sizeOfExistingFile);
 }
 
 function getFilename(target: JoinsoundTarget) {
@@ -123,10 +132,11 @@ export async function storeJoinsoundOfTarget(
     return JoinsoundStoreError.noStorageLeftOnServer;
   }
   const filename = getFilename(target);
-  if (!(await doesUserHaveEnoughSpace(target, filename))) {
+  const spaceLeftForUser = await spaceUserHasLeft(target, filename);
+  const success = await downloadFile(fileUrl, filename, spaceLeftForUser);
+  if (!success) {
     return JoinsoundStoreError.noStorageLeftForUser;
   }
-  await downloadFile(fileUrl, filename);
   return null;
 }
 
