@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import { interactionMemberIsAdmin } from '../../dbHelpers';
 import {
   MagibotAdminSlashCommand,
@@ -15,7 +16,8 @@ import { adminDeferralType } from '../../shared_assets';
 const adminApplicationCommandBase = new SlashCommandBuilder()
   .setName('admin')
   .setDescription('Admin only commands.')
-  .setDMPermission(false);
+  .setDMPermission(false)
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
   salt,
