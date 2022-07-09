@@ -2,7 +2,7 @@ import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { SaltrankModel } from '../db';
-import { getGlobalUser, getUser } from '../dbHelpers';
+import { getUser } from '../dbHelpers';
 
 async function getSalt(userid: string, guildID: string) {
   const result = await SaltrankModel.findOne({
@@ -26,16 +26,8 @@ async function runCommand(interaction: CommandInteraction) {
     inline: boolean;
   }> = [];
   const salt = await getSalt(member.id, guild.id);
-  const { botusage, sound } = await getUser(member.id, guild.id);
-  let joinsound = sound;
-  let isGlobalSound = false;
-  if (!joinsound) {
-    const globalUser = await getGlobalUser(member.id);
-    if (globalUser && globalUser.sound) {
-      joinsound = globalUser.sound;
-      isGlobalSound = true;
-    }
-  }
+  const { botusage } = await getUser(member.id, guild.id);
+
   info.push({
     name: 'Saltlevel',
     value: String(salt),
@@ -44,11 +36,6 @@ async function runCommand(interaction: CommandInteraction) {
   info.push({
     name: 'Bot usage',
     value: String(botusage),
-    inline: false,
-  });
-  info.push({
-    name: `Joinsound${isGlobalSound ? ' (default)' : ''}`,
-    value: joinsound || 'Empty',
     inline: false,
   });
   const embed: MessageEmbedOptions = {

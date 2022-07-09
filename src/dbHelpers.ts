@@ -58,13 +58,11 @@ async function createFirstConfiguration(guildID: string) {
     commandChannels: [],
     adminRoles: [],
     joinChannels: [],
-    blacklistedUsers: [],
-    blacklistedEveryone: [],
     saltKing: undefined,
     saltRole: undefined,
-    notChannel: undefined,
     prefix: config.prefix,
     lastConnected: new Date(),
+    defaultJoinsound: undefined,
   });
   await configuration.save();
   return configuration;

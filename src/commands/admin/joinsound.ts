@@ -1,7 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, GuildMember } from 'discord.js';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
-import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
+import {
+  adminDeferralType,
+  isShadowBanned,
+  shadowBannedLevel,
+} from '../../shared_assets';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import {
@@ -11,6 +15,12 @@ import {
   validateAndSaveJoinsound,
 } from '../joinsound/management';
 import { getConfiguration } from '../../dbHelpers';
+
+async function resetAllJoinChannels(guildId: string) {
+  const configuration = await getConfiguration(guildId);
+  configuration.joinChannels = [];
+  await configuration.save();
+}
 
 export async function setJoinChannel(
   guildId: string,
@@ -69,8 +79,9 @@ async function toggleJoinsoundChannel(
 const acticateJoinsoundsInChannelChoices: Array<
   APIApplicationCommandOptionChoice<string>
 > = [
-  { name: 'activate joinsounds', value: 'activate' },
-  { name: 'disable joinsounds', value: 'disable' },
+  { name: 'activate joinsounds in connected voicechannel', value: 'activate' },
+  { name: 'activate joinsounds everywhere', value: 'activate-all' },
+  { name: 'disable joinsounds in connected voicechannel', value: 'disable' },
 ];
 
 async function runCommand(interaction: CommandInteraction) {
@@ -123,6 +134,7 @@ async function runCommand(interaction: CommandInteraction) {
     const confirmed = await interactionConfirmation(
       interaction,
       'Do you want to remove the default joinsound of this server?',
+      adminDeferralType,
     );
     if (!confirmed) {
       return;
@@ -135,8 +147,24 @@ async function runCommand(interaction: CommandInteraction) {
   if (subcommand === 'voicechannel') {
     const action = interaction.options.getString('action', true) as
       | 'activate'
-      | 'disable';
-    await toggleJoinsoundChannel(interaction, action === 'activate');
+      | 'disable'
+      | 'activate-all';
+    if (action === 'activate-all') {
+      const confirmed = await interactionConfirmation(
+        interaction,
+        'Do you want to reset configured joinsound-voicechannels? This will activate joinsounds for all voicechannels.',
+        adminDeferralType,
+      );
+      if (!confirmed) {
+        return;
+      }
+      await resetAllJoinChannels(guild.id);
+      await confirmed.followUp(
+        'Successfully activated joinsounds for all voicechannels!',
+      );
+    } else {
+      await toggleJoinsoundChannel(interaction, action === 'activate');
+    }
   }
 }
 

@@ -5,11 +5,7 @@ import { bot } from './bot';
 import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import {
-  commandAllowed,
-  printCommandChannels,
-  usageUp,
-} from './commandHandler';
+import { usageUp } from './commandHandler';
 import { applicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
 
@@ -49,19 +45,6 @@ export async function checkApplicationCommand(
     const command = applicationCommands[interaction.commandName];
     if (command) {
       const { permissions } = command;
-      if (
-        !(await commandAllowed(interaction.guild.id, interaction.channel?.id))
-      ) {
-        await interaction.reply({
-          content: `Commands aren't allowed in <#${
-            interaction.channel?.id
-          }>. Use them in ${await printCommandChannels(
-            interaction.guild.id,
-          )}. If you're an admin use \`/help\` to see how you can change that.`,
-          ephemeral: true,
-        });
-        return;
-      }
       // check for all needed permissions
       const botPermissions = (
         interaction.channel as Discord.TextChannel
@@ -73,7 +56,9 @@ export async function checkApplicationCommand(
       }
       if (command.defer) {
         // allow slow commands to have more time to respond
-        await interaction.deferReply({ ephemeral: command.defer === DeferReply.ephemeral });
+        await interaction.deferReply({
+          ephemeral: command.defer === DeferReply.ephemeral,
+        });
       }
       // actually use the command
       await command.run(interaction);

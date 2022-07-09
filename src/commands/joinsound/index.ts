@@ -3,11 +3,29 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
+  getJoinsoundOverviewOfUser,
   JoinsoundOptions,
+  removeAllJoinsoundsOfUser,
   removeDefaultSound,
   removeSound,
   validateAndSaveJoinsound,
 } from './management';
+
+async function getSoundFromInteraction(interaction: CommandInteraction) {
+  const attachment = interaction.options.getAttachment(
+    JoinsoundOptions.soundFile,
+  );
+  if (attachment) {
+    return attachment;
+  }
+  const fileUrl = interaction.options.getString(JoinsoundOptions.directUrl);
+  if (fileUrl) {
+    return fileUrl;
+  }
+
+  interaction.followUp('You need to either pass a file or URL!');
+  return null;
+}
 
 const slashCommand = new SlashCommandBuilder()
   .setName('joinsound')
@@ -37,23 +55,15 @@ const slashCommand = new SlashCommandBuilder()
       .setRequired(true)))
   .addSubcommand((subcommand) => subcommand
     .setName('remove-default')
-    .setDescription('Remove your default joinsound.'));
+    .setDescription('Remove your default joinsound.'))
+  .addSubcommand((subcommand) => subcommand
+    .setName('remove-all')
+    .setDescription('Remove all of your joinsounds.'))
+  .addSubcommand((subcommand) => subcommand
+    .setName('overview')
+    .setDescription('Get an overview of your joinsound setup.'));
 
-async function getSoundFromInteraction(interaction: CommandInteraction) {
-  const attachment = interaction.options.getAttachment(
-    JoinsoundOptions.soundFile,
-  );
-  if (attachment) {
-    return attachment;
-  }
-  const fileUrl = interaction.options.getString(JoinsoundOptions.directUrl);
-  if (fileUrl) {
-    return fileUrl;
-  }
-
-  interaction.followUp('You need to either pass a file or URL!');
-  return null;
-}
+const deferralType = DeferReply.public;
 
 async function runCommand(interaction: CommandInteraction) {
   const { user } = interaction.member!;
@@ -68,7 +78,9 @@ async function runCommand(interaction: CommandInteraction) {
     | 'set'
     | 'set-default'
     | 'remove'
-    | 'remove-default';
+    | 'remove-default'
+    | 'remove-all'
+    | 'overview';
 
   if (subcommand === 'set') {
     const attachment = await getSoundFromInteraction(interaction);
@@ -95,10 +107,16 @@ async function runCommand(interaction: CommandInteraction) {
     await removeDefaultSound(user.id);
     interaction.followUp('Successfully removed your default joinsound!');
   }
+  if (subcommand === 'remove-all') {
+    await removeAllJoinsoundsOfUser(interaction, deferralType);
+  }
+  if (subcommand === 'overview') {
+    await getJoinsoundOverviewOfUser(interaction);
+  }
 }
 export const joinsound: MagibotSlashCommand = {
   permissions: [],
   definition: slashCommand.toJSON(),
   run: runCommand,
-  defer: DeferReply.public,
+  defer: deferralType,
 };

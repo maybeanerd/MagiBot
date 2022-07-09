@@ -4,6 +4,7 @@ import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
 import { saltGuild, addSalt } from '../salt';
+import { adminDeferralType } from '../../shared_assets';
 
 async function resetSalt(G: Guild) {
   const guildID = G.id;
@@ -41,6 +42,7 @@ async function resetSaltOfGuild(interaction: CommandInteraction) {
   const confirmation = await interactionConfirmation(
     interaction,
     'Do you really want to reset all salt on this server?',
+    adminDeferralType,
     'Successfully canceled salt reset.',
   );
   if (confirmation) {
@@ -58,6 +60,7 @@ async function clearAllSaltOfUser(interaction: CommandInteraction, user: User) {
   const confirm = await interactionConfirmation(
     interaction,
     `Do you want to clear all salt from ${user}?`,
+    adminDeferralType,
   );
   if (confirm) {
     await clearSaltOfUser(user.id, interaction.guild!);
@@ -73,6 +76,7 @@ async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
   const confirm = await interactionConfirmation(
     interaction,
     `Do you want to remove the oldest salt from ${user}?`,
+    adminDeferralType,
   );
   if (confirm) {
     if (await removeOldestSaltOfUser(user.id, interaction.guild!)) {

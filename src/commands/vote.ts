@@ -48,6 +48,8 @@ async function addVote(vote: Vote) {
   return voteCreated.toObject();
 }
 
+const deferralType = DeferReply.ephemeral;
+
 async function main(interaction: CommandInteraction) {
   const authorID = interaction.member!.user.id;
   const topic = interaction.options.getString('topic', true);
@@ -83,6 +85,7 @@ async function main(interaction: CommandInteraction) {
   const wantsToStartVote = await interactionConfirmation(
     interaction,
     `Do you want to start the vote **${topic}** lasting **${timeString}**with the options\n${optionsString}`,
+    deferralType,
     `Successfully canceled vote **${topic}**`,
     'Canceled vote due to timeout.',
   );
@@ -151,5 +154,5 @@ export const vote: MagibotSlashCommand = {
   permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   definition: slashCommand.toJSON(),
   run: main,
-  defer: DeferReply.ephemeral,
+  defer: deferralType,
 };

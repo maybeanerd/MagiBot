@@ -1,13 +1,24 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import { CommandInteraction, MessageAttachment, User } from 'discord.js';
+import {
+  CommandInteraction,
+  EmbedFieldData,
+  MessageAttachment,
+  MessageEmbedOptions,
+  User,
+} from 'discord.js';
 import { getGlobalUser, getConfiguration, getUser } from '../../dbHelpers';
 import {
   getJoinsoundReadableStreamOfUser,
   JoinsoundStoreError,
   removeLocallyStoredJoinsoundOfTarget,
   storeJoinsoundOfTarget,
+  getSpaceUsedByTarget,
+  joinsoundStorageUserLimit,
+  getAllLocallyStoredJoinsoundsOfUser,
 } from './fileManagement';
+import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
+import { DeferReply } from '../../types/command';
 
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundOptions {
@@ -245,4 +256,76 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
     return defaultGuildSound.defaultJoinsound;
   }
   return null;
+}
+
+export async function removeAllJoinsoundsOfUser(
+  interaction: CommandInteraction,
+  deferralType: DeferReply,
+) {
+  const confirmed = await interactionConfirmation(
+    interaction,
+    'Are you sure you want to remove all of your joinsounds?',
+    deferralType,
+    'Cancelled removing all of your joinsounds.',
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  const userId = interaction.member!.user.id;
+  const guildIds = await getAllLocallyStoredJoinsoundsOfUser(userId);
+  await asyncForEach(guildIds, async (guildId) => {
+    await removeSound(userId, guildId);
+  });
+  await removeDefaultSound(userId);
+  confirmed.followUp('Successfully removed all of your joinsounds!');
+}
+
+export async function getJoinsoundOverviewOfUser(
+  interaction: CommandInteraction,
+) {
+  const { user } = interaction.member!;
+  const userId = user.id;
+  const guild = interaction.guild!;
+  const guildId = guild.id;
+
+  const member = await guild.members.fetch(userId)!;
+
+  const defaultJoinsound = (await getGlobalUser(userId)).sound;
+  const guildJoinsound = (await getUser(userId, guildId)).sound;
+  const storageUsed = await getSpaceUsedByTarget({ userId, guildId });
+
+  const info: Array<EmbedFieldData> = [];
+
+  info.push({
+    name: 'Default Joinsound',
+    value: defaultJoinsound ? 'Yes' : 'None',
+    inline: false,
+  });
+
+  info.push({
+    name: 'Joinsound on this Guild',
+    value: guildJoinsound ? 'Yes' : 'None',
+    inline: false,
+  });
+  info.push({
+    name: 'Storage Used by Joinsounds',
+    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${
+      joinsoundStorageUserLimit / 1024
+    } KB`,
+    inline: false,
+  });
+
+  const embed: MessageEmbedOptions = {
+    color: member.displayColor,
+    description: `Joinsound overview of ${user}:`,
+    fields: info,
+    thumbnail: { url: member.user.avatarURL() || '' },
+    footer: {
+      iconURL: member.user.avatarURL() || '',
+      text: member.user.tag,
+    },
+  };
+
+  interaction.followUp({ embeds: [embed] });
 }

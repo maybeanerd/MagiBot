@@ -57,6 +57,8 @@ function getFolderSize(path: string): Promise<number> {
 const oneMegabyte = 1024 * 1024;
 const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
+export const joinsoundStorageUserLimit = oneMegabyte;
+
 async function doesServerHaveEnoughSpace() {
   const sizeOfFolder = await getFolderSize(basePath);
   return sizeOfFolder <= fourtyGigabyte;
@@ -82,10 +84,7 @@ function gracefullyCatchENOENT(error: NodeJS.ErrnoException) {
   }
 }
 
-async function doesUserHaveEnoughSpace(
-  target: JoinsoundTarget,
-  targetFileName: string,
-) {
+export async function getSpaceUsedByTarget(target: JoinsoundTarget) {
   const path = getTargetPath(target);
   await mkdir(path).catch((error) => {
     // If the error is that it already exists, that's fine
@@ -93,12 +92,21 @@ async function doesUserHaveEnoughSpace(
       throw error;
     }
   });
-  const sizeOfFolder = await getFolderSize(path);
+  return getFolderSize(path);
+}
+
+async function doesUserHaveEnoughSpace(
+  target: JoinsoundTarget,
+  targetFileName: string,
+) {
+  const sizeOfFolder = await getSpaceUsedByTarget(target);
   const statsOfExistingFile = await stat(targetFileName).catch(
     gracefullyCatchENOENT,
   );
   const sizeOfExistingFile = statsOfExistingFile?.size || 0;
-  return sizeOfFolder - sizeOfExistingFile <= oneMegabyte;
+  // TODO also count in the size of the file we are about to download!
+  // This just makes sure we don't already go over the limit
+  return sizeOfFolder - sizeOfExistingFile <= joinsoundStorageUserLimit;
 }
 
 function getFilename(target: JoinsoundTarget) {
@@ -152,6 +160,19 @@ export async function removeLocallyStoredJoinsoundsOfGuild(guildId: string) {
   await asyncForEach(userIds, async (userId) => {
     await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
   });
+}
+
+async function getExistingSoundFilesOfUser(userId: string) {
+  const files = await readdir(getTargetPath({ userId, default: true }), {
+    withFileTypes: true,
+  });
+  return files
+    .filter((file) => file.isFile() && file.name.startsWith(guildPrefix))
+    .map((file) => file.name.substring(guildPrefix.length));
+}
+
+export async function getAllLocallyStoredJoinsoundsOfUser(userId: string) {
+  return getExistingSoundFilesOfUser(userId);
 }
 
 export function getJoinsoundReadableStreamOfUser(target: JoinsoundTarget) {
