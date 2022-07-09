@@ -273,9 +273,9 @@ export async function removeAllJoinsoundsOfUser(
   }
 
   const userId = interaction.member!.user.id;
-  const files = await getAllLocallyStoredJoinsoundsOfUser(userId);
-  await asyncForEach(files, async (file) => {
-    await removeSound(userId, file);
+  const guildIds = await getAllLocallyStoredJoinsoundsOfUser(userId);
+  await asyncForEach(guildIds, async (guildId) => {
+    await removeSound(userId, guildId);
   });
   await removeDefaultSound(userId);
   confirmed.followUp('Successfully removed all of your joinsounds!');
