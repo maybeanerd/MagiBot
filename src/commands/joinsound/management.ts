@@ -18,6 +18,7 @@ import {
   getAllLocallyStoredJoinsoundsOfUser,
 } from './fileManagement';
 import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
+import { DeferReply } from '../../types/command';
 
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundOptions {
@@ -259,23 +260,25 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
 
 export async function removeAllJoinsoundsOfUser(
   interaction: CommandInteraction,
+  deferralType: DeferReply,
 ) {
   const confirmed = await interactionConfirmation(
     interaction,
     'Are you sure you want to remove all of your joinsounds?',
+    deferralType,
     'Cancelled removing all of your joinsounds.',
   );
-  if (confirmed) {
-    const userId = interaction.member!.user.id;
-
-    const files = await getAllLocallyStoredJoinsoundsOfUser(userId);
-    await asyncForEach(files, async (file) => {
-      await removeSound(userId, file);
-    });
-    await removeDefaultSound(userId);
-
-    confirmed.followUp('Successfully removed all of your joinsounds!');
+  if (!confirmed) {
+    return;
   }
+
+  const userId = interaction.member!.user.id;
+  const files = await getAllLocallyStoredJoinsoundsOfUser(userId);
+  await asyncForEach(files, async (file) => {
+    await removeSound(userId, file);
+  });
+  await removeDefaultSound(userId);
+  confirmed.followUp('Successfully removed all of your joinsounds!');
 }
 
 export async function getJoinsoundOverviewOfUser(

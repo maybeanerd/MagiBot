@@ -4,6 +4,7 @@ import Discord, {
   MessageButton,
   MessageComponentInteraction,
 } from 'discord.js';
+import { DeferReply } from './types/command';
 
 export function doNothingOnError() {}
 
@@ -148,13 +149,12 @@ To do the latter, re-invite the bot by clicking the big blue "Add to Server" but
   }
 }
 
-const ephemeral = true;
-
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
   interaction: Discord.CommandInteraction,
   question: string,
+  deferralType?: DeferReply | false,
   abortMessage: string = 'Cancelled.',
   timeoutMessage: string = 'Timeouted.',
   timeoutTime: number = 20000,
@@ -172,12 +172,15 @@ export async function interactionConfirmation(
       .setLabel('No')
       .setStyle('DANGER'),
   );
+
+  // always prefer ephemeral where possible
+  const ephemeral = deferralType !== DeferReply.public;
+
   const messageContent = {
     content: question,
     components: [row],
     ephemeral,
   };
-
   // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
   const needToFollowup = interaction.deferred || interaction.replied;
   if (needToFollowup) {
@@ -206,7 +209,10 @@ export async function interactionConfirmation(
       const isYesButton = idParts[2] === 'yes';
 
       if (!isYesButton) {
-        await collectionInteraction.reply({ content: abortMessage, ephemeral });
+        await collectionInteraction.reply({
+          content: abortMessage,
+          ephemeral,
+        });
       } else {
         await collectionInteraction.deferReply();
       }
@@ -216,7 +222,10 @@ export async function interactionConfirmation(
     collector.once('end', async () => {
       if (!alreadyResolved) {
         // await questionMessage.delete();
-        interaction.followUp({ content: messageForTimeout, ephemeral });
+        interaction.followUp({
+          content: messageForTimeout,
+          ephemeral,
+        });
         resolve(null);
       }
     });

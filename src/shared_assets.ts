@@ -1,5 +1,6 @@
 import Discord, { ClientUser } from 'discord.js';
 import config from './configuration';
+import { DeferReply } from './types/command';
 
 export const OWNERID = config.owner;
 export const PREFIX = config.prefix;
@@ -11,6 +12,9 @@ export const SUCCESS_COLOR = 0x00ff00;
 export const ERROR_COLOR = 0x0000ff;
 export const INFO_COLOR = 0x0000ff;
 export const SIGN = 'MagiBot - created by T0TProduction#0001';
+
+export const adminDeferralType = DeferReply.public;
+
 // eslint-disable-next-line import/no-mutable-exports
 export const PREFIXES: Map<string, string> = new Map();
 export const queueVoiceChannels: Map<string, string> = new Map();

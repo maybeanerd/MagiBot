@@ -2,7 +2,6 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
 import { interactionMemberIsAdmin } from '../../dbHelpers';
 import {
-  DeferReply,
   MagibotAdminSlashCommand,
   MagibotSlashCommand,
 } from '../../types/command';
@@ -10,6 +9,7 @@ import { salt } from './salt';
 import { joinsound } from './joinsound';
 import { queue } from './queue';
 import { config } from './config';
+import { adminDeferralType } from '../../shared_assets';
 
 // TODO make this only available to admins? might be possible to adjust visibility of commands
 const adminApplicationCommandBase = new SlashCommandBuilder()
@@ -44,9 +44,10 @@ async function runCommand(interaction: CommandInteraction) {
     command.run(interaction);
   }
 }
+
 export const admin: MagibotSlashCommand = {
   permissions: [],
   run: runCommand,
   definition: adminApplicationCommandBase.toJSON(),
-  defer: DeferReply.public,
+  defer: adminDeferralType,
 };

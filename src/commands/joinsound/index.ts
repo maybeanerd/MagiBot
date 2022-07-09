@@ -63,6 +63,8 @@ const slashCommand = new SlashCommandBuilder()
     .setName('overview')
     .setDescription('Get an overview of your joinsound setup.'));
 
+const deferralType = DeferReply.public;
+
 async function runCommand(interaction: CommandInteraction) {
   const { user } = interaction.member!;
   const guild = interaction.guild!;
@@ -106,7 +108,7 @@ async function runCommand(interaction: CommandInteraction) {
     interaction.followUp('Successfully removed your default joinsound!');
   }
   if (subcommand === 'remove-all') {
-    await removeAllJoinsoundsOfUser(interaction);
+    await removeAllJoinsoundsOfUser(interaction, deferralType);
   }
   if (subcommand === 'overview') {
     await getJoinsoundOverviewOfUser(interaction);
@@ -116,5 +118,5 @@ export const joinsound: MagibotSlashCommand = {
   permissions: [],
   definition: slashCommand.toJSON(),
   run: runCommand,
-  defer: DeferReply.public,
+  defer: deferralType,
 };

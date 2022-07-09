@@ -18,6 +18,7 @@ async function main(interaction: CommandInteraction, input: string) {
   const confirmed = await interactionConfirmation(
     interaction,
     `Do you want to send this bugreport?\n${input}`,
+    false,
     'Successfully cancelled bugreport.',
   );
   if (confirmed) {
