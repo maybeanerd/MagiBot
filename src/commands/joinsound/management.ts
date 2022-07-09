@@ -208,6 +208,13 @@ To add new joinsounds you either need to delete some of your old ones, or upload
       );
       return;
     }
+    if (error === JoinsoundStoreError.noStorageLeftForGuild) {
+      interaction.followUp(
+        `**You can't use a joinsound that is larger than 500KB (500 KiloBytes)!**
+This limit only applies to default joinsounds of guilds. A typical sound will need about 50-200 KB, so it should be no problem to fit within this limit.`,
+      );
+      return;
+    }
     if (error === JoinsoundStoreError.noStorageLeftOnServer) {
       interaction.followUp(
         'This is embarassing. It seems like the server has reached its maximum storage capacity. Feel free to notify the developers about this by using `/bugreport` or on the discord server found in `/info`.',

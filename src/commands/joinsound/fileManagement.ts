@@ -18,6 +18,7 @@ type JoinsoundTarget =
 export const enum JoinsoundStoreError {
   noStorageLeftOnServer = 0x1000,
   noStorageLeftForUser = 0x1001,
+  noStorageLeftForGuild = 0x1002,
 }
 
 async function setupLocalFolders() {
@@ -135,7 +136,9 @@ export async function storeJoinsoundOfTarget(
   const spaceLeftForUser = await spaceUserHasLeft(target, filename);
   const success = await downloadFile(fileUrl, filename, spaceLeftForUser);
   if (!success) {
-    return JoinsoundStoreError.noStorageLeftForUser;
+    return target.userId
+      ? JoinsoundStoreError.noStorageLeftForUser
+      : JoinsoundStoreError.noStorageLeftForGuild;
   }
   return null;
 }
