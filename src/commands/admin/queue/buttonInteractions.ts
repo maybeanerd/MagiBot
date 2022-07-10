@@ -1,6 +1,5 @@
-import { ButtonInteraction, GuildMember, Message } from 'discord.js';
+import { ButtonInteraction, Message } from 'discord.js';
 import { onQueueEnd, typeOfQueueAction } from '.';
-import { isAdmin } from '../../../dbHelpers';
 import {
   asyncWait,
   buttonInteractionId,
@@ -111,13 +110,8 @@ Try again later!`,
       });
     }
   } else if (typeOfAction === typeOfQueueAction.next) {
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-        buttonInteraction.guild!.id,
-        buttonInteraction.member as GuildMember,
-      ))
-    ) {
+    if (false) {
+      // TODO figure out if we can allow this for anyone but the creator
       buttonInteraction.reply({
         content: 'You are not allowed to use this!',
         ephemeral: true,
@@ -151,13 +145,8 @@ Try again later!`,
       });
     }
   } else if (typeOfAction === typeOfQueueAction.end) {
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-        buttonInteraction.guild!.id,
-        buttonInteraction.member as GuildMember,
-      ))
-    ) {
+    if (false) {
+      // TODO figure out if we can allow this for anyone but the creator
       buttonInteraction.reply({
         content: 'You are not allowed to use this!',
         ephemeral: true,

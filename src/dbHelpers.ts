@@ -1,4 +1,3 @@
-import { GuildMember, CommandInteraction } from 'discord.js';
 import {
   ConfigurationModel,
   UserModel,
@@ -7,7 +6,7 @@ import {
   StillMutedModel,
   GlobalUserDataModel,
 } from './db';
-import { OWNERID, PREFIXES } from './shared_assets';
+import { PREFIXES } from './shared_assets';
 import config from './configuration';
 import { sendJoinEvent } from './webhooks';
 
@@ -165,50 +164,6 @@ export async function toggleStillMuted(
       guildid: guildID,
     });
   }
-}
-
-export async function getAdminRoles(guildID: string) {
-  const configuration = await getConfiguration(guildID);
-  return configuration.adminRoles;
-}
-
-export async function isAdmin(guildID: string, member: GuildMember) {
-  // checks for admin and Owner, they can always use
-  if (member.permissions.has('ADMINISTRATOR', true)) {
-    return true;
-  }
-  // Owner of bot is always admin hehe
-  if (member.id === OWNERID) {
-    return true;
-  }
-  const roles = await getAdminRoles(guildID);
-  return member.roles.cache.hasAny(...roles);
-}
-
-export async function interactionMemberIsAdmin(
-  interaction: CommandInteraction,
-) {
-  const { member, guild } = interaction;
-  if (member instanceof GuildMember) {
-    // checks for admin and Owner, they can always use
-    if (member.permissions.has('ADMINISTRATOR', true)) {
-      return true;
-    }
-    const roles = await getAdminRoles(guild!.id);
-    return member.roles.cache.hasAny(...roles);
-  }
-  if (member) {
-    // checks for admin and Owner, they can always use
-    if (interaction.memberPermissions?.has('ADMINISTRATOR', true)) {
-      return true;
-    }
-  }
-  // Owner of bot is always admin hehe
-  if (interaction.user.id === OWNERID) {
-    return true;
-  }
-  // default: no admin
-  return false;
 }
 
 export async function getCommandChannels(guildID: string) {

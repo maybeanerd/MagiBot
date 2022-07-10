@@ -4,7 +4,6 @@ import { commandCategories } from '../../types/enums';
 // we allow this cycle once, as the help command also needs to list itself
 import { commands } from '../../commandHandler'; // eslint-disable-line import/no-cycle
 import { magibotCommand } from '../../types/command';
-import { isAdmin } from '../../dbHelpers';
 
 export const help: magibotCommand = {
   name: 'help',
@@ -59,7 +58,7 @@ export const help: magibotCommand = {
         // admin variant?
         if (
           message.member
-          && (await isAdmin(message.guild.id, message.member))
+          && true // TODO this was once isAdmin
         ) {
           if (commands[acommand]) {
             const inf: Array<{
@@ -95,7 +94,7 @@ export const help: magibotCommand = {
         }
       } else if (
         message.member
-        && (await isAdmin(message.guild.id, message.member))
+        && true // TODO this was once isAdmin
       ) {
         // Only Admin command
         command = acommand;
@@ -173,7 +172,10 @@ export const help: magibotCommand = {
         },
       };
       message.channel.send({ embeds: [embed] });
-      if (message.member && (await isAdmin(message.guild.id, message.member))) {
+      if (
+        message.member
+        && true // TODO this was once isAdmin
+      ) {
         const cmd: Array<{ name: string; value: string; inline: boolean }> = [];
         let coms = '';
         Object.values(commands).forEach((commnd) => {
