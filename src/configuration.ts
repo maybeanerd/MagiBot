@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config(); // load .env into environment
 
@@ -13,10 +14,11 @@ let blapis: {
 
 try {
   // eslint-disable-next-line import/no-dynamic-require, global-require
-  blapis = require(`${__dirname}/../botlistTokens.json`);
+  blapis = require(path.join(__dirname, '..', 'botlistTokens.json'));
+  console.info('Found botlist tokens:', Object.keys(blapis));
 } catch (e) {
   // eslint-disable-next-line no-console
-  console.warn('no bot list tokens found, defaulting to none');
+  console.warn('No bot list tokens found, defaulting to none');
   blapis = {};
 }
 

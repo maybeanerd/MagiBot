@@ -288,10 +288,12 @@ __pycache__/
 *.xsd.cs
 startForLinAMI.txt
 startForWin.txt
-# src/token.ts
+
+# MagiBot specific files
 dist/
 .env
 src/botlistTokens.json
+botlistTokens.json
 
 # locally stored joinsound files
 /joinsounds
