@@ -279,6 +279,8 @@ async function voteCheck(bot: Client) {
 }
 
 export function startUp(bot: Client) {
+  // functions that only run once on startup
+
   // repeating functions:
   hourlyCleanup(bot, true);
   voteCheck(bot);

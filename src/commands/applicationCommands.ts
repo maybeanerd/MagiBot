@@ -12,7 +12,7 @@ import { help } from './help';
 import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
-export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
+export const globalApplicationCommands: { [k: string]: MagibotSlashCommand } = {
   ping,
   roll,
   invite,
@@ -27,4 +27,8 @@ export const applicationCommands: { [k: string]: MagibotSlashCommand } = {
 
   // all admin commands
   admin,
+};
+
+export const guildApplicationCommands: { [k: string]: MagibotSlashCommand } = {
+  // TODO do we ever need this?
 };

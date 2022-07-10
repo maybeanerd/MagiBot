@@ -1,7 +1,7 @@
 import { ShardingManager } from 'discord.js';
 import Statcord from 'statcord.js';
 import configuration from './configuration';
-import { syncCommands } from './commandSync';
+import { syncGlobalCommands } from './commandSync';
 /* import {
 accumulateJoinsoundsPlayed,
 accumulateUsersJoinedQueue,
@@ -36,4 +36,4 @@ manager.on('shardCreate', (shard) => console.log(`Launched shard ${shard.id}`));
 manager.spawn();
 
 // sync slash commands
-syncCommands();
+syncGlobalCommands();
