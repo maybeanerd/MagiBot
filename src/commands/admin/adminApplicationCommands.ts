@@ -17,9 +17,10 @@ const adminApplicationCommandBase = new SlashCommandBuilder()
   .setDefaultMemberPermissions(0); // only allow administrators to use these commands by default
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
+  // TODO move these away from /admin?
   salt,
   joinsound,
-  queue,
+  queue, // especially this since there is no non-admin version of it
   config,
 };
 

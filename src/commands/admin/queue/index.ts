@@ -5,14 +5,22 @@ import {
   Guild,
   TextChannel,
   Message,
+  ButtonInteraction,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
+  asyncWait,
   buttonInteractionId,
   doNothingOnError,
+  getUserMention,
 } from '../../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../../types/command';
-import { removeQueue, tryToCreateQueue } from './stateManager';
+import {
+  goToNextUserOfQueue,
+  maximumQueueLength,
+  removeQueue,
+  tryToCreateQueue,
+} from './stateManager';
 
 // eslint being stupid again
 // eslint-disable-next-line no-shadow
@@ -34,6 +42,7 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     guild.id,
     interaction.channelId,
     originalMessage.id,
+    interaction.member!.user.id,
     topic,
   );
 
@@ -95,7 +104,7 @@ export async function onQueueEnd(guild: Guild) {
       );
       if (topicMessage) {
         topicMessage
-          .edit({ content: `**${queue.topic}** ended.`, components: [] })
+          .edit({ content: `The queue **${queue.topic}** ended.`, components: [] })
           .catch(doNothingOnError);
       }
       return true;
@@ -116,6 +125,85 @@ async function endRunningQueue(interaction: CommandInteraction) {
   }
 }
 
+export function messageEdit(
+  message: Message,
+  activeUser: string | null,
+  queuedUsers: Array<string>,
+  topic: string,
+) {
+  const msg = `Queue: **${topic}**`;
+  let nextUsers = '\n';
+  if (queuedUsers.length > 1) {
+    for (let i = 1; i <= 10 && i < queuedUsers.length; i++) {
+      nextUsers += `- ${getUserMention(queuedUsers[i])}\n`;
+    }
+  } else {
+    nextUsers = ' no more queued users\n';
+  }
+  return message
+    .edit(
+      `${msg}\n*${
+        queuedUsers.length
+      }/${maximumQueueLength} users queued*\n\nCurrent user: **${
+        activeUser ? getUserMention(activeUser) : 'Nobody'
+      }**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`,
+    )
+    .catch(doNothingOnError);
+}
+
+export async function sendItsYourTurnMessage(
+  interaction: CommandInteraction | ButtonInteraction,
+  userId: string,
+) {
+  const messageContent = {
+    fetchReply: true,
+    content: `It's your turn ${getUserMention(userId)}!`,
+  };
+  const message = (
+    interaction.deferred
+      ? await interaction.followUp(messageContent)
+      : await interaction.reply(messageContent)
+  ) as Message;
+  asyncWait(1000).then(() => message.delete());
+}
+
+export async function goToNextUser(
+  interaction: CommandInteraction | ButtonInteraction,
+) {
+  const guild = interaction.guild!;
+  const wentToNextUser = await goToNextUserOfQueue(guild.id);
+
+  if (wentToNextUser) {
+    const channel = await guild.channels.fetch(wentToNextUser.channelId);
+    if (channel) {
+      const topicMessage = await (channel as TextChannel).messages.fetch(
+        wentToNextUser.messageId,
+      );
+      if (topicMessage) {
+        messageEdit(
+          topicMessage,
+          wentToNextUser.activeUser,
+          wentToNextUser.queuedUsers,
+          wentToNextUser.topic,
+        );
+      }
+    }
+  }
+  if (wentToNextUser && wentToNextUser.activeUser) {
+    await sendItsYourTurnMessage(interaction, wentToNextUser.activeUser);
+  } else {
+    const messageContent = {
+      content: 'There are no users left in the queue!',
+      ephemeral: true,
+    };
+    if (interaction.deferred) {
+      interaction.followUp(messageContent);
+    } else {
+      interaction.reply(messageContent);
+    }
+  }
+}
+
 function registerSlashCommand(builder: SlashCommandBuilder) {
   return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
     .setName('queue')
@@ -133,13 +221,17 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
       .setName('end')
-      .setDescription('End the running queue on this guild.')));
+      .setDescription('End the running queue on this guild.'))
+    .addSubcommand((subcommand) => subcommand
+      .setName('next')
+      .setDescription('Go to the next user of the running queue.')));
 }
 
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'start'
-    | 'end';
+    | 'end'
+    | 'next';
 
   if (subcommand === 'start') {
     const topic = interaction.options.getString('topic', true);
@@ -148,6 +240,10 @@ async function runCommand(interaction: CommandInteraction) {
   }
   if (subcommand === 'end') {
     await endRunningQueue(interaction);
+    return;
+  }
+  if (subcommand === 'next') {
+    await goToNextUser(interaction);
   }
 }
 

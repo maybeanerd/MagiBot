@@ -17,6 +17,7 @@ export async function tryToCreateQueue(
   guildId: string,
   channelId: string,
   messageId: string,
+  creatorId: string,
   topic: string,
 ) {
   const existingQueue = await getQueue(guildId);
@@ -27,6 +28,7 @@ export async function tryToCreateQueue(
     guildId,
     channelId,
     messageId,
+    creatorId,
     topic,
     queuedUsers: [],
   });
@@ -88,6 +90,8 @@ export async function goToNextUserOfQueue(guildId: string) {
     activeUser: getActiveUserOfQueue(queue),
     queuedUsers: queue.queuedUsers,
     topic: queue.topic,
+    channelId: queue.channelId,
+    messageId: queue.messageId,
   };
 }
 
