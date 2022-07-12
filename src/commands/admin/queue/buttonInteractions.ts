@@ -9,6 +9,7 @@ import {
 import {
   addUserToQueue,
   goToNextUserOfQueue,
+  isCreatorOfQueue,
   maximumQueueLength,
   removeUserFromQueue,
 } from './stateManager';
@@ -110,10 +111,10 @@ Try again later!`,
       });
     }
   } else if (typeOfAction === typeOfQueueAction.next) {
-    if (false) {
-      // TODO figure out if we can allow this for anyone but the creator
+    if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
+        content:
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue next` instead.",
         ephemeral: true,
       });
       return;
@@ -145,10 +146,10 @@ Try again later!`,
       });
     }
   } else if (typeOfAction === typeOfQueueAction.end) {
-    if (false) {
-      // TODO figure out if we can allow this for anyone but the creator
+    if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
+        content:
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue end` instead.",
         ephemeral: true,
       });
       return;

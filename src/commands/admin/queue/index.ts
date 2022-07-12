@@ -104,12 +104,12 @@ export async function onQueueEnd(guild: Guild) {
   return false;
 }
 
-async function stopRunningQueue(interaction: CommandInteraction) {
+async function endRunningQueue(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   const runningQueue = await onQueueEnd(guild);
   if (runningQueue) {
     await interaction.followUp(
-      'Successfully stopped the ongoing queue on this guild.',
+      'Successfully ended the ongoing queue on this guild.',
     );
   } else {
     await interaction.followUp("There's no ongoing queue on this guild.");
@@ -132,22 +132,22 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setDescription('The topic of the queue.')
         .setRequired(true)))
     .addSubcommand((subcommand) => subcommand
-      .setName('stop')
-      .setDescription('Stop the running queue on this guild.')));
+      .setName('end')
+      .setDescription('End the running queue on this guild.')));
 }
 
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'start'
-    | 'stop';
+    | 'end';
 
   if (subcommand === 'start') {
     const topic = interaction.options.getString('topic', true);
     await startQueue(interaction, topic);
     return;
   }
-  if (subcommand === 'stop') {
-    await stopRunningQueue(interaction);
+  if (subcommand === 'end') {
+    await endRunningQueue(interaction);
   }
 }
 

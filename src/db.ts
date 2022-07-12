@@ -313,6 +313,7 @@ export type OngoingQueue = {
   guildId: string;
   channelId: string;
   messageId: string;
+  creatorId: string;
   topic: string;
   queuedUsers: Array<string>;
 };
@@ -327,6 +328,10 @@ const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
       required: true,
     },
     messageId: {
+      type: String,
+      required: true,
+    },
+    creatorId: {
       type: String,
       required: true,
     },
