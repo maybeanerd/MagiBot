@@ -6,7 +6,7 @@ import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { usageUp } from './commandHandler';
-import { applicationCommands } from './commands/applicationCommands';
+import { globalApplicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
 
 async function catchError(
@@ -42,7 +42,7 @@ export async function checkApplicationCommand(
       interaction.member.user.id,
       bot,
     );
-    const command = applicationCommands[interaction.commandName];
+    const command = globalApplicationCommands[interaction.commandName];
     if (command) {
       const { permissions } = command;
       // check for all needed permissions

@@ -1,15 +1,15 @@
-import { ButtonInteraction, GuildMember, Message } from 'discord.js';
-import { onQueueEnd, typeOfQueueAction } from '.';
-import { isAdmin } from '../../../dbHelpers';
+import { ButtonInteraction, Message } from 'discord.js';
 import {
-  asyncWait,
-  buttonInteractionId,
-  doNothingOnError,
-  getUserMention,
-} from '../../../helperFunctions';
+  goToNextUser,
+  messageEdit,
+  onQueueEnd,
+  sendItsYourTurnMessage,
+  typeOfQueueAction,
+} from '.';
+import { buttonInteractionId } from '../../../helperFunctions';
 import {
   addUserToQueue,
-  goToNextUserOfQueue,
+  isCreatorOfQueue,
   maximumQueueLength,
   removeUserFromQueue,
 } from './stateManager';
@@ -18,27 +18,6 @@ function isInteractionQueueRelated(interaction: ButtonInteraction) {
   return interaction.customId.startsWith(
     `${buttonInteractionId.queue}-${interaction.guildId}-`,
   );
-}
-
-function messageEdit(
-  activeUser: string | null,
-  queuedUsers: Array<string>,
-  topic: string,
-) {
-  const msg = `Queue: **${topic}**`;
-  let nextUsers = '\n';
-  if (queuedUsers.length > 1) {
-    for (let i = 1; i <= 10 && i < queuedUsers.length; i++) {
-      nextUsers += `- ${getUserMention(queuedUsers[i])}\n`;
-    }
-  } else {
-    nextUsers = ' no more queued users\n';
-  }
-  return `${msg}\n*${
-    queuedUsers.length
-  }/${maximumQueueLength} users queued*\n\nCurrent user: **${
-    activeUser ? getUserMention(activeUser) : 'Nobody'
-  }**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`;
 }
 
 async function onQueueAction(buttonInteraction: ButtonInteraction) {
@@ -55,26 +34,19 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
       if (addUserResponse.addedToQueue) {
         const { isActiveUser } = addUserResponse;
         if (isActiveUser) {
-          const message = (await buttonInteraction.reply({
-            fetchReply: true,
-            content: `It's your turn ${buttonInteraction.user}!`,
-          })) as Message;
-          asyncWait(1000).then(() => message.delete());
+          await sendItsYourTurnMessage(buttonInteraction, actionUserId);
         } else {
           buttonInteraction.reply({
             content: `Successfully joined the queue! Your position is: ${addUserResponse.position}`,
             ephemeral: true,
           });
         }
-        topicMessage
-          .edit(
-            messageEdit(
-              addUserResponse.activeUser,
-              addUserResponse.queuedUsers,
-              addUserResponse.topic,
-            ),
-          )
-          .catch(doNothingOnError);
+        messageEdit(
+          topicMessage,
+          addUserResponse.activeUser,
+          addUserResponse.queuedUsers,
+          addUserResponse.topic,
+        );
       } else if (addUserResponse.position !== null) {
         buttonInteraction.reply({
           content: `You were already in the queue! Your current position is: ${addUserResponse.position}`,
@@ -91,15 +63,12 @@ Try again later!`,
   } else if (typeOfAction === typeOfQueueAction.leave) {
     const userLeftQueue = await removeUserFromQueue(guildId, actionUserId);
     if (userLeftQueue) {
-      topicMessage
-        .edit(
-          messageEdit(
-            userLeftQueue.activeUser,
-            userLeftQueue.queuedUsers,
-            userLeftQueue.topic,
-          ),
-        )
-        .catch(doNothingOnError);
+      messageEdit(
+        topicMessage,
+        userLeftQueue.activeUser,
+        userLeftQueue.queuedUsers,
+        userLeftQueue.topic,
+      );
       buttonInteraction.reply({
         content: 'Successfully left the queue!',
         ephemeral: true,
@@ -111,55 +80,20 @@ Try again later!`,
       });
     }
   } else if (typeOfAction === typeOfQueueAction.next) {
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-        buttonInteraction.guild!.id,
-        buttonInteraction.member as GuildMember,
-      ))
-    ) {
+    if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
+        content:
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue next` instead.",
         ephemeral: true,
       });
       return;
     }
-    const wentToNextUser = await goToNextUserOfQueue(guildId);
-
-    if (wentToNextUser) {
-      topicMessage
-        .edit(
-          messageEdit(
-            wentToNextUser.activeUser,
-            wentToNextUser.queuedUsers,
-            wentToNextUser.topic,
-          ),
-        )
-        .catch(doNothingOnError);
-    }
-
-    if (wentToNextUser && wentToNextUser.activeUser) {
-      const message = (await buttonInteraction.reply({
-        fetchReply: true,
-        content: `It's your turn ${getUserMention(wentToNextUser.activeUser)}!`,
-      })) as Message;
-      asyncWait(1000).then(() => message.delete());
-    } else {
-      buttonInteraction.reply({
-        content: 'There are no users left in the queue!',
-        ephemeral: true,
-      });
-    }
+    await goToNextUser(buttonInteraction);
   } else if (typeOfAction === typeOfQueueAction.end) {
-    // only admins of guild are allowed to do this
-    if (
-      !(await isAdmin(
-        buttonInteraction.guild!.id,
-        buttonInteraction.member as GuildMember,
-      ))
-    ) {
+    if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
-        content: 'You are not allowed to use this!',
+        content:
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue end` instead.",
         ephemeral: true,
       });
       return;

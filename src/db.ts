@@ -17,7 +17,7 @@ mongoose.connect(`${url}/MagiBot`, {
 export type Configuration = {
   _id: string;
   commandChannels: Array<string>;
-  adminRoles: Array<string>;
+  adminRoles: Array<string>; // deprecated
   joinChannels: Array<string>;
   saltKing?: string; // deprecated
   saltRole?: string; // deprecated
@@ -37,6 +37,7 @@ const configurationSchema = new mongoose.Schema<Configuration>(
       required: true,
     },
     adminRoles: {
+      // deprecated
       type: [String],
       required: true,
     },
@@ -312,6 +313,7 @@ export type OngoingQueue = {
   guildId: string;
   channelId: string;
   messageId: string;
+  creatorId: string;
   topic: string;
   queuedUsers: Array<string>;
 };
@@ -326,6 +328,10 @@ const ongoingQueueSchema = new mongoose.Schema<OngoingQueue>(
       required: true,
     },
     messageId: {
+      type: String,
+      required: true,
+    },
+    creatorId: {
       type: String,
       required: true,
     },
