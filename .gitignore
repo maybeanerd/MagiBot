@@ -292,7 +292,6 @@ startForWin.txt
 # MagiBot specific files
 dist/
 .env
-src/botlistTokens.json
 botlistTokens.json
 
 # locally stored joinsound files
