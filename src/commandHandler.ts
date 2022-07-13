@@ -17,27 +17,23 @@ const migratedCommands = new Map([
   ['roll', 'roll'],
   ['salt', 'salt'],
   ['profile', 'profile'],
-  ['_salt', 'salt'], // admin command
-  ['_sound', 'joinsound'], // admin command
+  ['_salt', 'admin salt'], // admin command
+  ['_sound', 'admin joinsound'], // admin command
   ['sound', 'joinsound'],
   ['info', 'info'],
   ['vote', 'vote'],
-  ['_queue', 'queue'], // admin command
-  ['_setup', 'config'], // admin command
+  ['_queue', 'admin queue'], // admin command
+  ['_setup', 'admin config'], // admin command
   ['help', 'help'],
 ]);
 
 async function sendMigrationMessageIfComandHasBeenMigrated(
   message: Discord.Message,
   commandName: string,
-  isAdminCommand = false,
 ) {
   const migratedCommand = migratedCommands.get(commandName);
   if (migratedCommand) {
-    await notifyAboutSlashCommand(
-      message,
-      isAdminCommand ? `admin ${migratedCommand}` : migratedCommand,
-    );
+    await notifyAboutSlashCommand(message, migratedCommand);
   }
 }
 
@@ -81,23 +77,18 @@ export async function checkCommand(message: Discord.Message) {
   }
   if (command) {
     const pre = command.charAt(0);
-
     if (pre === '.') {
       command = command.slice(1);
     } else if (pre === ':') {
       command = `_${command.slice(1)}`;
       // Check if its an admin command
       // if not you're allowed to use the normal version as admin (in any channel)
-      if (!commands[command]) {
+      if (!commands[command] && !migratedCommands.has(command)) {
         command = command.slice(1);
       }
       // Check if the command exists, to not just spam k: msgs
       if (!commands[command]) {
-        await sendMigrationMessageIfComandHasBeenMigrated(
-          message,
-          command,
-          true,
-        );
+        await sendMigrationMessageIfComandHasBeenMigrated(message, command);
       }
       return;
     } else {
