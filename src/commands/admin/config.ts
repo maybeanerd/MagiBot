@@ -1,6 +1,9 @@
-import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
+import {
+  CommandInteraction,
+  GuildMember,
+  MessageEmbedOptions,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { COLOR } from '../../shared_assets';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { getConfiguration } from '../../dbHelpers';
 import { setJoinChannel } from './joinsound';
@@ -52,7 +55,7 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   });
 
   const embed: MessageEmbedOptions = {
-    color: COLOR,
+    color: (interaction.member as GuildMember).displayColor,
     description: `Guild configuration of ${guild.name}:`,
     fields: info,
     footer: {

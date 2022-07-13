@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
-import { COLOR, user } from '../shared_assets';
+import { CommandInteraction, GuildMember } from 'discord.js';
+import { user } from '../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 
 // we needed to manually type this because the inferred type collided with date type later on
@@ -22,7 +22,7 @@ async function main(interaction: CommandInteraction) {
     return;
   }
   const embed = {
-    color: COLOR,
+    color: (interaction.member as GuildMember).displayColor,
     // fields: info,
     title: `Random fact about: \`${now.toLocaleDateString('en-US', options)}\``,
     description: fact,

@@ -13,7 +13,9 @@ import { queue } from './queue';
 import { admin } from './admin/adminApplicationCommands';
 import { MagibotSlashCommand } from '../types/command';
 
-export const globalApplicationCommands: { [k: string]: MagibotSlashCommand } = {
+export const globalApplicationCommandsForEveryone: {
+  [k: string]: MagibotSlashCommand;
+} = {
   ping,
   roll,
   invite,
@@ -25,10 +27,17 @@ export const globalApplicationCommands: { [k: string]: MagibotSlashCommand } = {
   info,
   vote,
   help,
-  queue,
+};
 
-  // all admin commands
+export const globalApplicationCommandsForAdminsOnly: {
+  [k: string]: MagibotSlashCommand;
+} = {
+  queue,
   admin,
+};
+export const globalApplicationCommands: { [k: string]: MagibotSlashCommand } = {
+  ...globalApplicationCommandsForEveryone,
+  ...globalApplicationCommandsForAdminsOnly,
 };
 
 export const guildApplicationCommands: { [k: string]: MagibotSlashCommand } = {

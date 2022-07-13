@@ -1,13 +1,8 @@
 import Discord from 'discord.js';
 // import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
 import { PREFIXES, user } from './shared_assets';
-import { magibotCommand } from './types/command';
 import { getUser } from './dbHelpers';
 import { notifyAboutSlashCommand } from './helperFunctions';
-
-export const commands: { [k: string]: magibotCommand } = {
-  // help,
-};
 
 const migratedCommands = new Map([
   ['rfact', 'randomfact'],
@@ -83,19 +78,14 @@ export async function checkCommand(message: Discord.Message) {
       command = `_${command.slice(1)}`;
       // Check if its an admin command
       // if not you're allowed to use the normal version as admin (in any channel)
-      if (!commands[command] && !migratedCommands.has(command)) {
+      if (!migratedCommands.has(command)) {
         command = command.slice(1);
       }
-      // Check if the command exists, to not just spam k: msgs
-      if (!commands[command]) {
-        await sendMigrationMessageIfComandHasBeenMigrated(message, command);
-      }
+      await sendMigrationMessageIfComandHasBeenMigrated(message, command);
       return;
     } else {
       return;
     }
-    if (!commands[command]) {
-      await sendMigrationMessageIfComandHasBeenMigrated(message, command);
-    }
+    await sendMigrationMessageIfComandHasBeenMigrated(message, command);
   }
 }

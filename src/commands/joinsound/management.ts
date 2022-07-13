@@ -306,13 +306,13 @@ export async function getJoinsoundOverviewOfUser(
 
   info.push({
     name: 'Default Joinsound',
-    value: defaultJoinsound ? 'Yes' : 'None',
+    value: defaultJoinsound ? 'Active' : 'None',
     inline: false,
   });
 
   info.push({
     name: 'Joinsound on this Guild',
-    value: guildJoinsound ? 'Yes' : 'None',
+    value: guildJoinsound ? 'Active' : 'None',
     inline: false,
   });
   info.push({

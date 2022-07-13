@@ -1,6 +1,10 @@
-import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
+import {
+  CommandInteraction,
+  GuildMember,
+  MessageEmbedOptions,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { COLOR, user, SIGN } from '../shared_assets';
+import { user, SIGN } from '../shared_assets';
 import { MagibotSlashCommand } from '../types/command';
 
 const inviteURL = 'https://discord.com/api/oauth2/authorize?client_id=384820232583249921&permissions=276131153&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot';
@@ -30,7 +34,7 @@ async function main(interaction: CommandInteraction) {
     },
   ];
   const embed: MessageEmbedOptions = {
-    color: COLOR,
+    color: (interaction.member as GuildMember).displayColor,
     description: 'Some information about the bot:',
     fields: info,
     footer: {

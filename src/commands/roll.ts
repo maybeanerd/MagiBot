@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
-import { COLOR, PREFIXES } from '../shared_assets';
+import { CommandInteraction, GuildMember } from 'discord.js';
+import { PREFIXES } from '../shared_assets';
 import { MagibotSlashCommand } from '../types/command';
 
 /**  definition of calculation of dice, use parse(input)
@@ -115,7 +115,7 @@ async function runCommand(interaction: CommandInteraction, input: string) {
     });
   });
   const embed = {
-    color: COLOR,
+    color: (interaction.member as GuildMember).displayColor,
     description: `:game_die: ${interaction.member}s dice have been rolled:`,
     fields: info,
     footer: {

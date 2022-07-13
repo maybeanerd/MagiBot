@@ -20,7 +20,7 @@ const adminApplicationCommandBase = new SlashCommandBuilder()
     PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageGuild,
   );
 
-const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
+export const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
   salt,
   joinsound,
   config,
