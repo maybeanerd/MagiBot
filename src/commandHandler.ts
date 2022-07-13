@@ -22,7 +22,7 @@ const migratedCommands = new Map([
   ['sound', 'joinsound'],
   ['info', 'info'],
   ['vote', 'vote'],
-  ['_queue', 'admin queue'], // admin command
+  ['_queue', 'queue'],
   ['_setup', 'admin config'], // admin command
   ['help', 'help'],
 ]);

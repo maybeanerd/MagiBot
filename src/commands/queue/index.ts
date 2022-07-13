@@ -8,13 +8,14 @@ import {
   ButtonInteraction,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import {
   asyncWait,
   buttonInteractionId,
   doNothingOnError,
   getUserMention,
-} from '../../../helperFunctions';
-import { MagibotAdminSlashCommand } from '../../../types/command';
+} from '../../helperFunctions';
+import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
   goToNextUserOfQueue,
   maximumQueueLength,
@@ -48,7 +49,7 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
 
   if (!createdQueue) {
     originalMessage.edit(
-      "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed.",
+      "There's already an ongoing queue on this guild. For performance reasons only one queue per guild is allowed. To end it, use `/queue end`.",
     );
     return;
   }
@@ -89,7 +90,7 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
   );
 
   await originalMessage.edit({
-    content: `Queue: **${topic}:**\n\nUse the buttons below to join the queue!`,
+    content: `Queue **${topic}** :\n\nUse the buttons below to join the queue!`,
     components: [row, rowTwo],
   });
 }
@@ -104,7 +105,10 @@ export async function onQueueEnd(guild: Guild) {
       );
       if (topicMessage) {
         topicMessage
-          .edit({ content: `The queue **${queue.topic}** ended.`, components: [] })
+          .edit({
+            content: `The queue **${queue.topic}** ended.`,
+            components: [],
+          })
           .catch(doNothingOnError);
       }
       return true;
@@ -204,28 +208,32 @@ export async function goToNextUser(
   }
 }
 
-function registerSlashCommand(builder: SlashCommandBuilder) {
-  return builder.addSubcommandGroup((subcommandGroup) => subcommandGroup
-    .setName('queue')
+const slashCommand = new SlashCommandBuilder()
+  .setName('queue')
+  .setDescription(
+    'Manage queues for events such as karaoke or playing view viewers.',
+  )
+  .setDMPermission(false)
+  // only allow administrators to use these commands by default
+  .setDefaultMemberPermissions(
+    // eslint-disable-next-line no-bitwise
+    PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageGuild,
+  )
+  .addSubcommand((subcommand) => subcommand
+    .setName('start')
     .setDescription(
-      'Manage queues for events such as karaoke or playing view viewers.',
+      'Start a queue. Only one active queue per guild is allowed.',
     )
-    .addSubcommand((subcommand) => subcommand
-      .setName('start')
-      .setDescription(
-        'Start a queue. Only one active queue per guild is allowed.',
-      )
-      .addStringOption((option) => option
-        .setName('topic')
-        .setDescription('The topic of the queue.')
-        .setRequired(true)))
-    .addSubcommand((subcommand) => subcommand
-      .setName('end')
-      .setDescription('End the running queue on this guild.'))
-    .addSubcommand((subcommand) => subcommand
-      .setName('next')
-      .setDescription('Go to the next user of the running queue.')));
-}
+    .addStringOption((option) => option
+      .setName('topic')
+      .setDescription('The topic of the queue.')
+      .setRequired(true)))
+  .addSubcommand((subcommand) => subcommand
+    .setName('end')
+    .setDescription('End the running queue on this guild.'))
+  .addSubcommand((subcommand) => subcommand
+    .setName('next')
+    .setDescription('Go to the next user of the running queue.'));
 
 async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
@@ -247,8 +255,9 @@ async function runCommand(interaction: CommandInteraction) {
   }
 }
 
-export const queue: MagibotAdminSlashCommand = {
+export const queue: MagibotSlashCommand = {
   permissions: ['READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   run: runCommand,
-  registerSlashCommand,
+  definition: slashCommand.toJSON(),
+  defer: DeferReply.public,
 };

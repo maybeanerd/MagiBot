@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import {
   MagibotAdminSlashCommand,
   MagibotSlashCommand,
 } from '../../types/command';
 import { salt } from './salt';
 import { joinsound } from './joinsound';
-import { queue } from './queue';
 import { config } from './config';
 import { adminDeferralType } from '../../shared_assets';
 
@@ -14,13 +14,15 @@ const adminApplicationCommandBase = new SlashCommandBuilder()
   .setName('admin')
   .setDescription('Admin only commands.')
   .setDMPermission(false)
-  .setDefaultMemberPermissions(0); // only allow administrators to use these commands by default
+  // only allow administrators to use these commands by default
+  .setDefaultMemberPermissions(
+    // eslint-disable-next-line no-bitwise
+    PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageGuild,
+  );
 
 const adminApplicationCommands: { [k: string]: MagibotAdminSlashCommand } = {
-  // TODO move these away from /admin?
   salt,
   joinsound,
-  queue, // especially this since there is no non-admin version of it
   config,
 };
 

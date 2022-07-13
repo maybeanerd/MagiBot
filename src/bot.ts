@@ -21,7 +21,7 @@ import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
-import { onInteraction } from './commands/admin/queue/buttonInteractions';
+import { onInteraction } from './commands/queue/buttonInteractions';
 
 console.log(generateDependencyReport());
 
@@ -154,7 +154,11 @@ bot.on('guildCreate', async (guild) => {
         .catch(() => {});
     }
     await sendJoinEvent(
-      `:white_check_mark: joined **${guild.name}**: "${guild.preferredLocale}" (${guild.memberCount} users, ID: ${guild.id})\nOwner is: ${getUserMention(guild.ownerId)} (ID: ${guild.ownerId})`,
+      `:white_check_mark: joined **${guild.name}**: "${
+        guild.preferredLocale
+      }" (${guild.memberCount} users, ID: ${
+        guild.id
+      })\nOwner is: ${getUserMention(guild.ownerId)} (ID: ${guild.ownerId})`,
     );
   }
 });

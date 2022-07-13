@@ -1,4 +1,4 @@
-import { OngoingQueue, OngoingQueueModel } from '../../../db';
+import { OngoingQueue, OngoingQueueModel } from '../../db';
 
 async function getQueue(guildId: string) {
   return OngoingQueueModel.findOne({ where: { guildId } });

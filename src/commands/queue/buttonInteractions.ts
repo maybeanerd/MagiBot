@@ -6,7 +6,7 @@ import {
   sendItsYourTurnMessage,
   typeOfQueueAction,
 } from '.';
-import { buttonInteractionId } from '../../../helperFunctions';
+import { buttonInteractionId } from '../../helperFunctions';
 import {
   addUserToQueue,
   isCreatorOfQueue,
@@ -83,7 +83,7 @@ Try again later!`,
     if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
         content:
-          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue next` instead.",
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/queue next` instead.",
         ephemeral: true,
       });
       return;
@@ -93,7 +93,7 @@ Try again later!`,
     if (!(await isCreatorOfQueue(guildId, actionUserId))) {
       buttonInteraction.reply({
         content:
-          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/admin queue end` instead.",
+          "Only the creator of the queue is allowed to use this! If you're an admin, please use the command `/queue end` instead.",
         ephemeral: true,
       });
       return;
