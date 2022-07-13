@@ -7,7 +7,12 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
-import { getGlobalUser, getConfiguration, getUser } from '../../dbHelpers';
+import {
+  getGlobalUser,
+  getConfiguration,
+  getUser,
+  removeAllJoinsoundsOfUserFromDb,
+} from '../../dbHelpers';
 import {
   getJoinsoundReadableStreamOfUser,
   JoinsoundStoreError,
@@ -293,7 +298,8 @@ export async function removeAllJoinsoundsOfUser(
     await removeSound(userId, guildId);
   });
   await removeDefaultSound(userId);
-  // TODO also remove all from DB (that are not locally stored)
+  // remove all sounds that were not locally stored as well
+  await removeAllJoinsoundsOfUserFromDb(userId);
   confirmed.followUp('Successfully removed all of your joinsounds!');
 }
 
