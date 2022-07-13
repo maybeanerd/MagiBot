@@ -43,14 +43,10 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
     inline: false,
   });
 
-  let stringifiedDefaultJoinsound = 'None';
-  const { defaultJoinsound } = configuration;
-  if (defaultJoinsound) {
-    stringifiedDefaultJoinsound = 'Active';
-  }
+  const { defaultJoinsoundTitle } = configuration;
   info.push({
     name: 'Default guild joinsound',
-    value: stringifiedDefaultJoinsound,
+    value: defaultJoinsoundTitle || 'None',
     inline: false,
   });
 
