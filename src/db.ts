@@ -24,6 +24,7 @@ export type Configuration = {
   prefix: string; // deprecated
   lastConnected: Date;
   defaultJoinsound?: string;
+  defaultJoinsoundTitle?: string;
 };
 const configurationSchema = new mongoose.Schema<Configuration>(
   {
@@ -65,6 +66,10 @@ const configurationSchema = new mongoose.Schema<Configuration>(
       required: true,
     },
     defaultJoinsound: {
+      type: String,
+      required: false,
+    },
+    defaultJoinsoundTitle: {
       type: String,
       required: false,
     },
@@ -146,11 +151,9 @@ export const SaltModel = mongoose.model<Salt>('salt', saltSchema);
 type User = {
   userID: string;
   guildID: string;
-  warnings: number;
-  kicks: number;
-  bans: number;
   botusage: number;
   sound?: string;
+  soundTitle?: string;
 };
 const userSchema = new mongoose.Schema<User>(
   {
@@ -162,23 +165,15 @@ const userSchema = new mongoose.Schema<User>(
       type: String,
       required: true,
     },
-    warnings: {
-      type: Number,
-      required: true,
-    },
-    kicks: {
-      type: Number,
-      required: true,
-    },
-    bans: {
-      type: Number,
-      required: true,
-    },
     botusage: {
       type: Number,
       required: true,
     },
     sound: {
+      type: String,
+      required: false,
+    },
+    soundTitle: {
       type: String,
       required: false,
     },
@@ -234,6 +229,7 @@ UserModel.aggregate([
 type globalUser = {
   userID: string;
   sound?: string;
+  soundTitle?: string;
 };
 const globalUserSchema = new mongoose.Schema<globalUser>(
   {
@@ -242,6 +238,10 @@ const globalUserSchema = new mongoose.Schema<globalUser>(
       required: true,
     },
     sound: {
+      type: String,
+      required: false,
+    },
+    soundTitle: {
       type: String,
       required: false,
     },

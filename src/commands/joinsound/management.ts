@@ -7,7 +7,12 @@ import {
   MessageEmbedOptions,
   User,
 } from 'discord.js';
-import { getGlobalUser, getConfiguration, getUser } from '../../dbHelpers';
+import {
+  getGlobalUser,
+  getConfiguration,
+  getUser,
+  removeAllJoinsoundsOfUserFromDb,
+} from '../../dbHelpers';
 import {
   getJoinsoundReadableStreamOfUser,
   JoinsoundStoreError,
@@ -25,6 +30,10 @@ export const enum JoinsoundOptions {
   'soundFile' = 'sound-file',
   'directUrl' = 'direct-url',
   'user' = 'user',
+}
+
+function getSoundTitleFromUrl(url?: string) {
+  return url ? url.substring(url.lastIndexOf('/') + 1) : undefined;
 }
 
 async function setSound(
@@ -47,6 +56,8 @@ async function setSound(
     user.sound = undefined;
     await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
   }
+
+  user.soundTitle = getSoundTitleFromUrl(soundUrl);
   await user.save();
   return null;
 }
@@ -79,6 +90,7 @@ async function setDefaultSound(
     await removeLocallyStoredJoinsoundOfTarget({ userId, default: true });
   }
 
+  user.soundTitle = getSoundTitleFromUrl(soundUrl);
   await user.save();
   return null;
 }
@@ -111,6 +123,7 @@ async function setDefaultGuildJoinsound(
     await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
   }
 
+  guild.defaultJoinsoundTitle = getSoundTitleFromUrl(soundUrl);
   await guild.save();
   return null;
 }
@@ -285,6 +298,8 @@ export async function removeAllJoinsoundsOfUser(
     await removeSound(userId, guildId);
   });
   await removeDefaultSound(userId);
+  // remove all sounds that were not locally stored as well
+  await removeAllJoinsoundsOfUserFromDb(userId);
   confirmed.followUp('Successfully removed all of your joinsounds!');
 }
 
@@ -298,21 +313,21 @@ export async function getJoinsoundOverviewOfUser(
 
   const member = await guild.members.fetch(userId)!;
 
-  const defaultJoinsound = (await getGlobalUser(userId)).sound;
-  const guildJoinsound = (await getUser(userId, guildId)).sound;
+  const defaultJoinsound = (await getGlobalUser(userId)).soundTitle;
+  const guildJoinsound = (await getUser(userId, guildId)).soundTitle;
   const storageUsed = await getSpaceUsedByTarget({ userId, guildId });
 
   const info: Array<EmbedFieldData> = [];
 
   info.push({
     name: 'Default Joinsound',
-    value: defaultJoinsound ? 'Active' : 'None',
+    value: defaultJoinsound || 'None',
     inline: false,
   });
 
   info.push({
     name: 'Joinsound on this Guild',
-    value: guildJoinsound ? 'Active' : 'None',
+    value: guildJoinsound || 'None',
     inline: false,
   });
   info.push({
