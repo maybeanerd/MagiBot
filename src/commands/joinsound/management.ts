@@ -32,8 +32,14 @@ export const enum JoinsoundOptions {
   'user' = 'user',
 }
 
+const maxJoinsoundTitleCharlength = 30;
+
 function getSoundTitleFromUrl(url?: string) {
-  return url ? url.substring(url.lastIndexOf('/') + 1) : undefined;
+  return url
+    ? url
+      .substring(url.lastIndexOf('/') + 1)
+      .substring(0, maxJoinsoundTitleCharlength) // enforce max length
+    : undefined;
 }
 
 async function setSound(
