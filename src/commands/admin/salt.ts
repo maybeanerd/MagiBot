@@ -1,5 +1,6 @@
-import { CommandInteraction, Guild, User } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  ChatInputCommandInteraction, Guild, SlashCommandBuilder, User,
+} from 'discord.js';
 import { interactionConfirmation } from '../../helperFunctions';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { SaltModel, SaltrankModel } from '../../db';
@@ -38,7 +39,7 @@ async function clearSaltOfUser(userid: string, G: Guild) {
   await saltGuild(userid, guildID, 1, true);
 }
 
-async function resetSaltOfGuild(interaction: CommandInteraction) {
+async function resetSaltOfGuild(interaction: ChatInputCommandInteraction) {
   const confirmation = await interactionConfirmation(
     interaction,
     'Do you really want to reset all salt on this server?',
@@ -52,7 +53,7 @@ async function resetSaltOfGuild(interaction: CommandInteraction) {
   }
 }
 
-async function clearAllSaltOfUser(interaction: CommandInteraction, user: User) {
+async function clearAllSaltOfUser(interaction: ChatInputCommandInteraction, user: User) {
   if (user.bot) {
     interaction.followUp('Bots are never salty!');
     return;
@@ -68,7 +69,7 @@ async function clearAllSaltOfUser(interaction: CommandInteraction, user: User) {
   }
 }
 
-async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
+async function removeSaltOfUser(interaction: ChatInputCommandInteraction, user: User) {
   if (user.bot) {
     interaction.followUp('Bots are never salty!');
     return;
@@ -87,7 +88,7 @@ async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
   }
 }
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'report'
     | 'remove'

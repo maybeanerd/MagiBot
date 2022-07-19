@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import Discord, { ChannelType } from 'discord.js';
 // import { help } from './commands/old/help'; // eslint-disable-line import/no-cycle
 import { PREFIXES, user } from './shared_assets';
 import { getUser } from './dbHelpers';
@@ -40,13 +40,13 @@ export async function usageUp(userid: string, guildID: string) {
 }
 
 export async function checkCommand(message: Discord.Message) {
-  if (!(message.author && message.guild && message.guild.me)) {
+  if (!(message.author && message.guild && message.guild.members.me)) {
     // check for valid message
     console.error('Invalid message received:', message);
     return;
   }
   // only read guild messages from non-bots
-  if (!(!message.author.bot && message.channel.type === 'GUILD_TEXT')) {
+  if (!(!message.author.bot && message.channel.type === ChannelType.GuildText)) {
     return;
   }
   let isMention: boolean;

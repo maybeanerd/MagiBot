@@ -1,14 +1,16 @@
 import {
-  CommandInteraction,
+  APIEmbed,
+  ChatInputCommandInteraction,
   GuildMember,
-  MessageEmbedOptions,
+  SlashCommandBuilder,
 } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { getConfiguration } from '../../dbHelpers';
 import { setJoinChannel } from './joinsound';
 
-async function viewCurrentConfiguration(interaction: CommandInteraction) {
+async function viewCurrentConfiguration(
+  interaction: ChatInputCommandInteraction,
+) {
   const guild = interaction.guild!;
   const guildId = guild.id;
 
@@ -50,12 +52,12 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
     inline: false,
   });
 
-  const embed: MessageEmbedOptions = {
+  const embed: APIEmbed = {
     color: (interaction.member as GuildMember).displayColor,
     description: `Guild configuration of ${guild.name}:`,
     fields: info,
     footer: {
-      iconURL: guild.iconURL() || '',
+      icon_url: guild.iconURL() || '',
       text: guild.name,
     },
   };
@@ -63,7 +65,7 @@ async function viewCurrentConfiguration(interaction: CommandInteraction) {
   interaction.followUp({ embeds: [embed] });
 }
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as 'view';
 
   if (subcommand === 'view') {

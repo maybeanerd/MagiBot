@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import { user } from '../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 
@@ -11,7 +10,7 @@ const options: { weekday: 'long'; month: 'long'; day: 'numeric' } = {
   day: 'numeric',
 };
 
-async function main(interaction: CommandInteraction) {
+async function main(interaction: ChatInputCommandInteraction) {
   const now = new Date();
   const incomingFact = await axios.get<string>(
     `http://numbersapi.com/${now.getMonth() + 1}/${now.getDate()}/date`,
@@ -42,7 +41,7 @@ const slashCommand = new SlashCommandBuilder()
 
 export const randomfact: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     return main(interaction);
   },
   definition: slashCommand.toJSON(),

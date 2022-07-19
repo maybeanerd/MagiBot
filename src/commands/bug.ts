@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getUserMention, interactionConfirmation } from '../helperFunctions';
 import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
@@ -15,7 +14,7 @@ const slashCommand = new SlashCommandBuilder()
     )
     .setRequired(true));
 
-async function main(interaction: CommandInteraction, input: string) {
+async function main(interaction: ChatInputCommandInteraction, input: string) {
   const confirmed = await interactionConfirmation(
     interaction,
     `Do you want to send this bugreport?\n${input}`,
@@ -38,7 +37,7 @@ async function main(interaction: CommandInteraction, input: string) {
 
 export const bugreport: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const input = interaction.options.getString('description', true);
     return main(interaction, input);
   },

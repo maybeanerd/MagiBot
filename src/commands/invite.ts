@@ -1,5 +1,6 @@
-import { CommandInteraction, TextChannel } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, TextChannel,
+} from 'discord.js';
 import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
@@ -7,7 +8,7 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription('Creates a temporary invite link to this channel')
   .setDMPermission(false);
 
-async function main(interaction: CommandInteraction) {
+async function main(interaction: ChatInputCommandInteraction) {
   const invite = await (interaction.channel as TextChannel).createInvite({
     reason: `member ${interaction.member?.user} used invite command`,
   });
@@ -15,7 +16,7 @@ async function main(interaction: CommandInteraction) {
 }
 
 export const invite: MagibotSlashCommand = {
-  permissions: ['CREATE_INSTANT_INVITE'],
+  permissions: [PermissionFlagsBits.CreateInstantInvite],
   run: main,
   definition: slashCommand.toJSON(),
 };

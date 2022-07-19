@@ -1,10 +1,10 @@
 import {
-  CommandInteraction,
+  APIEmbed,
+  ChatInputCommandInteraction,
   Guild,
-  MessageEmbedOptions,
+  SlashCommandBuilder,
   User,
 } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotSlashCommand } from '../types/command';
 import { SaltModel, SaltrankModel } from '../db';
 import { topSalt } from '../dbHelpers';
@@ -84,15 +84,17 @@ async function saltUp(
 }
 
 export async function addSalt(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   reportedUser: User,
   fromAdmin = false,
 ) {
   if (reportedUser.id === interaction.user.id) {
-    return interaction.reply("You can't report yourself!");
+    await interaction.reply("You can't report yourself!");
+    return;
   }
   if (reportedUser.bot) {
-    return interaction.reply("You can't report bots!");
+    await interaction.reply("You can't report bots!");
+    return;
   }
   const time = await saltUp(
     reportedUser.id,
@@ -101,11 +103,12 @@ export async function addSalt(
     fromAdmin,
   );
   if (time === 0) {
-    return interaction.reply(
+    await interaction.reply(
       `Successfully reported ${reportedUser} for being salty!`,
     );
+    return;
   }
-  return interaction.reply(
+  await interaction.reply(
     `You can report ${reportedUser} again in ${
       59 - Math.floor((time * 60) % 60)
     } min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
@@ -133,7 +136,7 @@ async function getMemberSaltInfo(
   };
 }
 
-async function getTopSalters(interaction: CommandInteraction) {
+async function getTopSalters(interaction: ChatInputCommandInteraction) {
   const guild = interaction.guild!;
   const salters = await topSalt(guild.id);
   const info: Array<
@@ -152,16 +155,16 @@ async function getTopSalters(interaction: CommandInteraction) {
       break;
     }
   }
-  const embed: MessageEmbedOptions = {
+  const embed: APIEmbed = {
     color: 0xffffff,
     description: `Top 5 salter in ${guild.name}:`,
     fields: await Promise.all(info),
     footer: {
-      iconURL: guild.iconURL() || '',
+      icon_url: guild.iconURL() || '',
       text: guild.name,
     },
   };
-  return interaction.reply({ embeds: [embed] });
+  await interaction.reply({ embeds: [embed] });
 }
 
 const slashCommand = new SlashCommandBuilder()
@@ -179,7 +182,7 @@ const slashCommand = new SlashCommandBuilder()
     .setName('ranking')
     .setDescription('Get the current ranking of saltyness on this server.'));
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'report'
     | 'ranking';

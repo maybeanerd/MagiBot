@@ -1,6 +1,8 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, GuildMember } from 'discord.js';
-import { PREFIXES } from '../shared_assets';
+import {
+  ChatInputCommandInteraction,
+  GuildMember,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { MagibotSlashCommand } from '../types/command';
 
 /**  definition of calculation of dice, use parse(input)
@@ -62,13 +64,15 @@ const slashCommand = new SlashCommandBuilder()
     )
     .setRequired(true));
 
-async function runCommand(interaction: CommandInteraction, input: string) {
+async function runCommand(
+  interaction: ChatInputCommandInteraction,
+  input: string,
+) {
   const diceRollCalculation = parse(input);
   if (!diceRollCalculation) {
     interaction.reply(
-      `Your inputs could not be interpreted. Use \`${PREFIXES.get(
-        interaction.guild!.id,
-      )}.help roll\` for more info.`,
+      `Your inputs could not be interpreted. Use the following format: 
+\`[multiplier]*[number of rolls]d<die number>[+ <modifier>]\``,
     );
     return;
   }
@@ -131,7 +135,7 @@ async function runCommand(interaction: CommandInteraction, input: string) {
 
 export const roll: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const input = interaction.options.getString('dice', true);
     return runCommand(interaction, input);
   },

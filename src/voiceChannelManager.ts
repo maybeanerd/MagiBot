@@ -7,7 +7,7 @@ import {
   joinVoiceChannel,
   VoiceConnection,
 } from '@discordjs/voice';
-import { VoiceState } from 'discord.js';
+import { PermissionFlagsBits, VoiceState } from 'discord.js';
 import { getJoinsoundOfUser } from './commands/joinsound/management';
 import { StillMutedModel } from './db';
 import { isJoinableVc, toggleStillMuted } from './dbHelpers';
@@ -70,15 +70,15 @@ export async function onVoiceStateChange(
     );
     if (
       newVc
-      && newState.guild.me
-      && !newState.guild.me.voice.channel
-      && newState.id !== newState.guild.me.user.id
+      && newState.guild.members.me
+      && !newState.guild.members.me.voice.channel
+      && newState.id !== newState.guild.members.me.user.id
       && newVc.joinable
       && ((await isJoinableVc(newState.guild.id, newVc.id))
         || shadowBanned === shadowBannedLevel.guild)
     ) {
-      const perms = newVc.permissionsFor(newState.guild.me);
-      if (perms && perms.has('CONNECT')) {
+      const perms = newVc.permissionsFor(newState.guild.members.me);
+      if (perms && perms.has(PermissionFlagsBits.Connect)) {
         let sound = await getJoinsoundOfUser(newState.id, newState.guild.id);
         if (shadowBanned !== shadowBannedLevel.not) {
           sound = shadowBannedSound;

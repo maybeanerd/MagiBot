@@ -1,14 +1,15 @@
 import {
-  MessageActionRow,
-  MessageButton,
-  CommandInteraction,
+  ChatInputCommandInteraction,
   Guild,
   TextChannel,
   Message,
   ButtonInteraction,
+  SlashCommandBuilder,
+  ButtonBuilder,
+  ActionRowBuilder,
+  PermissionsBitField,
 } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { PermissionFlagsBits } from 'discord-api-types/v10';
+import { ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord-api-types/v10';
 import {
   asyncWait,
   buttonInteractionId,
@@ -32,7 +33,10 @@ export const enum typeOfQueueAction {
   leave = 'leave',
 }
 
-async function startQueue(interaction: CommandInteraction, topic: string) {
+async function startQueue(
+  interaction: ChatInputCommandInteraction,
+  topic: string,
+) {
   const guild = interaction.guild!;
 
   const originalMessage = (await interaction.followUp(
@@ -54,40 +58,41 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     return;
   }
 
-  const row = new MessageActionRow();
-  row.addComponents(
-    new MessageButton()
-      .setCustomId(
-        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
-      )
-      .setLabel('Next User')
-      .setStyle('PRIMARY'),
-  );
-  row.addComponents(
-    new MessageButton()
-      .setCustomId(
-        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
-      )
-      .setLabel('End Queue')
-      .setStyle('SECONDARY'),
-  );
-  const rowTwo = new MessageActionRow();
-  rowTwo.addComponents(
-    new MessageButton()
-      .setCustomId(
-        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
-      )
-      .setLabel('Join Queue')
-      .setStyle('SUCCESS'),
-  );
-  rowTwo.addComponents(
-    new MessageButton()
-      .setCustomId(
-        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
-      )
-      .setLabel('Leave Queue')
-      .setStyle('SECONDARY'),
-  );
+  const row = new ActionRowBuilder()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
+        )
+        .setLabel('Next User')
+        .setStyle(ButtonStyle.Primary),
+    )
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
+        )
+        .setLabel('End Queue')
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+  const rowTwo = new ActionRowBuilder()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
+        )
+        .setLabel('Join Queue')
+        .setStyle(ButtonStyle.Success),
+    )
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
+        )
+        .setLabel('Leave Queue')
+        .setStyle(ButtonStyle.Secondary),
+    );
 
   await originalMessage.edit({
     content: `Queue **${topic}** :\n\nUse the buttons below to join the queue!`,
@@ -117,7 +122,7 @@ export async function onQueueEnd(guild: Guild) {
   return false;
 }
 
-async function endRunningQueue(interaction: CommandInteraction) {
+async function endRunningQueue(interaction: ChatInputCommandInteraction) {
   const guild = interaction.guild!;
   const runningQueue = await onQueueEnd(guild);
   if (runningQueue) {
@@ -156,7 +161,7 @@ export function messageEdit(
 }
 
 export async function sendItsYourTurnMessage(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
   userId: string,
 ) {
   const messageContent = {
@@ -164,15 +169,15 @@ export async function sendItsYourTurnMessage(
     content: `It's your turn ${getUserMention(userId)}!`,
   };
   const message = (
-    interaction.deferred
-      ? await interaction.followUp(messageContent)
-      : await interaction.reply(messageContent)
+    interaction.isRepliable()
+      ? await interaction.reply(messageContent)
+      : await interaction.followUp(messageContent)
   ) as Message;
   asyncWait(1000).then(() => message.delete());
 }
 
 export async function goToNextUser(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
   const guild = interaction.guild!;
   const wentToNextUser = await goToNextUserOfQueue(guild.id);
@@ -200,10 +205,10 @@ export async function goToNextUser(
       content: 'There are no users left in the queue!',
       ephemeral: true,
     };
-    if (interaction.deferred) {
-      interaction.followUp(messageContent);
-    } else {
+    if (interaction.isRepliable()) {
       interaction.reply(messageContent);
+    } else {
+      interaction.followUp(messageContent);
     }
   }
 }
@@ -235,7 +240,7 @@ const slashCommand = new SlashCommandBuilder()
     .setName('next')
     .setDescription('Go to the next user of the running queue.'));
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'start'
     | 'end'
@@ -256,7 +261,10 @@ async function runCommand(interaction: CommandInteraction) {
 }
 
 export const queue: MagibotSlashCommand = {
-  permissions: ['READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
+  permissions: [
+    PermissionsBitField.Flags.ReadMessageHistory,
+    PermissionsBitField.Flags.ViewChannel,
+  ],
   run: runCommand,
   definition: slashCommand.toJSON(),
   defer: DeferReply.public,

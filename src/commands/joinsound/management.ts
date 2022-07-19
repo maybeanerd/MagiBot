@@ -1,10 +1,10 @@
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import {
-  CommandInteraction,
-  EmbedFieldData,
-  MessageAttachment,
-  MessageEmbedOptions,
+  APIEmbed,
+  APIEmbedField,
+  Attachment,
+  ChatInputCommandInteraction,
   User,
 } from 'discord.js';
 import {
@@ -139,8 +139,8 @@ export async function removeDefaultGuildJoinsound(guildId: string) {
 }
 
 export async function validateAndSaveJoinsound(
-  attachmentOrUrl: MessageAttachment | string,
-  interaction: CommandInteraction,
+  attachmentOrUrl: Attachment | string,
+  interaction: ChatInputCommandInteraction,
   setDefault: boolean,
   user?: User,
   defaultForGuildId?: string,
@@ -285,7 +285,7 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
 }
 
 export async function removeAllJoinsoundsOfUser(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   deferralType: DeferReply,
 ) {
   const confirmed = await interactionConfirmation(
@@ -310,7 +310,7 @@ export async function removeAllJoinsoundsOfUser(
 }
 
 export async function getJoinsoundOverviewOfUser(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
 ) {
   const { user } = interaction.member!;
   const userId = user.id;
@@ -323,7 +323,7 @@ export async function getJoinsoundOverviewOfUser(
   const guildJoinsound = (await getUser(userId, guildId)).soundTitle;
   const storageUsed = await getSpaceUsedByTarget({ userId, guildId });
 
-  const info: Array<EmbedFieldData> = [];
+  const info: Array<APIEmbedField> = [];
 
   info.push({
     name: 'Default Joinsound',
@@ -344,13 +344,13 @@ export async function getJoinsoundOverviewOfUser(
     inline: false,
   });
 
-  const embed: MessageEmbedOptions = {
+  const embed: APIEmbed = {
     color: member.displayColor,
     description: `Joinsound overview of ${user}:`,
     fields: info,
     thumbnail: { url: member.user.avatarURL() || '' },
     footer: {
-      iconURL: member.user.avatarURL() || '',
+      icon_url: member.user.avatarURL() || '',
       text: member.user.tag,
     },
   };

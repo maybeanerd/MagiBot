@@ -1,5 +1,4 @@
-import { CommandInteraction, MessageEmbedOptions } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { APIEmbed, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { SaltrankModel } from '../db';
 import { getUser } from '../dbHelpers';
@@ -14,7 +13,7 @@ async function getSalt(userid: string, guildID: string) {
   }
   return result.salt;
 }
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const guild = interaction.guild!;
   const passedUser = interaction.options.getUser('user', false);
   const member = await guild.members.fetch(
@@ -38,13 +37,13 @@ async function runCommand(interaction: CommandInteraction) {
     value: String(botusage),
     inline: false,
   });
-  const embed: MessageEmbedOptions = {
+  const embed: APIEmbed = {
     color: member.displayColor,
     description: `Here's some info on ${member.displayName}`,
     fields: info,
     thumbnail: { url: member.user.avatarURL() || '' },
     footer: {
-      iconURL: member.user.avatarURL() || '',
+      icon_url: member.user.avatarURL() || '',
       text: member.user.tag,
     },
   };
