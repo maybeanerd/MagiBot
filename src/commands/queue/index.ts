@@ -9,10 +9,11 @@ import {
   ActionRowBuilder,
   PermissionsBitField,
 } from 'discord.js';
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord-api-types/v10';
+import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
 import {
   asyncWait,
   buttonInteractionId,
+  doesInteractionRequireFollowup,
   doNothingOnError,
   getUserMention,
 } from '../../helperFunctions';
@@ -39,9 +40,7 @@ async function startQueue(
 ) {
   const guild = interaction.guild!;
 
-  const originalMessage = (await interaction.followUp(
-    'Creating Queue...',
-  )) as Message;
+  const originalMessage = await interaction.followUp('Creating Queue...');
 
   const createdQueue = await tryToCreateQueue(
     guild.id,
@@ -96,7 +95,7 @@ async function startQueue(
 
   await originalMessage.edit({
     content: `Queue **${topic}** :\n\nUse the buttons below to join the queue!`,
-    components: [row, rowTwo],
+    components: [row as any, rowTwo as any], // TODO fix these types?
   });
 }
 
@@ -169,9 +168,9 @@ export async function sendItsYourTurnMessage(
     content: `It's your turn ${getUserMention(userId)}!`,
   };
   const message = (
-    interaction.isRepliable()
-      ? await interaction.reply(messageContent)
-      : await interaction.followUp(messageContent)
+    doesInteractionRequireFollowup(interaction)
+      ? await interaction.followUp(messageContent)
+      : await interaction.reply(messageContent)
   ) as Message;
   asyncWait(1000).then(() => message.delete());
 }

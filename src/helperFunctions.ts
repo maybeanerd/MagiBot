@@ -1,7 +1,9 @@
 import Discord, {
   ActionRowBuilder,
   ButtonBuilder,
+  ButtonInteraction,
   ButtonStyle,
+  ChatInputCommandInteraction,
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
@@ -89,6 +91,12 @@ To do the latter, re-invite the bot by clicking the big blue "Add to Server" but
   }
 }
 
+export function doesInteractionRequireFollowup(
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
+) {
+  return interaction.replied || interaction.deferred;
+}
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
@@ -118,14 +126,14 @@ export async function interactionConfirmation(
 
   const messageContent = {
     content: question,
-    components: [row],
+    components: [row as any], // TODO fix this type?
     ephemeral,
   };
   // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
-  if (interaction.isRepliable()) {
-    await interaction.reply(messageContent);
-  } else {
+  if (doesInteractionRequireFollowup(interaction)) {
     await interaction.followUp(messageContent);
+  } else {
+    await interaction.reply(messageContent);
   }
   const questionMessage = (await interaction.fetchReply()) as Discord.Message;
   const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';

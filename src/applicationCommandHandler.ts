@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
-import Statcord from 'statcord.js';
+/* import Statcord from 'statcord.js';
 // eslint-disable-next-line import/no-cycle
-import { bot } from './bot';
+import { bot } from './bot'; */
 import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
@@ -39,11 +39,11 @@ export async function checkApplicationCommand(
     return;
   }
   try {
-    Statcord.ShardingClient.postCommand(
+    /* Statcord.ShardingClient.postCommand(
       interaction.commandName,
       interaction.member.user.id,
       bot,
-    );
+    ); */
     const command = globalApplicationCommands[interaction.commandName];
     if (command) {
       const { permissions } = command;
