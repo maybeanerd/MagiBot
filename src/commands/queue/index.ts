@@ -204,10 +204,10 @@ export async function goToNextUser(
       content: 'There are no users left in the queue!',
       ephemeral: true,
     };
-    if (interaction.isRepliable()) {
-      interaction.reply(messageContent);
-    } else {
+    if (doesInteractionRequireFollowup(interaction)) {
       interaction.followUp(messageContent);
+    } else {
+      interaction.reply(messageContent);
     }
   }
 }
