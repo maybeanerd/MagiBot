@@ -1,9 +1,5 @@
-import {
-  SlashCommandBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
-} from '@discordjs/builders';
 import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
-import Discord, { Message } from 'discord.js';
+import Discord, { Message, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
 import { commandCategories } from './enums';
 
 export type magibotCommand = {
@@ -23,7 +19,7 @@ export type magibotCommand = {
 type MagibotSlashCommandBase = {
   permissions: Discord.PermissionResolvable | Discord.PermissionResolvable[];
   run: (
-    interaction: Discord.CommandInteraction
+    interaction: Discord.ChatInputCommandInteraction
   ) => Promise<void | null> | void | null; // allow null to allow for "empty" returns
 };
 

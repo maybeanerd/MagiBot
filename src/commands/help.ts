@@ -1,9 +1,9 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import {
-  CommandInteraction,
-  EmbedFieldData,
+  APIEmbed,
+  APIEmbedField,
+  ChatInputCommandInteraction,
   GuildMember,
-  MessageEmbedOptions,
+  SlashCommandBuilder,
 } from 'discord.js';
 import { user } from '../shared_assets';
 import {
@@ -49,7 +49,7 @@ function getAllCommandsOfObject(commands: ObjectOfNestedCommands): string {
 
 const discordIntegrationManagementBlogPost = 'https://support.discord.com/hc/en-us/articles/360045093012-Server-Integrations-Page#:~:text=Membership%20Integration%20FAQ-,BOTS%20AND%20APPS,-And%20now%20for';
 
-function getFields(): Array<EmbedFieldData> {
+function getFields(): Array<APIEmbedField> {
   return [
     {
       name: 'How to use the bot',
@@ -87,13 +87,13 @@ const slashCommand = new SlashCommandBuilder()
 
 export const help: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
-    const helpEmbed: MessageEmbedOptions = {
+  async run(interaction: ChatInputCommandInteraction) {
+    const helpEmbed: APIEmbed = {
       color: (interaction.member as GuildMember).displayColor,
       description: "I'm here to help! ",
       fields: getFields(),
       footer: {
-        iconURL: user().avatarURL() || '',
+        icon_url: user().avatarURL() || '',
         text: 'If there are still open questions, feel free to join the support server linked in /info.',
       },
     };

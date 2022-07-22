@@ -1,7 +1,10 @@
 import Discord, {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  ChatInputCommandInteraction,
   Message,
-  MessageActionRow,
-  MessageButton,
   MessageComponentInteraction,
 } from 'discord.js';
 import { DeferReply } from './types/command';
@@ -70,69 +73,8 @@ export async function findRole(guild: Discord.Guild, ment: string) {
 // for some reason eslint doesnt get this...
 // eslint-disable-next-line no-shadow
 export const enum buttonInteractionId {
-  'yesOrNo' = 0x0001,
+  'confirmation' = 0x0001,
   'queue' = 0x1001,
-}
-
-// this is an idea to implement rather reusable confirmation processes.
-// ; abortMessage, timeoutMessage and time are optional parameters
-export async function yesOrNo(
-  msg: Discord.Message,
-  question: string,
-  abortMessage?: string,
-  timeoutMessage?: string,
-  timeoutTime?: number,
-): Promise<boolean> {
-  const row = new MessageActionRow();
-  row.addComponents(
-    new MessageButton()
-      .setCustomId(`${buttonInteractionId.yesOrNo}-${msg.id}-yes`)
-      .setLabel('Yes')
-      .setStyle('SUCCESS'),
-  );
-  row.addComponents(
-    new MessageButton()
-      .setCustomId(`${buttonInteractionId.yesOrNo}-${msg.id}-no`)
-      .setLabel('No')
-      .setStyle('DANGER'),
-  );
-  const questionMessage = await msg.channel.send({
-    content: question,
-    components: [row],
-  });
-  const time = timeoutTime || 20000;
-  const messageForTimeout = timeoutMessage || 'Cancelled due to timeout.';
-  // only accept reactions from the user that created this question
-  const filter = (interaction: MessageComponentInteraction) => interaction.user.id === msg.author.id
-    && interaction.customId.startsWith(
-      `${buttonInteractionId.yesOrNo}-${msg.id}-`,
-    );
-  const collector = questionMessage.createMessageComponentCollector({
-    filter,
-    time,
-  });
-  const promise = new Promise<boolean>((resolve) => {
-    let alreadyResolved = false;
-    collector.once('collect', async (interaction) => {
-      alreadyResolved = true;
-      // load info of that button
-      const idParts = interaction.customId.split('-');
-      const isYesButton = idParts[2] === 'yes';
-      questionMessage.delete();
-      if (!isYesButton && abortMessage) {
-        questionMessage.channel.send(abortMessage).catch(doNothingOnError);
-      }
-      resolve(isYesButton);
-      collector.stop('Got an answer.');
-    });
-    collector.once('end', (/* collected */) => {
-      if (!alreadyResolved) {
-        msg.channel.send(messageForTimeout);
-        resolve(false);
-      }
-    });
-  });
-  return promise;
 }
 
 export async function notifyAboutSlashCommand(
@@ -149,28 +91,34 @@ To do the latter, re-invite the bot by clicking the big blue "Add to Server" but
   }
 }
 
+export function doesInteractionRequireFollowup(
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
+) {
+  return interaction.replied || interaction.deferred;
+}
+
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
   question: string,
   deferralType?: DeferReply | false,
   abortMessage: string = 'Cancelled.',
   timeoutMessage: string = 'Timeouted.',
   timeoutTime: number = 20000,
 ): Promise<MessageComponentInteraction | null> {
-  const row = new MessageActionRow();
+  const row = new ActionRowBuilder();
   row.addComponents(
-    new MessageButton()
-      .setCustomId(`${buttonInteractionId.yesOrNo}-${interaction.id}-yes`)
+    new ButtonBuilder()
+      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-yes`)
       .setLabel('Yes')
-      .setStyle('SUCCESS'),
+      .setStyle(ButtonStyle.Success),
   );
   row.addComponents(
-    new MessageButton()
-      .setCustomId(`${buttonInteractionId.yesOrNo}-${interaction.id}-no`)
+    new ButtonBuilder()
+      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
       .setLabel('No')
-      .setStyle('DANGER'),
+      .setStyle(ButtonStyle.Danger),
   );
 
   // always prefer ephemeral where possible
@@ -178,12 +126,11 @@ export async function interactionConfirmation(
 
   const messageContent = {
     content: question,
-    components: [row],
+    components: [row as any], // TODO fix this type?
     ephemeral,
   };
   // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
-  const needToFollowup = interaction.deferred || interaction.replied;
-  if (needToFollowup) {
+  if (doesInteractionRequireFollowup(interaction)) {
     await interaction.followUp(messageContent);
   } else {
     await interaction.reply(messageContent);
@@ -194,7 +141,7 @@ export async function interactionConfirmation(
   // eslint-disable-next-line max-len
   const filter = (intraction: MessageComponentInteraction) => intraction.user.id === interaction.member?.user.id
     && intraction.customId.startsWith(
-      `${buttonInteractionId.yesOrNo}-${interaction.id}-`,
+      `${buttonInteractionId.confirmation}-${interaction.id}-`,
     );
   const collector = questionMessage.createMessageComponentCollector({
     filter,

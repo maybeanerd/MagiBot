@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
-import Statcord from 'statcord.js';
+/* import Statcord from 'statcord.js';
 // eslint-disable-next-line import/no-cycle
-import { bot } from './bot';
+import { bot } from './bot'; */
 import { PREFIXES } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
@@ -11,7 +11,7 @@ import { DeferReply } from './types/command';
 
 async function catchError(
   error: Error,
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
 ) {
   console.error(
     `Caught:\n${error.stack}\nin command ${interaction.commandName} ${interaction.options}`,
@@ -29,26 +29,28 @@ If you can reproduce this, consider using \`/bugreport\` or join the support dis
 }
 
 export async function checkApplicationCommand(
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
 ) {
-  if (!(interaction.member && interaction.guild && interaction.guild.me)) {
+  if (
+    !(interaction.member && interaction.guild && interaction.guild.members.me)
+  ) {
     // check for valid message
     console.error('Invalid interaction received:', interaction);
     return;
   }
   try {
-    Statcord.ShardingClient.postCommand(
+    /* Statcord.ShardingClient.postCommand(
       interaction.commandName,
       interaction.member.user.id,
       bot,
-    );
+    ); */
     const command = globalApplicationCommands[interaction.commandName];
     if (command) {
       const { permissions } = command;
       // check for all needed permissions
       const botPermissions = (
         interaction.channel as Discord.TextChannel
-      ).permissionsFor(interaction.guild.me);
+      ).permissionsFor(interaction.guild.members.me);
       if (!botPermissions.has(permissions)) {
         await interaction.reply(
           `I am missing permissions for this command. I require all of the following:\n${permissions}`,

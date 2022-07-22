@@ -1,5 +1,9 @@
 import Discord, {
-  Client, DiscordAPIError, Guild, Intents,
+  ActivityType,
+  Client,
+  DiscordAPIError,
+  GatewayIntentBits,
+  Guild,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
@@ -34,19 +38,11 @@ async function initializePrefixes(bot: Client) {
 }
 
 const intents = [
-  Intents.FLAGS.GUILDS,
-  // Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
-  Intents.FLAGS.GUILD_INTEGRATIONS,
-  /* | 'GUILD_WEBHOOKS'
-  | 'GUILD_INVITES' */
-  Intents.FLAGS.GUILD_VOICE_STATES,
-  // | 'GUILD_PRESENCES'
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  // | 'GUILD_MESSAGE_TYPING'
-  Intents.FLAGS.DIRECT_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-  // | 'DIRECT_MESSAGE_TYPING';
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildIntegrations, // TODO do we need this? what is this?
+  GatewayIntentBits.GuildVoiceStates,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildMessageReactions,
 ];
 
 export const bot = new Client({ intents });
@@ -69,7 +65,7 @@ process.on(
         await catchErrorOnDiscord(
           `**DiscordAPIError (${err.method || 'NONE'}):**\n\`\`\`${
             err.message
-          }\`\`\`\`\`\`${err.path ? err.path.substring(0, 1200) : ''}\`\`\``,
+          }\`\`\`\`\`\`${err.stack ? err.stack.substring(0, 1200) : ''}\`\`\``,
         );
       } else {
         await catchErrorOnDiscord(
@@ -96,8 +92,8 @@ bot.on('ready', async () => {
   bot.user.setPresence({
     activities: [
       {
-        name: `${PREFIX}.help`,
-        type: 'WATCHING',
+        name: '/help',
+        type: ActivityType.Watching,
         url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
       },
     ],
@@ -122,10 +118,16 @@ bot.on('interactionCreate', async (interaction) => {
     }
     // more handlers could be added here
   }
-  // handle command interactions
-  if (interaction.isCommand()) {
+  if (interaction.isChatInputCommand()) {
     try {
       await checkApplicationCommand(interaction);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  if (interaction.isContextMenuCommand()) {
+    try {
+      // TODO add commands that are offered in the context menu
     } catch (err) {
       console.error(err);
     }

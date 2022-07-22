@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { MagibotSlashCommand } from '../types/command';
 
 const slashCommand = new SlashCommandBuilder()
@@ -9,7 +8,7 @@ const slashCommand = new SlashCommandBuilder()
 
 export const ping: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const stop = new Date();
     const diff = stop.getTime() - interaction.createdAt.getTime();
     await interaction.reply(`Pong! \`(${diff}ms)\``);

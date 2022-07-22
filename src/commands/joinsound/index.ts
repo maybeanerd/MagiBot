@@ -1,5 +1,4 @@
-import { CommandInteraction } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
@@ -11,7 +10,7 @@ import {
   validateAndSaveJoinsound,
 } from './management';
 
-async function getSoundFromInteraction(interaction: CommandInteraction) {
+async function getSoundFromInteraction(interaction: ChatInputCommandInteraction) {
   const attachment = interaction.options.getAttachment(
     JoinsoundOptions.soundFile,
   );
@@ -66,7 +65,7 @@ const slashCommand = new SlashCommandBuilder()
 
 const deferralType = DeferReply.public;
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const { user } = interaction.member!;
   const guild = interaction.guild!;
   if (
