@@ -7,6 +7,7 @@ import Discord, {
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
+import { user } from './shared_assets';
 import { DeferReply } from './types/command';
 
 export function doNothingOnError() {}
@@ -29,9 +30,9 @@ export async function findMember(
     }
   }
   // fails if its not a snowflake
-  const user = await guild.members.fetch(mention).catch(returnNullOnError);
-  if (user) {
-    return { user, fuzzy: false };
+  const member = await guild.members.fetch(mention).catch(returnNullOnError);
+  if (member) {
+    return { user: member, fuzzy: false };
   }
   // it will sometimes only find one if multiple would fit (even with higher limit).
   // so we just call it fuzzy and take the first we get
@@ -129,7 +130,6 @@ export async function interactionConfirmation(
     components: [row as any], // TODO fix this type?
     ephemeral,
   };
-  // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
   if (doesInteractionRequireFollowup(interaction)) {
     await interaction.followUp(messageContent);
   } else {
@@ -234,4 +234,8 @@ export function getUserMention(userId: string | null | undefined) {
 
 export function getRoleMention(roleId: string) {
   return `<@&${roleId}>`;
+}
+
+export function getBotInviteUrl() {
+  return `https://discord.com/api/oauth2/authorize?client_id=${user().id}&permissions=66625&scope=bot%20applications.commands`;
 }

@@ -4,10 +4,9 @@ import {
   GuildMember,
   SlashCommandBuilder,
 } from 'discord.js';
+import { getBotInviteUrl } from '../helperFunctions';
 import { user, SIGN } from '../shared_assets';
 import { MagibotSlashCommand } from '../types/command';
-
-const inviteURL = 'https://discord.com/api/oauth2/authorize?client_id=384820232583249921&permissions=276131153&redirect_uri=https%3A%2F%2Fdiscord.gg%2F2Evcf4T&scope=bot';
 
 async function main(interaction: ChatInputCommandInteraction) {
   const info: Array<{
@@ -17,7 +16,7 @@ async function main(interaction: ChatInputCommandInteraction) {
   }> = [
     {
       name: 'Links',
-      value: `[Invite me to your guild](${inviteURL})\n[Official support Discord](https://discord.gg/2Evcf4T)`,
+      value: `[Invite me to your guild](${getBotInviteUrl()})\n[Official support Discord](https://discord.gg/2Evcf4T)`,
       inline: false,
     },
     {
