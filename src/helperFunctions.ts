@@ -237,5 +237,5 @@ export function getRoleMention(roleId: string) {
 }
 
 export function getBotInviteUrl() {
-  return `https://discord.com/api/oauth2/authorize?client_id=${user().id}&permissions=66625&scope=bot%20applications.commands`;
+  return `https://discord.com/api/oauth2/authorize?client_id=${user().id}&permissions=3212353&scope=bot%20applications.commands`;
 }
