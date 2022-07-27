@@ -129,7 +129,6 @@ export async function interactionConfirmation(
     components: [row as any], // TODO fix this type?
     ephemeral,
   };
-  // TODO validate if we can allow a reply beforehand, as then maybe fetchReply wont work?
   if (doesInteractionRequireFollowup(interaction)) {
     await interaction.followUp(messageContent);
   } else {

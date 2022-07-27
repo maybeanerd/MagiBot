@@ -224,10 +224,6 @@ async function endVote(vote: Vote, bot: Client) {
           }
           await msg.edit(str);
         }
-        // only possible with manage messages permission.
-        // If this were the only part where we need it, we should not require that permission
-        // TODO go back here once all other permissions are decided to see if we can use it
-        // await msg.reactions.removeAll();
       }
     }
   } catch (error) {

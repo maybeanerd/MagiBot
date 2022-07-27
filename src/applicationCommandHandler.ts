@@ -55,6 +55,7 @@ export async function checkApplicationCommand(
         await interaction.reply(
           `I am missing permissions for this command. I require all of the following:\n${permissions}`,
         );
+        return;
       }
       if (command.defer) {
         // allow slow commands to have more time to respond

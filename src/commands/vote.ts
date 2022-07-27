@@ -1,7 +1,6 @@
 import {
   ChatInputCommandInteraction,
   Message,
-  PermissionFlagsBits,
   SlashCommandBuilder,
 } from 'discord.js';
 import { asyncForEach, interactionConfirmation } from '../helperFunctions';
@@ -156,11 +155,7 @@ reactions.forEach((reaction, index) => {
 });
 
 export const vote: MagibotSlashCommand = {
-  permissions: [
-    PermissionFlagsBits.AddReactions,
-    PermissionFlagsBits.ReadMessageHistory,
-    PermissionFlagsBits.ViewChannel,
-  ],
+  permissions: ['AddReactions', 'ReadMessageHistory', 'ViewChannel'],
   definition: slashCommand.toJSON(),
   run: main,
   defer: deferralType,

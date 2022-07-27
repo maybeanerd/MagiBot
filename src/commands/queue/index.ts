@@ -7,7 +7,6 @@ import {
   SlashCommandBuilder,
   ButtonBuilder,
   ActionRowBuilder,
-  PermissionsBitField,
 } from 'discord.js';
 import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
 import {
@@ -260,10 +259,7 @@ async function runCommand(interaction: ChatInputCommandInteraction) {
 }
 
 export const queue: MagibotSlashCommand = {
-  permissions: [
-    PermissionsBitField.Flags.ReadMessageHistory,
-    PermissionsBitField.Flags.ViewChannel,
-  ],
+  permissions: ['ReadMessageHistory', 'ViewChannel'],
   run: runCommand,
   definition: slashCommand.toJSON(),
   defer: DeferReply.public,
