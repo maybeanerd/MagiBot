@@ -7,6 +7,7 @@ import Discord, {
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
+import { user } from './shared_assets';
 import { DeferReply } from './types/command';
 
 export function doNothingOnError() {}
@@ -233,4 +234,8 @@ export function getUserMention(userId: string | null | undefined) {
 
 export function getRoleMention(roleId: string) {
   return `<@&${roleId}>`;
+}
+
+export function getBotInviteUrl() {
+  return `https://discord.com/api/oauth2/authorize?client_id=${user().id}&permissions=66625&scope=bot%20applications.commands`;
 }
