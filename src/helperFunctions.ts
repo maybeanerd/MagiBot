@@ -30,9 +30,9 @@ export async function findMember(
     }
   }
   // fails if its not a snowflake
-  const user = await guild.members.fetch(mention).catch(returnNullOnError);
-  if (user) {
-    return { user, fuzzy: false };
+  const member = await guild.members.fetch(mention).catch(returnNullOnError);
+  if (member) {
+    return { user: member, fuzzy: false };
   }
   // it will sometimes only find one if multiple would fit (even with higher limit).
   // so we just call it fuzzy and take the first we get
