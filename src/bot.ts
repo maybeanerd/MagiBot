@@ -9,11 +9,7 @@ import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
 import config from './configuration';
 import {
-  PREFIX,
-  PREFIXES,
-  TOKEN,
-  setUser,
-  resetPrefixes,
+  PREFIXES, TOKEN, setUser, resetPrefixes,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { checkCommand } from './commandHandler';
@@ -147,20 +143,34 @@ bot.on('guildCreate', async (guild) => {
   if (guild.available) {
     await guildPrefixStartup(guild);
     const owner = await guild.fetchOwner();
-    if (owner) {
-      owner
-        .send(
-          `Hi there ${owner.displayName}.\nThanks for adding me to your server! If you have any need for help or want to help develop the bot by reporting bugs and requesting features, just join https://discord.gg/2Evcf4T\n\nTo setup the bot, use \`${PREFIX}:help setup\`.\nYou should:\n\t- setup an admin role, as only you and users with administrative permission are able to use admin commands (\`${PREFIX}:setup admin @role\`)\n\t- add some text channels where users can use the bot (\`${PREFIX}:setup command\`)\n\t- add voice channels in which the bot is allowed to `
-            + `join to use joinsounds (\`${PREFIX}:setup join\`)\n\t- add a notification channel where bot updates and information will be posted (\`${PREFIX}:setup notification\`)\n\nTo make sure the bot can use all its functions consider giving it a role with administrative rights, if you have not done so yet in the invitation.\n\nThanks for being part of this project,\nBasti aka. the MagiBot Dev`,
-        )
-        .catch(() => {});
+    let sentWelcomeMessage;
+    try {
+      await owner.send(
+        `Hi there ${owner.displayName}.
+Thanks for adding me to your server! If you have any need for help or want to support the development of the bot by reporting bugs and requesting features, join the support server: https://discord.gg/2Evcf4T
+
+To see a list of commands use \`/help\`.
+
+Now that I joined your server, you could:
+\t- Take a look at command permissions in your server settings to adjust who is allowed to use admin commands. By default, only users with "Administrator" or "Manage Server" permissions are allowed to do so.
+\t- Check if you want to restrict voice channels in which the bot is allowed to join to use joinsounds. By default, it is allowed in all voice channels. (\`/admin joinsound voicechannel\`)
+
+Thanks for being part of this project!`,
+      );
+      sentWelcomeMessage = true;
+    } catch {
+      sentWelcomeMessage = false;
     }
+
     await sendJoinEvent(
       `:white_check_mark: joined **${guild.name}**: "${
         guild.preferredLocale
       }" (${guild.memberCount} users, ID: ${
         guild.id
-      })\nOwner is: ${getUserMention(guild.ownerId)} (ID: ${guild.ownerId})`,
+      })
+Owner is: ${getUserMention(guild.ownerId)} (ID: ${
+  guild.ownerId
+}), got welcome message: ${sentWelcomeMessage}`,
     );
   }
 });
