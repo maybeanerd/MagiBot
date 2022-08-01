@@ -148,7 +148,7 @@ export async function validateAndSaveJoinsound(
   if (setDefault && user) {
     throw new Error('Cant set-default sounds for others!');
   }
-
+  console.log('validateAndSaveJoinsound : attachmentOrUrl', attachmentOrUrl);
   let soundUrl: string;
   let locallyStored = true;
   if (typeof attachmentOrUrl === 'string') {
@@ -164,7 +164,9 @@ export async function validateAndSaveJoinsound(
   }
 
   const sound = await ffprobe(soundUrl, { path: ffprobeStatic.path }).catch(
-    () => {},
+    (error) => {
+      console.error(error);
+    },
   );
   if (!sound) {
     interaction.followUp(
