@@ -26,9 +26,6 @@ import {
 import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
 import { DeferReply } from '../../types/command';
 
-// eslint-disable-next-line global-require
-const ffprobePath = require('@ffprobe-installer/ffprobe').path as string;
-
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundOptions {
   'soundFile' = 'sound-file',
@@ -174,16 +171,15 @@ export async function validateAndSaveJoinsound(
     }
     soundUrl = attachmentOrUrl.url;
   }
+  console.log('process.env.FFMPEG_PATH', process.env.FFMPEG_PATH);
   console.log('soundUrl', soundUrl);
-  console.log('ffprobePath', ffprobePath);
-  const sound = await ffprobe(soundUrl, { path: ffprobePath }).catch(
-    (error) => {
-      console.error(error);
-    },
-  );
+  const sound = await ffprobe(soundUrl, {
+    path: process.env.FFMPEG_PATH ?? '',
+  }).catch((error) => {
+    console.error(error);
+  });
   console.log('sound:', sound);
 
-  ffProbe.path = ffprobePath;
   const soundAlternative = await ffProbe(soundUrl).catch((error) => {
     console.error(error);
   });
