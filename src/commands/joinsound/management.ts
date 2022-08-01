@@ -1,4 +1,5 @@
 import ffprobe from 'ffprobe';
+import { ffprobe as ffProbe } from '@dropb/ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import {
   APIEmbed,
@@ -179,6 +180,15 @@ export async function validateAndSaveJoinsound(
     },
   );
   console.log('sound:', sound);
+
+  ffProbe.path = ffprobeStatic.path;
+  const soundAlternative = await ffProbe(soundUrl).catch(
+    (error) => {
+      console.error(error);
+    },
+  );
+  console.log('soundAlternative:', soundAlternative);
+
   if (!sound) {
     interaction.followUp(
       'Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.',
