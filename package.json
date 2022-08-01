@@ -64,7 +64,7 @@
     "url": "git+https://github.com/T0TProduction/MagiBot.git"
   },
   "author": "Sebastian Di Luzio",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/T0TProduction/MagiBot/issues"
   },
