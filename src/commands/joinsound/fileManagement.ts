@@ -71,10 +71,11 @@ function getFolderSize(path: string): Promise<number> {
 }
 
 const oneMegabyte = 1024 * 1024;
+export const maximumSingleFileSize = oneMegabyte / 2; // 500KB
 const fourtyGigabyte = 40 * 1024 * oneMegabyte;
 
 export const joinsoundStorageUserLimit = oneMegabyte;
-const joinsoundStorageGuildLimit = oneMegabyte / 2; // 500KB
+const joinsoundStorageGuildLimit = maximumSingleFileSize;
 
 async function doesServerHaveEnoughSpace() {
   const sizeOfFolder = await getFolderSize(basePath);

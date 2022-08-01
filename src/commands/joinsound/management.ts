@@ -21,6 +21,7 @@ import {
   getSpaceUsedByTarget,
   joinsoundStorageUserLimit,
   getAllLocallyStoredJoinsoundsOfUser,
+  maximumSingleFileSize,
 } from './fileManagement';
 import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
 import { DeferReply } from '../../types/command';
@@ -160,6 +161,12 @@ export async function validateAndSaveJoinsound(
       interaction.followUp('The file you sent is not an audio file!');
       return;
     }
+    if (attachmentOrUrl.size > maximumSingleFileSize) {
+      interaction.followUp(
+        `The file you sent is larger than ${maximumSingleFileSize / 1024} KB, which is the limit per file!`,
+      );
+      return;
+    }
     soundUrl = attachmentOrUrl.url;
   }
 
@@ -168,6 +175,7 @@ export async function validateAndSaveJoinsound(
       console.error(error);
     },
   );
+  console.log('sound:', sound);
   if (!sound) {
     interaction.followUp(
       'Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.',
