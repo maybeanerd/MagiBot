@@ -163,13 +163,16 @@ export async function validateAndSaveJoinsound(
     }
     if (attachmentOrUrl.size > maximumSingleFileSize) {
       interaction.followUp(
-        `The file you sent is larger than ${maximumSingleFileSize / 1024} KB, which is the limit per file!`,
+        `The file you sent is larger than ${
+          maximumSingleFileSize / 1024
+        } KB, which is the limit per file!`,
       );
       return;
     }
     soundUrl = attachmentOrUrl.url;
   }
-
+  console.log('soundUrl', soundUrl);
+  console.log('ffprobeStatic', ffprobeStatic);
   const sound = await ffprobe(soundUrl, { path: ffprobeStatic.path }).catch(
     (error) => {
       console.error(error);
