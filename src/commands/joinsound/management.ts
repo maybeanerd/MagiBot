@@ -171,19 +171,20 @@ export async function validateAndSaveJoinsound(
     }
     soundUrl = attachmentOrUrl.url;
   }
-  console.log('process.env.FFMPEG_PATH', process.env.FFMPEG_PATH);
   console.log('soundUrl', soundUrl);
+  console.log('process.env.FFMPEG_PATH', process.env.FFMPEG_PATH);
+
+  const soundAlternative = await ffProbe(soundUrl).catch((error) => {
+    console.error(error);
+  });
+  console.log('soundAlternative:', soundAlternative);
+
   const sound = await ffprobe(soundUrl, {
     path: process.env.FFMPEG_PATH ?? '',
   }).catch((error) => {
     console.error(error);
   });
   console.log('sound:', sound);
-
-  const soundAlternative = await ffProbe(soundUrl).catch((error) => {
-    console.error(error);
-  });
-  console.log('soundAlternative:', soundAlternative);
 
   if (!sound) {
     interaction.followUp(
