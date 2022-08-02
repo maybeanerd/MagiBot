@@ -8,7 +8,7 @@ import fastFolderSize from 'fast-folder-size';
 import { asyncForEach } from '../../helperFunctions';
 
 const isHostedInGoogleCloud = process.env.GAE_ENV === 'standard';
-console.log('isHostedInGoogleCloud:', isHostedInGoogleCloud);
+console.info('isHostedInGoogleCloud:', isHostedInGoogleCloud);
 
 const basePath = isHostedInGoogleCloud
   ? Path.join('/tmp', 'joinsounds')

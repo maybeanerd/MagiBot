@@ -1,7 +1,5 @@
 import ffprobe from 'ffprobe';
-import { ffprobe as ffProbe } from '@dropb/ffprobe';
 import { path as ffProbePath } from 'ffprobe-static';
-
 import {
   APIEmbed,
   APIEmbedField,
@@ -27,8 +25,6 @@ import {
 } from './fileManagement';
 import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
 import { DeferReply } from '../../types/command';
-
-ffProbe.path = ffProbePath;
 
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundOptions {
@@ -153,7 +149,6 @@ export async function validateAndSaveJoinsound(
   if (setDefault && user) {
     throw new Error('Cant set-default sounds for others!');
   }
-  console.log('validateAndSaveJoinsound : attachmentOrUrl', attachmentOrUrl);
   let soundUrl: string;
   let locallyStored = true;
   if (typeof attachmentOrUrl === 'string') {
@@ -175,20 +170,12 @@ export async function validateAndSaveJoinsound(
     }
     soundUrl = attachmentOrUrl.url;
   }
-  console.log('soundUrl', soundUrl);
-  console.log('ffProbePath', ffProbePath);
-
-  const soundAlternative = await ffProbe(soundUrl).catch((error) => {
-    console.error(error);
-  });
-  console.log('soundAlternative:', soundAlternative);
 
   const sound = await ffprobe(soundUrl, {
     path: ffProbePath,
   }).catch((error) => {
     console.error(error);
   });
-  console.log('sound:', sound);
 
   if (!sound) {
     interaction.followUp(
