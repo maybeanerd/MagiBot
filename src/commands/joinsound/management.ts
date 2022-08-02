@@ -1,5 +1,5 @@
 import ffprobe from 'ffprobe';
-import ffprobeStatic from 'ffprobe-static';
+import { path as ffProbePath } from 'ffprobe-static';
 import {
   APIEmbed,
   APIEmbedField,
@@ -149,7 +149,6 @@ export async function validateAndSaveJoinsound(
   if (setDefault && user) {
     throw new Error('Cant set-default sounds for others!');
   }
-  console.log('validateAndSaveJoinsound : attachmentOrUrl', attachmentOrUrl);
   let soundUrl: string;
   let locallyStored = true;
   if (typeof attachmentOrUrl === 'string') {
@@ -163,19 +162,21 @@ export async function validateAndSaveJoinsound(
     }
     if (attachmentOrUrl.size > maximumSingleFileSize) {
       interaction.followUp(
-        `The file you sent is larger than ${maximumSingleFileSize / 1024} KB, which is the limit per file!`,
+        `The file you sent is larger than ${
+          maximumSingleFileSize / 1024
+        } KB, which is the limit per file!`,
       );
       return;
     }
     soundUrl = attachmentOrUrl.url;
   }
 
-  const sound = await ffprobe(soundUrl, { path: ffprobeStatic.path }).catch(
-    (error) => {
-      console.error(error);
-    },
-  );
-  console.log('sound:', sound);
+  const sound = await ffprobe(soundUrl, {
+    path: ffProbePath,
+  }).catch((error) => {
+    console.error(error);
+  });
+
   if (!sound) {
     interaction.followUp(
       'Something went wrong when trying to load your file. Make sure the URL links directly to an audio file.',

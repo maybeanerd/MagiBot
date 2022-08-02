@@ -7,7 +7,12 @@ import { get } from 'node:https';
 import fastFolderSize from 'fast-folder-size';
 import { asyncForEach } from '../../helperFunctions';
 
-const basePath = Path.join(__dirname, '../../../joinsounds');
+const isHostedInGoogleCloud = process.env.GAE_ENV === 'standard';
+console.info('isHostedInGoogleCloud:', isHostedInGoogleCloud);
+
+const basePath = isHostedInGoogleCloud
+  ? Path.join('/tmp', 'joinsounds')
+  : Path.join(__dirname, '../../../joinsounds');
 
 type JoinsoundTarget =
   | { userId: string; guildId: string; default?: undefined }
