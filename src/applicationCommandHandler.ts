@@ -2,12 +2,11 @@ import Discord from 'discord.js';
 /* import Statcord from 'statcord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot'; */
-import { PREFIXES } from './shared_assets';
-// eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { usageUp } from './commandHandler';
 import { globalApplicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
+import { doesInteractionRequireFollowup } from './helperFunctions';
 
 async function catchError(
   error: Error,
@@ -20,12 +19,14 @@ async function catchError(
     `**Command:** ${interaction.commandName} ${interaction.options}\n**Caught Error:**\n\`\`\`${error.stack}\`\`\``,
   );
 
-  interaction.reply(`Something went wrong while using ${
-    interaction.commandName
-  }. The devs have been automatically notified.
-If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`${
-  interaction.guild ? PREFIXES.get(interaction.guild.id) : 'k'
-}.info\`) to tell us exactly how.`);
+  const messageContent = `Something went wrong while using ${interaction.commandName}. The devs have been automatically notified.
+If you can reproduce this, consider using \`/bugreport\` or join the support discord (link via \`/info\`) to tell us exactly how.`;
+
+  if (doesInteractionRequireFollowup(interaction)) {
+    await interaction.followUp(messageContent);
+  } else {
+    await interaction.reply(messageContent);
+  }
 }
 
 export async function checkApplicationCommand(
