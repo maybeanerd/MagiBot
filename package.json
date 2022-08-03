@@ -56,9 +56,8 @@
     "lint:fix": "eslint \"src/**/*\" --fix",
     "build": "rimraf ./dist && tsc",
     "start": "node dist/index.js",
-    "startforever": "forever start dist/index.js",
-    "stopforever": "forever stop dist/index.js",
-    "release:heroku": "git push heroku main"
+    "start:forever": "forever start dist/index.js",
+    "stop": "forever stop dist/index.js",
   },
   "repository": {
     "type": "git",
@@ -71,5 +70,4 @@
   },
   "homepage": "https://github.com/T0TProduction/MagiBot#readme",
   "heroku-run-build-script": true,
-  "snyk": true
 }
