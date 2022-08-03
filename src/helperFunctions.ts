@@ -1,9 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
 import { ButtonStyle } from 'discord-api-types/v10';
 import Discord, {
-
   ButtonInteraction,
   CommandInteraction,
+  InteractionReplyOptions,
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
@@ -108,24 +108,26 @@ export async function interactionConfirmation(
   timeoutMessage: string = 'Timeouted.',
   timeoutTime: number = 20000,
 ): Promise<MessageComponentInteraction | null> {
-  const row = new ActionRowBuilder();
-  row.addComponents(
-    new ButtonBuilder()
-      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-yes`)
-      .setLabel('Yes')
-      .setStyle(ButtonStyle.Success),
-  );
-  row.addComponents(
-    new ButtonBuilder()
-      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
-      .setLabel('No')
-      .setStyle(ButtonStyle.Danger),
-  );
+  const row = new ActionRowBuilder()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${buttonInteractionId.confirmation}-${interaction.id}-yes`,
+        )
+        .setLabel('Yes')
+        .setStyle(ButtonStyle.Success),
+    )
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
+        .setLabel('No')
+        .setStyle(ButtonStyle.Danger),
+    );
 
   // always prefer ephemeral where possible
   const ephemeral = deferralType !== DeferReply.public;
 
-  const messageContent = {
+  const messageContent: InteractionReplyOptions = {
     content: question,
     components: [row as any], // TODO fix this type?
     ephemeral,
@@ -237,5 +239,7 @@ export function getRoleMention(roleId: string) {
 }
 
 export function getBotInviteUrl() {
-  return `https://discord.com/api/oauth2/authorize?client_id=${user().id}&permissions=3212353&scope=bot%20applications.commands`;
+  return `https://discord.com/api/oauth2/authorize?client_id=${
+    user().id
+  }&permissions=3212353&scope=bot%20applications.commands`;
 }
