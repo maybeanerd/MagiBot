@@ -1,14 +1,13 @@
 import {
-  ChatInputCommandInteraction,
+  CommandInteraction,
   Guild,
   TextChannel,
   Message,
   ButtonInteraction,
-  SlashCommandBuilder,
-  ButtonBuilder,
-  ActionRowBuilder,
+
 } from 'discord.js';
 import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
+import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import {
   asyncWait,
   buttonInteractionId,
@@ -34,12 +33,12 @@ export const enum typeOfQueueAction {
 }
 
 async function startQueue(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
   topic: string,
 ) {
   const guild = interaction.guild!;
 
-  const originalMessage = await interaction.followUp('Creating Queue...');
+  const originalMessage = (await interaction.followUp('Creating Queue...'))as Message;
 
   const createdQueue = await tryToCreateQueue(
     guild.id,
@@ -120,7 +119,7 @@ export async function onQueueEnd(guild: Guild) {
   return false;
 }
 
-async function endRunningQueue(interaction: ChatInputCommandInteraction) {
+async function endRunningQueue(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   const runningQueue = await onQueueEnd(guild);
   if (runningQueue) {
@@ -159,7 +158,7 @@ export function messageEdit(
 }
 
 export async function sendItsYourTurnMessage(
-  interaction: ChatInputCommandInteraction | ButtonInteraction,
+  interaction: CommandInteraction | ButtonInteraction,
   userId: string,
 ) {
   const messageContent = {
@@ -175,7 +174,7 @@ export async function sendItsYourTurnMessage(
 }
 
 export async function goToNextUser(
-  interaction: ChatInputCommandInteraction | ButtonInteraction,
+  interaction: CommandInteraction | ButtonInteraction,
 ) {
   const guild = interaction.guild!;
   const wentToNextUser = await goToNextUserOfQueue(guild.id);
@@ -238,7 +237,7 @@ const slashCommand = new SlashCommandBuilder()
     .setName('next')
     .setDescription('Go to the next user of the running queue.'));
 
-async function runCommand(interaction: ChatInputCommandInteraction) {
+async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'start'
     | 'end'
@@ -259,7 +258,7 @@ async function runCommand(interaction: ChatInputCommandInteraction) {
 }
 
 export const queue: MagibotSlashCommand = {
-  permissions: ['ReadMessageHistory', 'ViewChannel'],
+  permissions: ['READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   run: runCommand,
   definition: slashCommand.toJSON(),
   defer: DeferReply.public,

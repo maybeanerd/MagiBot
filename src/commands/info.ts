@@ -1,14 +1,14 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { APIEmbed } from 'discord-api-types/v10';
 import {
-  APIEmbed,
-  ChatInputCommandInteraction,
+  CommandInteraction,
   GuildMember,
-  SlashCommandBuilder,
 } from 'discord.js';
 import { getBotInviteUrl } from '../helperFunctions';
 import { user, SIGN } from '../shared_assets';
 import { MagibotSlashCommand } from '../types/command';
 
-async function main(interaction: ChatInputCommandInteraction) {
+async function main(interaction: CommandInteraction) {
   const info: Array<{
     name: string;
     value: string;

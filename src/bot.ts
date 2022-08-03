@@ -1,9 +1,5 @@
 import Discord, {
-  ActivityType,
-  Client,
-  DiscordAPIError,
-  GatewayIntentBits,
-  Guild,
+  Client, DiscordAPIError, Guild, Intents,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
@@ -34,11 +30,13 @@ async function initializePrefixes(bot: Client) {
 }
 
 const intents = [
-  GatewayIntentBits.Guilds,
-  GatewayIntentBits.GuildIntegrations, // TODO do we need this? what is this?
-  GatewayIntentBits.GuildVoiceStates,
-  GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.GuildMessageReactions,
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_INTEGRATIONS,
+  Intents.FLAGS.GUILD_VOICE_STATES,
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  Intents.FLAGS.DIRECT_MESSAGES,
+  Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
 ];
 
 export const bot = new Client({ intents });
@@ -89,7 +87,7 @@ bot.on('ready', async () => {
     activities: [
       {
         name: '/help',
-        type: ActivityType.Watching,
+        type: 'WATCHING',
         url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
       },
     ],
@@ -115,20 +113,20 @@ bot.on('interactionCreate', async (interaction) => {
     }
     // more handlers could be added here
   }
-  if (interaction.isChatInputCommand()) {
+  if (interaction.isCommand()) {
     try {
       await checkApplicationCommand(interaction);
     } catch (err) {
       console.error(err);
     }
   }
-  if (interaction.isContextMenuCommand()) {
+  /* if (interaction.isContextMenuCommand()) {
     try {
       // TODO add commands that are offered in the context menu
     } catch (err) {
       console.error(err);
     }
-  }
+  } */
 });
 
 async function guildPrefixStartup(guild: Guild) {
@@ -166,9 +164,7 @@ Thanks for being part of this project!`,
     await sendJoinEvent(
       `:white_check_mark: joined **${guild.name}**: "${
         guild.preferredLocale
-      }" (${guild.memberCount} users, ID: ${
-        guild.id
-      })
+      }" (${guild.memberCount} users, ID: ${guild.id})
 Owner is: ${getUserMention(guild.ownerId)} (ID: ${
   guild.ownerId
 }), got welcome message: ${sentWelcomeMessage}`,

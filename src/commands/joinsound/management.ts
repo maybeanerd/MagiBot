@@ -1,12 +1,7 @@
 import ffprobe from 'ffprobe';
 import { path as ffProbePath } from 'ffprobe-static';
-import {
-  APIEmbed,
-  APIEmbedField,
-  Attachment,
-  ChatInputCommandInteraction,
-  User,
-} from 'discord.js';
+import { CommandInteraction, MessageAttachment, User } from 'discord.js';
+import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
 import {
   getGlobalUser,
   getConfiguration,
@@ -140,8 +135,8 @@ export async function removeDefaultGuildJoinsound(guildId: string) {
 }
 
 export async function validateAndSaveJoinsound(
-  attachmentOrUrl: Attachment | string,
-  interaction: ChatInputCommandInteraction,
+  attachmentOrUrl: MessageAttachment | string,
+  interaction: CommandInteraction,
   setDefault: boolean,
   user?: User,
   defaultForGuildId?: string,
@@ -296,7 +291,7 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
 }
 
 export async function removeAllJoinsoundsOfUser(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
   deferralType: DeferReply,
 ) {
   const confirmed = await interactionConfirmation(
@@ -321,7 +316,7 @@ export async function removeAllJoinsoundsOfUser(
 }
 
 export async function getJoinsoundOverviewOfUser(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
 ) {
   const { user } = interaction.member!;
   const userId = user.id;

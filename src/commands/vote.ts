@@ -1,8 +1,8 @@
 import {
-  ChatInputCommandInteraction,
+  CommandInteraction,
   Message,
-  SlashCommandBuilder,
 } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { asyncForEach, interactionConfirmation } from '../helperFunctions';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
@@ -53,7 +53,7 @@ async function addVote(vote: Vote) {
 
 const deferralType = DeferReply.ephemeral;
 
-async function main(interaction: ChatInputCommandInteraction) {
+async function main(interaction: CommandInteraction) {
   const authorID = interaction.member!.user.id;
   const topic = interaction.options.getString('topic', true);
   const duration = getTime(interaction.options.getString('duration', true));
@@ -155,7 +155,7 @@ reactions.forEach((reaction, index) => {
 });
 
 export const vote: MagibotSlashCommand = {
-  permissions: ['AddReactions', 'ReadMessageHistory', 'ViewChannel'],
+  permissions: ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY', 'VIEW_CHANNEL'],
   definition: slashCommand.toJSON(),
   run: main,
   defer: deferralType,

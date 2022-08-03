@@ -1,10 +1,6 @@
-import {
-  APIEmbed,
-  APIEmbedField,
-  ChatInputCommandInteraction,
-  GuildMember,
-  SlashCommandBuilder,
-} from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
+import { CommandInteraction, GuildMember } from 'discord.js';
 import { user } from '../shared_assets';
 import {
   MagibotAdminSlashCommand,
@@ -87,7 +83,7 @@ const slashCommand = new SlashCommandBuilder()
 
 export const help: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: ChatInputCommandInteraction) {
+  async run(interaction: CommandInteraction) {
     const helpEmbed: APIEmbed = {
       color: (interaction.member as GuildMember).displayColor,
       description: "I'm here to help! ",

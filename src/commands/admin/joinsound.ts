@@ -1,5 +1,6 @@
-import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   adminDeferralType,
   isShadowBanned,
@@ -47,7 +48,7 @@ export async function setJoinChannel(
 }
 
 async function toggleJoinsoundChannel(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
   activate: boolean,
 ) {
   const voiceChannel = (interaction.member as GuildMember).voice.channel;
@@ -83,7 +84,7 @@ const acticateJoinsoundsInChannelChoices: Array<
   { name: 'disable joinsounds in connected voicechannel', value: 'disable' },
 ];
 
-async function runCommand(interaction: ChatInputCommandInteraction) {
+async function runCommand(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   if (
     isShadowBanned(interaction.member!.user.id, guild.id, guild.ownerId)
