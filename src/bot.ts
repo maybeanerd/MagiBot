@@ -98,6 +98,7 @@ bot.on('ready', async () => {
   initializePrefixes(bot);
 });
 
+// TODO move to messageCreate, or just remove this entirely
 bot.on('message', async (message: Discord.Message) => {
   try {
     await checkCommand(message);
