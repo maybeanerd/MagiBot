@@ -1,9 +1,9 @@
+import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
+import { ButtonStyle } from 'discord-api-types/v10';
 import Discord, {
-  ActionRowBuilder,
-  ButtonBuilder,
+
   ButtonInteraction,
-  ButtonStyle,
-  ChatInputCommandInteraction,
+  CommandInteraction,
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
@@ -93,7 +93,7 @@ To do the latter, re-invite the bot by clicking the big blue "Add to Server" but
 }
 
 export function doesInteractionRequireFollowup(
-  interaction: ChatInputCommandInteraction | ButtonInteraction,
+  interaction: CommandInteraction | ButtonInteraction,
 ) {
   return interaction.replied || interaction.deferred;
 }
@@ -101,7 +101,7 @@ export function doesInteractionRequireFollowup(
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
-  interaction: Discord.ChatInputCommandInteraction,
+  interaction: Discord.CommandInteraction,
   question: string,
   deferralType?: DeferReply | false,
   abortMessage: string = 'Cancelled.',

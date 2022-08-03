@@ -1,4 +1,6 @@
-import { APIEmbed, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
+import { APIEmbed } from 'discord-api-types/v10';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { SaltrankModel } from '../db';
 import { getUser } from '../dbHelpers';
@@ -13,7 +15,7 @@ async function getSalt(userid: string, guildID: string) {
   }
   return result.salt;
 }
-async function runCommand(interaction: ChatInputCommandInteraction) {
+async function runCommand(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   const passedUser = interaction.options.getUser('user', false);
   const member = await guild.members.fetch(

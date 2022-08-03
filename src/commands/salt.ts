@@ -1,10 +1,10 @@
 import {
-  APIEmbed,
-  ChatInputCommandInteraction,
+  CommandInteraction,
   Guild,
-  SlashCommandBuilder,
   User,
 } from 'discord.js';
+import { APIEmbed } from 'discord-api-types/v10';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotSlashCommand } from '../types/command';
 import { SaltModel, SaltrankModel } from '../db';
 import { topSalt } from '../dbHelpers';
@@ -84,7 +84,7 @@ async function saltUp(
 }
 
 export async function addSalt(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
   reportedUser: User,
   fromAdmin = false,
 ) {
@@ -136,7 +136,7 @@ async function getMemberSaltInfo(
   };
 }
 
-async function getTopSalters(interaction: ChatInputCommandInteraction) {
+async function getTopSalters(interaction: CommandInteraction) {
   const guild = interaction.guild!;
   const salters = await topSalt(guild.id);
   const info: Array<
@@ -182,7 +182,7 @@ const slashCommand = new SlashCommandBuilder()
     .setName('ranking')
     .setDescription('Get the current ranking of saltyness on this server.'));
 
-async function runCommand(interaction: ChatInputCommandInteraction) {
+async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'report'
     | 'ranking';

@@ -10,7 +10,7 @@ import { doesInteractionRequireFollowup } from './helperFunctions';
 
 async function catchError(
   error: Error,
-  interaction: Discord.ChatInputCommandInteraction,
+  interaction: Discord.CommandInteraction,
 ) {
   console.error(
     `Caught:\n${error.stack}\nin command ${interaction.commandName} ${interaction.options}`,
@@ -30,10 +30,10 @@ If you can reproduce this, consider using \`/bugreport\` or join the support dis
 }
 
 export async function checkApplicationCommand(
-  interaction: Discord.ChatInputCommandInteraction,
+  interaction: Discord.CommandInteraction,
 ) {
   if (
-    !(interaction.member && interaction.guild && interaction.guild.members.me)
+    !(interaction.member && interaction.guild && interaction.guild.me)
   ) {
     // check for valid message
     console.error('Invalid interaction received:', interaction);
@@ -51,7 +51,7 @@ export async function checkApplicationCommand(
       // check for all needed permissions
       const botPermissions = (
         interaction.channel as Discord.TextChannel
-      ).permissionsFor(interaction.guild.members.me);
+      ).permissionsFor(interaction.guild.me);
       if (!botPermissions.has(permissions)) {
         await interaction.reply(
           `I am missing permissions for this command. I require all of the following:\n${permissions}`,

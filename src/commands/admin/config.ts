@@ -1,15 +1,15 @@
 import {
-  APIEmbed,
-  ChatInputCommandInteraction,
+  CommandInteraction,
   GuildMember,
-  SlashCommandBuilder,
 } from 'discord.js';
+import { APIEmbed } from 'discord-api-types/v10';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotAdminSlashCommand } from '../../types/command';
 import { getConfiguration } from '../../dbHelpers';
 import { setJoinChannel } from './joinsound';
 
 async function viewCurrentConfiguration(
-  interaction: ChatInputCommandInteraction,
+  interaction: CommandInteraction,
 ) {
   const guild = interaction.guild!;
   const guildId = guild.id;
@@ -65,7 +65,7 @@ async function viewCurrentConfiguration(
   interaction.followUp({ embeds: [embed] });
 }
 
-async function runCommand(interaction: ChatInputCommandInteraction) {
+async function runCommand(interaction: CommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as 'view';
 
   if (subcommand === 'view') {

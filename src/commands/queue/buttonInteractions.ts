@@ -1,4 +1,4 @@
-import { ButtonInteraction } from 'discord.js';
+import { ButtonInteraction, Message } from 'discord.js';
 import {
   goToNextUser,
   messageEdit,
@@ -26,7 +26,7 @@ async function onQueueAction(buttonInteraction: ButtonInteraction) {
   )[2] as typeOfQueueAction;
   const actionUserId = buttonInteraction.user.id;
   const guildId = buttonInteraction.guildId!;
-  const topicMessage = buttonInteraction.message;
+  const topicMessage = buttonInteraction.message as Message;
 
   if (typeOfAction === typeOfQueueAction.join) {
     const addUserResponse = await addUserToQueue(guildId, actionUserId);
