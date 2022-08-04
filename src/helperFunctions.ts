@@ -1,10 +1,10 @@
-import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
-import { ButtonStyle } from 'discord-api-types/v10';
 import Discord, {
   ButtonInteraction,
   CommandInteraction,
   InteractionReplyOptions,
   Message,
+  MessageActionRow,
+  MessageButton,
   MessageComponentInteraction,
 } from 'discord.js';
 import { user } from './shared_assets';
@@ -108,28 +108,23 @@ export async function interactionConfirmation(
   timeoutMessage: string = 'Timeouted.',
   timeoutTime: number = 20000,
 ): Promise<MessageComponentInteraction | null> {
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.confirmation}-${interaction.id}-yes`,
-        )
-        .setLabel('Yes')
-        .setStyle(ButtonStyle.Success),
-    )
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
-        .setLabel('No')
-        .setStyle(ButtonStyle.Danger),
-    );
+  const row = new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-yes`)
+      .setLabel('Yes')
+      .setStyle('SUCCESS'),
+    new MessageButton()
+      .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
+      .setLabel('No')
+      .setStyle('DANGER'),
+  );
 
   // always prefer ephemeral where possible
   const ephemeral = deferralType !== DeferReply.public;
 
   const messageContent: InteractionReplyOptions = {
     content: question,
-    components: [row as any], // TODO fix this type?
+    components: [row],
     ephemeral,
   };
   if (doesInteractionRequireFollowup(interaction)) {
