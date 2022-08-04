@@ -1,13 +1,10 @@
-import {
-  CommandInteraction,
-  Guild,
-  User,
-} from 'discord.js';
+import { CommandInteraction, Guild, User } from 'discord.js';
 import { APIEmbed } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotSlashCommand } from '../types/command';
 import { SaltModel, SaltrankModel } from '../db';
 import { topSalt } from '../dbHelpers';
+import { doesInteractionRequireFollowup } from '../helperFunctions';
 
 async function saltDowntimeDone(salterUserId: string, reporterUserId: string) {
   // get newest entry in salt
@@ -91,11 +88,21 @@ export async function addSalt(
   fromAdmin = false,
 ) {
   if (reportedUser.id === interaction.user.id) {
-    await interaction.reply("You can't report yourself!");
+    const response = "You can't report yourself!";
+    if (doesInteractionRequireFollowup(interaction)) {
+      await interaction.followUp(response);
+    } else {
+      await interaction.reply(response);
+    }
     return;
   }
   if (reportedUser.bot) {
-    await interaction.reply("You can't report bots!");
+    const response = "You can't report bots!";
+    if (doesInteractionRequireFollowup(interaction)) {
+      await interaction.followUp(response);
+    } else {
+      await interaction.reply(response);
+    }
     return;
   }
   const time = await saltUp(
@@ -105,16 +112,23 @@ export async function addSalt(
     fromAdmin,
   );
   if (time === 0) {
-    await interaction.reply(
-      `Successfully reported ${reportedUser} for being salty!`,
-    );
+    const response = `Successfully reported ${reportedUser} for being salty!`;
+    if (doesInteractionRequireFollowup(interaction)) {
+      await interaction.followUp(response);
+    } else {
+      await interaction.reply(response);
+    }
+
     return;
   }
-  await interaction.reply(
-    `You can report ${reportedUser} again in ${
-      59 - Math.floor((time * 60) % 60)
-    } min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`,
-  );
+  const response = `You can report ${reportedUser} again in ${
+    59 - Math.floor((time * 60) % 60)
+  } min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`;
+  if (doesInteractionRequireFollowup(interaction)) {
+    await interaction.followUp(response);
+  } else {
+    await interaction.reply(response);
+  }
 }
 
 async function getMemberSaltInfo(
