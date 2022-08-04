@@ -35,12 +35,14 @@ export async function saltGuild(
     guild: guildID,
   });
   if (!user) {
-    const myobj = new SaltrankModel({
-      salter,
-      salt: 1,
-      guild: guildID,
-    });
-    await myobj.save();
+    if (!reset) {
+      const myobj = new SaltrankModel({
+        salter,
+        salt: 1,
+        guild: guildID,
+      });
+      await myobj.save();
+    }
   } else {
     const slt = user.salt + add;
     if (slt <= 0 || reset) {
