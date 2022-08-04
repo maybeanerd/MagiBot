@@ -175,7 +175,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
     .addSubcommand((subcommand) => subcommand
       .setName('set')
       .setDescription('Set someones joinsound.')
-      .addAttachmentOption((option) => option
+      .addUserOption((option) => option
         .setName(JoinsoundOptions.user)
         .setDescription('The user you want to set the sound for.')
         .setRequired(true))
