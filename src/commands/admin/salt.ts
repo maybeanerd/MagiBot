@@ -37,7 +37,7 @@ async function clearSaltOfUser(userid: string, G: Guild) {
     guild: guildID,
     salter: userid,
   });
-  await saltGuild(userid, guildID, 1, true);
+  await saltGuild(userid, guildID, 0, true);
 }
 
 async function resetSaltOfGuild(interaction: CommandInteraction) {
