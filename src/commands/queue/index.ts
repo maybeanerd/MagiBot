@@ -4,10 +4,11 @@ import {
   TextChannel,
   Message,
   ButtonInteraction,
-
+  MessageActionRow,
+  MessageButton,
 } from 'discord.js';
-import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
-import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from '@discordjs/builders';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   asyncWait,
   buttonInteractionId,
@@ -32,13 +33,12 @@ export const enum typeOfQueueAction {
   leave = 'leave',
 }
 
-async function startQueue(
-  interaction: CommandInteraction,
-  topic: string,
-) {
+async function startQueue(interaction: CommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
-  const originalMessage = (await interaction.followUp('Creating Queue...'))as Message;
+  const originalMessage = (await interaction.followUp(
+    'Creating Queue...',
+  )) as Message;
 
   const createdQueue = await tryToCreateQueue(
     guild.id,
@@ -55,45 +55,39 @@ async function startQueue(
     return;
   }
 
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
-        )
-        .setLabel('Next User')
-        .setStyle(ButtonStyle.Primary),
-    )
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
-        )
-        .setLabel('End Queue')
-        .setStyle(ButtonStyle.Secondary),
-    );
+  const row = new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
+      )
+      .setLabel('Next User')
+      .setStyle('PRIMARY'),
+    new MessageButton()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
+      )
+      .setLabel('End Queue')
+      .setStyle('SECONDARY'),
+  );
 
-  const rowTwo = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
-        )
-        .setLabel('Join Queue')
-        .setStyle(ButtonStyle.Success),
-    )
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
-        )
-        .setLabel('Leave Queue')
-        .setStyle(ButtonStyle.Secondary),
-    );
+  const rowTwo = new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
+      )
+      .setLabel('Join Queue')
+      .setStyle('SUCCESS'),
+    new MessageButton()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
+      )
+      .setLabel('Leave Queue')
+      .setStyle('SECONDARY'),
+  );
 
   await originalMessage.edit({
     content: `Queue **${topic}** :\n\nUse the buttons below to join the queue!`,
-    components: [row as any, rowTwo as any], // TODO fix these types?
+    components: [row, rowTwo],
   });
 }
 
