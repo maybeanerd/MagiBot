@@ -179,7 +179,7 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setName(JoinsoundOptions.user)
         .setDescription('The user you want to set the sound for.')
         .setRequired(true))
-      .addAttachmentOption((option) => option
+      .addStringOption((option) => option
         .setName(JoinsoundOptions.directUrl)
         .setDescription(
           'A direct link to the sound you want to use. Max length of 8 seconds.',
