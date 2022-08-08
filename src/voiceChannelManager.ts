@@ -31,14 +31,13 @@ function clearConnectionAndPlayer(
   connection: VoiceConnection,
   player: AudioPlayer,
   // eslint-disable-next-line no-undef
-  timeoutId?: NodeJS.Timeout,
+  timeout?: NodeJS.Timeout,
 ) {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+  if (timeout) {
+    clearTimeout(timeout);
   }
-  player.removeAllListeners(); // To be sure noone listens to this anymore
-  player.stop();
   connection.destroy();
+  player.removeAllListeners().stop(true);// To be sure noone listens to this anymore
 }
 
 export async function onVoiceStateChange(
@@ -103,19 +102,19 @@ export async function onVoiceStateChange(
             // 8 seconds is max play time:
             // so when something goes wrong this will time out latest 4 seconds after;
             // this also gives the bot 4 seconds to connect and start playing when it actually works
-            const timeoutID = setTimeout(() => {
+            const timeout = setTimeout(() => {
               clearConnectionAndPlayer(connection, player);
             }, 12 * 1000);
             player.on('stateChange', (state) => {
               if (state.status === AudioPlayerStatus.Playing) {
                 if (state.playbackDuration > 0) {
                   // this occurs *after* the sound has finished
-                  clearConnectionAndPlayer(connection, player, timeoutID);
+                  clearConnectionAndPlayer(connection, player, timeout);
                 }
               }
             });
             player.on('error', (err) => {
-              clearConnectionAndPlayer(connection, player, timeoutID);
+              clearConnectionAndPlayer(connection, player, timeout);
               catchErrorOnDiscord(
                 `**Dispatcher Error (${
                   (err.toString && err.toString()) || 'NONE'

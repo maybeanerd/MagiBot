@@ -41,9 +41,8 @@ const intents = [
 
 export const bot = new Client({ intents });
 // post to the APIs every 30 minutes
-if (config.blapis) {
-  handle(bot, config.blapis, 30);
-}
+handle(bot, config.blapis, 30);
+
 process.on('uncaughtException', async (err) => {
   console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
   await catchErrorOnDiscord(
