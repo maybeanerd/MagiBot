@@ -90,7 +90,7 @@ async function runCommand(interaction: CommandInteraction) {
     isShadowBanned(interaction.member!.user.id, guild.id, guild.ownerId)
     !== shadowBannedLevel.not
   ) {
-    interaction.followUp('You cant do this.');
+    interaction.followUp('You can\'t do this.');
     return;
   }
 
@@ -103,8 +103,8 @@ async function runCommand(interaction: CommandInteraction) {
 
   if (subcommand === 'set') {
     const user = interaction.options.getUser(JoinsoundOptions.user, true);
-    const attachment = interaction.options.getString(
-      JoinsoundOptions.directUrl,
+    const attachment = interaction.options.getAttachment(
+      JoinsoundOptions.soundFile,
       true,
     );
     validateAndSaveJoinsound(attachment, interaction, false, user);
@@ -179,8 +179,8 @@ function registerSlashCommand(builder: SlashCommandBuilder) {
         .setName(JoinsoundOptions.user)
         .setDescription('The user you want to set the sound for.')
         .setRequired(true))
-      .addStringOption((option) => option
-        .setName(JoinsoundOptions.directUrl)
+      .addAttachmentOption((option) => option
+        .setName(JoinsoundOptions.soundFile)
         .setDescription(
           'A direct link to the sound you want to use. Max length of 8 seconds.',
         )

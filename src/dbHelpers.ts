@@ -33,6 +33,13 @@ export async function getUser(userid: string, guildID: string) {
   return result;
 }
 
+export async function getUserInAllGuilds(userid: string) {
+  const result = await UserModel.find({
+    userID: userid,
+  });
+  return result;
+}
+
 export async function getGlobalUser(userId: string) {
   const result = await GlobalUserDataModel.findOneAndUpdate(
     {

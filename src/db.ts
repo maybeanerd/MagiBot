@@ -148,7 +148,7 @@ saltSchema.index({
 export const SaltModel = mongoose.model<Salt>('salt', saltSchema);
 
 // userdata per user per guild
-type User = {
+export type User = {
   userID: string;
   guildID: string;
   botusage: number;
@@ -226,7 +226,7 @@ UserModel.aggregate([
 });
 
 // global/default values for a specific user
-type globalUser = {
+export type globalUser = {
   userID: string;
   sound?: string;
   soundTitle?: string;
