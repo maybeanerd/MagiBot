@@ -7,6 +7,7 @@ import {
   getConfiguration,
   getUser,
   removeAllJoinsoundsOfUserFromDb,
+  getUserInAllGuilds,
 } from '../../dbHelpers';
 import {
   getJoinsoundReadableStreamOfUser,
@@ -20,11 +21,11 @@ import {
 } from './fileManagement';
 import { asyncForEach, interactionConfirmation } from '../../helperFunctions';
 import { DeferReply } from '../../types/command';
+import { globalUser, User as UserInDb } from '../../db';
 
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundOptions {
   'soundFile' = 'sound-file',
-  'directUrl' = 'direct-url',
   'user' = 'user',
 }
 
@@ -135,7 +136,7 @@ export async function removeDefaultGuildJoinsound(guildId: string) {
 }
 
 export async function validateAndSaveJoinsound(
-  attachmentOrUrl: MessageAttachment | string,
+  attachment: MessageAttachment,
   interaction: CommandInteraction,
   setDefault: boolean,
   user?: User,
@@ -144,27 +145,21 @@ export async function validateAndSaveJoinsound(
   if (setDefault && user) {
     throw new Error('Cant set-default sounds for others!');
   }
-  let soundUrl: string;
-  let locallyStored = true;
-  if (typeof attachmentOrUrl === 'string') {
-    soundUrl = attachmentOrUrl;
-    locallyStored = false;
-  } else {
-    const isAudioFile = attachmentOrUrl.contentType?.startsWith('audio/');
-    if (!isAudioFile) {
-      interaction.followUp('The file you sent is not an audio file!');
-      return;
-    }
-    if (attachmentOrUrl.size > maximumSingleFileSize) {
-      interaction.followUp(
-        `The file you sent is larger than ${
-          maximumSingleFileSize / 1024
-        } KB, which is the limit per file!`,
-      );
-      return;
-    }
-    soundUrl = attachmentOrUrl.url;
+
+  const isAudioFile = attachment.contentType?.startsWith('audio/');
+  if (!isAudioFile) {
+    interaction.followUp('The file you sent is not an audio file!');
+    return;
   }
+  if (attachment.size > maximumSingleFileSize) {
+    interaction.followUp(
+      `The file you sent is larger than ${
+        maximumSingleFileSize / 1024
+      } KB, which is the limit per file!`,
+    );
+    return;
+  }
+  const soundUrl = attachment.url;
 
   const sound = await ffprobe(soundUrl, {
     path: ffProbePath,
@@ -207,6 +202,8 @@ export async function validateAndSaveJoinsound(
   const userId = user ? user.id : interaction.member!.user.id;
 
   let error: JoinsoundStoreError | null;
+
+  const locallyStored = true; // we only support downloading the files
 
   if (defaultForGuildId) {
     error = await setDefaultGuildJoinsound(
@@ -315,6 +312,19 @@ export async function removeAllJoinsoundsOfUser(
   confirmed.followUp('Successfully removed all of your joinsounds!');
 }
 
+function getJoinsoundOfUserEntry(user: UserInDb | globalUser) {
+  if (user.soundTitle) {
+    return user.soundTitle;
+  }
+  if (user.sound) {
+    return user.sound.slice(-30);
+  }
+  return false;
+}
+
+const defaultJoinsoundValue = 'None set.';
+const maxEmbedCharacters = 4096;
+
 export async function getJoinsoundOverviewOfUser(
   interaction: CommandInteraction,
 ) {
@@ -325,28 +335,48 @@ export async function getJoinsoundOverviewOfUser(
 
   const member = await guild.members.fetch(userId)!;
 
-  const defaultJoinsound = (await getGlobalUser(userId)).soundTitle;
-  const guildJoinsound = (await getUser(userId, guildId)).soundTitle;
+  const defaultUser = await getGlobalUser(userId);
+  // get user for this guild extra as this will create the user entry if it doesn't exist
+  const userInThisGuild = await getUser(userId, guildId);
+  const userInAllGuilds = await getUserInAllGuilds(userId);
   const storageUsed = await getSpaceUsedByTarget({ userId, guildId });
 
   const info: Array<APIEmbedField> = [];
 
   info.push({
-    name: 'Default Joinsound',
-    value: defaultJoinsound || 'None',
-    inline: false,
-  });
-
-  info.push({
-    name: 'Joinsound on this Guild',
-    value: guildJoinsound || 'None',
-    inline: false,
-  });
-  info.push({
     name: 'Storage Used by Joinsounds',
     value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${
       joinsoundStorageUserLimit / 1024
     } KB`,
+    inline: false,
+  });
+
+  info.push({
+    name: 'Default Joinsound',
+    value: getJoinsoundOfUserEntry(defaultUser) || defaultJoinsoundValue,
+    inline: false,
+  });
+
+  info.push({
+    name: 'Joinsound on this guild',
+    value: getJoinsoundOfUserEntry(userInThisGuild) || defaultJoinsoundValue,
+    inline: false,
+  });
+
+  let soundNames = '';
+  userInAllGuilds.forEach((userEntry) => {
+    if (userEntry.guildID === guildId) {
+      return;
+    }
+    const soundName = getJoinsoundOfUserEntry(userEntry);
+    if (soundName) {
+      soundNames += `${soundName}\n`;
+    }
+  });
+
+  info.push({
+    name: 'Joinsounds on other guilds',
+    value: (soundNames || defaultJoinsoundValue).slice(0, maxEmbedCharacters),
     inline: false,
   });
 

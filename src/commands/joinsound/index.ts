@@ -11,22 +11,6 @@ import {
   validateAndSaveJoinsound,
 } from './management';
 
-async function getSoundFromInteraction(interaction: CommandInteraction) {
-  const attachment = interaction.options.getAttachment(
-    JoinsoundOptions.soundFile,
-  );
-  if (attachment) {
-    return attachment;
-  }
-  const fileUrl = interaction.options.getString(JoinsoundOptions.directUrl);
-  if (fileUrl) {
-    return fileUrl;
-  }
-
-  interaction.followUp('You need to either pass a file or URL!');
-  return null;
-}
-
 const slashCommand = new SlashCommandBuilder()
   .setName('joinsound')
   .setDescription('Manage your joinsounds.')
@@ -38,12 +22,8 @@ const slashCommand = new SlashCommandBuilder()
       .setName(JoinsoundOptions.soundFile)
       .setDescription(
         'The sound you want to use. Mp3 or wav, max length of 8 seconds.',
-      ))
-    .addStringOption((option) => option
-      .setName(JoinsoundOptions.directUrl)
-      .setDescription(
-        'A direct link to the sound you want to use. Max length of 8 seconds.',
-      )))
+      )
+      .setRequired(true)))
   .addSubcommand((subcommand) => subcommand.setName('remove').setDescription('Remove your joinsound.'))
   .addSubcommand((subcommand) => subcommand
     .setName('set-default')
@@ -84,18 +64,18 @@ async function runCommand(interaction: CommandInteraction) {
     | 'overview';
 
   if (subcommand === 'set') {
-    const attachment = await getSoundFromInteraction(interaction);
-    if (!attachment) {
-      return;
-    }
+    const attachment = interaction.options.getAttachment(
+      JoinsoundOptions.soundFile,
+      true,
+    );
     await validateAndSaveJoinsound(attachment, interaction, false);
     return;
   }
   if (subcommand === 'set-default') {
-    const attachment = await getSoundFromInteraction(interaction);
-    if (!attachment) {
-      return;
-    }
+    const attachment = interaction.options.getAttachment(
+      JoinsoundOptions.soundFile,
+      true,
+    );
     await validateAndSaveJoinsound(attachment, interaction, true);
     return;
   }
