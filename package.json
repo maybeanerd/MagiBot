@@ -44,7 +44,7 @@
     "@types/node": "16.11.49",
     "@typescript-eslint/eslint-plugin": "5.37.0",
     "@typescript-eslint/parser": "5.37.0",
-    "eslint": "8.23.0",
+    "eslint": "8.23.1",
     "eslint-config-airbnb-base": "15.0.0",
     "prettier": "2.7.1",
     "rimraf": "3.0.2",
