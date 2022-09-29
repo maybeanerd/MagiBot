@@ -19,7 +19,7 @@
     "bufferutil": "^4.0.6",
     "discord-api-types": "0.37.11",
     "discord.js": "13.11.0",
-    "dotenv": "16.0.2",
+    "dotenv": "16.0.3",
     "fast-folder-size": "1.7.1",
     "ffmpeg-static": "5.1.0",
     "ffprobe": "1.1.2",
