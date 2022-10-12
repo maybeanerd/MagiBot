@@ -13,7 +13,7 @@
   "dependencies": {
     "@discordjs/builders": "1.3.0",
     "@discordjs/rest": "1.3.0",
-    "@discordjs/voice": "0.11.0",
+    "@discordjs/voice": "0.13.0",
     "axios": "^1.0.0",
     "blapi": "3.0.0",
     "bufferutil": "^4.0.6",
