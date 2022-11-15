@@ -30,7 +30,7 @@
     "opusscript": "0.0.8",
     "statcord.js": "3.4.3",
     "tweetnacl": "^1.0.3",
-    "utf-8-validate": "^5.0.9"
+    "utf-8-validate": "^5.0.10"
   },
   "optionalDependencies": {
     "@discordjs/opus": "^0.9.0",
