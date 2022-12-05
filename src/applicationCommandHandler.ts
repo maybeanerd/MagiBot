@@ -3,10 +3,17 @@ import Discord from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { bot } from './bot'; */
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { usageUp } from './commandHandler';
 import { globalApplicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
 import { doesInteractionRequireFollowup } from './helperFunctions';
+import { getUser } from './dbHelpers';
+
+export async function usageUp(userid: string, guildID: string) {
+  const usr = await getUser(userid, guildID);
+  const updateval = usr.botusage + 1;
+  usr.botusage = updateval;
+  await usr.save();
+}
 
 async function catchError(
   error: Error,
@@ -33,7 +40,7 @@ export async function checkApplicationCommand(
   interaction: Discord.CommandInteraction,
 ) {
   if (
-    !(interaction.member && interaction.guild && interaction.guild.me)
+    !(interaction.member && interaction.guild && interaction.guild.members.me)
   ) {
     // check for valid message
     console.error('Invalid interaction received:', interaction);
@@ -51,7 +58,7 @@ export async function checkApplicationCommand(
       // check for all needed permissions
       const botPermissions = (
         interaction.channel as Discord.TextChannel
-      ).permissionsFor(interaction.guild.me);
+      ).permissionsFor(interaction.guild.members.me);
       if (!botPermissions.has(permissions)) {
         await interaction.reply(
           `I am missing permissions for this command. I require all of the following:\n${permissions}`,

@@ -1,14 +1,13 @@
-import Discord, {
+import {
   Client, DiscordAPIError, Guild, Intents,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
+import { ActivityType } from 'discord-api-types/v10';
 import config from './configuration';
 import {
   PREFIXES, TOKEN, setUser, resetPrefixes,
 } from './shared_assets';
-// eslint-disable-next-line import/no-cycle
-import { checkCommand } from './commandHandler';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { checkGuild, getPrefix } from './dbHelpers';
@@ -86,22 +85,13 @@ bot.on('ready', async () => {
     activities: [
       {
         name: '/help',
-        type: 'WATCHING',
         url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
+        type: ActivityType.Watching,
       },
     ],
     status: 'online',
   });
   initializePrefixes(bot);
-});
-
-// TODO move to messageCreate, or just remove this entirely
-bot.on('message', async (message: Discord.Message) => {
-  try {
-    await checkCommand(message);
-  } catch (err) {
-    console.error(err);
-  }
 });
 
 bot.on('interactionCreate', async (interaction) => {
