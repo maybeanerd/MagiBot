@@ -1,6 +1,6 @@
 import {
   ChatInputCommandInteraction,
-  Client, DiscordAPIError, Guild, IntentsBitField,
+  Client, DiscordAPIError, GatewayIntentBits, Guild,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
@@ -30,13 +30,13 @@ async function initializePrefixes(bot: Client) {
 }
 
 const intents = [
-  IntentF,
-  Intents.FLAGS.GUILD_INTEGRATIONS,
-  Intents.FLAGS.GUILD_VOICE_STATES,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  Intents.FLAGS.DIRECT_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildIntegrations,
+  GatewayIntentBits.GuildVoiceStates,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildMessageReactions,
+  GatewayIntentBits.DirectMessages,
+  GatewayIntentBits.DirectMessageReactions,
 ];
 
 export const bot = new Client({ intents });
