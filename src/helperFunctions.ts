@@ -112,7 +112,7 @@ export async function interactionConfirmation(
     new ButtonBuilder()
       .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-yes`)
       .setLabel('Yes')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
       .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
       .setLabel('No')

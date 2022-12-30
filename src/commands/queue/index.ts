@@ -76,7 +76,7 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
         `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
       )
       .setLabel('Join Queue')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
       .setCustomId(
         `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
