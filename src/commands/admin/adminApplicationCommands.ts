@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import {
   MagibotAdminSlashCommand,
   MagibotSlashCommand,
@@ -32,7 +32,7 @@ Object.values(adminApplicationCommands).forEach((command) => {
   command.registerSlashCommand(adminApplicationCommandBase);
 });
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommandGroup = interaction.options.getSubcommandGroup(true);
   const command = adminApplicationCommands[subcommandGroup];
   // we assume the command exists, but just in case

@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction, GuildMember } from 'discord.js';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
@@ -84,7 +84,7 @@ const acticateJoinsoundsInChannelChoices: Array<
   { name: 'disable joinsounds in connected voicechannel', value: 'disable' },
 ];
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const guild = interaction.guild!;
   if (
     isShadowBanned(interaction.member!.user.id, guild.id, guild.ownerId)

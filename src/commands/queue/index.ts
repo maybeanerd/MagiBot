@@ -70,24 +70,24 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
         .setStyle(ButtonStyle.Secondary),
     );
 
-  const rowTwo = new MessageActionRow().addComponents(
-    new MessageButton()
+  const rowTwo = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
       .setCustomId(
         `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.join}`,
       )
       .setLabel('Join Queue')
-      .setStyle('SUCCESS'),
-    new MessageButton()
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
       .setCustomId(
         `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.leave}`,
       )
       .setLabel('Leave Queue')
-      .setStyle('SECONDARY'),
+      .setStyle(ButtonStyle.Secondary),
   );
 
   await originalMessage.edit({
     content: `Queue **${topic}** :\n\nUse the buttons below to join the queue!`,
-    components: [row, rowTwo],
+    components: [row as any, rowTwo], // somehow types are not fully compatible
   });
 }
 

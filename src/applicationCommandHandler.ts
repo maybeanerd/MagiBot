@@ -37,7 +37,7 @@ If you can reproduce this, consider using \`/bugreport\` or join the support dis
 }
 
 export async function checkApplicationCommand(
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
 ) {
   if (
     !(interaction.member && interaction.guild && interaction.guild.members.me)

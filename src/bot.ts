@@ -1,5 +1,6 @@
 import {
-  Client, DiscordAPIError, Guild, Intents,
+  ChatInputCommandInteraction,
+  Client, DiscordAPIError, Guild, IntentsBitField,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
@@ -29,7 +30,7 @@ async function initializePrefixes(bot: Client) {
 }
 
 const intents = [
-  Intents.FLAGS.GUILDS,
+  IntentF,
   Intents.FLAGS.GUILD_INTEGRATIONS,
   Intents.FLAGS.GUILD_VOICE_STATES,
   Intents.FLAGS.GUILD_MESSAGES,
@@ -104,7 +105,7 @@ bot.on('interactionCreate', async (interaction) => {
   }
   if (interaction.isCommand()) {
     try {
-      await checkApplicationCommand(interaction);
+      await checkApplicationCommand(interaction as ChatInputCommandInteraction);
     } catch (err) {
       console.error(err);
     }
