@@ -8,7 +8,7 @@ import Discord from 'discord.js';
 type MagibotSlashCommandBase = {
   permissions: Discord.PermissionResolvable[];
   run: (
-    interaction: Discord.CommandInteraction
+    interaction: Discord.ChatInputCommandInteraction
   ) => Promise<void | null> | void | null; // allow null to allow for "empty" returns
 };
 
