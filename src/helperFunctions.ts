@@ -1,10 +1,10 @@
+import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
 import Discord, {
   ButtonInteraction,
+  ButtonStyle,
   CommandInteraction,
   InteractionReplyOptions,
   Message,
-  MessageActionRow,
-  MessageButton,
   MessageComponentInteraction,
 } from 'discord.js';
 import { user } from './shared_assets';
@@ -108,15 +108,15 @@ export async function interactionConfirmation(
   timeoutMessage: string = 'Timeouted.',
   timeoutTime: number = 20000,
 ): Promise<MessageComponentInteraction | null> {
-  const row = new MessageActionRow().addComponents(
-    new MessageButton()
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
       .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-yes`)
       .setLabel('Yes')
-      .setStyle('SUCCESS'),
-    new MessageButton()
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
       .setCustomId(`${buttonInteractionId.confirmation}-${interaction.id}-no`)
       .setLabel('No')
-      .setStyle('DANGER'),
+      .setStyle(ButtonStyle.Danger),
   );
 
   // always prefer ephemeral where possible
@@ -124,7 +124,7 @@ export async function interactionConfirmation(
 
   const messageContent: InteractionReplyOptions = {
     content: question,
-    components: [row],
+    components: [row as any], // type is incompatible for now
     ephemeral,
   };
   if (doesInteractionRequireFollowup(interaction)) {
