@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  main:
+    build: .
+    environment:
+      - TOKEN=${TOKEN}
+      - OWNERID=${OWNERID}
+      - DATABASE_URL=${DATABASE_URL}
+      - STATCORD_TOKEN=${STATCORD_TOKEN}
+      - APP_ID=${APP_ID}
+
+      # webhook tokens
+      - WEBHOOK_ID_EX=${WEBHOOK_ID_EX}
+      - WEBHOOK_TOKEN_EX=${WEBHOOK_TOKEN_EX}
+      - WEBHOOK_ID_JOIN=${WEBHOOK_ID_JOIN}
+      - WEBHOOK_TOKEN_JOIN=${WEBHOOK_TOKEN_JOIN}
+      - WEBHOOK_ID_BUG=${WEBHOOK_ID_BUG}
+      - WEBHOOK_TOKEN_BUG=${WEBHOOK_TOKEN_BUG}
+      - WEBHOOK_ID_STARTUP=${WEBHOOK_ID_STARTUP}
+      - WEBHOOK_TOKEN_STARTUP=${WEBHOOK_TOKEN_STARTUP}
