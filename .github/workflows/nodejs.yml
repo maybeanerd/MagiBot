@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  lint&build:
+  nodeJS:
     runs-on: ubuntu-latest
 
     strategy:
