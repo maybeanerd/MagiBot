@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  lint&build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -31,13 +31,13 @@ jobs:
       - name: test
         run: npm run test --if-present
 
-  docker:
+  container:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Start containers
+      - name: Build & Start containers
         run: docker-compose up -d --build
       - name: Stop containers
         if: always()
