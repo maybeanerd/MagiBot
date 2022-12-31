@@ -1,0 +1,42 @@
+name: Release to dev
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: See if ownerid is defined
+        if: "${{ env.OWNERID != '' }}"
+        run: echo "This command is executed if OWNERID secret IS NOT empty, and it is $OWNERID"
+        env:
+          OWNERID: ${{ secrets.OWNERID }}
+      - name: Build & Start containers
+        run: docker compose up -d --build
+        env:
+          TEST: test value to see
+          TOKEN: ${{ secrets.TOKEN }}
+          OWNERID: ${{ secrets.OWNERID }}
+          PREFIX: ${{ secrets.PREFIX }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STATCORD_TOKEN: ${{ secrets.STATCORD_TOKEN }}
+          APP_ID: ${{ secrets.APP_ID }}
+          WEBHOOK_ID_EX: ${{ secrets.WEBHOOK_ID_EX }}
+          WEBHOOK_TOKEN_EX: ${{ secrets.WEBHOOK_TOKEN_EX }}
+          WEBHOOK_ID_JOIN: ${{ secrets.WEBHOOK_ID_JOIN }}
+          WEBHOOK_TOKEN_JOIN: ${{ secrets.WEBHOOK_TOKEN_JOIN }}
+          WEBHOOK_ID_BUG: ${{ secrets.WEBHOOK_ID_BUG }}
+          WEBHOOK_TOKEN_BUG: ${{ secrets.WEBHOOK_TOKEN_BUG }}
+          WEBHOOK_ID_STARTUP: ${{ secrets.WEBHOOK_ID_STARTUP }}
+          WEBHOOK_TOKEN_STARTUP: ${{ secrets.WEBHOOK_TOKEN_STARTUP }}
+      # TODO deploy container
+      - name: Stop containers
+        if: always()
+        run: docker-compose down

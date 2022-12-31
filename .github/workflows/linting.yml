@@ -1,15 +1,15 @@
-name: Node CI
+name: Linting
 
 on: 
-  pull_request: 
-    branches: 
-      - '**'
   push:
     branches:
       - main
+  pull_request: 
+    branches: 
+      - '**'
 
 jobs:
-  build:
+  lint_and_typecheck:
     runs-on: ubuntu-latest
 
     strategy:

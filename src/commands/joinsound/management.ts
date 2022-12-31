@@ -1,5 +1,4 @@
 import ffprobe from 'ffprobe';
-import { path as ffProbePath } from 'ffprobe-static';
 import { CommandInteraction, MessageAttachment, User } from 'discord.js';
 import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
 import {
@@ -135,6 +134,8 @@ export async function removeDefaultGuildJoinsound(guildId: string) {
   return setDefaultGuildJoinsound(guildId, undefined, true);
 }
 
+const defaultFFProbeLocation = '/usr/bin/ffprobe';
+
 export async function validateAndSaveJoinsound(
   attachment: MessageAttachment,
   interaction: CommandInteraction,
@@ -162,7 +163,7 @@ export async function validateAndSaveJoinsound(
   const soundUrl = attachment.url;
 
   const sound = await ffprobe(soundUrl, {
-    path: ffProbePath,
+    path: defaultFFProbeLocation,
   }).catch((error) => {
     console.error(error);
   });
