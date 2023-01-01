@@ -8,7 +8,6 @@ RUN apt-get install -y ffmpeg
 
 # Intall dependencies
 COPY ["package.json", "package-lock.json*", "./"]
-ENV TEST=HI
 RUN npm ci
 
 # Build
