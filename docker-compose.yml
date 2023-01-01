@@ -2,6 +2,8 @@ version: "3.9"
 services:
   main:
     build: .
+    volumes:
+      - main:/app
     environment:
       - TOKEN=${TOKEN}
       - OWNERID=${OWNERID}
@@ -9,7 +11,7 @@ services:
       - STATCORD_TOKEN=${STATCORD_TOKEN}
       - APP_ID=${APP_ID}
 
-      # webhook tokens
+      # discord webhook tokens
       - WEBHOOK_ID_EX=${WEBHOOK_ID_EX}
       - WEBHOOK_TOKEN_EX=${WEBHOOK_TOKEN_EX}
       - WEBHOOK_ID_JOIN=${WEBHOOK_ID_JOIN}
@@ -18,3 +20,5 @@ services:
       - WEBHOOK_TOKEN_BUG=${WEBHOOK_TOKEN_BUG}
       - WEBHOOK_ID_STARTUP=${WEBHOOK_ID_STARTUP}
       - WEBHOOK_TOKEN_STARTUP=${WEBHOOK_TOKEN_STARTUP}
+volumes:
+  main:
