@@ -1,0 +1,21 @@
+name: Release to production
+
+on: 
+  release:
+
+env:
+  release_environment: prod
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build & Start containers
+        run: docker-compose up -d --build
+      # TODO deploy container
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
