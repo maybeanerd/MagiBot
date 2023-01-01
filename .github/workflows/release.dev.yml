@@ -6,6 +6,13 @@ on:
       - main
 
 jobs:
+  testforenvvars:
+    steps:
+      env:
+        MY_KEY: ${{ secrets.OWNERID }}
+      if: "${{ env.MY_KEY != '' }}"
+      run: echo "This command is executed if OWNERID secret IS NOT empty"
+
   container:
     runs-on: ubuntu-latest
     environment: dev
@@ -14,7 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build & Start containers
-        run: docker-compose up -d --build
         env:
           TOKEN: ${{ secrets.TOKEN }}
           OWNERID: ${{ secrets.OWNERID }}
@@ -30,6 +36,7 @@ jobs:
           WEBHOOK_TOKEN_BUG: ${{ secrets.WEBHOOK_TOKEN_BUG }}
           WEBHOOK_ID_STARTUP: ${{ secrets.WEBHOOK_ID_STARTUP }}
           WEBHOOK_TOKEN_STARTUP: ${{ secrets.WEBHOOK_TOKEN_STARTUP }}
+        run: docker-compose up -d --build
       # TODO deploy container
       - name: Stop containers
         if: always()
