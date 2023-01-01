@@ -15,12 +15,7 @@ jobs:
         uses: actions/checkout@v3
       - name: See if ownerid is defined
         if: "${{ env.OWNERID != '' }}"
-        run: echo "This command is executed if OWNERID secret IS NOT empty"
-        env:
-          OWNERID: ${{ secrets.OWNERID }}
-      - name: See if ownerid is not defined
-        if: "${{ env.OWNERID == '' }}"
-        run: echo "This command is executed if OWNERID secret IS empty"
+        run: echo "This command is executed if OWNERID secret IS NOT empty, and it is $OWNERID"
         env:
           OWNERID: ${{ secrets.OWNERID }}
       - name: Build & Start containers
