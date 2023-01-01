@@ -6,13 +6,6 @@ on:
       - main
 
 jobs:
-  testforenvvars:
-    steps:
-      env:
-        MY_KEY: ${{ secrets.OWNERID }}
-      if: "${{ env.MY_KEY != '' }}"
-      run: echo "This command is executed if OWNERID secret IS NOT empty"
-
   container:
     runs-on: ubuntu-latest
     environment: dev
