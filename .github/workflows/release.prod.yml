@@ -3,12 +3,10 @@ name: Release to production
 on: 
   release:
 
-env:
-  release_environment: prod
-
 jobs:
   container:
     runs-on: ubuntu-latest
+    environment: prod
 
     steps:
       - name: Checkout

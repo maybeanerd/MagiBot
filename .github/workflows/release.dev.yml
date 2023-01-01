@@ -5,12 +5,10 @@ on:
     branches:
       - main
 
-env:
-  release_environment: dev
-
 jobs:
   container:
     runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout
