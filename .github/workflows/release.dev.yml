@@ -13,10 +13,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Build & Start containers
-        run: echo "ownerid: ${{ env.OWNERID }}"
+      - name: See if ownerid is defined
         env:
           OWNERID: ${{ secrets.OWNERID }}
+        if: "${{ env.OWNERID != '' }}"
+        run: echo "This command is executed if OWNERID secret IS NOT empty"
+      - name: See if ownerid is not defined
+        env:
+          OWNERID: ${{ secrets.OWNERID }}
+        if: "${{ env.OWNERID == '' }}"
+        run: echo "This command is executed if OWNERID secret IS empty"
       - name: Build & Start containers
         run: docker-compose up -d --build
         env:
