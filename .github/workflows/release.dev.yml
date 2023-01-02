@@ -19,8 +19,10 @@ jobs:
         env:
           OWNERID: ${{ secrets.OWNERID }}
       - name: Build & Start containers
-        run: docker-compose up -d --build
+        # run: docker compose up -d --build
+        run: docker compose convert # to see if env vars end up here
         env:
+          TEST: test value to see
           TOKEN: ${{ secrets.TOKEN }}
           OWNERID: ${{ secrets.OWNERID }}
           PREFIX: ${{ secrets.PREFIX }}
