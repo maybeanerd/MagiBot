@@ -3,8 +3,9 @@ services:
   main:
     build: .
     volumes:
-      - magibot-main:/app
+      - main:/app
     environment:
+      - TEST=${TEST}
       - TOKEN=${TOKEN}
       - OWNERID=${OWNERID}
       - DATABASE_URL=${DATABASE_URL}
@@ -21,4 +22,4 @@ services:
       - WEBHOOK_ID_STARTUP=${WEBHOOK_ID_STARTUP}
       - WEBHOOK_TOKEN_STARTUP=${WEBHOOK_TOKEN_STARTUP}
 volumes:
-  magibot-main:
+  main:
