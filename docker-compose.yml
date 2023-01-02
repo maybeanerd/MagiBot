@@ -5,7 +5,6 @@ services:
     volumes:
       - main:/app
     environment:
-      - TEST=${TEST}
       - TOKEN=${TOKEN}
       - OWNERID=${OWNERID}
       - DATABASE_URL=${DATABASE_URL}
