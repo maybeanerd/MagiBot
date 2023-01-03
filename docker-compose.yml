@@ -2,8 +2,9 @@ version: "3.9"
 services:
   main:
     build: .
+    image: ${IMAGE_NAME}
     volumes:
-      - main:/app
+      - joinsounds:/app/joinsounds
     environment:
       - TOKEN=${TOKEN}
       # TODO remove the need for this
@@ -23,4 +24,4 @@ services:
       - WEBHOOK_ID_STARTUP=${WEBHOOK_ID_STARTUP}
       - WEBHOOK_TOKEN_STARTUP=${WEBHOOK_TOKEN_STARTUP}
 volumes:
-  main:
+  joinsounds:

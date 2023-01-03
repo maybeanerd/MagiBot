@@ -13,7 +13,6 @@ RUN npm ci
 # Build
 COPY . .
 RUN npm run build
-# TODO mount external storage to store joinsounds
 
 # Start service
 CMD ["npm", "run", "start"]
