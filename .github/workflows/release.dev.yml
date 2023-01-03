@@ -10,18 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
 
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}-{{ secrets.ENVIRONMENT }}
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
       - name: See if ownerid is defined
         if: "${{ env.OWNERID != '' }}"
         run: echo "This command is executed if OWNERID secret IS NOT empty, and it is $OWNERID"
         env:
           OWNERID: ${{ secrets.OWNERID }}
+        
       - name: Build & Start containers
         run: docker compose up -d --build
         env:
-          TEST: test value to see
           TOKEN: ${{ secrets.TOKEN }}
           OWNERID: ${{ secrets.OWNERID }}
           PREFIX: ${{ secrets.PREFIX }}
@@ -36,7 +45,23 @@ jobs:
           WEBHOOK_TOKEN_BUG: ${{ secrets.WEBHOOK_TOKEN_BUG }}
           WEBHOOK_ID_STARTUP: ${{ secrets.WEBHOOK_ID_STARTUP }}
           WEBHOOK_TOKEN_STARTUP: ${{ secrets.WEBHOOK_TOKEN_STARTUP }}
-      # TODO deploy container
+
       - name: Stop containers
         if: always()
-        run: docker-compose down
+        run: docker compose down
+
+      - name: Log in to the Container registry
+        uses: docker/login-action
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Push Docker image
+        run: docker compose push
