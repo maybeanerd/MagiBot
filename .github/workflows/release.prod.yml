@@ -1,7 +1,9 @@
 name: Release to production
 
 on: 
-  release:
+  release:   
+    types: [published]
+
 
 jobs:
   container:
