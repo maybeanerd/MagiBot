@@ -6,9 +6,68 @@ on:
 jobs:
   container:
     runs-on: ubuntu-latest
+
     environment: prod
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+      IMAGE_NAME: ghcr.io/t0tproduction/magibot-main-${{ secrets.ENVIRONMENT }}
+      PROJECT_NAME: magibot-${{ secrets.ENVIRONMENT }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      # TODO copy from dev release, or use shared action for it?
+        
+      - name: Build containers
+        run: docker compose --project-name ${{ env.PROJECT_NAME }} build 
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.IMAGE_NAME }}
+       
+      - name: Push Docker image
+        run: docker push ${{ env.IMAGE_NAME }}
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }} 
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy stack
+        run: docker stack deploy --compose-file docker-compose.yml ${{ env.PROJECT_NAME }}
+        env:
+          # To deploy stack on remote swarm
+          DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          # Env vars required to run the stack
+          TOKEN: ${{ secrets.TOKEN }}
+          OWNERID: ${{ secrets.OWNERID }}
+          PREFIX: ${{ secrets.PREFIX }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STATCORD_TOKEN: ${{ secrets.STATCORD_TOKEN }}
+          APP_ID: ${{ secrets.APP_ID }}
+          WEBHOOK_ID_EX: ${{ secrets.WEBHOOK_ID_EX }}
+          WEBHOOK_TOKEN_EX: ${{ secrets.WEBHOOK_TOKEN_EX }}
+          WEBHOOK_ID_JOIN: ${{ secrets.WEBHOOK_ID_JOIN }}
+          WEBHOOK_TOKEN_JOIN: ${{ secrets.WEBHOOK_TOKEN_JOIN }}
+          WEBHOOK_ID_BUG: ${{ secrets.WEBHOOK_ID_BUG }}
+          WEBHOOK_TOKEN_BUG: ${{ secrets.WEBHOOK_TOKEN_BUG }}
+          WEBHOOK_ID_STARTUP: ${{ secrets.WEBHOOK_ID_STARTUP }}
+          WEBHOOK_TOKEN_STARTUP: ${{ secrets.WEBHOOK_TOKEN_STARTUP }}

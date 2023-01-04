@@ -8,11 +8,13 @@ on:
 jobs:
   container:
     runs-on: ubuntu-latest
+
     environment: dev
 
     permissions:
       contents: read
       packages: write
+
     env:
       REGISTRY: ghcr.io
       ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -38,10 +40,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.IMAGE_NAME }}
-  
-      #- name: Tag Docker image
-      #  run: docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}
-      
+       
       - name: Push Docker image
         run: docker push ${{ env.IMAGE_NAME }}
 
@@ -55,7 +54,6 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy stack
-        # run: docker stack deploy -c <(docker-compose config) ${{ env.PROJECT_NAME }}
         run: docker stack deploy --compose-file docker-compose.yml ${{ env.PROJECT_NAME }}
         env:
           # To deploy stack on remote swarm
