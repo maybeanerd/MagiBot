@@ -6,7 +6,6 @@ dotenv.config(); // load .env into environment
 const token = process.env.TOKEN;
 const appId = process.env.APP_ID;
 const owner = process.env.OWNERID;
-const prefix = process.env.PREFIX;
 const dburl = process.env.DATABASE_URL;
 let blapis: {
   [listname: string]: string;
@@ -22,14 +21,13 @@ try {
   blapis = {};
 }
 
-if (!(token && owner && prefix && dburl && appId)) {
+if (!(token && owner && dburl && appId)) {
   throw new Error('Missing .env configuration!');
 }
 
 export default {
   tk: token,
   owner,
-  prefix,
   dburl,
   blapis,
   appId,

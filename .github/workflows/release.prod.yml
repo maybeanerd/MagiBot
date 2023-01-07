@@ -61,7 +61,6 @@ jobs:
           # Env vars required to run the stack
           TOKEN: ${{ secrets.TOKEN }}
           OWNERID: ${{ secrets.OWNERID }}
-          PREFIX: ${{ secrets.PREFIX }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           STATCORD_TOKEN: ${{ secrets.STATCORD_TOKEN }}
           APP_ID: ${{ secrets.APP_ID }}

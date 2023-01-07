@@ -7,8 +7,6 @@ services:
       - joinsounds:/app/joinsounds
     environment:
       - TOKEN=${TOKEN}
-      # TODO remove the need for this
-      - PREFIX=${PREFIX}
       - OWNERID=${OWNERID}
       - DATABASE_URL=${DATABASE_URL}
       - STATCORD_TOKEN=${STATCORD_TOKEN}

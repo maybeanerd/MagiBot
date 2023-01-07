@@ -1,18 +1,17 @@
 import {
   ChatInputCommandInteraction,
-  Client, DiscordAPIError, GatewayIntentBits, Guild,
+  Client, DiscordAPIError, GatewayIntentBits,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
 import { ActivityType } from 'discord-api-types/v10';
 import config from './configuration';
 import {
-  PREFIXES, TOKEN, setUser, resetPrefixes,
+  TOKEN, setUser,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { checkGuild, getPrefix } from './dbHelpers';
-import { asyncForEach, getUserMention } from './helperFunctions';
+import { getUserMention } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
@@ -20,14 +19,6 @@ import { onVoiceStateChange } from './voiceChannelManager';
 import { onInteraction } from './commands/queue/buttonInteractions';
 
 console.log(generateDependencyReport());
-
-async function initializePrefixes(bot: Client) {
-  resetPrefixes();
-  const guilds = bot.guilds.cache;
-  asyncForEach(guilds, async (G) => {
-    PREFIXES.set(G.id, await getPrefix(G.id));
-  });
-}
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -92,7 +83,6 @@ bot.on('ready', async () => {
     ],
     status: 'online',
   });
-  initializePrefixes(bot);
 });
 
 bot.on('interactionCreate', async (interaction) => {
@@ -119,20 +109,11 @@ bot.on('interactionCreate', async (interaction) => {
   } */
 });
 
-async function guildPrefixStartup(guild: Guild) {
-  try {
-    await checkGuild(guild.id);
-    PREFIXES.set(guild.id, await getPrefix(guild.id));
-  } catch (err) {
-    console.error(err);
-  }
-}
-
 bot.on('guildCreate', async (guild) => {
   if (guild.available) {
-    await guildPrefixStartup(guild);
     const owner = await guild.fetchOwner();
     let sentWelcomeMessage;
+    // TODO migrate welcome message to channel instead of message to owner?
     try {
       await owner.send(
         `Hi there ${owner.displayName}.
