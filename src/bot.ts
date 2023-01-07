@@ -17,6 +17,7 @@ import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
 import { onInteraction } from './commands/queue/buttonInteractions';
+import { checkGuild } from './dbHelpers';
 
 console.log(generateDependencyReport());
 
@@ -110,6 +111,7 @@ bot.on('interactionCreate', async (interaction) => {
 });
 
 bot.on('guildCreate', async (guild) => {
+  await checkGuild(guild.id); // Create guild in database if it doesn't exist yet
   if (guild.available) {
     const owner = await guild.fetchOwner();
     let sentWelcomeMessage;
