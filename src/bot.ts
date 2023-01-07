@@ -1,18 +1,17 @@
-import Discord, {
-  Client, DiscordAPIError, Guild, Intents,
+import {
+  ChatInputCommandInteraction,
+  Client, DiscordAPIError, GatewayIntentBits,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
+import { ActivityType } from 'discord-api-types/v10';
 import config from './configuration';
 import {
-  PREFIXES, TOKEN, setUser, resetPrefixes,
+  TOKEN, setUser,
 } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
-import { checkCommand } from './commandHandler';
-// eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
-import { checkGuild, getPrefix } from './dbHelpers';
-import { asyncForEach, getUserMention } from './helperFunctions';
+import { getUserMention } from './helperFunctions';
 import { startUp } from './cronjobs';
 import { sendJoinEvent } from './webhooks';
 import { checkApplicationCommand } from './applicationCommandHandler';
@@ -21,22 +20,14 @@ import { onInteraction } from './commands/queue/buttonInteractions';
 
 console.log(generateDependencyReport());
 
-async function initializePrefixes(bot: Client) {
-  resetPrefixes();
-  const guilds = bot.guilds.cache;
-  asyncForEach(guilds, async (G) => {
-    PREFIXES.set(G.id, await getPrefix(G.id));
-  });
-}
-
 const intents = [
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_INTEGRATIONS,
-  Intents.FLAGS.GUILD_VOICE_STATES,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  Intents.FLAGS.DIRECT_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildIntegrations,
+  GatewayIntentBits.GuildVoiceStates,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildMessageReactions,
+  GatewayIntentBits.DirectMessages,
+  GatewayIntentBits.DirectMessageReactions,
 ];
 
 export const bot = new Client({ intents });
@@ -86,22 +77,12 @@ bot.on('ready', async () => {
     activities: [
       {
         name: '/help',
-        type: 'WATCHING',
         url: 'https://bots.ondiscord.xyz/bots/384820232583249921',
+        type: ActivityType.Watching,
       },
     ],
     status: 'online',
   });
-  initializePrefixes(bot);
-});
-
-// TODO move to messageCreate, or just remove this entirely
-bot.on('message', async (message: Discord.Message) => {
-  try {
-    await checkCommand(message);
-  } catch (err) {
-    console.error(err);
-  }
 });
 
 bot.on('interactionCreate', async (interaction) => {
@@ -114,7 +95,7 @@ bot.on('interactionCreate', async (interaction) => {
   }
   if (interaction.isCommand()) {
     try {
-      await checkApplicationCommand(interaction);
+      await checkApplicationCommand(interaction as ChatInputCommandInteraction);
     } catch (err) {
       console.error(err);
     }
@@ -128,20 +109,11 @@ bot.on('interactionCreate', async (interaction) => {
   } */
 });
 
-async function guildPrefixStartup(guild: Guild) {
-  try {
-    await checkGuild(guild.id);
-    PREFIXES.set(guild.id, await getPrefix(guild.id));
-  } catch (err) {
-    console.error(err);
-  }
-}
-
 bot.on('guildCreate', async (guild) => {
   if (guild.available) {
-    await guildPrefixStartup(guild);
     const owner = await guild.fetchOwner();
     let sentWelcomeMessage;
+    // TODO migrate welcome message to channel instead of message to owner?
     try {
       await owner.send(
         `Hi there ${owner.displayName}.

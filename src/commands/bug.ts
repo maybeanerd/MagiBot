@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import { getUserMention, interactionConfirmation } from '../helperFunctions';
 import { MagibotSlashCommand } from '../types/command';
 import { sendBugreport } from '../webhooks';
@@ -38,7 +38,7 @@ async function main(interaction: CommandInteraction, input: string) {
 
 export const bugreport: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const input = interaction.options.getString('description', true);
     return main(interaction, input);
   },

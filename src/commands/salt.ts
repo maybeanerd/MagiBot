@@ -1,4 +1,6 @@
-import { CommandInteraction, Guild, User } from 'discord.js';
+import {
+  ChatInputCommandInteraction, CommandInteraction, Guild, User,
+} from 'discord.js';
 import { APIEmbed } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MagibotSlashCommand } from '../types/command';
@@ -198,7 +200,7 @@ const slashCommand = new SlashCommandBuilder()
     .setName('ranking')
     .setDescription('Get the current ranking of saltyness on this server.'));
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'report'
     | 'ranking';

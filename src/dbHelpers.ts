@@ -6,8 +6,6 @@ import {
   StillMutedModel,
   GlobalUserDataModel,
 } from './db';
-import { PREFIXES } from './shared_assets';
-import config from './configuration';
 import { sendJoinEvent } from './webhooks';
 
 export async function getUser(userid: string, guildID: string) {
@@ -77,7 +75,6 @@ async function createFirstConfiguration(guildID: string) {
     joinChannels: [],
     saltKing: undefined,
     saltRole: undefined,
-    prefix: config.prefix,
     lastConnected: new Date(),
     defaultJoinsound: undefined,
   });
@@ -137,26 +134,6 @@ export async function isJoinableVc(guildID: string, channelID: string) {
     configuration.joinChannels.length === 0
     || configuration.joinChannels.includes(channelID)
   );
-}
-
-export async function setPrefix(guildID: string, prefix: string) {
-  const success = await setConfiguration(guildID, {
-    prefix,
-  });
-  if (success) {
-    PREFIXES.set(guildID, prefix);
-  }
-  return success;
-}
-
-export async function getPrefix(guildID: string) {
-  const configuration = await getConfiguration(guildID);
-  const { prefix } = configuration;
-  if (!prefix) {
-    await setPrefix(guildID, config.prefix);
-    return config.prefix;
-  }
-  return prefix;
 }
 
 export async function toggleStillMuted(

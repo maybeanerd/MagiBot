@@ -1,5 +1,5 @@
 import ffprobe from 'ffprobe';
-import { CommandInteraction, MessageAttachment, User } from 'discord.js';
+import { CommandInteraction, Attachment, User } from 'discord.js';
 import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
 import {
   getGlobalUser,
@@ -137,7 +137,7 @@ export async function removeDefaultGuildJoinsound(guildId: string) {
 const defaultFFProbeLocation = '/usr/bin/ffprobe';
 
 export async function validateAndSaveJoinsound(
-  attachment: MessageAttachment,
+  attachment: Attachment,
   interaction: CommandInteraction,
   setDefault: boolean,
   user?: User,

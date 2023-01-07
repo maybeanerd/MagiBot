@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
+  ChatInputCommandInteraction,
   CommandInteraction,
   GuildMember,
 } from 'discord.js';
@@ -135,7 +136,7 @@ async function runCommand(
 
 export const roll: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const input = interaction.options.getString('dice', true);
     return runCommand(interaction, input);
   },

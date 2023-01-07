@@ -1,4 +1,5 @@
 import {
+  ChatInputCommandInteraction,
   CommandInteraction,
   GuildMember,
 } from 'discord.js';
@@ -65,7 +66,7 @@ async function viewCurrentConfiguration(
   interaction.followUp({ embeds: [embed] });
 }
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as 'view';
 
   if (subcommand === 'view') {

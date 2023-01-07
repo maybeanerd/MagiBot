@@ -59,7 +59,7 @@ const configurationSchema = new mongoose.Schema<Configuration>(
     prefix: {
       // deprecated
       type: String,
-      required: true,
+      required: false,
     },
     lastConnected: {
       type: Date,

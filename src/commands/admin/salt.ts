@@ -1,4 +1,5 @@
 import {
+  ChatInputCommandInteraction,
   CommandInteraction, Guild, User,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -89,7 +90,7 @@ async function removeSaltOfUser(interaction: CommandInteraction, user: User) {
   }
 }
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand(true) as
     | 'report'
     | 'remove'

@@ -3,7 +3,6 @@ import config from './configuration';
 import { DeferReply } from './types/command';
 
 export const OWNERID = config.owner;
-export const PREFIX = config.prefix;
 export const TOKEN = config.tk;
 export const APP_ID = config.appId;
 export const DETAILED_LOGGING = false;
@@ -13,7 +12,6 @@ export const SIGN = 'MagiBot - created by T0TProduction#0001';
 export const adminDeferralType = DeferReply.public;
 
 // eslint-disable-next-line import/no-mutable-exports
-export const PREFIXES: Map<string, string> = new Map();
 export const queueVoiceChannels: Map<string, string> = new Map();
 
 let bot_user: ClientUser;
@@ -24,10 +22,6 @@ export function setUser(usr: ClientUser) {
 
 export function user() {
   return bot_user;
-}
-
-export function resetPrefixes() {
-  PREFIXES.clear();
 }
 
 // for shadowbanned servers we want do deny

@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   CommandInteraction,
+  PermissionFlagsBits,
   TextChannel,
 } from 'discord.js';
 import { MagibotSlashCommand } from '../types/command';
@@ -18,7 +19,9 @@ async function main(interaction: CommandInteraction) {
 }
 
 export const invite: MagibotSlashCommand = {
-  permissions: ['CREATE_INSTANT_INVITE'],
+  permissions: [
+    PermissionFlagsBits.CreateInstantInvite,
+  ],
   run: main,
   definition: slashCommand.toJSON(),
 };

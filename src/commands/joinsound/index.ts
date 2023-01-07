@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'discord.js';
 import { isShadowBanned, shadowBannedLevel } from '../../shared_assets';
 import { DeferReply, MagibotSlashCommand } from '../../types/command';
 import {
@@ -46,7 +46,7 @@ const slashCommand = new SlashCommandBuilder()
 
 const deferralType = DeferReply.public;
 
-async function runCommand(interaction: CommandInteraction) {
+async function runCommand(interaction: ChatInputCommandInteraction) {
   const { user } = interaction.member!;
   const guild = interaction.guild!;
   if (
