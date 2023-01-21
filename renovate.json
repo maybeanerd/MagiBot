@@ -1,4 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>t0tproduction/configs/renovate/default"]
+  "extends": ["github>T0TProduction/renovate-config"]
 }
