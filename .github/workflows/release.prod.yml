@@ -53,10 +53,16 @@ jobs:
       - name: Add Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Prune Leftover Docker Artifacts
+        run: docker system prune -af
+        env:
+          # To execute it on remote swarm
+          DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+
       - name: Deploy stack
         run: docker stack deploy --compose-file docker-compose.yml ${{ env.PROJECT_NAME }}
         env:
-          # To deploy stack on remote swarm
+          # To execute it on remote swarm
           DOCKER_HOST: ssh://${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
           # Env vars required to run the stack
           TOKEN: ${{ secrets.TOKEN }}
