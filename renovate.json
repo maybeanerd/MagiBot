@@ -1,12 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": [
+    "config:base",
+    "default:pinVersions",
+    "default:automergeMinor",
+    "default::rebaseStalePrs"
+  ],
   "labels": ["dependencies"],
-  "automergeStrategy": "fast-forward",
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
-    }
-  ]
+  "automergeStrategy": "fast-forward"
 }
