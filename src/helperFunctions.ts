@@ -238,3 +238,20 @@ export function getBotInviteUrl() {
     user().id
   }&permissions=3212353&scope=bot%20applications.commands`;
 }
+
+export enum TimestampType {
+  SHORT_TIME = 't',
+  LONG_TIME = 'T',
+  SHORT_DATE = 'd',
+  LONG_DATE = 'D',
+  SHORT_DATE_TIME = 'f',
+  LONG_DATE_TIME = 'F',
+  RELATIVE = 'R'
+}
+
+export function formatAsTimestamp(date: Date, type: TimestampType = TimestampType.SHORT_DATE_TIME) {
+  let timestamp = date.getTime();
+  timestamp /= 1000;
+  timestamp = Math.floor(timestamp);
+  return `<t:${timestamp}:${type}>`;
+}
