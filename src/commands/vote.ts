@@ -1,10 +1,11 @@
-import {
-  ChatInputCommandInteraction,
-  Message,
-  PermissionFlagsBits,
-} from 'discord.js';
+﻿import { ChatInputCommandInteraction, Message, PermissionFlagsBits, } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { asyncForEach, interactionConfirmation } from '../helperFunctions';
+import {
+  asyncForEach,
+  formatAsTimestamp,
+  interactionConfirmation,
+  TimestampType
+} from '../helperFunctions';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
 
@@ -107,7 +108,7 @@ async function main(interaction: ChatInputCommandInteraction) {
     );
 
     const reply = await wantsToStartVote.followUp(
-      `**${topic}**\n*by ${interaction.member}, ends on <t:${(date.getTime()/1000)|0}:F>*\n\n${optionsString}`,
+      `**${topic}**\n*by ${interaction.member}, ends on ${formatAsTimestamp(date, TimestampType.LONG_DATE_TIME)}*\n\n${optionsString}`,
     );
     if (reply instanceof Message) {
       asyncForEach(options, async (value, index) => {
