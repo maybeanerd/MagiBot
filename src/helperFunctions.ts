@@ -239,6 +239,7 @@ export function getBotInviteUrl() {
   }&permissions=3212353&scope=bot%20applications.commands`;
 }
 
+// eslint-disable-next-line no-shadow
 export enum TimestampType {
   SHORT_TIME = 't',
   LONG_TIME = 'T',
