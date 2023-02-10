@@ -112,7 +112,10 @@ async function main(interaction: ChatInputCommandInteraction) {
     );
 
     const reply = await wantsToStartVote.followUp(
-      `**${topic}**\n*by ${interaction.member}, ends on ${formatAsTimestamp(date, TimestampType.LONG_DATE_TIME)}*\n\n${optionsString}`,
+      `**${topic}**\n*by ${interaction.member}, ends ${formatAsTimestamp(
+        date,
+        TimestampType.RELATIVE,
+      )}*\n\n${optionsString}`,
     );
     if (reply instanceof Message) {
       asyncForEach(options, async (value, index) => {
