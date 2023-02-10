@@ -1,10 +1,14 @@
-﻿import { ChatInputCommandInteraction, Message, PermissionFlagsBits, } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  Message,
+  PermissionFlagsBits,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   asyncForEach,
   formatAsTimestamp,
   interactionConfirmation,
-  TimestampType
+  TimestampType,
 } from '../helperFunctions';
 import { DeferReply, MagibotSlashCommand } from '../types/command';
 import { Vote, VoteModel } from '../db';
