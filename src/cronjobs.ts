@@ -1,5 +1,10 @@
 import { Client, TextChannel } from 'discord.js';
-import { asyncForEach, getUserMention } from './helperFunctions';
+import {
+  asyncForEach,
+  formatAsTimestamp,
+  getUserMention,
+  TimestampType,
+} from './helperFunctions';
 import {
   OngoingQueueModel,
   SaltModel,
@@ -184,14 +189,27 @@ async function endVote(vote: Vote, bot: Client) {
             }
           }
         });
-        if (finalReact[0]) {
+        const authorCredit = vote.authorID
+          ? `by ${getUserMention(vote.authorID)} `
+          : '';
+
+        const baseMessage = `**${
+          vote.topic
+        }** ${authorCredit}ended ${formatAsTimestamp(
+          vote.date,
+          TimestampType.RELATIVE,
+        )}.\n\n`;
+
+        const finalReaction = finalReact.at(0);
+
+        if (finalReaction) {
+          const highestReactionCount = finalReaction.count;
+          const numberOfVotes = `**${highestReactionCount - 1}** vote${
+            highestReactionCount > 2 ? 's' : ''
+          }`;
+
           if (finalReact.length > 1) {
-            let str = `**${vote.topic}** ended.\n\nThere was a tie between `;
-            if (vote.authorID) {
-              str = `**${vote.topic}** by ${getUserMention(
-                vote.authorID,
-              )} ended.\n\nThere was a tie between `;
-            }
+            let str = `${baseMessage}There was a tie between `;
             finalReact.forEach((react, i) => {
               str += `**${vote.options[react.reaction]}**`;
               if (i < finalReact.length - 2) {
@@ -200,28 +218,16 @@ async function endVote(vote: Vote, bot: Client) {
                 str += ' and ';
               }
             });
-            str += ` with each having ** ${finalReact[0].count - 1} ** votes.`;
+            str += ` with each having ${numberOfVotes}.`;
             await msg.edit(str);
           } else {
-            let str = `**${vote.topic}** ended.\n\nThe result is **${
+            const str = `${baseMessage}The result is **${
               vote.options[finalReact[0].reaction]
-            }** with **${finalReact[0].count - 1}** votes.`;
-            if (vote.authorID) {
-              str = `**${vote.topic}** by ${getUserMention(
-                vote.authorID,
-              )} ended.\n\nThe result is **${
-                vote.options[finalReact[0].reaction]
-              }** with **${finalReact[0].count - 1}** votes.`;
-            }
+            }** with ${numberOfVotes}.`;
             await msg.edit(str);
           }
         } else {
-          let str = `**${vote.topic}** ended.\n\nCould not compute a result.`;
-          if (vote.authorID) {
-            str = `**${vote.topic}** by ${getUserMention(
-              vote.authorID,
-            )} ended.\n\nCould not compute a result.`;
-          }
+          const str = `${baseMessage}Could not compute a result.`;
           await msg.edit(str);
         }
       }
