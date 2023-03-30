@@ -46,7 +46,7 @@
     "eslint-config-airbnb-base": "15.0.0",
     "prettier": "2.8.7",
     "rimraf": "4.4.1",
-    "typescript": "5.0.2"
+    "typescript": "5.0.3"
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
