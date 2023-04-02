@@ -265,13 +265,13 @@ async function voteCheck(bot: Client) {
   await asyncForEach(votes, async (vote) => {
     try {
       await endVote(vote, bot);
-      await vote.delete();
+      await vote.deleteOne();
     } catch (err) {
       if (
         (err as any).name === 'DiscordAPIError'
         && (err as any).message === 'Missing Access'
       ) {
-        await vote.delete();
+        await vote.deleteOne();
       } else {
         throw err;
       }

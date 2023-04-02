@@ -165,7 +165,6 @@ export async function interactionConfirmation(
     });
     collector.once('end', async () => {
       if (!alreadyResolved) {
-        // await questionMessage.delete();
         interaction.followUp({
           content: messageForTimeout,
           ephemeral,

@@ -117,7 +117,7 @@ export async function removeQueue(guildId: string) {
   if (queue === null) {
     return null;
   }
-  await queue.remove();
+  await queue.deleteOne();
   return {
     topic: queue.topic,
     channelId: queue.channelId,
