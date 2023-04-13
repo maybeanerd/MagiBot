@@ -4,7 +4,7 @@
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
-    "node": "18.15.0"
+    "node": "18.16.0"
   },
   "directories": {
     "doc": "docs",
