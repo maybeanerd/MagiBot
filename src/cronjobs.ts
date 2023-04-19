@@ -234,9 +234,13 @@ async function endVote(vote: Vote, bot: Client) {
     }
   } catch (error) {
     console.error(JSON.stringify(error, null, 2));
+
+    const { httpStatus } = error as any;
     if (
       // eslint-disable-next-line eqeqeq
-      (error as any).httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */
+      httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */
+      // eslint-disable-next-line eqeqeq
+      && httpStatus != 403 /* 'DiscordAPIError: Missing Access' */
     ) {
       throw error;
     }
