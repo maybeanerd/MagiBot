@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/centra": "2.2.0",
     "@types/ffprobe": "1.1.4",
-    "@types/node": "18.16.1",
+    "@types/node": "18.16.2",
     "@typescript-eslint/eslint-plugin": "5.59.1",
     "@typescript-eslint/parser": "5.59.1",
     "eslint": "8.39.0",
