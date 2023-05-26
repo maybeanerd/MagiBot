@@ -114,42 +114,46 @@ async function hourlyCleanup(bot: Client, isFirst: boolean) {
     }
   });
 
-  // find all guilds that have not connected for a week
-  const guilds2 = await ConfigurationModel.find({
-    lastConnected: { $lt: sevenDaysAgo },
-  });
-  // remove all data saved for those guilds
-  await asyncForEach(guilds2, async (guild) => {
-    // eslint-disable-next-line no-underscore-dangle
-    const guildID = guild._id;
-    try {
-      if (allowDeletions) {
-        await sendJoinEvent(
-          `:wastebasket: Deleting all information from guild with ID ${guildID} because they removed me more than seven days ago.`,
-          bot.shard?.ids[0],
-        );
-        // ignore salt and saltrank, as they are removed after 7 days anyways
-        await StillMutedModel.deleteMany({ guildid: guildID });
-        await UserModel.deleteMany({ guildID });
-        // doing this per guild instead of with a list of guilds is less efficient
-        // but now it happens at the same time as the rest of deletion
-        await removeLocallyStoredJoinsoundsOfGuild(guildID);
-        await VoteModel.deleteMany({ guildid: guildID });
-        await ConfigurationModel.deleteMany({ _id: guildID });
-        await OngoingQueueModel.deleteMany({ guildid: guildID });
-      } else {
-        await sendJoinEvent(
-          `:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
+  // do not delete outdated guilds in first run
+  // this should make sure that all guilds are checked at least once by a shard
+  if (!isFirst) {
+    // find all guilds that have not connected for a week
+    const guilds2 = await ConfigurationModel.find({
+      lastConnected: { $lt: sevenDaysAgo },
+    });
+    // remove all data saved for those guilds
+    await asyncForEach(guilds2, async (guild) => {
+      // eslint-disable-next-line no-underscore-dangle
+      const guildID = guild._id;
+      try {
+        if (allowDeletions) {
+          await sendJoinEvent(
+            `:wastebasket: Deleting all information from guild with ID ${guildID} because they removed me more than seven days ago.`,
+            bot.shard?.ids[0],
+          );
+          // ignore salt and saltrank, as they are removed after 7 days anyways
+          await StillMutedModel.deleteMany({ guildid: guildID });
+          await UserModel.deleteMany({ guildID });
+          // doing this per guild instead of with a list of guilds is less efficient
+          // but now it happens at the same time as the rest of deletion
+          await removeLocallyStoredJoinsoundsOfGuild(guildID);
+          await VoteModel.deleteMany({ guildid: guildID });
+          await ConfigurationModel.deleteMany({ _id: guildID });
+          await OngoingQueueModel.deleteMany({ guildid: guildID });
+        } else {
+          await sendJoinEvent(
+            `:wastebasket: Attempting to delete all information from guild with ID ${guildID} because they removed me more than seven days ago. Deletion is deactivated for now, though.`,
+            bot.shard?.ids[0],
+          );
+        }
+      } catch (error) {
+        sendException(
+          `Failed deleting all information releated to guild with ID ${guildID} : ${error}`,
           bot.shard?.ids[0],
         );
       }
-    } catch (error) {
-      sendException(
-        `Failed deleting all information releated to guild with ID ${guildID} : ${error}`,
-        bot.shard?.ids[0],
-      );
-    }
-  });
+    });
+  }
 
   // call function for next hour
   setTimeout(() => hourlyCleanup(bot, false), timeoutForNextHour);
@@ -237,10 +241,10 @@ async function endVote(vote: Vote, bot: Client) {
 
     const { httpStatus } = error as any;
     if (
+      // eslint-disable-next-line eqeqeq, operator-linebreak
+      httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */ &&
       // eslint-disable-next-line eqeqeq
-      httpStatus != 404 /*  'DiscordAPIError: Unknown Message' */
-      // eslint-disable-next-line eqeqeq
-      && httpStatus != 403 /* 'DiscordAPIError: Missing Access' */
+      httpStatus != 403 /* 'DiscordAPIError: Missing Access' */
     ) {
       throw error;
     }
