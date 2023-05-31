@@ -97,11 +97,13 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
 export async function onQueueEnd(guild: Guild) {
   const queue = await removeQueue(guild.id);
   if (queue) {
-    const channel = await guild.channels.fetch(queue.channelId);
+    const channel = await guild.channels
+      .fetch(queue.channelId)
+      .catch(doNothingOnError);
     if (channel) {
-      const topicMessage = await (channel as TextChannel).messages.fetch(
-        queue.messageId,
-      );
+      const topicMessage = await (channel as TextChannel).messages
+        .fetch(queue.messageId)
+        .catch(doNothingOnError);
       if (topicMessage) {
         topicMessage
           .edit({
