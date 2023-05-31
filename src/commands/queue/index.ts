@@ -7,7 +7,11 @@ import {
   ChatInputCommandInteraction,
 } from 'discord.js';
 import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
-import { ActionRowBuilder, ButtonBuilder, SlashCommandBuilder } from '@discordjs/builders';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  SlashCommandBuilder,
+} from '@discordjs/builders';
 import {
   asyncWait,
   buttonInteractionId,
@@ -54,21 +58,20 @@ async function startQueue(interaction: CommandInteraction, topic: string) {
     return;
   }
 
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
-        )
-        .setLabel('Next User')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId(
-          `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
-        )
-        .setLabel('End Queue')
-        .setStyle(ButtonStyle.Secondary),
-    );
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.next}`,
+      )
+      .setLabel('Next User')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(
+        `${buttonInteractionId.queue}-${guild.id}-${typeOfQueueAction.end}`,
+      )
+      .setLabel('End Queue')
+      .setStyle(ButtonStyle.Secondary),
+  );
 
   const rowTwo = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -113,15 +116,20 @@ export async function onQueueEnd(guild: Guild) {
   return false;
 }
 
-async function endRunningQueue(interaction: CommandInteraction) {
+async function endRunningQueue(
+  interaction: CommandInteraction | ButtonInteraction,
+) {
   const guild = interaction.guild!;
   const runningQueue = await onQueueEnd(guild);
-  if (runningQueue) {
-    await interaction.followUp(
-      'Successfully ended the ongoing queue on this guild.',
-    );
+
+  const messageContent = runningQueue
+    ? 'Successfully ended the ongoing queue on this guild.'
+    : "There's no ongoing queue on this guild.";
+
+  if (doesInteractionRequireFollowup(interaction)) {
+    interaction.followUp(messageContent);
   } else {
-    await interaction.followUp("There's no ongoing queue on this guild.");
+    interaction.reply(messageContent);
   }
 }
 
@@ -175,19 +183,29 @@ export async function goToNextUser(
 
   if (wentToNextUser) {
     const channel = await guild.channels.fetch(wentToNextUser.channelId);
-    if (channel) {
-      const topicMessage = await (channel as TextChannel).messages.fetch(
-        wentToNextUser.messageId,
-      );
-      if (topicMessage) {
-        messageEdit(
-          topicMessage,
-          wentToNextUser.activeUser,
-          wentToNextUser.queuedUsers,
-          wentToNextUser.topic,
-        );
-      }
+    if (!channel) {
+      // We should only get here if we cannot access the channel anymore
+      // and therefore we should end the queue
+      await endRunningQueue(interaction);
+      return;
     }
+
+    const topicMessage = await (channel as TextChannel).messages.fetch(
+      wentToNextUser.messageId,
+    );
+    if (!topicMessage) {
+      // We should only get here if we cannot find the original message anymore
+      // and therefore we should end the queue
+      await endRunningQueue(interaction);
+      return;
+    }
+
+    messageEdit(
+      topicMessage,
+      wentToNextUser.activeUser,
+      wentToNextUser.queuedUsers,
+      wentToNextUser.topic,
+    );
   }
   if (wentToNextUser && wentToNextUser.activeUser) {
     await sendItsYourTurnMessage(interaction, wentToNextUser.activeUser);
@@ -252,8 +270,10 @@ async function runCommand(interaction: ChatInputCommandInteraction) {
 }
 
 export const queue: MagibotSlashCommand = {
-  permissions: [PermissionFlagsBits.ReadMessageHistory,
-    PermissionFlagsBits.ViewChannel],
+  permissions: [
+    PermissionFlagsBits.ReadMessageHistory,
+    PermissionFlagsBits.ViewChannel,
+  ],
   run: runCommand,
   definition: slashCommand.toJSON(),
   defer: DeferReply.public,
