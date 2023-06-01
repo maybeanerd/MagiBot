@@ -1,9 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { APIEmbed } from 'discord-api-types/v10';
-import {
-  CommandInteraction,
-  GuildMember,
-} from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
 import { getBotInviteUrl } from '../helperFunctions';
 import { user, SIGN } from '../shared_assets';
 import { MagibotSlashCommand } from '../types/command';
@@ -15,20 +12,20 @@ async function main(interaction: CommandInteraction) {
     inline: boolean;
   }> = [
     {
-      name: 'Links',
+      name: 'Useful links',
       value: `[Invite me to your guild](${getBotInviteUrl()})\n[Official support Discord](https://discord.gg/2Evcf4T)`,
       inline: false,
     },
     {
-      name: 'How to support MagiBot',
+      name: 'The code is open source!',
       value:
-        'Pledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nLeave a review on [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)!',
+        'Check out [the repository on GitHub](https://github.com/T0TProduction/MagiBot) and leave a star to show your support.',
       inline: false,
     },
     {
-      name: 'A bit of background',
+      name: 'How to support the development',
       value:
-        "MagiBot is being developed in Germany by T0TProduction#0001 as a side project.\nIt was originally a private bot for a Discord guild themed after the Pokemon Magikarp which is the reason it's called MagiBot.",
+        'Pledge on [MagiBots Patreon](https://www.patreon.com/MagiBot)\nLeave a review on [bots.ondiscord.xyz](https://bots.ondiscord.xyz/bots/384820232583249921)',
       inline: false,
     },
   ];
