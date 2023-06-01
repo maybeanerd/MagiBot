@@ -1,27 +1,23 @@
 name: Linting
 
-on: 
+on:
   push:
     branches:
       - main
-  pull_request: 
-    branches: 
+  pull_request:
+    branches:
       - '**'
 
 jobs:
   lint_and_typecheck:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.2.0
       - name: npm ci
         run: npm ci
       - name: lint
