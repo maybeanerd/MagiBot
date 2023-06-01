@@ -1,7 +1,7 @@
 import { OngoingQueue, OngoingQueueModel } from '../../db';
 
 async function getQueue(guildId: string) {
-  return OngoingQueueModel.findOne({ where: { guildId } });
+  return OngoingQueueModel.findOne({ guildId });
 }
 
 function getActiveUserOfQueue(queue: OngoingQueue) {

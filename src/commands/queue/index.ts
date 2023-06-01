@@ -186,20 +186,18 @@ export async function goToNextUser(
   if (wentToNextUser) {
     const channel = await guild.channels.fetch(wentToNextUser.channelId);
     if (!channel) {
-      // We should only get here if we cannot access the channel anymore
-      // and therefore we should end the queue
-      await endRunningQueue(interaction);
-      return;
+      throw new Error(
+        `Failed to get channel of queue message. GuildId: ${guild.id}; ChannelId: ${wentToNextUser.channelId}`,
+      );
     }
 
     const topicMessage = await (channel as TextChannel).messages.fetch(
       wentToNextUser.messageId,
     );
     if (!topicMessage) {
-      // We should only get here if we cannot find the original message anymore
-      // and therefore we should end the queue
-      await endRunningQueue(interaction);
-      return;
+      throw new Error(
+        `Failed to get queue message. GuildId: ${guild.id}; ChannelId: ${wentToNextUser.channelId}; MessageId: ${wentToNextUser.messageId}`,
+      );
     }
 
     messageEdit(
