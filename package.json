@@ -20,7 +20,7 @@
     "discord-api-types": "0.37.46",
     "discord.js": "14.11.0",
     "dotenv": "16.3.1",
-    "fast-folder-size": "2.0.0",
+    "fast-folder-size": "2.1.0",
     "ffmpeg-static": "5.1.0",
     "ffprobe": "1.1.2",
     "forever": "4.0.3",
