@@ -25,7 +25,7 @@
     "ffprobe": "1.1.2",
     "forever": "4.0.3",
     "libsodium-wrappers": "0.7.11",
-    "mongoose": "7.4.4",
+    "mongoose": "7.4.5",
     "opusscript": "0.1.0",
     "statcord.js": "3.4.3",
     "tweetnacl": "1.0.3",
