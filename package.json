@@ -37,7 +37,7 @@
     "zlib-sync": "0.1.8"
   },
   "devDependencies": {
-    "@types/centra": "2.2.1",
+    "@types/centra": "2.2.2",
     "@types/ffprobe": "1.1.4",
     "@types/node": "20.8.6",
     "@typescript-eslint/eslint-plugin": "6.8.0",
