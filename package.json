@@ -18,7 +18,7 @@
     "blapi": "3.1.2",
     "bufferutil": "4.0.8",
     "discord-api-types": "0.37.63",
-    "discord.js": "14.14.0",
+    "discord.js": "14.14.1",
     "dotenv": "16.3.1",
     "fast-folder-size": "2.2.0",
     "ffmpeg-static": "5.2.0",
