@@ -4,7 +4,7 @@
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
-    "node": "18.19.0"
+    "node": "20.10.0"
   },
   "directories": {
     "doc": "docs",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/centra": "2.2.3",
     "@types/ffprobe": "1.1.4",
-    "@types/node": "20.8.7",
+    "@types/node": "20.10.3",
     "@typescript-eslint/eslint-plugin": "6.13.2",
     "@typescript-eslint/parser": "6.13.2",
     "eslint": "8.55.0",
