@@ -26,7 +26,7 @@ jobs:
 
       - name: Create Image Name
         run: |
-          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}-${{ secrets.ENVIRONMENT }}" >> $GITHUB_OUTPUT
+          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}-${{ secrets.ENVIRONMENT }}" >> $GITHUB_ENV
         
       - name: Build containers
         run: docker compose --project-name ${{ env.PROJECT_NAME }} build 
