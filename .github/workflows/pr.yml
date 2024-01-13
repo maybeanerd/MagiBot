@@ -7,11 +7,12 @@ on:
 jobs:
   build_container:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: ghcr.io/${{ github.repository }}-pr
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Create Image Name
+        run: |
+          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}-pr" >> $GITHUB_OUTPUT
       - name: Build containers
         run: docker compose build
