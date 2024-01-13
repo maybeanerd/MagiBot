@@ -25,7 +25,7 @@
   "prettier.endOfLine": "lf",
 	"typescript.tsdk": "node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+		"source.fixAll.eslint": "explicit"
 	},
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 "editor.detectIndentation": false,

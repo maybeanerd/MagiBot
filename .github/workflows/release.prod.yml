@@ -18,7 +18,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-      IMAGE_NAME: ghcr.io/t0tproduction/magibot-main-${{ secrets.ENVIRONMENT }}
+      IMAGE_NAME: ghcr.io/maybeanerd/magibot-main-${{ secrets.ENVIRONMENT }}
       PROJECT_NAME: magibot-${{ secrets.ENVIRONMENT }}
 
     steps:

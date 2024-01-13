@@ -19,7 +19,7 @@ async function main(interaction: CommandInteraction) {
     {
       name: 'The code is open source!',
       value:
-        'Check out [the repository on GitHub](https://github.com/T0TProduction/MagiBot) and leave a star to show your support.',
+        'Check out [the repository on GitHub](https://github.com/maybeanerd/MagiBot) and leave a star to show your support.',
       inline: false,
     },
     {

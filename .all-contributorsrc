@@ -6,7 +6,7 @@
   "commit": false,
   "contributors": [
     {
-      "login": "T0TProduction",
+      "login": "maybeanerd",
       "name": "Sebastian Di Luzio",
       "avatar_url": "https://avatars.githubusercontent.com/u/18548570?v=4",
       "profile": "http://diluz.io",
@@ -42,7 +42,7 @@
   ],
   "contributorsPerLine": 7,
   "projectName": "MagiBot",
-  "projectOwner": "T0TProduction",
+  "projectOwner": "maybeanerd",
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true
