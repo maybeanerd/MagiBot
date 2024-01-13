@@ -8,7 +8,7 @@ jobs:
   build_container:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/maybeanerd/magibot-main-pr
+      IMAGE_NAME: ghcr.io/${{ github.repository }}-pr
 
     steps:
       - name: Checkout
