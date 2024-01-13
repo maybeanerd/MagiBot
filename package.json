@@ -60,13 +60,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/T0TProduction/MagiBot.git"
+    "url": "git+https://github.com/maybeanerd/MagiBot.git"
   },
   "author": "Sebastian Di Luzio",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/T0TProduction/MagiBot/issues"
+    "url": "https://github.com/maybeanerd/MagiBot/issues"
   },
-  "homepage": "https://github.com/T0TProduction/MagiBot#readme",
+  "homepage": "https://github.com/maybeanerd/MagiBot#readme",
   "heroku-run-build-script": true
 }

@@ -7,7 +7,7 @@ export const TOKEN = config.tk;
 export const APP_ID = config.appId;
 export const DETAILED_LOGGING = false;
 
-export const SIGN = 'MagiBot - created by T0TProduction#0001';
+export const SIGN = 'MagiBot - created by @maybeanerd';
 
 export const adminDeferralType = DeferReply.public;
 

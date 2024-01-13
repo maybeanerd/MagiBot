@@ -1,6 +1,6 @@
 # Privacy Policy
  
-Disclaimer (as [defined in the License](https://github.com/T0TProduction/MagiBot/blob/main/LICENSE)): 
+Disclaimer (as [defined in the License](https://github.com/maybeanerd/MagiBot/blob/main/LICENSE)): 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
