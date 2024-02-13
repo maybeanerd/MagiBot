@@ -1,6 +1,6 @@
 {
   "name": "magibot",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
@@ -19,7 +19,7 @@
     "bufferutil": "4.0.8",
     "discord-api-types": "0.37.69",
     "discord.js": "14.14.1",
-    "dotenv": "16.4.3",
+    "dotenv": "16.4.4",
     "fast-folder-size": "2.2.0",
     "ffmpeg-static": "5.2.0",
     "ffprobe": "1.1.2",
