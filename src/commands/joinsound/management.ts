@@ -154,8 +154,7 @@ export async function validateAndSaveJoinsound(
   }
   if (attachment.size > maximumSingleFileSize) {
     interaction.followUp(
-      `The file you sent is larger than ${
-        maximumSingleFileSize / 1024
+      `The file you sent is larger than ${maximumSingleFileSize / 1024
       } KB, which is the limit per file!`,
     );
     return;
@@ -187,13 +186,14 @@ export async function validateAndSaveJoinsound(
     );
     return;
   }
-  if (!firstStream.duration) {
+  const duration = firstStream.duration ? Number(firstStream.duration) : null;
+  if (!duration || Number.isNaN(duration)) {
     interaction.followUp(
       "Failed to calculate the duration of the joinsound you're trying to add.",
     );
     return;
   }
-  if (firstStream.duration > 8) {
+  if (duration > 8) {
     interaction.followUp(
       "The joinsound you're trying to add is longer than 8 seconds.",
     );
@@ -346,8 +346,7 @@ export async function getJoinsoundOverviewOfUser(
 
   info.push({
     name: 'Storage Used by Joinsounds',
-    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${
-      joinsoundStorageUserLimit / 1024
+    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${joinsoundStorageUserLimit / 1024
     } KB`,
     inline: false,
   });
