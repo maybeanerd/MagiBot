@@ -145,7 +145,7 @@ export async function toggleStillMuted(
     const isStillMutedAmount = await StillMutedModel.find({
       userid: userID,
       guildid: guildID,
-    }).count();
+    }).countDocuments();
     if (isStillMutedAmount === 0) {
       const newMute = new StillMutedModel({
         userid: userID,
