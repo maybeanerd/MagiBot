@@ -1,6 +1,6 @@
 {
   "name": "magibot",
-  "version": "3.2.15",
+  "version": "3.2.16",
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/centra": "2.2.3",
     "@types/ffprobe": "1.1.8",
-    "@types/node": "20.11.22",
+    "@types/node": "20.11.23",
     "@typescript-eslint/eslint-plugin": "7.1.0",
     "@typescript-eslint/parser": "7.1.0",
     "eslint": "8.57.0",
