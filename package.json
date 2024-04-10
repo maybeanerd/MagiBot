@@ -1,6 +1,6 @@
 {
   "name": "magibot",
-  "version": "3.2.54",
+  "version": "3.2.55",
   "description": "MagiBot - a Discord bot to build communities",
   "main": "dist/index.js",
   "engines": {
@@ -46,7 +46,7 @@
     "eslint-config-airbnb-base": "15.0.0",
     "prettier": "3.2.5",
     "rimraf": "5.0.5",
-    "typescript": "5.4.4"
+    "typescript": "5.4.5"
   },
   "scripts": {
     "install-dev": "npm i --no-optional",
