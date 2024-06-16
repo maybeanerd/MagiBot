@@ -42,13 +42,9 @@ async function setSound(
   userId: string,
   guildId: string,
   soundUrl: string | undefined,
-  locallyStored: boolean,
 ): Promise<JoinsoundStoreError | null> {
   const user = await getUser(userId, guildId);
-  if (!locallyStored) {
-    user.sound = soundUrl;
-    await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
-  } else if (soundUrl) {
+  if (soundUrl) {
     user.sound = 'local';
     const error = await storeJoinsoundOfTarget({ userId, guildId }, soundUrl);
     if (error) {
@@ -65,20 +61,16 @@ async function setSound(
 }
 
 export async function removeSound(userId: string, guildId: string) {
-  return setSound(userId, guildId, undefined, true);
+  return setSound(userId, guildId, undefined);
 }
 
 async function setDefaultSound(
   userId: string,
   soundUrl: string | undefined,
-  locallyStored: boolean,
 ): Promise<JoinsoundStoreError | null> {
   const user = await getGlobalUser(userId);
 
-  if (!locallyStored) {
-    user.sound = soundUrl;
-    await removeLocallyStoredJoinsoundOfTarget({ userId, default: true });
-  } else if (soundUrl) {
+  if (soundUrl) {
     user.sound = 'local';
     const error = await storeJoinsoundOfTarget(
       { userId, default: true },
@@ -98,20 +90,16 @@ async function setDefaultSound(
 }
 
 export async function removeDefaultSound(userId: string) {
-  return setDefaultSound(userId, undefined, true);
+  return setDefaultSound(userId, undefined);
 }
 
 async function setDefaultGuildJoinsound(
   guildId: string,
   soundUrl: string | undefined,
-  locallyStored: boolean,
 ): Promise<JoinsoundStoreError | null> {
   const guild = await getConfiguration(guildId);
 
-  if (!locallyStored) {
-    guild.defaultJoinsound = soundUrl;
-    await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
-  } else if (soundUrl) {
+  if (soundUrl) {
     guild.defaultJoinsound = 'local';
     const error = await storeJoinsoundOfTarget(
       { guildId, default: true },
@@ -131,7 +119,7 @@ async function setDefaultGuildJoinsound(
 }
 
 export async function removeDefaultGuildJoinsound(guildId: string) {
-  return setDefaultGuildJoinsound(guildId, undefined, true);
+  return setDefaultGuildJoinsound(guildId, undefined);
 }
 
 const defaultFFProbeLocation = '/usr/bin/ffprobe';
@@ -154,7 +142,8 @@ export async function validateAndSaveJoinsound(
   }
   if (attachment.size > maximumSingleFileSize) {
     interaction.followUp(
-      `The file you sent is larger than ${maximumSingleFileSize / 1024
+      `The file you sent is larger than ${
+        maximumSingleFileSize / 1024
       } KB, which is the limit per file!`,
     );
     return;
@@ -204,23 +193,12 @@ export async function validateAndSaveJoinsound(
 
   let error: JoinsoundStoreError | null;
 
-  const locallyStored = true; // we only support downloading the files
-
   if (defaultForGuildId) {
-    error = await setDefaultGuildJoinsound(
-      defaultForGuildId,
-      soundUrl,
-      locallyStored,
-    );
+    error = await setDefaultGuildJoinsound(defaultForGuildId, soundUrl);
   } else if (setDefault) {
-    error = await setDefaultSound(userId, soundUrl, locallyStored);
+    error = await setDefaultSound(userId, soundUrl);
   } else {
-    error = await setSound(
-      userId,
-      interaction.guild!.id,
-      soundUrl,
-      locallyStored,
-    );
+    error = await setSound(userId, interaction.guild!.id, soundUrl);
   }
   if (error) {
     if (error === JoinsoundStoreError.noStorageLeftForUser) {
@@ -346,7 +324,8 @@ export async function getJoinsoundOverviewOfUser(
 
   info.push({
     name: 'Storage Used by Joinsounds',
-    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${joinsoundStorageUserLimit / 1024
+    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${
+      joinsoundStorageUserLimit / 1024
     } KB`,
     inline: false,
   });
