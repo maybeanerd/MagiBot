@@ -17,10 +17,9 @@ async function getSalt(userid: string, guildID: string) {
 }
 async function runCommand(interaction: CommandInteraction) {
   const guild = interaction.guild!;
-  const passedUser = interaction.options.getUser('user', false);
-  const member = await guild.members.fetch(
-    passedUser?.id || interaction.user.id,
-  )!;
+  const interactionOption = interaction.options.get('user', false);
+  const userId = interactionOption?.user?.id;
+  const member = await guild.members.fetch(userId ?? interaction.user.id)!;
   const info: Array<{
     name: string;
     value: string;
