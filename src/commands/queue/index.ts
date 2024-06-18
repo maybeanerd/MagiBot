@@ -5,8 +5,9 @@ import {
   Message,
   ButtonInteraction,
   ChatInputCommandInteraction,
+  ButtonStyle,
 } from 'discord.js';
-import { ButtonStyle, PermissionFlagsBits } from 'discord-api-types/v10';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import {
   ActionRowBuilder,
   ButtonBuilder,
