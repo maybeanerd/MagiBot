@@ -24,7 +24,7 @@
     "ffmpeg-static": "5.2.0",
     "ffprobe": "1.1.2",
     "forever": "4.0.3",
-    "libsodium-wrappers": "0.7.14",
+    "libsodium-wrappers": "0.7.15",
     "mongoose": "8.5.2",
     "opusscript": "0.1.1",
     "statcord.js": "3.4.3",
