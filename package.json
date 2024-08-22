@@ -17,7 +17,7 @@
     "axios": "1.7.4",
     "blapi": "3.1.2",
     "bufferutil": "4.0.8",
-    "discord-api-types": "0.37.96",
+    "discord-api-types": "0.37.97",
     "discord.js": "14.15.3",
     "dotenv": "16.4.5",
     "fast-folder-size": "2.2.0",
