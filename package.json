@@ -11,14 +11,14 @@
     "test": "test"
   },
   "dependencies": {
-    "@discordjs/builders": "1.11.1",
+    "@discordjs/builders": "1.11.2",
     "@discordjs/rest": "2.5.0",
     "@discordjs/voice": "0.18.0",
     "axios": "1.9.0",
     "blapi": "3.1.2",
     "bufferutil": "4.0.9",
     "discord-api-types": "0.38.2",
-    "discord.js": "14.19.2",
+    "discord.js": "14.19.3",
     "dotenv": "16.5.0",
     "fast-folder-size": "2.4.0",
     "ffmpeg-static": "5.2.0",
