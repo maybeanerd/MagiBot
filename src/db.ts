@@ -8,7 +8,7 @@ const url = config.dburl;
 
 mongoose.connect(`${url}/MagiBot`, {
   ssl: true,
-  { maxPoolSize: 50 },
+  maxPoolSize: 50,
 });
 
 // const mongooseConnction = mongoose.connection;
