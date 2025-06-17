@@ -7,6 +7,7 @@ const token = process.env.TOKEN;
 const appId = process.env.APP_ID;
 const owner = process.env.OWNERID;
 const dburl = process.env.DATABASE_URL;
+const posthogApiKey = process.env.POSTHOG_API_KEY;
 let blapis: {
   [listname: string]: string;
 };
@@ -31,4 +32,5 @@ export default {
   dburl,
   blapis,
   appId,
+  posthogApiKey,
 };

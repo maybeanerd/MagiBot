@@ -1,14 +1,14 @@
 import {
   ChatInputCommandInteraction,
-  Client, DiscordAPIError, GatewayIntentBits,
+  Client,
+  DiscordAPIError,
+  GatewayIntentBits,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
 import { ActivityType } from 'discord-api-types/v10';
 import config from './configuration';
-import {
-  TOKEN, setUser,
-} from './shared_assets';
+import { TOKEN, setUser } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { getUserMention } from './helperFunctions';
@@ -18,6 +18,7 @@ import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
 import { onInteraction } from './commands/queue/buttonInteractions';
 import { checkGuild } from './dbHelpers';
+import { initPostHog, shutdownPostHog } from './analytics';
 
 console.log(generateDependencyReport());
 
@@ -34,6 +35,9 @@ const intents = [
 export const bot = new Client({ intents });
 // post to the APIs every 30 minutes
 handle(bot, config.blapis, 30);
+
+// Initialize PostHog analytics
+initPostHog();
 
 process.on('uncaughtException', async (err) => {
   console.error(`Uncaught Exception:\n${err.stack ? err.stack : err}`);
@@ -161,6 +165,10 @@ bot.on('voiceStateUpdate', onVoiceStateChange);
 
 bot.on('disconnect', () => {
   console.log('Disconnected!');
+});
+
+process.on('exit', () => {
+  shutdownPostHog();
 });
 
 bot.login(TOKEN); // connect to discord

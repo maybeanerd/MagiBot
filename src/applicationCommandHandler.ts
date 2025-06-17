@@ -7,6 +7,7 @@ import { globalApplicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
 import { doesInteractionRequireFollowup } from './helperFunctions';
 import { getUser } from './dbHelpers';
+import { trackCommandUsage } from './analytics';
 
 export async function usageUp(userid: string, guildID: string) {
   const usr = await getUser(userid, guildID);
@@ -71,6 +72,14 @@ export async function checkApplicationCommand(
           ephemeral: command.defer === DeferReply.ephemeral,
         });
       }
+      // Track command usage with PostHog
+      trackCommandUsage({
+        commandName: interaction.commandName,
+        userId: interaction.member.user.id,
+        properties: {
+          guildId: interaction.guild.id,
+        },
+      });
       // actually use the command
       await command.run(interaction);
       await usageUp(interaction.member.user.id, interaction.guild.id);

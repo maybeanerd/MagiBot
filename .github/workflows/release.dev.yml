@@ -1,6 +1,6 @@
 name: Release to dev
 
-on: 
+on:
   push:
     branches:
       - main
@@ -29,7 +29,7 @@ jobs:
           echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}-${{ secrets.ENVIRONMENT }}" >> $GITHUB_ENV
 
       - name: Build containers
-        run: docker compose --project-name ${{ env.PROJECT_NAME }} build 
+        run: docker compose --project-name ${{ env.PROJECT_NAME }} build
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -43,16 +43,16 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME }}
-       
+
       - name: Push Docker image
         run: docker push ${{ env.IMAGE_NAME }}
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }} 
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
-      
+
       - name: Add Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
@@ -73,6 +73,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           STATCORD_TOKEN: ${{ secrets.STATCORD_TOKEN }}
           APP_ID: ${{ secrets.APP_ID }}
+
+          # PostHog analytics
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+
+          # discord webhook tokens
           WEBHOOK_ID_EX: ${{ secrets.WEBHOOK_ID_EX }}
           WEBHOOK_TOKEN_EX: ${{ secrets.WEBHOOK_TOKEN_EX }}
           WEBHOOK_ID_JOIN: ${{ secrets.WEBHOOK_ID_JOIN }}
