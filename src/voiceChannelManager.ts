@@ -18,6 +18,7 @@ import {
   shadowBannedSound,
 } from './shared_assets';
 import { saveJoinsoundsPlayedOfShard } from './statTracking';
+import { trackJoinsoundPlayed, trackGenericEvent } from './analytics';
 
 async function isStillMuted(userID: string, guildID: string) {
   const find = await StillMutedModel.findOne({
@@ -37,7 +38,7 @@ function clearConnectionAndPlayer(
     clearTimeout(timeout);
   }
   connection.destroy();
-  player.removeAllListeners().stop(true);// To be sure noone listens to this anymore
+  player.removeAllListeners().stop(true); // To be sure noone listens to this anymore
 }
 
 export async function onVoiceStateChange(
@@ -53,6 +54,14 @@ export async function onVoiceStateChange(
     && !newState.member.user.bot
     && (!oldState.channel || !newVc || oldState.channel.id !== newVc.id)
   ) {
+    trackGenericEvent({
+      userId: newState.member.id,
+      event: 'voice_channel_join_detected',
+      properties: {
+        guildId: newState.guild.id,
+      },
+    });
+
     // is muted and joined a vc? maybe still muted from queue
     if (
       newState.serverMute
@@ -76,14 +85,30 @@ export async function onVoiceStateChange(
       && ((await isJoinableVc(newState.guild.id, newVc.id))
         || shadowBanned === shadowBannedLevel.guild)
     ) {
+      trackGenericEvent({
+        userId: newState.member.id,
+        event: 'voice_channel_should_play_joinsound',
+        properties: {
+          guildId: newState.guild.id,
+        },
+      });
+
       const perms = newVc.permissionsFor(newState.guild.members.me);
-      if (perms && perms.has(
-        PermissionFlagsBits.Connect,
-      )) {
+      if (perms && perms.has(PermissionFlagsBits.Connect)) {
         let sound = await getJoinsoundOfUser(newState.id, newState.guild.id);
         if (shadowBanned !== shadowBannedLevel.not) {
           sound = shadowBannedSound;
         }
+
+        trackGenericEvent({
+          userId: newState.member.id,
+          event: 'voice_channel_loaded_joinsound',
+          properties: {
+            guildId: newState.guild.id,
+            hasSound: Boolean(sound),
+          },
+        });
+
         if (sound) {
           connection = joinVoiceChannel({
             channelId: newVc.id,
@@ -98,6 +123,14 @@ export async function onVoiceStateChange(
               inlineVolume: true,
             });
             player.play(resource);
+
+            trackJoinsoundPlayed({
+              userId: newState.member.id,
+              properties: {
+                guildId: newState.guild.id,
+              },
+            });
+
             resource.volume!.setVolume(0.5);
             saveJoinsoundsPlayedOfShard(-1); // no shard data here atm
 

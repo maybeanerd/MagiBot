@@ -16,6 +16,28 @@ export function initPostHog() {
   }
 }
 
+export function trackGenericEvent({
+  userId,
+  event,
+  properties = {},
+}: {
+  userId: string;
+  event: string;
+  properties?: Record<string, any>;
+}) {
+  if (!client) {
+    console.warn('PostHog client not initialized.');
+    return;
+  }
+  client.capture({
+    distinctId: userId,
+    event,
+    properties: {
+      ...properties,
+    },
+  });
+}
+
 export function trackCommandUsage({
   commandName,
   userId,
@@ -25,15 +47,27 @@ export function trackCommandUsage({
   userId: string;
   properties?: Record<string, any>;
 }) {
-  if (!client) {
-    console.warn('PostHog client not initialized.');
-    return;
-  }
-  client.capture({
-    distinctId: userId,
+  trackGenericEvent({
+    userId,
     event: 'command_used',
     properties: {
       command: commandName,
+      ...properties,
+    },
+  });
+}
+
+export function trackJoinsoundPlayed({
+  userId,
+  properties = {},
+}: {
+  userId: string;
+  properties?: Record<string, any>;
+}) {
+  trackGenericEvent({
+    userId,
+    event: 'joinsound_played',
+    properties: {
       ...properties,
     },
   });
