@@ -1,14 +1,14 @@
 import {
   ChatInputCommandInteraction,
-  Client, DiscordAPIError, GatewayIntentBits,
+  Client,
+  DiscordAPIError,
+  GatewayIntentBits,
 } from 'discord.js';
 import { handle } from 'blapi';
 import { generateDependencyReport } from '@discordjs/voice';
 import { ActivityType } from 'discord-api-types/v10';
 import config from './configuration';
-import {
-  TOKEN, setUser,
-} from './shared_assets';
+import { TOKEN, setUser } from './shared_assets';
 // eslint-disable-next-line import/no-cycle
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { getUserMention } from './helperFunctions';
@@ -18,7 +18,7 @@ import { checkApplicationCommand } from './applicationCommandHandler';
 import { onVoiceStateChange } from './voiceChannelManager';
 import { onInteraction } from './commands/queue/buttonInteractions';
 import { checkGuild } from './dbHelpers';
-import { initPostHog, shutdownPostHog } from './posthogUtil';
+import { initPostHog, shutdownPostHog } from './analytics';
 
 console.log(generateDependencyReport());
 

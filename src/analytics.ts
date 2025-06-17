@@ -1,5 +1,5 @@
-import configuration from './configuration';
 import posthog, { PostHog } from 'posthog-node';
+import configuration from './configuration';
 
 // Singleton PostHog client
 let client: PostHog | null = null;
@@ -19,7 +19,7 @@ export function initPostHog() {
 export function trackCommandUsage({
   commandName,
   userId,
-  properties = {}
+  properties = {},
 }: {
   commandName: string;
   userId: string;
@@ -34,8 +34,8 @@ export function trackCommandUsage({
     event: 'command_used',
     properties: {
       command: commandName,
-      ...properties
-    }
+      ...properties,
+    },
   });
 }
 
