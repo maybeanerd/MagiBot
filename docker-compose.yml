@@ -11,7 +11,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - STATCORD_TOKEN=${STATCORD_TOKEN}
       - APP_ID=${APP_ID}
-
+      # PostHog analytics (example)
+      - POSTHOG_API_KEY=your-posthog-api-key-here
       # discord webhook tokens
       - WEBHOOK_ID_EX=${WEBHOOK_ID_EX}
       - WEBHOOK_TOKEN_EX=${WEBHOOK_TOKEN_EX}
