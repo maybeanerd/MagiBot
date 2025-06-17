@@ -1,4 +1,4 @@
-import posthog, { PostHog } from 'posthog-node';
+import { PostHog } from 'posthog-node';
 import configuration from './configuration';
 
 // Singleton PostHog client
@@ -12,7 +12,7 @@ export function initPostHog() {
       console.warn('PostHog API key not set. Analytics disabled.');
       return;
     }
-    client = new posthog.PostHog(apiKey);
+    client = new PostHog(apiKey);
   }
 }
 
