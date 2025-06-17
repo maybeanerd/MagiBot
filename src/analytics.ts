@@ -12,7 +12,9 @@ export function initPostHog() {
       console.warn('PostHog API key not set. Analytics disabled.');
       return;
     }
-    client = new PostHog(apiKey);
+    client = new PostHog(apiKey, {
+      host: 'https://eu.i.posthog.com',
+    });
   }
 }
 
@@ -32,9 +34,7 @@ export function trackGenericEvent({
   client.capture({
     distinctId: userId,
     event,
-    properties: {
-      ...properties,
-    },
+    properties,
   });
 }
 
@@ -51,8 +51,8 @@ export function trackCommandUsage({
     userId,
     event: 'command_used',
     properties: {
-      command: commandName,
       ...properties,
+      command: commandName,
     },
   });
 }
@@ -67,9 +67,7 @@ export function trackJoinsoundPlayed({
   trackGenericEvent({
     userId,
     event: 'joinsound_played',
-    properties: {
-      ...properties,
-    },
+    properties,
   });
 }
 
