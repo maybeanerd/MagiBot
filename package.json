@@ -25,7 +25,7 @@
     "ffprobe": "1.1.2",
     "forever": "4.0.3",
     "libsodium-wrappers": "0.7.15",
-    "mongoose": "8.16.5",
+    "mongoose": "8.17.0",
     "opusscript": "0.1.1",
     "posthog-node": "5.6.0",
     "statcord.js": "3.4.3",
