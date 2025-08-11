@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Create Image Name
         run: |
           echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}-pr" >> $GITHUB_ENV
