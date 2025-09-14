@@ -14,7 +14,7 @@
     "@discordjs/builders": "1.11.2",
     "@discordjs/rest": "2.5.0",
     "@discordjs/voice": "0.18.0",
-    "axios": "1.12.1",
+    "axios": "1.12.2",
     "blapi": "3.1.2",
     "bufferutil": "4.0.9",
     "discord-api-types": "0.38.11",
