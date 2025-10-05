@@ -1,5 +1,5 @@
 import ffprobe from 'ffprobe';
-import { CommandInteraction, Attachment, User } from 'discord.js';
+import { ChatInputCommandInteraction, Attachment, User } from 'discord.js';
 import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
 import {
   getGlobalUser,
@@ -126,7 +126,7 @@ const defaultFFProbeLocation = '/usr/bin/ffprobe';
 
 export async function validateAndSaveJoinsound(
   attachment: Attachment,
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   setDefault: boolean,
   user?: User,
   defaultForGuildId?: string,
@@ -142,8 +142,7 @@ export async function validateAndSaveJoinsound(
   }
   if (attachment.size > maximumSingleFileSize) {
     interaction.followUp(
-      `The file you sent is larger than ${
-        maximumSingleFileSize / 1024
+      `The file you sent is larger than ${maximumSingleFileSize / 1024
       } KB, which is the limit per file!`,
     );
     return;
@@ -267,7 +266,7 @@ export async function getJoinsoundOfUser(userId: string, guildId: string) {
 }
 
 export async function removeAllJoinsoundsOfUser(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   deferralType: DeferReply,
 ) {
   const confirmed = await interactionConfirmation(
@@ -305,7 +304,7 @@ const defaultJoinsoundValue = 'None set.';
 const maxEmbedCharacters = 4096;
 
 export async function getJoinsoundOverviewOfUser(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
 ) {
   const { user } = interaction.member!;
   const userId = user.id;
@@ -324,8 +323,7 @@ export async function getJoinsoundOverviewOfUser(
 
   info.push({
     name: 'Storage Used by Joinsounds',
-    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${
-      joinsoundStorageUserLimit / 1024
+    value: `**${(storageUsed / 1024).toFixed(1)} KB** / ${joinsoundStorageUserLimit / 1024
     } KB`,
     inline: false,
   });

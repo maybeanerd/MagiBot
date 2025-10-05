@@ -3,32 +3,15 @@
   "files.eol": "\n",
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
-  "eslint.validate": [
-    {
-      "language": "typescript",
-      "autoFix": true
-    },
-    {
-      "language": "javascript",
-      "autoFix": true
-    }
-  ],
-  "eslint.autoFixOnSave": true,
-  "vetur.validation.template": false,
-  "vetur.format.defaultFormatterOptions": {
-    "prettier": {
-      "semi": true,
-      "singleQuote": true
-    }
-  },
-  "prettier.singleQuote": true,
-  "prettier.endOfLine": "lf",
-	"typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": ["typescript", "javascript"],
+  "typescript.tsdk": "node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
-		"source.fixAll.eslint": "explicit"
-	},
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-"editor.detectIndentation": false,
-"editor.insertSpaces": false,
-"editor.tabSize": 2
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": false,
+  "editor.tabSize": 2,
+  "eslint.format.enable": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": false
 }

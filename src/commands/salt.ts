@@ -1,5 +1,5 @@
 import {
-  ChatInputCommandInteraction, CommandInteraction, Guild, User,
+  ChatInputCommandInteraction, Guild, User,
 } from 'discord.js';
 import { APIEmbed } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -85,7 +85,7 @@ async function saltUp(
 }
 
 export async function addSalt(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   reportedUser: User,
   fromAdmin = false,
 ) {
@@ -123,8 +123,7 @@ export async function addSalt(
 
     return;
   }
-  const response = `You can report ${reportedUser} again in ${
-    59 - Math.floor((time * 60) % 60)
+  const response = `You can report ${reportedUser} again in ${59 - Math.floor((time * 60) % 60)
   } min and ${60 - Math.floor((time * 60 * 60) % 60)} sec!`;
   if (doesInteractionRequireFollowup(interaction)) {
     await interaction.followUp(response);
@@ -140,12 +139,11 @@ async function getMemberSaltInfo(
   salt: number,
 ) {
   let memberName = 'User left guild';
-  const member = await guild.members.fetch(salter).catch(() => {});
+  const member = await guild.members.fetch(salter).catch(() => { });
   if (member) {
     memberName = member.displayName;
   }
-  const name = `${
-    index === 0 ? 'Monarch of Salt' : `${index + 1}. place`
+  const name = `${index === 0 ? 'Monarch of Salt' : `${index + 1}. place`
   }: ${memberName}`;
   return {
     name,
@@ -154,7 +152,7 @@ async function getMemberSaltInfo(
   };
 }
 
-async function getTopSalters(interaction: CommandInteraction) {
+async function getTopSalters(interaction: ChatInputCommandInteraction) {
   const guild = interaction.guild!;
   const salters = await topSalt(guild.id);
   const info: Array<
