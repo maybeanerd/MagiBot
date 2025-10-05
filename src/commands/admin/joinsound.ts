@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, CommandInteraction, GuildMember } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v10';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
@@ -48,7 +48,7 @@ export async function setJoinChannel(
 }
 
 async function toggleJoinsoundChannel(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   activate: boolean,
 ) {
   const voiceChannel = (interaction.member as GuildMember).voice.channel;
@@ -60,14 +60,12 @@ async function toggleJoinsoundChannel(
     );
     if (success) {
       interaction.followUp(
-        `Successfully ${activate ? '' : 'de'}activated joinsounds in **${
-          voiceChannel.name
+        `Successfully ${activate ? '' : 'de'}activated joinsounds in **${voiceChannel.name
         }**.`,
       );
     } else {
       interaction.followUp(
-        `**${voiceChannel.name}** already has joinsounds ${
-          activate ? 'active' : 'disabled'
+        `**${voiceChannel.name}** already has joinsounds ${activate ? 'active' : 'disabled'
         }.`,
       );
     }

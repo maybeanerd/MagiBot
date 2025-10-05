@@ -15,7 +15,7 @@ export async function usageUp(userid: string, guildID: string) {
 
 async function catchError(
   error: Error,
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
 ) {
   console.error(
     `Caught:\n${error.stack}\nin command ${interaction.commandName} ${interaction.options}`,

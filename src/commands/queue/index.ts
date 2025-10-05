@@ -1,5 +1,4 @@
 import {
-  CommandInteraction,
   Guild,
   TextChannel,
   Message,
@@ -37,7 +36,7 @@ export const enum typeOfQueueAction {
   leave = 'leave',
 }
 
-async function startQueue(interaction: CommandInteraction, topic: string) {
+async function startQueue(interaction: ChatInputCommandInteraction, topic: string) {
   const guild = interaction.guild!;
 
   const originalMessage = (await interaction.followUp(
@@ -120,7 +119,7 @@ export async function onQueueEnd(guild: Guild) {
 }
 
 async function endRunningQueue(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
   const guild = interaction.guild!;
   const runningQueue = await onQueueEnd(guild);
@@ -153,17 +152,15 @@ export function messageEdit(
   }
   return message
     .edit(
-      `${msg}\n*${
-        queuedUsers.length
-      }/${maximumQueueLength} users queued*\n\nCurrent user: **${
-        activeUser ? getUserMention(activeUser) : 'Nobody'
+      `${msg}\n*${queuedUsers.length
+      }/${maximumQueueLength} users queued*\n\nCurrent user: **${activeUser ? getUserMention(activeUser) : 'Nobody'
       }**\n\nNext up are:${nextUsers}\nUse the buttons below to join and leave the queue!`,
     )
     .catch(doNothingOnError);
 }
 
 export async function sendItsYourTurnMessage(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
   userId: string,
 ) {
   const messageContent = {
@@ -179,7 +176,7 @@ export async function sendItsYourTurnMessage(
 }
 
 export async function goToNextUser(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
   const guild = interaction.guild!;
   const wentToNextUser = await goToNextUserOfQueue(guild.id);
@@ -229,7 +226,7 @@ const slashCommand = new SlashCommandBuilder()
     'Manage queues for events such as karaoke or playing view viewers.',
   )
   .setDMPermission(false)
-  // only allow administrators to use these commands by default
+// only allow administrators to use these commands by default
   .setDefaultMemberPermissions(
     // eslint-disable-next-line no-bitwise
     PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageGuild,

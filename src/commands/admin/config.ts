@@ -1,6 +1,5 @@
 import {
   ChatInputCommandInteraction,
-  CommandInteraction,
   GuildMember,
 } from 'discord.js';
 import { APIEmbed } from 'discord-api-types/v10';
@@ -10,7 +9,7 @@ import { getConfiguration } from '../../dbHelpers';
 import { setJoinChannel } from './joinsound';
 
 async function viewCurrentConfiguration(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
 ) {
   const guild = interaction.guild!;
   const guildId = guild.id;

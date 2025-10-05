@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   ChatInputCommandInteraction,
-  CommandInteraction,
   GuildMember,
 } from 'discord.js';
 import { MagibotSlashCommand } from '../types/command';
@@ -66,7 +65,7 @@ const slashCommand = new SlashCommandBuilder()
     .setRequired(true));
 
 async function runCommand(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   input: string,
 ) {
   const diceRollCalculation = parse(input);

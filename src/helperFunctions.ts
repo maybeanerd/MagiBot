@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
 import Discord, {
   ButtonInteraction,
   ButtonStyle,
-  CommandInteraction,
+  ChatInputCommandInteraction,
   InteractionReplyOptions,
   Message,
   MessageComponentInteraction,
@@ -10,7 +10,7 @@ import Discord, {
 import { user } from './shared_assets';
 import { DeferReply } from './types/command';
 
-export function doNothingOnError() {}
+export function doNothingOnError() { }
 
 export function returnNullOnError() {
   return null;
@@ -93,7 +93,7 @@ To do the latter, re-invite the bot by clicking the big blue "Add to Server" but
 }
 
 export function doesInteractionRequireFollowup(
-  interaction: CommandInteraction | ButtonInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
   return interaction.replied || interaction.deferred;
 }
@@ -101,7 +101,7 @@ export function doesInteractionRequireFollowup(
 // this is an idea to implement rather reusable confirmation processes.
 // ; abortMessage, timeoutMessage and time are optional parameters
 export async function interactionConfirmation(
-  interaction: Discord.CommandInteraction,
+  interaction: Discord.ChatInputCommandInteraction,
   question: string,
   deferralType?: DeferReply | false,
   abortMessage: string = 'Cancelled.',
@@ -186,10 +186,10 @@ export function printError(error: {
 export async function asyncForEach<T, F, O>(
   values: Array<T> | Discord.Collection<string | number, T>,
   callback: (
-    input: T,
-    index: number | string,
-    optionalParams?: O
-  ) => Promise<F>,
+  input: T,
+  index: number | string,
+  optionalParams?: O
+) => Promise<F>,
   optParams?: O,
 ) {
   if (Array.isArray(values)) {
@@ -233,8 +233,7 @@ export function getRoleMention(roleId: string) {
 }
 
 export function getBotInviteUrl() {
-  return `https://discord.com/api/oauth2/authorize?client_id=${
-    user().id
+  return `https://discord.com/api/oauth2/authorize?client_id=${user().id
   }&permissions=3212353&scope=bot%20applications.commands`;
 }
 

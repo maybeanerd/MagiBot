@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
-  CommandInteraction,
+  ChatInputCommandInteraction,
   PermissionFlagsBits,
   TextChannel,
 } from 'discord.js';
@@ -11,7 +11,7 @@ const slashCommand = new SlashCommandBuilder()
   .setDescription('Creates a temporary invite link to this channel')
   .setDMPermission(false);
 
-async function main(interaction: CommandInteraction) {
+async function main(interaction: ChatInputCommandInteraction) {
   const invite = await (interaction.channel as TextChannel).createInvite({
     reason: `member ${interaction.member?.user} used invite command`,
   });

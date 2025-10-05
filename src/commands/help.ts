@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { APIEmbed, APIEmbedField } from 'discord-api-types/v10';
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { user } from '../shared_assets';
 import {
   MagibotAdminSlashCommand,
@@ -34,10 +34,9 @@ function getAllNestedCommandsOfObject(
 
 function getAllCommandsOfObject(commands: ObjectOfNestedCommands): string {
   return Object.entries(commands).reduce(
-    (previous, [key, value]) => `${previous}/${
-      Object.hasOwn(value, 'permissions') && Object.hasOwn(value, 'run') // this implies it's a command
-        ? key
-        : getAllNestedCommandsOfObject(value as ObjectOfCommands, key)
+    (previous, [key, value]) => `${previous}/${Object.hasOwn(value, 'permissions') && Object.hasOwn(value, 'run') // this implies it's a command
+      ? key
+      : getAllNestedCommandsOfObject(value as ObjectOfCommands, key)
     } `,
     '',
   );
@@ -83,7 +82,7 @@ const slashCommand = new SlashCommandBuilder()
 
 export const help: MagibotSlashCommand = {
   permissions: [],
-  async run(interaction: CommandInteraction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const helpEmbed: APIEmbed = {
       color: (interaction.member as GuildMember).displayColor,
       description: "I'm here to help! ",
