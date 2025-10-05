@@ -1,7 +1,4 @@
 import Discord from 'discord.js';
-/* import Statcord from 'statcord.js';
-// eslint-disable-next-line import/no-cycle
-import { bot } from './bot'; */
 import { catchErrorOnDiscord } from './sendToMyDiscord';
 import { globalApplicationCommands } from './commands/applicationCommands';
 import { DeferReply } from './types/command';
