@@ -11,7 +11,7 @@
     "test": "test"
   },
   "dependencies": {
-    "@discordjs/builders": "1.12.2",
+    "@discordjs/builders": "1.13.0",
     "@discordjs/rest": "2.6.0",
     "@discordjs/voice": "0.19.0",
     "@snazzah/davey": "0.1.7",
@@ -19,7 +19,7 @@
     "blapi": "3.1.2",
     "bufferutil": "4.0.9",
     "discord-api-types": "0.38.31",
-    "discord.js": "14.23.2",
+    "discord.js": "14.24.0",
     "dotenv": "17.2.3",
     "fast-folder-size": "2.4.0",
     "ffmpeg-static": "5.2.0",
