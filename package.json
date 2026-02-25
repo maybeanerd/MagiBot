@@ -28,7 +28,7 @@
     "libsodium-wrappers": "0.8.2",
     "mongoose": "9.2.2",
     "opusscript": "0.1.1",
-    "posthog-node": "5.25.0",
+    "posthog-node": "5.26.0",
     "tweetnacl": "1.0.3",
     "utf-8-validate": "6.0.6"
   },
