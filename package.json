@@ -11,8 +11,8 @@
     "test": "test"
   },
   "dependencies": {
-    "@discordjs/builders": "1.13.1",
-    "@discordjs/rest": "2.6.0",
+    "@discordjs/builders": "1.14.0",
+    "@discordjs/rest": "2.6.1",
     "@discordjs/voice": "0.19.2",
     "@snazzah/davey": "0.1.10",
     "axios": "1.13.6",
