@@ -1,7 +1,7 @@
-import { ShardingManager } from "discord.js";
+import { ShardingManager } from 'discord.js';
 /* import Statcord from 'statcord.js'; */
-import configuration from "./configuration";
-import { syncGlobalCommands } from "./commandSync";
+import configuration from './configuration';
+import { syncGlobalCommands } from './commandSync';
 /* import {
 accumulateJoinsoundsPlayed,
 accumulateUsersJoinedQueue,
@@ -9,7 +9,7 @@ accumulateUsersJoinedQueue,
 
 export const TOKEN = configuration.tk;
 
-const manager = new ShardingManager("dist/bot.js", {
+const manager = new ShardingManager('dist/bot.js', {
   token: TOKEN,
 });
 
@@ -22,7 +22,7 @@ const manager = new ShardingManager("dist/bot.js", {
   console.log('[Statcord]: Started autopost');
 }); */
 
-manager.on("shardCreate", (shard) => console.log(`Launched shard ${shard.id}`));
+manager.on('shardCreate', (shard) => console.log(`Launched shard ${shard.id}`));
 
 manager.spawn();
 
