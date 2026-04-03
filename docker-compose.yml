@@ -1,8 +1,8 @@
-version: '3.9'
+version: "3.9"
 services:
   main:
     build: .
-    image: ${IMAGE_NAME}
+    image: magibot
     volumes:
       - joinsounds:/app/joinsounds
     environment:
