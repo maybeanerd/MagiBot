@@ -9,7 +9,6 @@ services:
       - TOKEN=${TOKEN}
       - OWNERID=${OWNERID}
       - DATABASE_URL=${DATABASE_URL}
-      - STATCORD_TOKEN=${STATCORD_TOKEN}
       - APP_ID=${APP_ID}
 
       # PostHog analytics
