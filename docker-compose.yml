@@ -1,15 +1,14 @@
-version: '3.9'
+version: "3.9"
 services:
   main:
     build: .
-    image: ${IMAGE_NAME}
+    image: magibot
     volumes:
       - joinsounds:/app/joinsounds
     environment:
       - TOKEN=${TOKEN}
       - OWNERID=${OWNERID}
       - DATABASE_URL=${DATABASE_URL}
-      - STATCORD_TOKEN=${STATCORD_TOKEN}
       - APP_ID=${APP_ID}
 
       # PostHog analytics

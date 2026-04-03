@@ -67,6 +67,5 @@
   "bugs": {
     "url": "https://github.com/maybeanerd/MagiBot/issues"
   },
-  "homepage": "https://github.com/maybeanerd/MagiBot#readme",
-  "heroku-run-build-script": true
+  "homepage": "https://github.com/maybeanerd/MagiBot#readme"
 }
