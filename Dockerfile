@@ -1,4 +1,4 @@
-FROM node:24.16.0
+FROM node:24.22.2
 WORKDIR /app
 
 # Install FFMPEG
